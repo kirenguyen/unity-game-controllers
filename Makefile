@@ -3,3 +3,6 @@ init:
 
 test:
 	nosetests tests
+
+lint:
+	pylint GameController/*.py

@@ -5,4 +5,4 @@ test:
 	nosetests tests
 
 lint:
-	pylint GameController/*.py
+	pylint GameController/*.py scripts/*.py

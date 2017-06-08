@@ -4,6 +4,8 @@ This is a basic class for the Game Controller
 # -*- coding: utf-8 -*-
 from . import helpers
 
+ROS_TO_TAP_GAME_TOPIC = '/tap_game_from_ros'
+TAP_GAME_TO_ROS_TOPIC = '/tap_game_to_ros'
 
 class GameController:
     """

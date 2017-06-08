@@ -6,7 +6,6 @@ This script can be used to send test messages to the Unity game via the command 
 import rospy
 from unity_game_msgs.msg import TapGameCommand
 from std_msgs.msg import Header  # standard ROS msg header
-from GameController import ROS_TO_TAP_GAME_TOPIC
 
 
 
@@ -19,7 +18,8 @@ def tap_game_sender():
     # open ros up here, then run through the below and send all
 
     # start ROS node
-    pub = rospy.Publisher(ROS_TO_TAP_GAME_TOPIC, TapGameCommand, queue_size=10)
+    # TODO: Can't we import this string? Python packing is giving me headaches
+    pub = rospy.Publisher('/tap_game_from_ros', TapGameCommand, queue_size=10)
     rospy.init_node('ros_to_tap_sender', anonymous=True)
     rate = rospy.Rate(10)  # spin at 10 Hz
     rate.sleep()  # sleep to wait for subscribers
@@ -31,7 +31,7 @@ def tap_game_sender():
     msg.header.stamp = rospy.Time.now()
 
     # fill in command and properties:
-    msg.command = 0
+    msg.command = 1
 
 
     # send Opal message to tablet game

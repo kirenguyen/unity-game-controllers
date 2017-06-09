@@ -1,25 +1,23 @@
-#!/usr/bin/env python
 """
-This script can be used to send test messages to the Unity game via the command line
+This is a basic class for the Game Controller
 """
+# -*- coding: utf-8 -*-
 
-import rospy
-from unity_game_msgs.msg import TapGameCommand
-from std_msgs.msg import Header  # standard ROS msg header
-
-
+import TapGameController.GameController as GameController
 
 def tap_game_sender():
     """
     This sender uses ROS to send messages via rosbridge_server
     """
+    import rospy
+    from unity_game_msgs.msg import TapGameCommand
+    from std_msgs.msg import Header  # standard ROS msg header
 
     # build a message based on the command:
     # open ros up here, then run through the below and send all
 
     # start ROS node
-    # TODO: Can't we import this string? Python packing is giving me headaches
-    pub = rospy.Publisher('/tap_game_from_ros', TapGameCommand, queue_size=10)
+    pub = rospy.Publisher(GameController.ROS_TO_TAP_GAME_TOPIC, TapGameCommand, queue_size=10)
     rospy.init_node('ros_to_tap_sender', anonymous=True)
     rate = rospy.Rate(10)  # spin at 10 Hz
     rate.sleep()  # sleep to wait for subscribers
@@ -38,10 +36,3 @@ def tap_game_sender():
     pub.publish(msg)
     rospy.loginfo(msg)
     rate.sleep()
-
-
-if __name__ == '__main__':
-    try:
-        tap_game_sender()
-    except rospy.ROSInterruptException:
-        print('ROSnode shutdown')

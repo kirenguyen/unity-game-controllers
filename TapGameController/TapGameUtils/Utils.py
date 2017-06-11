@@ -3,7 +3,7 @@ This is a basic class for the Game Controller
 """
 # -*- coding: utf-8 -*-
 
-import TapGameController.GameController as GameController
+import TapGameController.TapGameFSM
 
 def tap_game_sender():
     """
@@ -17,7 +17,7 @@ def tap_game_sender():
     # open ros up here, then run through the below and send all
 
     # start ROS node
-    pub = rospy.Publisher(GameController.ROS_TO_TAP_GAME_TOPIC, TapGameCommand, queue_size=10)
+    pub = rospy.Publisher(TapGameController.TapGameFSM.ROS_TO_TAP_GAME_TOPIC, TapGameCommand, queue_size=10)
     rospy.init_node('ros_to_tap_sender', anonymous=True)
     rate = rospy.Rate(10)  # spin at 10 Hz
     rate.sleep()  # sleep to wait for subscribers

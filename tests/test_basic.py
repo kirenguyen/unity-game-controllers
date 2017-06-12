@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .context import GameController
+from .context import TapGameFSM
 
 import unittest
 

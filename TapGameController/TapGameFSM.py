@@ -3,7 +3,6 @@ This is a basic class for the Game Controller
 """
 # -*- coding: utf-8 -*-
 from transitions import Machine
-from . import helpers
 from .TapGameUtils import Curriculum
 
 class TapGameFSM:
@@ -32,32 +31,6 @@ class TapGameFSM:
         self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
                                      initial='GAME_START')
 
-        def on_enter_GAME_START(self):
-            """
-            Called when we enter state GAME_START
-            """
-            print('I am starting the Game! Rd ' + self.round_index + 'coming up')
-
-        def on_enter_ROUND_START(self):
-            """
-            Called when we enter state ROUND_START
-            """
-            print('I am starting Round ' + self.round_index + '!')
-
-        def on_enter_ROUND_ACTIVE(self):
-            """
-            Called when we enter state ROUND_ACTIVE
-            """
-            print('DING DING, Round ' + self.round_index + ' is now LIVE!')
-
-        def on_enter_ROUND_END(self):
-            """
-            Called when we enter state ROUND_END
-            """
-            print('Round ' + self.round_index + ' is over!')
-
-
-
         def on_log_received(data):
             """
             Rospy Callback for when we get log messages
@@ -66,14 +39,14 @@ class TapGameFSM:
             print("I heard %s", data.data)
 
 
-        def startNode():
+
+        def startLogListener():
             """
             Node starting function
             """
             print('Node started')
-            # rospy.init_node('listener', anonymous=True)
-            # rospy.Subscriber("chatter", String, callback)
-            # spin() simply keeps python from exiting until this node is stopped
+            # rospy.init_node('LogListener', anonymous=True)
+            # rospy.Subscriber(TAP_GAME_TO_ROS_TOPIC, String, on_log_received)
             # rospy.spin()
 
     def evaluate_round(self):
@@ -85,17 +58,3 @@ class TapGameFSM:
         else:
             self.round_index += 1
             self.initNextRound()
-
-
-
-    @staticmethod
-    def get_hmm():
-        """Get a thought."""
-        print(Curriculum.DOG)
-        return 'hmmm...'
-
-
-    def hmm(self):
-        """Contemplation..."""
-        if helpers.get_answer():
-            print(self.get_hmm())

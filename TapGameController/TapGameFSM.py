@@ -13,7 +13,9 @@ from unity_game_msgs.msg import TapGameLog
 ROS_TO_TAP_GAME_TOPIC = '/tap_game_from_ros'
 TAP_GAME_TO_ROS_TOPIC = '/tap_game_to_ros'
 
-FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.INIT_ROUND_DONE, TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN, TapGameLog.PLAYER_RING_IN]
+FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
+                    TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
+                    TapGameLog.PLAYER_RING_IN, TapGameLog.RESET_NEXT_ROUND_DONE]
 
 class TapGameFSM:
     """
@@ -32,7 +34,7 @@ class TapGameFSM:
 
         self.states = ['GAME_START', 'ROUND_START', 'ROUND_ACTIVE', 'ROUND_END', 'GAME_FINISHED']
         self.transitions = [
-            {'trigger': 'initRound', 'source': 'GAME_START', 'dest': 'ROUND_START'},
+            {'trigger': 'initFirstRound', 'source': 'GAME_START', 'dest': 'ROUND_START'},
             {'trigger': 'startRound', 'source': 'ROUND_START', 'dest': 'ROUND_ACTIVE'},
             {'trigger': 'robotRingIn', 'source': 'ROUND_ACTIVE', 'dest': 'ROUND_END'},
             {'trigger': 'playerRingIn', 'source': 'ROUND_ACTIVE', 'dest': 'ROUND_END'},
@@ -54,18 +56,34 @@ class TapGameFSM:
                 print('its real!')
 
                 if data.message == TapGameLog.CHECK_IN:
-                    print('initializing round')
-                    self.initRound()
+                    print('Game Checked in!')
+
+                if data.message == TapGameLog.GAME_START_PRESSED:
                     self.sendCmd(TapGameCommand.INIT_ROUND)
+                    self.initFirstRound()
+
                 if data.message == TapGameLog.INIT_ROUND_DONE:
                     print('done initializing')
                     self.startRound()
                     self.sendCmd(TapGameCommand.START_ROUND)
+
                 if data.message == TapGameLog.START_ROUND_DONE:                    
                     print('I heard Start Round DONE. Waiting for player input')
+
+                if data.message == TapGameLog.PLAYER_RING_IN:
+                    print('Player Rang in!')
+                    self.playerRingIn()
+                    self.sendCmd(TapGameCommand.RESET_NEXT_ROUND)                    
+
                 if data.message == TapGameLog.ROBOT_RING_IN:
                     print('Robot Rang in!')
                     self.robotRingIn()
+                    self.sendCmd(TapGameCommand.RESET_NEXT_ROUND)
+
+                if data.message == TapGameLog.RESET_NEXT_ROUND_DONE:
+                    print('Done Resetting Round!')
+                    self.initNextRound()
+                    self.sendCmd(TapGameCommand.RESET_NEXT_ROUND)
             else:
                 print('its not real!')
 

@@ -2,13 +2,19 @@
 This is a basic class for the Game Controller
 """
 # -*- coding: utf-8 -*-
+# pylint: disable=import-error
 from transitions import Machine
 from .TapGameUtils import Curriculum
-import rospy
-from std_msgs.msg import Header  # standard ROS msg header
-from std_msgs.msg import String 
-from unity_game_msgs.msg import TapGameCommand
-from unity_game_msgs.msg import TapGameLog
+from .TapGameUtils import GlobalSettings
+
+if GlobalSettings.USE_ROS:
+    import rospy
+    from std_msgs.msg import Header  # standard ROS msg header
+    from unity_game_msgs.msg import TapGameCommand
+    from unity_game_msgs.msg import TapGameLog
+else:
+    TapGameLog = GlobalSettings.TapGameLog #Mock object, used for testing in non-ROS environments
+    TapGameCommand = GlobalSettings.TapGameCommand
 
 ROS_TO_TAP_GAME_TOPIC = '/tap_game_from_ros'
 TAP_GAME_TO_ROS_TOPIC = '/tap_game_to_ros'
@@ -17,12 +23,10 @@ FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameL
                     TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
                     TapGameLog.PLAYER_RING_IN, TapGameLog.RESET_NEXT_ROUND_DONE]
 
-class TapGameFSM:
+class TapGameFSM: # pylint: disable=no-member
     """
     Each class should have a docstring describing what it does
     """
-
-
 
     def __init__(self):
 
@@ -46,66 +50,72 @@ class TapGameFSM:
                                      initial='GAME_START')
 
     def on_log_received(self, data):
-            """
-            Rospy Callback for when we get log messages
-            """
-            rospy.loginfo(rospy.get_caller_id() + "I heard " + data.message)            
-            print("I heard " + data.message)
+        """
+        Rospy Callback for when we get log messages
+        """
+        rospy.loginfo(rospy.get_caller_id() + "I heard " + data.message)
+        print("I heard " + data.message)
 
-            if data.message in FSM_LOG_MESSAGES:
-                print('its real!')
+        if data.message in FSM_LOG_MESSAGES:
+            print('its real!')
 
-                if data.message == TapGameLog.CHECK_IN:
-                    print('Game Checked in!')
+            if data.message == TapGameLog.CHECK_IN:
+                print('Game Checked in!')
 
-                if data.message == TapGameLog.GAME_START_PRESSED:
-                    self.sendCmd(TapGameCommand.INIT_ROUND)
-                    self.initFirstRound()
+            if data.message == TapGameLog.GAME_START_PRESSED:
+                self.send_cmd(TapGameCommand.INIT_ROUND)
+                self.initFirstRound()
 
-                if data.message == TapGameLog.INIT_ROUND_DONE:
-                    print('done initializing')
-                    self.startRound()
-                    self.sendCmd(TapGameCommand.START_ROUND)
+            if data.message == TapGameLog.INIT_ROUND_DONE:
+                print('done initializing')
+                self.startRound()
+                self.send_cmd(TapGameCommand.START_ROUND)
 
-                if data.message == TapGameLog.START_ROUND_DONE:                    
-                    print('I heard Start Round DONE. Waiting for player input')
+            if data.message == TapGameLog.START_ROUND_DONE:
+                print('I heard Start Round DONE. Waiting for player input')
 
-                if data.message == TapGameLog.PLAYER_RING_IN:
-                    print('Player Rang in!')
-                    self.playerRingIn()
-                    self.sendCmd(TapGameCommand.RESET_NEXT_ROUND)                    
+            if data.message == TapGameLog.PLAYER_RING_IN:
+                print('Player Rang in!')
+                self.playerRingIn()
+                self.send_cmd(TapGameCommand.RESET_NEXT_ROUND)
 
-                if data.message == TapGameLog.ROBOT_RING_IN:
-                    print('Robot Rang in!')
-                    self.robotRingIn()
-                    self.sendCmd(TapGameCommand.RESET_NEXT_ROUND)
+            if data.message == TapGameLog.ROBOT_RING_IN:
+                print('Robot Rang in!')
+                self.robotRingIn()
+                self.send_cmd(TapGameCommand.RESET_NEXT_ROUND)
 
-                if data.message == TapGameLog.RESET_NEXT_ROUND_DONE:
-                    print('Done Resetting Round!')
-                    self.initNextRound()
-                    self.sendCmd(TapGameCommand.RESET_NEXT_ROUND)
-            else:
-                print('its not real!')
-
-
-    def startLogListener(self):
-            """
-            Node starting function
-            """
-            print('Sub Node started')
-            rospy.init_node('FSM_Listener_Controller', anonymous=True)
-            self.log_listener = rospy.Subscriber(TAP_GAME_TO_ROS_TOPIC, TapGameLog, self.on_log_received)
-
-    def startCmdPublisher(self):            
-            print('Pub Node started')
-            self.game_commander = rospy.Publisher(ROS_TO_TAP_GAME_TOPIC, TapGameCommand, queue_size=10)
-            rate = rospy.Rate(10)  # spin at 10 Hz
-            rate.sleep()  # sleep to wait for subscribers
-            #rospy.spin()
+            if data.message == TapGameLog.RESET_NEXT_ROUND_DONE:
+                print('Done Resetting Round!')
+                self.initNextRound()
+                self.send_cmd(TapGameCommand.RESET_NEXT_ROUND)
+        else:
+            print('its not real!')
 
 
-    def sendCmd(self, command):
-        # start building message
+    def start_log_listener(self):
+        """
+        Start up the Game Log Subscriber node
+        """
+        print('Sub Node started')
+        rospy.init_node('FSM_Listener_Controller', anonymous=True)
+        self.log_listener = rospy.Subscriber(TAP_GAME_TO_ROS_TOPIC, TapGameLog,
+                                             self.on_log_received)
+
+    def start_cmd_publisher(self):
+        """
+        Starts up the command publisher node
+        """
+        print('Pub Node started')
+        self.game_commander = rospy.Publisher(ROS_TO_TAP_GAME_TOPIC, TapGameCommand, queue_size=10)
+        rate = rospy.Rate(10)  # spin at 10 Hz
+        rate.sleep()  # sleep to wait for subscribers
+        #rospy.spin()
+
+
+    def send_cmd(self, command):
+        """
+        send a TapGameCommand to game
+        """
         msg = TapGameCommand()
         # add header
         msg.header = Header()
@@ -116,9 +126,9 @@ class TapGameFSM:
 
         # send message to tablet game
         if self.game_commander is None:
-            self.startCmdPublisher()
+            self.start_cmd_publisher()
         self.game_commander.publish(msg)
-        rospy.loginfo(msg)        
+        rospy.loginfo(msg)
 
 
     def evaluate_round(self):

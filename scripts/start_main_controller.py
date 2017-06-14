@@ -7,9 +7,9 @@ import rospy
 def main():
 
     my_FSM = TapGameFSM.TapGameFSM()
-    my_FSM.startLogListener()
+    my_FSM.start_log_listener()
     print('nodes started!')
     rospy.spin()
-    
+
     ##
 main()

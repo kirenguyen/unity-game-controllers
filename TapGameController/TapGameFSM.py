@@ -4,8 +4,11 @@ This is a basic class for the Game Controller
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error
 from transitions import Machine
-from .TapGameUtils import Curriculum
+#from .TapGameUtils import Curriculum
 from .TapGameUtils import GlobalSettings
+from .StudentModel import StudentModel
+
+import json
 
 if GlobalSettings.USE_ROS:
     import rospy
@@ -32,6 +35,8 @@ class TapGameFSM: # pylint: disable=no-member
 
         self.round_index = 1
         self.max_rounds = 2
+
+        self.student_model = StudentModel()
 
         self.game_commander = None
         self.log_listener = None
@@ -62,13 +67,14 @@ class TapGameFSM: # pylint: disable=no-member
             if data.message == TapGameLog.CHECK_IN:
                 print('Game Checked in!')
 
-            if data.message == TapGameLog.GAME_START_PRESSED:
-                self.send_cmd(TapGameCommand.INIT_ROUND)
+            if data.message == TapGameLog.GAME_START_PRESSED:                
+                # get latest word                
+                self.send_cmd(TapGameCommand.INIT_ROUND, self.student_model.get_next_best_word() )
                 self.initFirstRound()
 
             if data.message == TapGameLog.INIT_ROUND_DONE:
                 print('done initializing')
-                self.startRound()
+                self.startRound()                
                 self.send_cmd(TapGameCommand.START_ROUND)
 
             if data.message == TapGameLog.START_ROUND_DONE:
@@ -87,7 +93,7 @@ class TapGameFSM: # pylint: disable=no-member
             if data.message == TapGameLog.RESET_NEXT_ROUND_DONE:
                 print('Done Resetting Round!')
                 self.initNextRound()
-                self.send_cmd(TapGameCommand.RESET_NEXT_ROUND)
+                self.send_cmd(TapGameCommand.INIT_ROUND, self.student_model.get_next_best_word() )
         else:
             print('its not real!')
 
@@ -112,17 +118,20 @@ class TapGameFSM: # pylint: disable=no-member
         #rospy.spin()
 
 
-    def send_cmd(self, command):
+    def send_cmd(self, command, *args):
         """
         send a TapGameCommand to game
+        Args are optional parameters
         """
         msg = TapGameCommand()
         # add header
         msg.header = Header()
         msg.header.stamp = rospy.Time.now()
 
-        # fill in command and properties:
+        # fill in command and any params:
         msg.command = command
+        if len(args) > 0:        
+            msg.params = json.dumps(args[0]) #assume the
 
         # send message to tablet game
         if self.game_commander is None:

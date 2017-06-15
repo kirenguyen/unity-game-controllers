@@ -7,29 +7,31 @@ class Curriculum: # pylint: disable=too-few-public-methods
     This class contains all static final members that correspond to the words we will teach
     """
 
-    def __init__(self):
-        return
-
-
     # DAD = 'DAD'
     # MOM = 'MOM'
     # GRANDMOTHER = 'GRANDMOTHER'
     # GRANDFATHER = 'GRANDFATHER'
     # BABY = 'BABY'
 
-    DOG = 'DOG'
-    PIG = 'PIG'
-    SHEEP = 'SHEEP'
-    RAT = 'RAT'
+    #DOG = 'DOG'
+    #PIG = 'PIG'
+    #RAT = 'RAT'
+
+    BEE = 'BEE'
     CHICKEN = 'CHICKEN'
-    DRAGON = 'DRAGON'
-    GOAT = 'GOAT'
-    SHEEP = 'SHEEP'
-    HORSE = 'HORSE'
-    RABBIT = 'RABBIT'
     MONKEY = 'MONKEY'
+    RABBIT = 'RABBIT'
+    ROOSTER = 'ROOSTER'
+    SHEEP = 'SHEEP'
     TIGER = 'TIGER'
     SNAKE = 'SNAKE'
+
+    #DRAGON = 'DRAGON'
+    #GOAT = 'GOAT'
+    #HORSE = 'HORSE'
+    
+    
+    
     # CAT = 'CAT'
     # BUG = 'BUG'
     # COW = 'COW'
@@ -40,7 +42,7 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # LION = 'LION'
     # SEAL = 'SEAL'
     # DEER = 'DEER'
-    # BEE = 'BEE'
+    
 
     # SUN = 'SUN'
     # MOON = 'MOON'
@@ -101,6 +103,10 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # SKINNY = 'SKINNY'
     # FAT = 'FAT'
     #
-    # ROOSTER = 'ROOSTER'
     # CHICK = 'CHICK'
     # MOUNTAIN = 'MOUNTAIN'
+
+
+    def __init__(self):
+        return
+

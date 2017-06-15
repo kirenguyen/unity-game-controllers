@@ -11,7 +11,10 @@ class GPTestSuite(unittest.TestCase):
 
     def test_GP(self):
         my_GP = StudentModel()
-        self.assertEqual(my_GP.get_next_best_word(), Curriculum.CHICKEN)
+        valid_words = [p for p in dir(Curriculum)
+                       if isinstance(getattr(Curriculum, p), str)
+                       and not p.startswith('__')]
+        self.assertEqual(my_GP.get_next_best_word() in valid_words, True)
 
 
 if __name__ == '__main__':

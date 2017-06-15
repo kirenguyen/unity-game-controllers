@@ -4,6 +4,15 @@ from TapGameController import TapGameFSM
 from unity_game_msgs.msg import TapGameCommand
 import rospy
 
+import warnings
+
+def fxn():
+    warnings.warn("deprecated", DeprecationWarning)
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    fxn()
+
 def main():
 
     my_FSM = TapGameFSM.TapGameFSM()

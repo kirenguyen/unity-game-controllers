@@ -1,8 +1,9 @@
 """
 This Module handles all aspects of student modeling and assessment
 """
+from random import randint
 import numpy as np
-from .TapGameUtils import Curriculum
+from .TapGameUtils.Curriculum import Curriculum
 
 class StudentModel():
     """
@@ -12,11 +13,10 @@ class StudentModel():
     """
 
     def __init__(self):
-        print('hi')
-
-        #fancy python one-liner to read all properties off of a class
+        #fancy python one-liner to read all string attributes off of a class
         self.curriculum = [p for p in dir(Curriculum)
-                           if isinstance(getattr(Curriculum, p), property)]
+                           if isinstance(getattr(Curriculum, p), str)
+                           and not p.startswith('__')]
 
     def init_model(self):
         """
@@ -43,9 +43,8 @@ class StudentModel():
         """
         gives an external caller the next best word to achieve some objective
         Active Learning paradigm should be implemented here!
-        """
-        print(self)
-        return Curriculum.CHICKEN
+        """    
+        return self.curriculum[randint(0, len(self.curriculum) - 1)] #randint is inclusive
 
     def add_data_point(self, word_asked, answered_correct):
         """

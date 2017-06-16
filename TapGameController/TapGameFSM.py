@@ -2,26 +2,48 @@
 This is a basic class for the Game Controller
 """
 # -*- coding: utf-8 -*-
+# pylint: disable=import-error
 from transitions import Machine
-from . import helpers
-from .TapGameUtils import Curriculum
+#from .TapGameUtils import Curriculum
+from .TapGameUtils import GlobalSettings
+from .StudentModel import StudentModel
 
-class TapGameFSM:
+import json
+
+if GlobalSettings.USE_ROS:
+    import rospy
+    from std_msgs.msg import Header  # standard ROS msg header
+    from unity_game_msgs.msg import TapGameCommand
+    from unity_game_msgs.msg import TapGameLog
+else:
+    TapGameLog = GlobalSettings.TapGameLog #Mock object, used for testing in non-ROS environments
+    TapGameCommand = GlobalSettings.TapGameCommand
+
+ROS_TO_TAP_GAME_TOPIC = '/tap_game_from_ros'
+TAP_GAME_TO_ROS_TOPIC = '/tap_game_to_ros'
+
+FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
+                    TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
+                    TapGameLog.PLAYER_RING_IN, TapGameLog.RESET_NEXT_ROUND_DONE]
+
+class TapGameFSM: # pylint: disable=no-member
     """
     Each class should have a docstring describing what it does
     """
-
-    ROS_TO_TAP_GAME_TOPIC = '/tap_game_from_ros'
-    TAP_GAME_TO_ROS_TOPIC = '/tap_game_to_ros'
 
     def __init__(self):
 
         self.round_index = 1
         self.max_rounds = 2
 
+        self.student_model = StudentModel()
+
+        self.game_commander = None
+        self.log_listener = None
+
         self.states = ['GAME_START', 'ROUND_START', 'ROUND_ACTIVE', 'ROUND_END', 'GAME_FINISHED']
         self.transitions = [
-            {'trigger': 'initRound', 'source': 'GAME_START', 'dest': 'ROUND_START'},
+            {'trigger': 'initFirstRound', 'source': 'GAME_START', 'dest': 'ROUND_START'},
             {'trigger': 'startRound', 'source': 'ROUND_START', 'dest': 'ROUND_ACTIVE'},
             {'trigger': 'robotRingIn', 'source': 'ROUND_ACTIVE', 'dest': 'ROUND_END'},
             {'trigger': 'playerRingIn', 'source': 'ROUND_ACTIVE', 'dest': 'ROUND_END'},
@@ -32,49 +54,91 @@ class TapGameFSM:
         self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
                                      initial='GAME_START')
 
-        def on_enter_GAME_START(self):
-            """
-            Called when we enter state GAME_START
-            """
-            print('I am starting the Game! Rd ' + self.round_index + 'coming up')
+    def on_log_received(self, data):
+        """
+        Rospy Callback for when we get log messages
+        """
+        rospy.loginfo(rospy.get_caller_id() + "I heard " + data.message)
+        print("I heard " + data.message)
 
-        def on_enter_ROUND_START(self):
-            """
-            Called when we enter state ROUND_START
-            """
-            print('I am starting Round ' + self.round_index + '!')
+        if data.message in FSM_LOG_MESSAGES:
+            print('its real!')
 
-        def on_enter_ROUND_ACTIVE(self):
-            """
-            Called when we enter state ROUND_ACTIVE
-            """
-            print('DING DING, Round ' + self.round_index + ' is now LIVE!')
+            if data.message == TapGameLog.CHECK_IN:
+                print('Game Checked in!')
 
-        def on_enter_ROUND_END(self):
-            """
-            Called when we enter state ROUND_END
-            """
-            print('Round ' + self.round_index + ' is over!')
+            if data.message == TapGameLog.GAME_START_PRESSED:                
+                # get latest word                
+                self.send_cmd(TapGameCommand.INIT_ROUND, self.student_model.get_next_best_word() )
+                self.initFirstRound()
+
+            if data.message == TapGameLog.INIT_ROUND_DONE:
+                print('done initializing')
+                self.startRound()                
+                self.send_cmd(TapGameCommand.START_ROUND)
+
+            if data.message == TapGameLog.START_ROUND_DONE:
+                print('I heard Start Round DONE. Waiting for player input')
+
+            if data.message == TapGameLog.PLAYER_RING_IN:
+                print('Player Rang in!')
+                self.playerRingIn()
+                self.send_cmd(TapGameCommand.RESET_NEXT_ROUND)
+
+            if data.message == TapGameLog.ROBOT_RING_IN:
+                print('Robot Rang in!')
+                self.robotRingIn()
+                self.send_cmd(TapGameCommand.RESET_NEXT_ROUND)
+
+            if data.message == TapGameLog.RESET_NEXT_ROUND_DONE:
+                print('Done Resetting Round!')
+                self.initNextRound()
+                self.send_cmd(TapGameCommand.INIT_ROUND, self.student_model.get_next_best_word() )
+        else:
+            print('its not real!')
 
 
+    def start_log_listener(self):
+        """
+        Start up the Game Log Subscriber node
+        """
+        print('Sub Node started')
+        rospy.init_node('FSM_Listener_Controller', anonymous=True)
+        self.log_listener = rospy.Subscriber(TAP_GAME_TO_ROS_TOPIC, TapGameLog,
+                                             self.on_log_received)
 
-        def on_log_received(data):
-            """
-            Rospy Callback for when we get log messages
-            """
-            #rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
-            print("I heard %s", data.data)
+    def start_cmd_publisher(self):
+        """
+        Starts up the command publisher node
+        """
+        print('Pub Node started')
+        self.game_commander = rospy.Publisher(ROS_TO_TAP_GAME_TOPIC, TapGameCommand, queue_size=10)
+        rate = rospy.Rate(10)  # spin at 10 Hz
+        rate.sleep()  # sleep to wait for subscribers
+        #rospy.spin()
 
 
-        def startNode():
-            """
-            Node starting function
-            """
-            print('Node started')
-            # rospy.init_node('listener', anonymous=True)
-            # rospy.Subscriber("chatter", String, callback)
-            # spin() simply keeps python from exiting until this node is stopped
-            # rospy.spin()
+    def send_cmd(self, command, *args):
+        """
+        send a TapGameCommand to game
+        Args are optional parameters
+        """
+        msg = TapGameCommand()
+        # add header
+        msg.header = Header()
+        msg.header.stamp = rospy.Time.now()
+
+        # fill in command and any params:
+        msg.command = command
+        if len(args) > 0:        
+            msg.params = json.dumps(args[0]) #assume the
+
+        # send message to tablet game
+        if self.game_commander is None:
+            self.start_cmd_publisher()
+        self.game_commander.publish(msg)
+        rospy.loginfo(msg)
+
 
     def evaluate_round(self):
         """
@@ -85,17 +149,3 @@ class TapGameFSM:
         else:
             self.round_index += 1
             self.initNextRound()
-
-
-
-    @staticmethod
-    def get_hmm():
-        """Get a thought."""
-        print(Curriculum.DOG)
-        return 'hmmm...'
-
-
-    def hmm(self):
-        """Contemplation..."""
-        if helpers.get_answer():
-            print(self.get_hmm())

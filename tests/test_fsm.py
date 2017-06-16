@@ -5,14 +5,14 @@ from .context import TapGameFSM
 import unittest
 
 
-class AdvancedTestSuite(unittest.TestCase):
+class FSMTestSuite(unittest.TestCase):
     """Advanced test cases."""
 
     def test_FSM(self):
         my_FSM = TapGameFSM()
         self.assertEqual(my_FSM.state, 'GAME_START')
 
-        my_FSM.initRound()
+        my_FSM.initFirstRound()
         self.assertEqual(my_FSM.state, 'ROUND_START')
 
         my_FSM.startRound()

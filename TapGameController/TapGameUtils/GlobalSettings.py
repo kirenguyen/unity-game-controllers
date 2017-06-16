@@ -3,7 +3,7 @@ This is a module that exports certain global runtime settings
 """
 # -*- coding: utf-8 -*-
 
-USE_ROS = True
+USE_ROS = False
 
 class TapGameLog(): # pylint: disable=too-few-public-methods
     """

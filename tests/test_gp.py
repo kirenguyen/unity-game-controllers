@@ -25,8 +25,18 @@ class GPTestSuite(unittest.TestCase):
         self.assertEqual(my_GP.get_word_cov('SNAKE', 'SILK'), .44)
 
     def graph_test(self):
-        my_sm = StudentModel()
-        my_sm.plot_curricular_distro([1] * 8, [1] * 8)
+        msm = StudentModel()
+        Xtrain = ['BEE', 'SNAKE', 'TIGER']  # these numbers are just labels
+        Ytrain = [.66, .66, .66]  # these numbers correspond to 'Correct' demonstrations
+
+        msm.train_and_compute_posterior(Xtrain, Ytrain)
+        msm.plot_curricular_distro()
+
+        Xtrain = ['BEE', 'SNAKE', 'TIGER']  # these numbers are just labels
+        Ytrain = [1, 1, 1]  # these numbers correspond to 'Correct' demonstrations
+
+        msm.train_and_compute_posterior(Xtrain, Ytrain)
+        msm.plot_curricular_distro()
 
 
 

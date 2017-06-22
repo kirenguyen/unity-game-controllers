@@ -9,29 +9,30 @@ class FSMTestSuite(unittest.TestCase):
     """Advanced test cases."""
 
     def test_FSM(self):
+
+        def send_command(cmd, *args):
+            print(cmd)
+
         my_FSM = TapGameFSM()
+        my_FSM.max_rounds = 2
+        my_FSM.send_cmd = send_command
+
         self.assertEqual(my_FSM.state, 'GAME_START')
 
-        my_FSM.initFirstRound()
+        my_FSM.init_first_round()
         self.assertEqual(my_FSM.state, 'ROUND_START')
 
-        my_FSM.startRound()
+        my_FSM.start_round()
         self.assertEqual(my_FSM.state, 'ROUND_ACTIVE')
 
-        my_FSM.robotRingIn()
-        self.assertEqual(my_FSM.state, 'ROUND_END')
-
-        my_FSM.evaluate_round()
-
+        my_FSM.robot_ring_in()
         self.assertEqual(my_FSM.state, 'ROUND_START')
 
-        my_FSM.startRound()
+        my_FSM.start_round()
         self.assertEqual(my_FSM.state, 'ROUND_ACTIVE')
 
-        my_FSM.robotRingIn()
-        self.assertEqual(my_FSM.state, 'ROUND_END')
+        my_FSM.robot_ring_in()
 
-        my_FSM.evaluate_round()
         self.assertEqual(my_FSM.state, 'GAME_FINISHED')
 
 

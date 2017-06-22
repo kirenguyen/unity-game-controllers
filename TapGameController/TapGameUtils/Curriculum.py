@@ -13,9 +13,9 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # GRANDFATHER = 'GRANDFATHER'
     # BABY = 'BABY'
 
-    #DOG = 'DOG'
-    #PIG = 'PIG'
-    #RAT = 'RAT'
+    # DOG = 'DOG'
+    # PIG = 'PIG'
+    # RAT = 'RAT'
 
     BEE = 'BEE'
     CHICKEN = 'CHICKEN'
@@ -26,9 +26,9 @@ class Curriculum: # pylint: disable=too-few-public-methods
     TIGER = 'TIGER'
     SNAKE = 'SNAKE'
 
-    #DRAGON = 'DRAGON'
-    #GOAT = 'GOAT'
-    #HORSE = 'HORSE'
+    # DRAGON = 'DRAGON'
+    # GOAT = 'GOAT'
+    # HORSE = 'HORSE'
     
     
     
@@ -56,13 +56,13 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # POND = 'POND'
     # CLOUD = 'CLOUD'
     # SKY = 'SKY'
-    #
+    
     # HAT = 'HAT'
     # SOCK = 'SOCK'
     # SHIRT = 'SHIRT'
     # DRESS = 'DRESS'
     # SHOES = 'SHOES'
-    #
+    
     # SIT = 'SIT'
     # RUN = 'RUN'
     # CLAP = 'CLAP'
@@ -75,7 +75,7 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # SLEEP = 'SLEEP'
     # FLY = 'FLY'
     # WAVE = 'WAVE'
-    #
+    
     # RED = 'RED'
     # GREEN = 'GREEN'
     # BLUE = 'BLUE'
@@ -86,14 +86,14 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # BLACK = 'BLACK'
     # BROWN = 'BROWN'
     # GREY = 'GREY'
-    #
+    
     # HAPPY = 'HAPPY'
     # SAD = 'SAD'
     # MAD = 'MAD'
     # ANGRY = 'ANGRY'
     # TIRED = 'TIRED'
     # SCARED = 'SCARED'
-    #
+    
     # OLD = 'OLD'
     # YOUNG = 'YOUNG'
     # BIG = 'BIG'
@@ -102,7 +102,7 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # FLAT = 'FLAT'
     # SKINNY = 'SKINNY'
     # FAT = 'FAT'
-    #
+    
     # CHICK = 'CHICK'
     # MOUNTAIN = 'MOUNTAIN'
 

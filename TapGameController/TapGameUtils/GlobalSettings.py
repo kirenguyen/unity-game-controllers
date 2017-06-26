@@ -3,7 +3,7 @@ This is a module that exports certain global runtime settings
 """
 # -*- coding: utf-8 -*-
 
-USE_ROS = True
+USE_ROS = False
 
 class TapGameLog(): # pylint: disable=too-few-public-methods
     """
@@ -17,6 +17,7 @@ class TapGameLog(): # pylint: disable=too-few-public-methods
     ROBOT_RING_IN = "ROBOT_RING_IN"
     PLAYER_RING_IN = "PLAYER_RING_IN"
     RESET_NEXT_ROUND_DONE = "RESET_NEXT_ROUND_DONE"
+    SHOW_GAME_END_DONE = "SHOW_GAME_END_DONE"
 
     def __init__(self):
         pass
@@ -29,7 +30,8 @@ class TapGameCommand(): # pylint: disable=too-few-public-methods
     INIT_ROUND = "INIT_ROUND"
     START_ROUND = "START_ROUND"
     ROBOT_RING_IN = "ROBOT_RING_IN"
-    RESET_NEXT_ROUND_DONE = "RESET_NEXT_ROUND"
+    RESET_NEXT_ROUND = "RESET_NEXT_ROUND"
+    SHOW_GAME_END = "SHOW_GAME_END"
 
     def __init__(self):
         pass

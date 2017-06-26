@@ -10,11 +10,14 @@ import scipy.stats
 import matplotlib.pyplot as plt
 from .TapGameUtils.Curriculum import Curriculum
 
-class StudentModel():
+class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
+
     """
     This class implements a Gaussian Process, intended to model student vocabulary knowledge
     It uses a kernel based on the distance between two words in ConceptNet as well as a
-    phonetic distance heuristic
+    phonetic distance heuristic.
+    pylint's 'invalid-name' checker has been disabled to conform with the notation
+    in Rasmussen and Williams
     """
 
     def __init__(self):
@@ -43,7 +46,7 @@ class StudentModel():
     def get_prior(self, n_samples):
         """
         Samples form a prior distribution over the words
-        #See Algorithm 2.1 in Rasmussen and Williams to follow along with this implementation + notation
+        See Algorithm 2.1 in Rasmussen and Williams to follow along with implementation + notation
         """
 
         # Test data
@@ -95,11 +98,11 @@ class StudentModel():
         # we only want the diagonal bc we want to know
         # variance of each variable independent of any others
         variance = np.diag(K_ss - np.dot(v.T, v))
-        stdv = np.sqrt(variance)
+        #stdv = np.sqrt(variance)
 
         self.means = mu
         self.variances = variance
-        return mu, stdv
+        return mu, variance
 
 
     def get_next_best_word(self):
@@ -109,7 +112,7 @@ class StudentModel():
         """
         return self.curriculum[randint(0, len(self.curriculum) - 1)] #randint is inclusive
 
-    def rbf_kernel(input_a, input_b, length_scale):
+    def rbf_kernel(self, input_a, input_b, length_scale):
         """
         Implements to Radial Basis Function kernel
         """
@@ -143,7 +146,7 @@ class StudentModel():
         Will eventually incorporate conceptnet and other phonetic metrics
         """
 
-        if (word_a == word_b):
+        if word_a == word_b:
             return 1
 
         score = 0
@@ -159,10 +162,14 @@ class StudentModel():
         return round(ratio, 2)
 
     def plot_curricular_distro(self):
+        """
+        Plots the most recent distribution
+        """
 
         n_rows = 2 # needs to be > 1
 
-        # f, plts = plt.subplots(n_rows, int(test_space_size / n_rows), sharex='col', sharey='row', figsize=(15,10))
+        # f, plts = plt.subplots(n_rows, int(test_space_size / n_rows),
+        #                        sharex='col', sharey='row', figsize=(15,10))
         f, plts = plt.subplots(n_rows, int(len(self.curriculum) / n_rows), figsize=(15, 10))
         # print(plts)
 
@@ -189,7 +196,8 @@ class StudentModel():
             # plts[row_index][col_index].scatter(data, np.zeros(n_samples))
 
             x = np.linspace(-3, 3, 50)
-            plts[row_index][col_index].plot(x, scipy.stats.norm.pdf(x, self.means[i], self.variances[i]))
+            plts[row_index][col_index].plot(x, scipy.stats.norm.pdf(x, self.means[i],
+                                                                    self.variances[i]))
             plts[row_index][col_index].set_title(
                 self.curriculum[i] + ": u= " + str(round(self.means[i], 2)) + ", var= " + str(
                     round(self.variances[i], 2)))
@@ -197,5 +205,3 @@ class StudentModel():
         plt.subplots_adjust(left, bottom, right, top, wspace, hspace)
         plt.draw()
         plt.show()
-
-

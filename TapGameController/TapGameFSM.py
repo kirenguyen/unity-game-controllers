@@ -3,13 +3,13 @@ This is a basic class for the Game Controller
 """
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error
+
+
+import json
 from transitions import Machine
-#from .TapGameUtils import Curriculum
 from .TapGameUtils import GlobalSettings
 from .StudentModel import StudentModel
 
-import json
-import time
 
 if GlobalSettings.USE_ROS:
     import rospy
@@ -25,36 +25,64 @@ TAP_GAME_TO_ROS_TOPIC = '/tap_game_to_ros'
 
 FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
                     TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
-                    TapGameLog.PLAYER_RING_IN, TapGameLog.RESET_NEXT_ROUND_DONE, TapGameLog.SHOW_GAME_END_DONE]
+                    TapGameLog.PLAYER_RING_IN, TapGameLog.RESET_NEXT_ROUND_DONE,
+                    TapGameLog.SHOW_GAME_END_DONE]
 
 class TapGameFSM: # pylint: disable=no-member
     """
     Each class should have a docstring describing what it does
     """
 
+    round_index = 1
+    max_rounds = 7
+
+    student_model = StudentModel()
+    current_round_word = ""
+
+    game_commander = None
+    log_listener = None
+
+    states = ['GAME_START', 'ROUND_START', 'ROUND_ACTIVE', 'ROUND_END', 'GAME_FINISHED']
+    transitions = [
+        {'trigger': 'init_first_round',
+         'source': 'GAME_START',
+         'dest': 'ROUND_START',
+         'after': 'on_init_first_round'},
+
+        {'trigger': 'start_round',
+         'source': 'ROUND_START',
+         'dest': 'ROUND_ACTIVE',
+         'after': 'on_start_round'},
+
+        {'trigger': 'robot_ring_in',
+         'source': 'ROUND_ACTIVE',
+         'dest': 'ROUND_END',
+         'after': 'on_robot_ring_in'},
+
+        {'trigger': 'player_ring_in',
+         'source': 'ROUND_ACTIVE',
+         'dest': 'ROUND_END',
+         'after': 'on_player_ring_in'},
+
+        {'trigger': 'handle_round_end',
+         'source': 'ROUND_END',
+         'dest': 'ROUND_START',
+         'conditions': 'is_not_last_round',
+         'after': 'on_round_reset'},
+
+        {'trigger': 'handle_round_end',
+         'source': 'ROUND_END',
+         'dest': 'GAME_FINISHED',
+         'conditions': 'is_last_round',
+         'after': 'on_game_finished'},
+
+        {'trigger': 'replay_game',
+         'source': 'GAME_FINISHED',
+         'dest': 'ROUND_START',
+         'after': 'on_game_replay'},
+    ]
+
     def __init__(self):
-
-        self.round_index = 1
-        self.max_rounds = 7
-
-        self.student_model = StudentModel()
-        self.current_round_word = ""
-
-        self.game_commander = None
-        self.log_listener = None
-
-        self.states = ['GAME_START', 'ROUND_START', 'ROUND_ACTIVE', 'ROUND_END', 'GAME_FINISHED']
-        self.transitions = [
-            {'trigger': 'init_first_round', 'source': 'GAME_START', 'dest': 'ROUND_START', 'after': 'on_init_first_round'},
-            {'trigger': 'start_round', 'source': 'ROUND_START', 'dest': 'ROUND_ACTIVE', 'after': 'on_start_round'},
-            {'trigger': 'robot_ring_in', 'source': 'ROUND_ACTIVE', 'dest': 'ROUND_END', 'after': 'on_robot_ring_in'},
-            {'trigger': 'player_ring_in', 'source': 'ROUND_ACTIVE', 'dest': 'ROUND_END', 'after': 'on_player_ring_in'}, 
-
-
-            {'trigger': 'handle_round_end', 'source': 'ROUND_END', 'dest': 'ROUND_START', 'conditions': 'is_not_last_round', 'after': 'on_round_reset'},
-            {'trigger': 'handle_round_end', 'source': 'ROUND_END', 'dest': 'GAME_FINISHED', 'conditions': 'is_last_round',  'after': 'on_game_finished'},
-            {'trigger': 'replay_game', 'source': 'GAME_FINISHED', 'dest': 'ROUND_START', 'after': 'on_game_replay'},
-        ]
 
         self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
                                      initial='GAME_START')
@@ -66,13 +94,13 @@ class TapGameFSM: # pylint: disable=no-member
         """
         self.current_round_word = self.student_model.get_next_best_word()
         self.send_cmd(TapGameCommand.INIT_ROUND, self.current_round_word)
-        
+
         # #send message every 2s in case it gets dropped
-        # while(not self.state == "ROUND_ACTIVE"):            
+        # while(not self.state == "ROUND_ACTIVE"):
         #     self.send_cmd(TapGameCommand.INIT_ROUND, self.student_model.get_next_best_word() )
         #     print('sent command!')
         #     print(self.state)
-        #     time.sleep(2) 
+        #     time.sleep(2)
 
     def on_start_round(self):
         """
@@ -96,10 +124,13 @@ class TapGameFSM: # pylint: disable=no-member
         Should send msg to Unity game telling it to load the pronunciation screen
         """
         print('got to player ring in cb')
-        mu, stdv = self.student_model.train_and_compute_posterior([self.current_round_word], [1])
+        # TODO: the [1] is only for fully correct answers!!!!
+        means, variances = self.student_model.train_and_compute_posterior([self.current_round_word],
+                                                                          [1])
+
         print(self.student_model.curriculum)
-        print(mu)
-        print(stdv)
+        print(means)
+        print(variances)
         self.handle_round_end()
 
     def on_round_reset(self):
@@ -110,7 +141,7 @@ class TapGameFSM: # pylint: disable=no-member
         """
         print('got to round reset')
         self.round_index += 1
-        self.send_cmd(TapGameCommand.RESET_NEXT_ROUND )
+        self.send_cmd(TapGameCommand.RESET_NEXT_ROUND)
 
 
 
@@ -123,26 +154,26 @@ class TapGameFSM: # pylint: disable=no-member
         self.send_cmd(TapGameCommand.SHOW_GAME_END)
 
 
-    
+
     def on_game_replay(self):
         """
         Called when the player wants to replay the game after finishing.
         Sends msg to the Unity game to reset the game and start over
         """
-        
+
 
     def on_log_received(self, data):
         """
         Rospy Callback for when we get log messages
         """
-        rospy.loginfo(rospy.get_caller_id() + "I heard " + data.message)       
+        rospy.loginfo(rospy.get_caller_id() + "I heard " + data.message)
 
         if data.message in FSM_LOG_MESSAGES:
 
             if data.message == TapGameLog.CHECK_IN:
                 print('Game Checked in!')
 
-            if data.message == TapGameLog.GAME_START_PRESSED:                                
+            if data.message == TapGameLog.GAME_START_PRESSED:
                 self.init_first_round() #makes state transition + calls self.on_init_first_round()
 
             if data.message == TapGameLog.INIT_ROUND_DONE:
@@ -154,7 +185,7 @@ class TapGameFSM: # pylint: disable=no-member
 
             if data.message == TapGameLog.PLAYER_RING_IN:
                 print('Player Rang in!')
-                self.player_ring_in()        
+                self.player_ring_in()
 
             if data.message == TapGameLog.ROBOT_RING_IN:
                 print('Robot Rang in!')
@@ -166,7 +197,7 @@ class TapGameFSM: # pylint: disable=no-member
                 self.send_cmd(TapGameCommand.INIT_ROUND, self.current_round_word)
 
             if data.message == TapGameLog.SHOW_GAME_END_DONE:
-                print('GAME OVER!')                
+                print('GAME OVER!')
         else:
             print('NOT A REAL MESSAGE?!?!?!?')
 
@@ -203,7 +234,7 @@ class TapGameFSM: # pylint: disable=no-member
 
         # fill in command and any params:
         msg.command = command
-        if len(args) > 0:        
+        if len(args) > 0:
             msg.params = json.dumps(args[0]) #assume the
 
         # send message to tablet game
@@ -217,10 +248,10 @@ class TapGameFSM: # pylint: disable=no-member
         """
         used by FSM to determine whether to start next round or end game
         """
-        return (self.round_index == self.max_rounds)
+        return self.round_index == self.max_rounds
 
     def is_not_last_round(self):
         """
         used by FSM to determine whether to start next round or end game
         """
-        return (not self.is_last_round())
+        return not self.is_last_round()

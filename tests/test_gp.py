@@ -21,8 +21,7 @@ class GPTestSuite(unittest.TestCase):
     def test_kernel(self):
         my_GP = StudentModel()
 
-        self.assertEqual(my_GP.get_word_cov('dog', 'dada'), .43)
-        self.assertEqual(my_GP.get_word_cov('SNAKE', 'SILK'), .44)
+        self.assertGreater(my_GP.get_word_cov('DOG', 'DADA'), my_GP.get_word_cov('DOG', 'ALPHABET'))
 
     def graph_test(self):
         msm = StudentModel()

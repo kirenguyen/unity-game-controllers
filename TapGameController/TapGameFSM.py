@@ -9,6 +9,7 @@ import json
 from transitions import Machine
 from .TapGameUtils import GlobalSettings
 from .StudentModel import StudentModel
+from .TapGameAudioRecorder import TapGameAudioRecorder
 
 
 if GlobalSettings.USE_ROS:
@@ -22,6 +23,7 @@ else:
 
 ROS_TO_TAP_GAME_TOPIC = '/tap_game_from_ros'
 TAP_GAME_TO_ROS_TOPIC = '/tap_game_to_ros'
+ROS_TO_ANDROID_MIC_TOPIC = 'android_audio'
 
 FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
                     TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
@@ -139,6 +141,22 @@ class TapGameFSM: # pylint: disable=no-member
         And also start recording from the phone for 5 seconds + writing to wav
         """
         print('got to player ring in cb')
+
+        # Initializes a new audio recorder object if one hasn't been created
+        if self.recorder == None:
+            self.recorder = TapGameAudioRecorder()
+
+        self.recorder.speakingStage(ispy_action_msg.speakingStage)
+
+
+        ##Evaluates the action message
+
+        ## If given a word to evaluate and done recording send the information to speechace
+        if self.origText and self.recorder.has_recorded % 2 == 0 and self.recorder.has_recorded != 0:
+            audioFile = "audioFile.wav"
+            word_score_list = self.recorder.speechace(audioFile, self.origText)
+            self.send_ispy_cmd(SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, word_score_list)
+            self.origText = ""
 
         #record
 

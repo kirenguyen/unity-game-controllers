@@ -3,3 +3,5 @@ sphinx
 transitions
 numpy
 matplotlib
+pyaudio
+six

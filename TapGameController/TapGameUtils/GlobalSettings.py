@@ -18,6 +18,9 @@ class TapGameLog(): # pylint: disable=too-few-public-methods
     PLAYER_RING_IN = "PLAYER_RING_IN"
     RESET_NEXT_ROUND_DONE = "RESET_NEXT_ROUND_DONE"
     SHOW_GAME_END_DONE = "SHOW_GAME_END_DONE"
+    START_PRONUNCIATION_PANEL_DONE = "START_PRONUNCIATION_PANEL_DONE"
+    END_PRONUNCIATION_PANEL_DONE = "END_PRONUNCIATION_PANEL_DONE"
+    SHOW_RESULTS_DONE = "SHOW_RESULTS_DONE"
 
     def __init__(self):
         pass
@@ -32,6 +35,8 @@ class TapGameCommand(): # pylint: disable=too-few-public-methods
     ROBOT_RING_IN = "ROBOT_RING_IN"
     RESET_NEXT_ROUND = "RESET_NEXT_ROUND"
     SHOW_GAME_END = "SHOW_GAME_END"
+    START_PRONUNCIATION_PANEL = "START_PRONUNCIATION_PANEL"
+    SHOW_RESULTS = "START_PRONUNCIATION_PANEL"
 
     def __init__(self):
         pass

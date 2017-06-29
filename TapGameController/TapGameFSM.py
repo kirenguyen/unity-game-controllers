@@ -25,8 +25,9 @@ TAP_GAME_TO_ROS_TOPIC = '/tap_game_to_ros'
 
 FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
                     TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
-                    TapGameLog.PLAYER_RING_IN, TapGameLog.RESET_NEXT_ROUND_DONE,
-                    TapGameLog.SHOW_GAME_END_DONE]
+                    TapGameLog.PLAYER_RING_IN, TapGameLog.START_PRONUNCIATION_PANEL_DONE,
+                    TapGameLog.END_PRONUNCIATION_PANEL_DONE, TapGameLog.SHOW_RESULTS_DONE,
+                    TapGameLog.RESET_NEXT_ROUND_DONE, TapGameLog.SHOW_GAME_END_DONE]
 
 class TapGameFSM: # pylint: disable=no-member
     """
@@ -42,7 +43,10 @@ class TapGameFSM: # pylint: disable=no-member
     game_commander = None
     log_listener = None
 
-    states = ['GAME_START', 'ROUND_START', 'ROUND_ACTIVE', 'ROUND_END', 'GAME_FINISHED']
+    states = ['GAME_START', 'ROUND_START', 'ROUND_ACTIVE',
+              'PLAYER_PRONOUNCE', 'ROBOT_PRONOUNCE', 'SHOW_RESULTS',
+              'GAME_FINISHED']
+
     transitions = [
         {'trigger': 'init_first_round',
          'source': 'GAME_START',
@@ -56,22 +60,32 @@ class TapGameFSM: # pylint: disable=no-member
 
         {'trigger': 'robot_ring_in',
          'source': 'ROUND_ACTIVE',
-         'dest': 'ROUND_END',
+         'dest': 'ROBOT_PRONOUNCE',
          'after': 'on_robot_ring_in'},
 
         {'trigger': 'player_ring_in',
          'source': 'ROUND_ACTIVE',
-         'dest': 'ROUND_END',
+         'dest': 'PLAYER_PRONOUNCE',
          'after': 'on_player_ring_in'},
 
+        {'trigger': 'player_pronounce_eval',
+         'source': 'PLAYER_PRONOUNCE',
+         'dest': 'SHOW_RESULTS',
+         'after': 'on_player_pronounce_eval'},
+
+        {'trigger': 'robot_pronounce_eval',
+         'source': 'ROBOT_PRONOUNCE',
+         'dest': 'SHOW_RESULTS',
+         'after': 'on_robot_pronounce_eval'},
+
         {'trigger': 'handle_round_end',
-         'source': 'ROUND_END',
+         'source': 'SHOW_RESULTS',
          'dest': 'ROUND_START',
          'conditions': 'is_not_last_round',
          'after': 'on_round_reset'},
 
         {'trigger': 'handle_round_end',
-         'source': 'ROUND_END',
+         'source': 'SHOW_RESULTS',
          'dest': 'GAME_FINISHED',
          'conditions': 'is_last_round',
          'after': 'on_game_finished'},
@@ -89,8 +103,8 @@ class TapGameFSM: # pylint: disable=no-member
 
     def on_init_first_round(self):
         """
-        Called when the game registers that the robot 'buzzed in'
-        Should send msg to Unity game telling it to load robot pronunciation screen
+        Called when the game registers with the controller
+        Should send msg to Unity game telling it the word to load for the first round
         """
         self.current_round_word = self.student_model.get_next_best_word()
         self.send_cmd(TapGameCommand.INIT_ROUND, self.current_round_word)
@@ -116,14 +130,32 @@ class TapGameFSM: # pylint: disable=no-member
         Should send msg to Unity game telling it to load robot pronunciation screen
         """
         print('got to robot ring in cb')
-        self.handle_round_end()
+        self.handle_SHOW_RESULTS()
 
     def on_player_ring_in(self):
         """
         Called when the human player has tapped their buzzer to ring in
         Should send msg to Unity game telling it to load the pronunciation screen
+        And also start recording from the phone for 5 seconds + writing to wav
         """
         print('got to player ring in cb')
+
+        #record
+
+        # where my wav
+
+        #move along
+
+        self.on_player_pronounce_eval()
+
+    def on_player_pronounce_eval(self):
+        """
+        Called after the human player has pronounced their buzzer to ring in
+        send wav from previous step to speech ace, get results, update model, and
+        send message to game to display results
+        """
+        print('got to player pronounce eval cb')
+        # Get the actual results here
         # TODO: the [1] is only for fully correct answers!!!!
         means, variances = self.student_model.train_and_compute_posterior([self.current_round_word],
                                                                           [1])
@@ -131,6 +163,18 @@ class TapGameFSM: # pylint: disable=no-member
         print(self.student_model.curriculum)
         print(means)
         print(variances)
+
+        # TODO Send message to Game to show results for three seconds, sleep, + handle round_end
+        self.handle_round_end()
+
+    def on_robot_pronounce_eval(self):
+        """
+        Called after the robot has 'pronounced' a word. Should send mesage to Game telling it
+        to show results
+        handle_round_end() to transition to next round
+        """
+
+        #TODO Send message to Game to show results for three seconds, sleep, + handle round_end
         self.handle_round_end()
 
     def on_round_reset(self):

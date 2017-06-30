@@ -12,6 +12,7 @@ from six.moves import queue
 
 from transitions import Machine
 from .TapGameUtils import GlobalSettings
+from .TapGameUtils import Utils
 from .StudentModel import StudentModel
 
 
@@ -39,7 +40,7 @@ RECORD_SECONDS = 4
 WAVE_OUTPUT_FILENAME = "audioFile.wav"
 #audio = pyaudio.PyAudio()
 
-ROS_TO_ANDROID_MIC_TOPIC = 'android_audio'
+ANDROID_MIC_TO_ROS_TOPIC = 'android_audio'
 
 
 class TapGameAudioRecorder:
@@ -81,7 +82,7 @@ class TapGameAudioRecorder:
         """
         buff = queue.Queue()
         self.sub_audio = None
-        self.sub_audio = rospy.Subscriber(ROS_TO_ANDROID_MIC_TOPIC, AndroidAudio, self._fill_buffer,
+        self.sub_audio = rospy.Subscriber(ANDROID_MIC_TO_ROS_TOPIC, AndroidAudio, self._fill_buffer,
                                           buff)
 
         return self._audio_data_generator(buff, data)
@@ -117,26 +118,29 @@ class TapGameAudioRecorder:
         """
         Starts a new thread that records the microphones audio.
         """
-
         self.isRecording = True
         self.has_recorded += 1
         self.buffered_audio_data = []  # Resets audio data
-        thread.start_new_thread(self.record_audio, (self.buffered_audio_data,))
-        time.sleep(.1)
+
+        #only do the recording if we are actually getting streaming audio data
+        if Utils.rostopic_present(ANDROID_MIC_TO_ROS_TOPIC):           
+            thread.start_new_thread(self.record_audio, (self.buffered_audio_data,))
+            time.sleep(.1)
 
     def stopRecording(self):
         """
         ends the recording and makes the data into
         a wave file
         """
-
         self.isRecording = False  # Ends the recording
         self.has_recorded += 1
         time.sleep(.2)  # Gives time to return the data
 
-        waveFile = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
-        waveFile.setnchannels(CHANNELS)
-        waveFile.setsampwidth(2)
-        waveFile.setframerate(RATE)
-        waveFile.writeframes(b''.join(self.buffered_audio_data))
-        waveFile.close()
+        #only if we are actually getting streaming audio data
+        if Utils.rostopic_present(ANDROID_MIC_TO_ROS_TOPIC):
+            waveFile = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
+            waveFile.setnchannels(CHANNELS)
+            waveFile.setsampwidth(2)
+            waveFile.setframerate(RATE)
+            waveFile.writeframes(b''.join(self.buffered_audio_data))
+            waveFile.close()

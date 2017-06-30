@@ -10,7 +10,7 @@ import time
 from transitions import Machine
 from .TapGameUtils import GlobalSettings
 from .StudentModel import StudentModel
-#from .TapGameAudioRecorder import TapGameAudioRecorder
+from .TapGameAudioRecorder import TapGameAudioRecorder
 
 
 if GlobalSettings.USE_ROS:
@@ -41,7 +41,7 @@ class TapGameFSM: # pylint: disable=no-member
     max_rounds = 7
 
     student_model = StudentModel()
-    #recorder = TapGameAudioRecorder()
+    recorder = TapGameAudioRecorder()
     current_round_word = ""
 
     game_commander = None
@@ -172,7 +172,7 @@ class TapGameFSM: # pylint: disable=no-member
 
         #move along
 
-        self.on_player_pronounce_eval()
+        #self.on_player_pronounce_eval()
 
     def on_player_pronounce_eval(self):
         """

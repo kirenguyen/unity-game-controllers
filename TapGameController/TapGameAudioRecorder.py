@@ -37,7 +37,7 @@ CHANNELS = 1
 RATE = 16000
 RECORD_SECONDS = 4
 WAVE_OUTPUT_FILENAME = "audioFile.wav"
-audio = pyaudio.PyAudio()
+#audio = pyaudio.PyAudio()
 
 ROS_TO_ANDROID_MIC_TOPIC = 'android_audio'
 
@@ -113,7 +113,7 @@ class TapGameAudioRecorder:
 
         return result_wordScoreList
 
-    def startRecording(self, string):
+    def startRecording(self):
         """
         Starts a new thread that records the microphones audio.
         """
@@ -124,7 +124,7 @@ class TapGameAudioRecorder:
         thread.start_new_thread(self.record_audio, (self.buffered_audio_data,))
         time.sleep(.1)
 
-    def stopRecording(self, string):
+    def stopRecording(self):
         """
         ends the recording and makes the data into
         a wave file

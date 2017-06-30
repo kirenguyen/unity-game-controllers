@@ -6,10 +6,11 @@ This is a basic class for the Game Controller
 
 
 import json
+import time
 from transitions import Machine
 from .TapGameUtils import GlobalSettings
 from .StudentModel import StudentModel
-from .TapGameAudioRecorder import TapGameAudioRecorder
+#from .TapGameAudioRecorder import TapGameAudioRecorder
 
 
 if GlobalSettings.USE_ROS:
@@ -23,7 +24,7 @@ else:
 
 ROS_TO_TAP_GAME_TOPIC = '/tap_game_from_ros'
 TAP_GAME_TO_ROS_TOPIC = '/tap_game_to_ros'
-ROS_TO_ANDROID_MIC_TOPIC = 'android_audio'
+ROS_TO_ANDROID_MIC_TOPIC = '/android_audio'
 
 FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
                     TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
@@ -40,6 +41,7 @@ class TapGameFSM: # pylint: disable=no-member
     max_rounds = 7
 
     student_model = StudentModel()
+    #recorder = TapGameAudioRecorder()
     current_round_word = ""
 
     game_commander = None
@@ -108,6 +110,7 @@ class TapGameFSM: # pylint: disable=no-member
         Called when the game registers with the controller
         Should send msg to Unity game telling it the word to load for the first round
         """
+        print("got to init_first round!")
         self.current_round_word = self.student_model.get_next_best_word()
         self.send_cmd(TapGameCommand.INIT_ROUND, self.current_round_word)
 
@@ -146,17 +149,22 @@ class TapGameFSM: # pylint: disable=no-member
         if self.recorder == None:
             self.recorder = TapGameAudioRecorder()
 
-        self.recorder.speakingStage(ispy_action_msg.speakingStage)
-
+        #SEND SHOW_PRONUNCIATION_PAGE MSG
+        self.recorder.startRecording()
+        time.sleep(5)
+        self.recorder.stopRecording()
 
         ##Evaluates the action message
 
         ## If given a word to evaluate and done recording send the information to speechace
-        if self.origText and self.recorder.has_recorded % 2 == 0 and self.recorder.has_recorded != 0:
+        if self.current_round_word and self.recorder.has_recorded % 2 == 0 and self.recorder.has_recorded != 0:
             audioFile = "audioFile.wav"
-            word_score_list = self.recorder.speechace(audioFile, self.origText)
-            self.send_ispy_cmd(SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, word_score_list)
-            self.origText = ""
+            word_score_list = self.recorder.speechace(audioFile, self.current_round_word)
+            print("WORD SCORE LIST")
+            print(word_score_list)
+            self.player_pronounce_eval()
+        else:
+            print('THIS SHOULD NEVER HAPPEN')
 
         #record
 
@@ -272,6 +280,7 @@ class TapGameFSM: # pylint: disable=no-member
         rospy.init_node('FSM_Listener_Controller', anonymous=True)
         self.log_listener = rospy.Subscriber(TAP_GAME_TO_ROS_TOPIC, TapGameLog,
                                              self.on_log_received)
+        
 
     def start_cmd_publisher(self):
         """
@@ -289,6 +298,11 @@ class TapGameFSM: # pylint: disable=no-member
         send a TapGameCommand to game
         Args are optional parameters
         """
+    
+        # send message to tablet game
+        if self.game_commander is None:
+            self.start_cmd_publisher()
+
         msg = TapGameCommand()
         # add header
         msg.header = Header()
@@ -298,10 +312,6 @@ class TapGameFSM: # pylint: disable=no-member
         msg.command = command
         if len(args) > 0:
             msg.params = json.dumps(args[0]) #assume the
-
-        # send message to tablet game
-        if self.game_commander is None:
-            self.start_cmd_publisher()
         self.game_commander.publish(msg)
         rospy.loginfo(msg)
 

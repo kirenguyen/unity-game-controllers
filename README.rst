@@ -32,6 +32,7 @@ If you are new to Python or new to creating Python projects, see Kenneth Reitz's
 ###. Install the project's non-python development and runtime requirements::
 
 	brew install portaudio
+	sudo apt-get install portaudio19-dev
 
 ###. Install the project's python development and runtime requirements::
 

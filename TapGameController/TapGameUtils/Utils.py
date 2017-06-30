@@ -4,37 +4,34 @@ This is a basic class for the Game Controller
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error
 
+import json
 import TapGameController.TapGameFSM
 
-def tap_game_sender():
+
+def organize_speechace_result(results):
     """
-    This sender uses ROS to send messages via rosbridge_server
+    Converts speechace results from a messy dictionary to list of phonemes
+    and their bool values
     """
-    import rospy
-    from unity_game_msgs.msg import TapGameCommand
-    from std_msgs.msg import Header  # standard ROS msg header
+    SCORE_THRESHOLD = 70
+    speech_result_list = []
 
-    # build a message based on the command:
-    # open ros up here, then run through the below and send all
+    for word in range(len(results)):
+        syllable_score_list = results[word]["syllable_score_list"]
+        for syllable in syllable_score_list:
+            letters = syllable["letters"]
+            if syllable["quality_score"] > SCORE_THRESHOLD:
+                passed = True
+            else:
+                passed = False
+            speech_result_list.append((letters, passed))
 
-    # start ROS node
-    pub = rospy.Publisher(TapGameController.TapGameFSM.ROS_TO_TAP_GAME_TOPIC,
-                          TapGameCommand, queue_size=10)
-    rospy.init_node('ros_to_tap_sender', anonymous=True)
-    rate = rospy.Rate(10)  # spin at 10 Hz
-    rate.sleep()  # sleep to wait for subscribers
-
-    # start building message
-    msg = TapGameCommand()
-    # add header
-    msg.header = Header()
-    msg.header.stamp = rospy.Time.now()
-
-    # fill in command and properties:
-    msg.command = 1
+    return speech_result_list
 
 
-    # send Opal message to tablet game
-    pub.publish(msg)
-    rospy.loginfo(msg)
-    rate.sleep()
+def convert_speechaceResult_to_JSON(results):
+    """
+    generate a Json message for phoneme pronouciation accuracy results
+    """
+    speech_result_list = organize_speechace_result(results)
+    return json.dumps(speech_result_list)

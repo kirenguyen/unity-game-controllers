@@ -111,7 +111,7 @@ class TapGameFSM: # pylint: disable=no-member
         """
         print("got to init_first round!")
         self.current_round_word = self.student_model.get_next_best_word()
-        self.send_cmd(TapGameCommand.INIT_ROUND, self.current_round_word)
+        self.send_cmd(TapGameCommand.INIT_ROUND, json.dumps(self.current_round_word))
 
         # #send message every 2s in case it gets dropped
         # while(not self.state == "ROUND_ACTIVE"):
@@ -190,6 +190,14 @@ class TapGameFSM: # pylint: disable=no-member
         print(variances)
 
         # TODO Send message to Game to show results for three seconds, sleep, + handle round_end
+        letters = ['a', 'b', 'c', 'd', 'e']
+        passed = [0, 1, 1, 1, 0]
+        results_params = {}
+        results_params['letters'] = letters
+        results_params['passed'] = passed
+
+        self.send_cmd(TapGameCommand.SHOW_RESULTS, json.dumps(results_params))
+        time.sleep(10)
         self.handle_round_end()
 
     def on_robot_pronounce_eval(self):
@@ -263,7 +271,7 @@ class TapGameFSM: # pylint: disable=no-member
             if data.message == TapGameLog.RESET_NEXT_ROUND_DONE:
                 print('Done Resetting Round!')
                 self.current_round_word = self.student_model.get_next_best_word()
-                self.send_cmd(TapGameCommand.INIT_ROUND, self.current_round_word)
+                self.send_cmd(TapGameCommand.INIT_ROUND, json.dumps(self.current_round_word))
 
             if data.message == TapGameLog.SHOW_GAME_END_DONE:
                 print('GAME OVER!')
@@ -310,7 +318,7 @@ class TapGameFSM: # pylint: disable=no-member
         # fill in command and any params:
         msg.command = command
         if len(args) > 0:
-            msg.params = json.dumps(args[0]) #assume the
+            msg.params = args[0]
         self.game_commander.publish(msg)
         rospy.loginfo(msg)
 

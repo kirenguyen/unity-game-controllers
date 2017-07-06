@@ -105,6 +105,8 @@ class TapGameAudioRecorder:
         # decode json outputs from speechace api
 
         result = json.loads(out_json)['text_score']
+        print('result is:')
+        print(result)
         result_text = result['text']
         result_qualityScore = result['quality_score']
         result_wordScoreList = result['word_score_list']

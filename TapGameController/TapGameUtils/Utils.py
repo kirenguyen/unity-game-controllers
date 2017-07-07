@@ -5,8 +5,15 @@ This is a basic class for the Game Controller
 # pylint: disable=import-error
 
 import json
+import subprocess
 import TapGameController.TapGameFSM
 
+def rostopic_present(topic_name):
+    cmd = "rostopic list | grep " + topic_name
+    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+    result = p.communicate()[0].decode('utf-8') #interpret bytes as string
+    print(result)
+    return (result is not '')
 
 def organize_speechace_result(results):
     """

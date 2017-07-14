@@ -9,6 +9,7 @@ import json
 import time
 from transitions import Machine
 from .TapGameUtils import GlobalSettings
+from .TapGameUtils.PronunciationUtils import PronunciationHandler
 from .StudentModel import StudentModel
 from .TapGameAudioRecorder import TapGameAudioRecorder
 
@@ -41,6 +42,7 @@ class TapGameFSM: # pylint: disable=no-member
 
     student_model = StudentModel()
     recorder = TapGameAudioRecorder()
+    pronunciation_handler = PronunciationHandler()
     current_round_word = ""
 
     game_commander = None
@@ -161,6 +163,13 @@ class TapGameFSM: # pylint: disable=no-member
             word_score_list = self.recorder.speechace(audioFile, self.current_round_word)
             print("WORD SCORE LIST")
             print(word_score_list)
+
+            for word_results in word_score_list:
+                print("Message for ROS")
+                self.letters, self.passed = self.pronunciation_handler.process_speechace_word_results(word_results)
+                print(self.letters)
+                print(self.passed)
+
             self.player_pronounce_eval()
         else:
             print('THIS SHOULD NEVER HAPPEN')
@@ -190,11 +199,13 @@ class TapGameFSM: # pylint: disable=no-member
         print(variances)
 
         # TODO Send message to Game to show results for three seconds, sleep, + handle round_end
-        letters = ['a', 'b', 'c', 'd', 'e']
-        passed = [0, 1, 1, 1, 0]
+        #print(self.letters)
+        #print(self.passed)
+        #letters = ['S', 'N', 'A', 'K', 'E']
+        #passed = ['1', '1', '0', '1', '1']
         results_params = {}
-        results_params['letters'] = letters
-        results_params['passed'] = passed
+        results_params['letters'] = self.letters
+        results_params['passed'] = self.passed
 
         self.send_cmd(TapGameCommand.SHOW_RESULTS, json.dumps(results_params))
         time.sleep(10)

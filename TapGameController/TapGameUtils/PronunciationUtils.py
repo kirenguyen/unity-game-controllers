@@ -4,7 +4,7 @@ import os
 
 SCORE_THRESHOLD = 70
 
-class PronunciationUtils:
+class PronunciationHandler:
 	'''
 	This class contains functions that handles pronunciation results obtained from SpeechACE
 	'''
@@ -18,20 +18,19 @@ class PronunciationUtils:
 		self.load_nettalk_dataset()
 	
 
-	def process_Speechace_results(self,results):
+	def process_speechace_word_results(self,word_results):
 		'''
 		takes in results from speechace and analyze the user's pronunciation accuracy
 		'''
-		#self.iword = results["word"].encode("ascii","ignore")
+		self.current_word = word_results["word"]#.encode("ascii","ignore")
 
-		self.pho_results = results["phone_score_list"]
-		self.syl_results = results["syllable_score_list"]
+		self.pho_results = word_results["phone_score_list"]
+		self.syl_results = word_results["syllable_score_list"]
 
 		phoneme_acc = self.phoneme_based_accuracy(self.pho_results)
 		syllable_acc = self.syllable_based_accuracy(self.syl_results)
 
-
-		return self.obtain_pronunciation_message_for_ROS(phoneme_acc, syllable_acc)
+		return self.get_letters_and_scores(phoneme_acc, syllable_acc)
 
 
 	def phoneme_based_accuracy(self,phoneme_results):
@@ -40,15 +39,15 @@ class PronunciationUtils:
 		return: a tuple that contains three lists (graphemes,phonemes and bool values indicating whether the graphemes pass threshold)
 		'''
 		
-		graphemes,phonemes = self.phonemes2graphemes(self.iword)
+		graphemes,phonemes = self.phonemes2graphemes(self.current_word)
 		pass_list = []
 
 		for i in range(len(phonemes)):
 			score = self.pho_results[i]["quality_score"]
 			if score >= SCORE_THRESHOLD:
-				pass_list.append(True)
+				pass_list.append("1")
 			else:
-				pass_list.append(False)
+				pass_list.append("0")
 
 		return (graphemes,phonemes,pass_list)
 
@@ -70,25 +69,27 @@ class PronunciationUtils:
 
 		return (syllable_list, pass_list)
 
-	def obtain_pronunciation_message_for_ROS(self, phoneme_acc, syllable_acc):
+	def get_letters_and_scores(self, phoneme_acc, syllable_acc):
 		'''
-		should be called by iSpy Game Controller to get the final pronunciation message for ROS
-		return: a dictionary of letters with bool values indicating whether letters should be red or greeen
+		called by  Game Controller to get the letters and whether they were passing or not
 		'''
 		
 		# Uncomment for phoneme accuracy
 		speech_result = {}
 		index = 0
 		graphemes, phonemes, scores = phoneme_acc
+		letters = []
+		passed = []
 
 		for i in range(len(graphemes)):
-			if len(graphemes[i]) > 1:
+			if len(graphemes[i]) > 1: #some graphemes have multiple letters, like 'CH'
 				for j in graphemes[i]:
-					speech_result["%s-%s"%(j,index)] = scores[i]
-					index += 1
+					letters.append(j)
+					passed.append(scores[i])
+
 			else:
-				speech_result["%s-%s"%(graphemes[i],index)] = scores[i]
-				index += 1
+				letters.append(graphemes[i])
+				passed.append(scores[i])
 
 
 		# #Uncomment for syllable accuracy
@@ -105,9 +106,8 @@ class PronunciationUtils:
 		# 		speech_result["%s-%s"%(syllables[i],index)] = scores[i]
 		# 		index += 1
 
-
-		print (speech_result)
-		return speech_result
+		return letters, passed
+		#return speech_result
 
 
 
@@ -142,22 +142,25 @@ class PronunciationUtils:
 				self.nettalk_dataset.update({row[0]:row[1]})
 
 
-	def phonemes2graphemes(self,iword):
+	def phonemes2graphemes(self,word):
 		'''
 		align a given word's graphemes with its phonemes
 		'''
-		import pronouncing
-		phonemes_raw=pronouncing.phones_for_word(iword)[0].split(' ')
+		print(word)
+		print(pronouncing.phones_for_word(word.lower()))
+
+		#need to use lowercase form of word for pronouncing and nettalk dict lookup
+		phonemes_raw = pronouncing.phones_for_word(word.lower())[0].split(' ')
 		phonemes=[''.join(filter(lambda c: not c.isdigit(), pho)) for pho in phonemes_raw]
 		
 		#find the phoneme-grapheme alignment in Nettalk database
 		#get exact alignment
-		phos=self.nettalk_dataset[iword]
+		phos=self.nettalk_dataset[word.lower()]
 		
 		print(phos)
 	
 		phos=list(phos)
-		word_list = list(iword)
+		word_list = list(word)
 		graphemes = list()
 		grapheme=''
 		for i in range(0,len(phos),1):
@@ -165,15 +168,18 @@ class PronunciationUtils:
 				# one phoneme is matched to one letter
 				if grapheme!='':
 					graphemes.append(grapheme)
-				grapheme = iword[i]
+				grapheme = word[i]
 			else:
 				# one phoneme is matched to an additional letter
-				grapheme+=iword[i]
+				grapheme+=word[i]
 		graphemes.append(grapheme)
 
+		# TODO: This is hack-ey and should not be done. Let this comment stand as a reminder
+		# TODO: that sometimes phonemes and graphemes dont line up right...
+
 		# For some reason camera doesn't line up phonemes and graphemes correctly
-		if iword == "camera":
-			graphemes = ['c', 'a', 'm', 'er', 'a']
+		#if word == "camera":
+		#	graphemes = ['c', 'a', 'm', 'er', 'a']
 
 		print([graphemes,phonemes])
 		return [graphemes,phonemes]
@@ -184,14 +190,13 @@ class PronunciationUtils:
 	# 	'''
 	# 	self.arpabet_ids = dict()
 		
-	def conversion_for_phonetic_similarity(self,iword):
+	def conversion_for_phonetic_similarity(self, word):
 		'''
 		convert a given word into a unique phonetic transcription, 
 		which allows for measuring phonetic siimlarity with other words
 		output: a phonetic string for the input word. each letter in the string corresponds uniquely to a phone
 		'''
-		import pronouncing
-		phonemes_raw=pronouncing.phones_for_word(iword)[0].split(' ')
+		phonemes_raw=pronouncing.phones_for_word(word)[0].split(' ')
 		phonemes=[''.join(filter(lambda c: not c.isdigit(), pho)) for pho in phonemes_raw]
 		print(phonemes_raw)
 		output = ''

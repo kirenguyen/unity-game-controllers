@@ -26,10 +26,12 @@ else:
 ROS_TO_TAP_GAME_TOPIC = '/tap_game_from_ros'
 TAP_GAME_TO_ROS_TOPIC = '/tap_game_to_ros'
 
+RECORD_TIME_MS = 3500
+SHOW_RESULTS_TIME_MS = 3500
+
 FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
                     TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
-                    TapGameLog.PLAYER_RING_IN, TapGameLog.START_PRONUNCIATION_PANEL_DONE,
-                    TapGameLog.END_PRONUNCIATION_PANEL_DONE, TapGameLog.SHOW_RESULTS_DONE,
+                    TapGameLog.PLAYER_RING_IN, TapGameLog.END_ROUND_DONE,
                     TapGameLog.RESET_NEXT_ROUND_DONE, TapGameLog.SHOW_GAME_END_DONE]
 
 class TapGameFSM: # pylint: disable=no-member
@@ -152,14 +154,14 @@ class TapGameFSM: # pylint: disable=no-member
 
         #SEND SHOW_PRONUNCIATION_PAGE MSG
         self.recorder.startRecording()
-        time.sleep(5)
+        time.sleep(RECORD_TIME_MS / 1000.0)
         self.recorder.stopRecording()
 
         ##Evaluates the action message
 
         ## If given a word to evaluate and done recording send the information to speechace
         if self.current_round_word and self.recorder.has_recorded % 2 == 0 and self.recorder.has_recorded != 0:
-            audioFile = "audioFile.wav"
+            audioFile = TapGameAudioRecorder.WAV_OUTPUT_FILENAME
             word_score_list = self.recorder.speechace(audioFile, self.current_round_word)
             print("WORD SCORE LIST")
             print(word_score_list)
@@ -199,16 +201,12 @@ class TapGameFSM: # pylint: disable=no-member
         print(variances)
 
         # TODO Send message to Game to show results for three seconds, sleep, + handle round_end
-        #print(self.letters)
-        #print(self.passed)
-        #letters = ['S', 'N', 'A', 'K', 'E']
-        #passed = ['1', '1', '0', '1', '1']
         results_params = {}
         results_params['letters'] = self.letters
         results_params['passed'] = self.passed
 
         self.send_cmd(TapGameCommand.SHOW_RESULTS, json.dumps(results_params))
-        time.sleep(10)
+        time.sleep(SHOW_RESULTS_TIME_MS / 1000.0)
         self.handle_round_end()
 
     def on_robot_pronounce_eval(self):

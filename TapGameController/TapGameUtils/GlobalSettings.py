@@ -3,7 +3,7 @@ This is a module that exports certain global runtime settings
 """
 # -*- coding: utf-8 -*-
 
-USE_ROS = False
+USE_ROS = True
 USE_TEGA = True # if False, we are using Jibo
 
 class TapGameLog(): # pylint: disable=too-few-public-methods

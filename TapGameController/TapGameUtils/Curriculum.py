@@ -7,15 +7,102 @@ class Curriculum: # pylint: disable=too-few-public-methods
     This class contains all static final members that correspond to the words we will teach
     """
 
+
+    ###############
+    #    HOUSE    #
+    ###############
+
     # DAD = 'DAD'
     # MOM = 'MOM'
     # GRANDMOTHER = 'GRANDMOTHER'
     # GRANDFATHER = 'GRANDFATHER'
     # BABY = 'BABY'
 
-    #DOG = 'DOG'
-    #PIG = 'PIG'
-    #RAT = 'RAT'
+    # DOG = 'DOG'
+
+    # HAT = 'HAT'
+    # SOCK = 'SOCK'
+    # SHIRT = 'SHIRT'
+    # DRESS = 'DRESS'
+    # SHOES = 'SHOES'
+
+    # WINDOW = 'WINDOW'
+    # PILLOW = 'PILLOW'
+    # DRESSER = 'DRESSER'
+
+
+    ###############
+    #JUNGLE/FOREST#
+    ###############
+
+    # BUG = 'BUG'
+
+    ###############
+    #    FARM     #
+    ###############
+
+
+    # GOAT = 'GOAT'
+    # HORSE = 'HORSE'
+    # COW = 'COW'
+    # DUCK = 'DUCK'
+    # BIRD = 'BIRD'
+    # CHICK = 'CHICK'
+    # CAT = 'CAT'
+    # PIG = 'PIG'
+    # WAGON = 'WAGON'
+    # TRACTOR = 'TRACTOR'
+    # DONKEY = 'DONKEY'
+
+
+    ###############
+    #    NATURE   #
+    ###############
+
+    # DEER = 'DEER'
+    # FROG = 'FROG'
+
+    # SUN = 'SUN'
+    # MOON = 'MOON'
+    # SAND = 'SAND'
+
+    # FLOWER = 'FLOWER'
+    # WOODS = 'WOODS'
+    # FOREST = 'FOREST'
+    # LAKE = 'LAKE'
+    # POND = 'POND'
+    # CLOUD = 'CLOUD'
+    # SKY = 'SKY'
+    # MOUNTAIN = 'MOUNTAIN'
+
+    ###############
+    #    CITY     #
+    ###############
+
+    # RAT = 'RAT'
+    # BUS = 'BUS'
+    # MAILBOX = 'MAILBOX'
+    # AIRPLANE = 'AIRPLANE'
+    # TELEPHONE = 'TELEPHONE'
+    # TRAIN = 'TRAIN'
+    # CLOCK = 'CLOCK'
+
+    ###############
+    #    BEACH    #
+    ###############
+
+    # SEAL = 'SEAL'
+    # DOLPHIN = 'DOLPHIN'
+    # BUCKET = 'BUCKET'
+    # COCONUT = 'COCONUT'
+    # SHELL = 'SHELL'
+    # CASTLE = 'CASTLE'
+    # FISH = 'FISH'
+
+
+    ###############
+    #    ZOO      #
+    ###############
 
     BEE = 'BEE'
     CHICKEN = 'CHICKEN'
@@ -25,44 +112,15 @@ class Curriculum: # pylint: disable=too-few-public-methods
     SHEEP = 'SHEEP'
     TIGER = 'TIGER'
     SNAKE = 'SNAKE'
-
-    #DRAGON = 'DRAGON'
-    #GOAT = 'GOAT'
-    #HORSE = 'HORSE'
-    
-    
-    
-    # CAT = 'CAT'
-    # BUG = 'BUG'
-    # COW = 'COW'
-    # DUCK = 'DUCK'
-    # BIRD = 'BIRD'
-    # FISH = 'FISH'
-    # FROG = 'FROG'
+    # DRAGON = 'DRAGON'
     # LION = 'LION'
-    # SEAL = 'SEAL'
-    # DEER = 'DEER'
-    
 
-    # SUN = 'SUN'
-    # MOON = 'MOON'
-    # SEA = 'SEA'
-    # SAND = 'SAND'
+
+    ###############
+    #    MISC     #
+    ###############
+
     # HILL = 'HILL'
-    # FLOWER = 'FLOWER'
-    # WOODS = 'WOODS'
-    # FOREST = 'FOREST'
-    # LAKE = 'LAKE'
-    # POND = 'POND'
-    # CLOUD = 'CLOUD'
-    # SKY = 'SKY'
-    #
-    # HAT = 'HAT'
-    # SOCK = 'SOCK'
-    # SHIRT = 'SHIRT'
-    # DRESS = 'DRESS'
-    # SHOES = 'SHOES'
-    #
     # SIT = 'SIT'
     # RUN = 'RUN'
     # CLAP = 'CLAP'
@@ -75,7 +133,7 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # SLEEP = 'SLEEP'
     # FLY = 'FLY'
     # WAVE = 'WAVE'
-    #
+
     # RED = 'RED'
     # GREEN = 'GREEN'
     # BLUE = 'BLUE'
@@ -86,14 +144,14 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # BLACK = 'BLACK'
     # BROWN = 'BROWN'
     # GREY = 'GREY'
-    #
+
     # HAPPY = 'HAPPY'
     # SAD = 'SAD'
     # MAD = 'MAD'
     # ANGRY = 'ANGRY'
     # TIRED = 'TIRED'
     # SCARED = 'SCARED'
-    #
+
     # OLD = 'OLD'
     # YOUNG = 'YOUNG'
     # BIG = 'BIG'
@@ -102,10 +160,6 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # FLAT = 'FLAT'
     # SKINNY = 'SKINNY'
     # FAT = 'FAT'
-    #
-    # CHICK = 'CHICK'
-    # MOUNTAIN = 'MOUNTAIN'
-
 
     def __init__(self):
         return

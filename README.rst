@@ -18,8 +18,6 @@ NOTES
 
 This project is based on a best-practices template Python project which integrates several different tools. It saves you work by setting up a number of things, including documentation, code checking, and unit testing.
 
-* Sphinx_ for documentation
-* flake8_ for source code checking
 * pytest_ for unit testing
 
 If you are new to Python or new to creating Python projects, see Kenneth Reitz's `Hitchhiker's Guide to Python`_ for an explanation of some of the tools used here.
@@ -31,7 +29,12 @@ If you are new to Python or new to creating Python projects, see Kenneth Reitz's
 
 ##Project Setup
 
-###. Install the project's development and runtime requirements::
+###. Install the project's non-python development and runtime requirements::
+
+	brew install portaudio
+	sudo apt-get install portaudio19-dev
+
+###. Install the project's python development and runtime requirements::
 
         pip install -r requirements-dev.txt
 

@@ -91,3 +91,6 @@ ENV/
 
 # PyCharm metadata
 .idea
+
+#stored audio files
+*.wav

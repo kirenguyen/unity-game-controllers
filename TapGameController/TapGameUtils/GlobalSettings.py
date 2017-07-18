@@ -48,7 +48,7 @@ class TegaAction(): # pylint: disable=too-few-public-methods
     """
 
     do_motion = True
-    SILENT_CONFIRM = "SILENT_CONFIRM"
+    CONFIRM = "CONFIRM"
 
     def __init__(self):
         pass
@@ -59,5 +59,5 @@ class JiboAction(): # pylint: disable=too-few-public-methods
     """
 
     do_motion = True
-    SILENT_CONFIRM = "SILENT_CONFIRM"
+    CONFIRM = "CONFIRM"
 

@@ -149,7 +149,7 @@ class TapGameFSM: # pylint: disable=no-member
         # get the next robot action
         next_action = self.agent_model.get_next_action()
 
-        if not next_action == ActionSpace.DONT_RING:
+        if next_action == ActionSpace.RING_ANSWER_CORRECT:
             time.sleep(WAIT_TO_BUZZ_TIME_MS / 1000.0)
             self.send_robot_cmd(next_action)
             self.send_game_cmd(TapGameCommand.ROBOT_RING_IN)
@@ -168,7 +168,7 @@ class TapGameFSM: # pylint: disable=no-member
 
         # Move to evaluation phase
         self.letters = list(self.current_round_word)
-        self.passed = ['1' * len(self.letters)] #TODO: robot always gets it perfect for now
+        self.passed = ['1'] * len(self.letters) #TODO: robot always gets it perfect for now
 
         #self.send
         self.robot_pronounce_eval()
@@ -256,6 +256,7 @@ class TapGameFSM: # pylint: disable=no-member
         results_params['passed'] = self.passed
 
         self.send_game_cmd(TapGameCommand.SHOW_RESULTS, json.dumps(results_params))
+        time.sleep(SHOW_RESULTS_TIME_MS / 1000.0)
         self.handle_round_end()
 
     def on_round_reset(self):
@@ -407,17 +408,20 @@ class TapGameFSM: # pylint: disable=no-member
         msg.header.stamp = rospy.Time.now()
 
 
-        if command == 'RING_ANSWER_CORRECT':
-            msg.command = TegaAction.SILENT_CONFIRM if GlobalSettings.USE_TEGA else JiboAction.SILENT_CONFIRM
-        elif command == 'REACT_FRUSTRATED':
-            msg.command = TegaAction.SILENT_CONFIRM if GlobalSettings.USE_TEGA else JiboAction.SILENT_CONFIRM
-
-
-        if len(args) > 0:
-            msg.params = args[0]
+        if command == 'RING_ANSWER_CORRECT': #this handles the mapping
+            msg.do_motion = True
+            msg.motion = "CONFIRM" if GlobalSettings.USE_TEGA else JiboAction.SILENT_CONFIRM
+            if len(args) > 0:
+                msg.params = args[0]
 
         self.robot_commander.publish(msg)
         rospy.loginfo(msg)
+
+        #elif command == 'REACT_FRUSTRATED':
+        #    msg.do_motion = True
+        #    msg.motion = "CONFIRM" if GlobalSettings.USE_TEGA else JiboAction.SILENT_CONFIRM
+
+
 
     def is_last_round(self):
         """

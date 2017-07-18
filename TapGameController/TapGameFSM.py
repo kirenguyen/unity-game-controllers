@@ -52,7 +52,7 @@ class TapGameFSM: # pylint: disable=no-member
     """
 
     round_index = 1
-    max_rounds = 7
+    max_rounds = 5
 
     student_model = StudentModel()
     agent_model = AgentModel()
@@ -226,9 +226,12 @@ class TapGameFSM: # pylint: disable=no-member
         print('got to player pronounce eval cb')
         # Get the actual results here
         # TODO: the [1] is only for fully correct answers!!!!
+        tmp = [int(x) for x in self.passed]
+        passed_ratio = (sum(tmp) / len(tmp)) #TODO: do this over phonemes, not letters! 
         means, variances = self.student_model.train_and_compute_posterior([self.current_round_word],
-                                                                          [1])
+                                                                          [passed_ratio])
 
+        print("LATEST MEANS / VARS")
         print(self.student_model.curriculum)
         print(means)
         print(variances)
@@ -277,6 +280,7 @@ class TapGameFSM: # pylint: disable=no-member
         Sends msg to the Unity game to load the game end screen
         """
         print('got to game finished')
+        #self.student_model.plot_curricular_distro()
         self.send_game_cmd(TapGameCommand.SHOW_GAME_END)
 
 
@@ -410,7 +414,7 @@ class TapGameFSM: # pylint: disable=no-member
 
         if command == 'RING_ANSWER_CORRECT': #this handles the mapping
             msg.do_motion = True
-            msg.motion = "CONFIRM" if GlobalSettings.USE_TEGA else JiboAction.SILENT_CONFIRM
+            msg.motion = "YES" if GlobalSettings.USE_TEGA else JiboAction.SILENT_CONFIRM
             if len(args) > 0:
                 msg.params = args[0]
 

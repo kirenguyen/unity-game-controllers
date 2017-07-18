@@ -105,18 +105,19 @@ class TapGameAudioRecorder:
         elapsed_time = time.time() - start_time
 
         # decode json outputs from speechace api
+        try:
+            result = json.loads(out_json)['text_score']
+            print('result is:')
+            print(result)
+            result_text = result['text']
+            result_qualityScore = result['quality_score']
+            result_wordScoreList = result['word_score_list']
 
-        result = json.loads(out_json)['text_score']
-        print('result is:')
-        print(result)
-        result_text = result['text']
-        result_qualityScore = result['quality_score']
-        result_wordScoreList = result['word_score_list']
+            return result_wordScoreList
+        except:
+            print("DID NOT GET VALID RESPONSE")
+            return None
 
-        # print (result_wordScoreList)
-        # print (elapsed_time)
-
-        return result_wordScoreList
 
     def startRecording(self):
         """

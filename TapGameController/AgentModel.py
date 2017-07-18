@@ -11,9 +11,9 @@ class ActionSpace(): # pylint: disable=too-few-public-methods
     """
     RING_ANSWER_CORRECT = "RING_ANSWER_CORRECT"
     RING_ANSWER_WRONG = "RING_ANSWER_WRONG"
-    DONT_RING = "DONT_RING"
+    #DONT_RING = "DONT_RING"
 
-    REACT_FRUSTRATED = "REACT_FRUSTRATED"
+    #REACT_FRUSTRATED = "REACT_FRUSTRATED"
 
     def __init__(self):
         pass

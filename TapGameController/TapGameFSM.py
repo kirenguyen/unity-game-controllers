@@ -150,7 +150,7 @@ class TapGameFSM: # pylint: disable=no-member
         next_action = self.agent_model.get_next_action()
 
         if not next_action == ActionSpace.DONT_RING:
-            time.sleep(WAIT_TO_BUZZ_TIME_MS)
+            time.sleep(WAIT_TO_BUZZ_TIME_MS / 1000.0)
             self.send_robot_cmd(next_action)
             self.send_game_cmd(TapGameCommand.ROBOT_RING_IN)
 

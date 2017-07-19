@@ -15,7 +15,7 @@ class FSMTestSuite(unittest.TestCase):
 
         my_FSM = TapGameFSM()
         my_FSM.max_rounds = 2
-        my_FSM.send_cmd = send_command
+        my_FSM.send_game_cmd = send_command
 
         self.assertEqual(my_FSM.state, 'GAME_START')
 

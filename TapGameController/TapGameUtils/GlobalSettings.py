@@ -3,7 +3,8 @@ This is a module that exports certain global runtime settings
 """
 # -*- coding: utf-8 -*-
 
-USE_ROS = True
+USE_ROS = False
+USE_TEGA = True # if False, we are using Jibo
 
 class TapGameLog(): # pylint: disable=too-few-public-methods
     """
@@ -18,8 +19,7 @@ class TapGameLog(): # pylint: disable=too-few-public-methods
     PLAYER_RING_IN = "PLAYER_RING_IN"
     RESET_NEXT_ROUND_DONE = "RESET_NEXT_ROUND_DONE"
     SHOW_GAME_END_DONE = "SHOW_GAME_END_DONE"
-    START_PRONUNCIATION_PANEL_DONE = "START_PRONUNCIATION_PANEL_DONE"
-    END_PRONUNCIATION_PANEL_DONE = "END_PRONUNCIATION_PANEL_DONE"
+    END_ROUND_DONE = "END_ROUND_DONE"
     SHOW_RESULTS_DONE = "SHOW_RESULTS_DONE"
 
     def __init__(self):
@@ -40,3 +40,24 @@ class TapGameCommand(): # pylint: disable=too-few-public-methods
 
     def __init__(self):
         pass
+
+
+class TegaAction(): # pylint: disable=too-few-public-methods
+    """
+    this is a mock class for Tega Actions that allows tests to pass in a non-ROS environment
+    """
+
+    do_motion = True
+    SILENT_CONFIRM = "SILENT_CONFIRM"
+
+    def __init__(self):
+        pass
+
+class JiboAction(): # pylint: disable=too-few-public-methods
+    """
+    this is a mock class  for Jibo Actions that allows tests to pass in a non-ROS environment
+    """
+
+    do_motion = True
+    SILENT_CONFIRM = "SILENT_CONFIRM"
+

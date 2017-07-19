@@ -13,6 +13,8 @@ class ActionSpace(): # pylint: disable=too-few-public-methods
     RING_ANSWER_WRONG = "RING_ANSWER_WRONG"
     DONT_RING = "DONT_RING"
 
+    REACT_FRUSTRATED = "REACT_FRUSTRATED"
+
     def __init__(self):
         pass
 
@@ -39,6 +41,7 @@ class AgentModel():
         # randint is inclusive
         next_action = (self.action_space[randint(0, len(self.action_space) - 1)])
         self.action_history.append(next_action)
+        print('NEXT_ACTION is ' + next_action)
         return next_action
 
     def get_action_history(self):

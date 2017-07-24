@@ -202,11 +202,11 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
 
             x = np.linspace(-3, 3, 50)
             self.plts[row_index][col_index].plot(x, scipy.stats.norm.pdf(x, self.means[i],
-                                                                    self.variances[i]))
+                                                                         self.variances[i]))
             self.plts[row_index][col_index].set_title(
                 self.curriculum[i] + ": u= " + str(round(self.means[i], 2)) + ", var= " + str(
                     round(self.variances[i], 2)))
 
         plt.subplots_adjust(left, bottom, right, top, wspace, hspace)
-        plt.show()        
+        plt.show()
         plt.draw()

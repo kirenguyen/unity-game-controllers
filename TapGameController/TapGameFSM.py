@@ -22,7 +22,7 @@ if GlobalSettings.USE_ROS:
     from unity_game_msgs.msg import TapGameCommand
     from unity_game_msgs.msg import TapGameLog
     from r1d1_msgs.msg import TegaAction
-    #from jibo_msgs.msg import JiboAction TODO: uncomment when JiboMessage exists
+    from jibo_msgs.msg import JiboAction #TODO: uncomment when JiboMessage exists
 else:
     TapGameLog = GlobalSettings.TapGameLog #Mock object, used for testing in non-ROS environments
     TapGameCommand = GlobalSettings.TapGameCommand
@@ -42,7 +42,8 @@ WAIT_TO_BUZZ_TIME_MS = 3500 #note, game currently waits 3000ms after receiving m
 FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
                     TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
                     TapGameLog.PLAYER_RING_IN, TapGameLog.END_ROUND_DONE,
-                    TapGameLog.RESET_NEXT_ROUND_DONE, TapGameLog.SHOW_GAME_END_DONE]
+                    TapGameLog.RESET_NEXT_ROUND_DONE, TapGameLog.SHOW_GAME_END_DONE,
+                    TapGameLog.PLAYER_BEAT_ROBOT]
 
 
 
@@ -165,8 +166,10 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
         # Send message to robot telling it to pronounce
 
-        # Wait a few seconds
-        time.sleep(RECORD_TIME_MS / 1000.0)
+        # Wait a few seconds, pronounce word, then wait again
+        time.sleep((RECORD_TIME_MS / 2) / 1000.0)
+        self.send_robot_cmd("PRONOUNCE_CORRECT")
+        time.sleep((RECORD_TIME_MS / 2) / 1000.0)
 
         # Move to evaluation phase
         self.letters = list(self.current_round_word)
@@ -174,6 +177,10 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
         #self.send
         self.robot_pronounce_eval()
+
+    def player_beat_robot(self):
+        print("PLAYER BEAT ROBOT TO THE PUNCH!")
+
 
     def on_player_ring_in(self):
         """
@@ -204,24 +211,22 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
             print("WORD SCORE LIST")
             print(word_score_list)
 
-            for word_results in word_score_list:
-                print("Message for ROS")
-                self.letters, self.passed = \
-                    self.pronunciation_handler.process_speechace_word_results(word_results)
-                print(self.letters)
-                print(self.passed)
+            # if we didn't record, there will be no word score list
+            if word_score_list:
+                for word_results in word_score_list:
+                    print("Message for ROS")
+                    self.letters, self.passed = \
+                        self.pronunciation_handler.process_speechace_word_results(word_results)
+                    print(self.letters)
+                    print(self.passed)
+            else:
+                self.letters = list(self.current_round_word)
+                self.passed = ['1'] * len(self.letters)
+                print('NO RECORDING, SO YOU AUTO-PASS!!')
 
             self.player_pronounce_eval()
         else:
             print('THIS SHOULD NEVER HAPPEN')
-
-        #record
-
-        # where my wav
-
-        #move along
-
-        #self.on_player_pronounce_eval()
 
     def on_player_pronounce_eval(self):
         """
@@ -274,7 +279,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         'max_rounds" yet
         Should increment round index, and send cmd to game to reset for the next round
         """
-        print('got to round reset')
+        print('got to round reset')        
         self.round_index += 1
         self.send_game_cmd(TapGameCommand.RESET_NEXT_ROUND)
 
@@ -326,6 +331,9 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
             if data.message == TapGameLog.ROBOT_RING_IN:
                 print('Robot Rang in!')
                 self.robot_ring_in()
+
+            if data.message == TapGameLog.PLAYER_BEAT_ROBOT:
+                self.player_beat_robot()                
 
             if data.message == TapGameLog.RESET_NEXT_ROUND_DONE:
                 print('Done Resetting Round!')
@@ -418,11 +426,22 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         msg.header.stamp = rospy.Time.now()
 
 
-        if command == 'RING_ANSWER_CORRECT': #this handles the mapping
-            msg.do_motion = True
-            msg.motion = "YES" if GlobalSettings.USE_TEGA else JiboAction.SILENT_CONFIRM
+        if command == 'RING_ANSWER_CORRECT' and not GlobalSettings.USE_TEGA: #this handles the mapping
+            msg.do_motion = False
+            msg.do_tts = True
+            msg.do_lookat = False
+            msg.tts_text = "BUZZ"
             if len(args) > 0:
                 msg.params = args[0]
+
+        if command == 'PRONOUNCE_CORRECT' and not GlobalSettings.USE_TEGA: #this handles the mapping
+            msg.do_motion = False
+            msg.do_tts = True
+            msg.do_lookat = False
+            msg.tts_text = self.current_round_word
+            if len(args) > 0:
+                msg.params = args[0]
+
 
         self.robot_commander.publish(msg)
         rospy.loginfo(msg)

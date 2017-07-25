@@ -22,8 +22,6 @@ This project is based on a best-practices template Python project which integrat
 
 If you are new to Python or new to creating Python projects, see Kenneth Reitz's `Hitchhiker's Guide to Python`_ for an explanation of some of the tools used here.
 
-- [Sphinx](http://sphinx-doc.org/)
-- [flake8](https://pypi.python.org/pypi/flake8)
 - [pytest](http://pytest.org/latest/)
 - [Hitchhiker's Guide to Python](http://docs.python-guide.org/en/latest/)
 

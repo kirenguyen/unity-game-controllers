@@ -94,3 +94,5 @@ ENV/
 
 #stored audio files
 *.wav
+
+.DS_Store

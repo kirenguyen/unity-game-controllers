@@ -36,6 +36,9 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
 
         self.means = [.5] * len(self.curriculum)  # These are the most recent posteriors
         self.variances = [1] * len(self.curriculum) # Together they form the Student Model!
+        self.fig = None # Figure for drawing
+        self.plts = None #Plots
+
 
     def init_model(self):
         """
@@ -170,7 +173,9 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
 
         # f, plts = plt.subplots(n_rows, int(test_space_size / n_rows),
         #                        sharex='col', sharey='row', figsize=(15,10))
-        f, plts = plt.subplots(n_rows, int(len(self.curriculum) / n_rows), figsize=(15, 10))
+        fig, plts = plt.subplots(n_rows, int(len(self.curriculum) / n_rows), figsize=(15, 10))
+        self.fig = fig
+        self.plts = plts
         # print(plts)
 
 
@@ -184,24 +189,24 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
         for i in range(len(self.curriculum)):
             row_index = int(i / (len(self.curriculum) * .5))
             col_index = int(i % (len(self.curriculum) / n_rows))
-            plts[row_index][col_index].set_xlim([-3, 3])
-            plts[row_index][col_index].set_ylim([-1.5, 1.5])
+            self.plts[row_index][col_index].set_xlim([-3, 3])
+            self.plts[row_index][col_index].set_ylim([-1.5, 1.5])
 
             #data = f_post[:][i]
-            print(self.curriculum[i])
+            #print(self.curriculum[i])
             #print(np.mean(data))
             #print(np.var(data))
-            print(self.means[i])
-            print(self.variances[i])
+            #print(self.means[i])
+            #print(self.variances[i])
             # plts[row_index][col_index].scatter(data, np.zeros(n_samples))
 
             x = np.linspace(-3, 3, 50)
-            plts[row_index][col_index].plot(x, scipy.stats.norm.pdf(x, self.means[i],
-                                                                    self.variances[i]))
-            plts[row_index][col_index].set_title(
+            self.plts[row_index][col_index].plot(x, scipy.stats.norm.pdf(x, self.means[i],
+                                                                         self.variances[i]))
+            self.plts[row_index][col_index].set_title(
                 self.curriculum[i] + ": u= " + str(round(self.means[i], 2)) + ", var= " + str(
                     round(self.variances[i], 2)))
 
         plt.subplots_adjust(left, bottom, right, top, wspace, hspace)
-        plt.draw()
         plt.show()
+        plt.draw()

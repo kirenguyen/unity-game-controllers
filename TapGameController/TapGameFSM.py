@@ -1,5 +1,5 @@
 """
-This is a basic class for the Game Controller
+This is the main FSM / Game Logic class for the Tap Game
 """
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error
@@ -12,6 +12,8 @@ from .TapGameUtils import GlobalSettings
 from .TapGameUtils.PronunciationUtils import PronunciationHandler
 from .StudentModel import StudentModel
 from .TapGameAudioRecorder import TapGameAudioRecorder
+from .AgentModel import ActionSpace
+from .AgentModel import AgentModel
 
 
 if GlobalSettings.USE_ROS:
@@ -19,36 +21,50 @@ if GlobalSettings.USE_ROS:
     from std_msgs.msg import Header  # standard ROS msg header
     from unity_game_msgs.msg import TapGameCommand
     from unity_game_msgs.msg import TapGameLog
+    from r1d1_msgs.msg import TegaAction
+    #from jibo_msgs.msg import JiboAction TODO: uncomment when JiboMessage exists
 else:
     TapGameLog = GlobalSettings.TapGameLog #Mock object, used for testing in non-ROS environments
     TapGameCommand = GlobalSettings.TapGameCommand
+    TegaAction = GlobalSettings.TegaAction
+    JiboAction = GlobalSettings.JiboAction
 
-ROS_TO_TAP_GAME_TOPIC = '/tap_game_from_ros'
-TAP_GAME_TO_ROS_TOPIC = '/tap_game_to_ros'
+ROSCORE_TO_TAP_GAME_TOPIC = '/tap_game_from_ros'
+TAP_GAME_TO_ROSCORE_TOPIC = '/tap_game_to_ros'
+
+ROSCORE_TO_JIBO_TOPIC = '/jibo'
+ROSCORE_TO_TEGA_TOPIC = '/tega'
 
 RECORD_TIME_MS = 3500
 SHOW_RESULTS_TIME_MS = 3500
+WAIT_TO_BUZZ_TIME_MS = 3500 #note, game currently waits 3000ms after receiving message
 
 FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
                     TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
                     TapGameLog.PLAYER_RING_IN, TapGameLog.END_ROUND_DONE,
                     TapGameLog.RESET_NEXT_ROUND_DONE, TapGameLog.SHOW_GAME_END_DONE]
 
-class TapGameFSM: # pylint: disable=no-member
+
+
+class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     """
-    Each class should have a docstring describing what it does
+    An FSM for the Tap Game. Contains Game Logic and some nodes for interacting w the Unity "View"
     """
 
     round_index = 1
-    max_rounds = 7
+    max_rounds = 5
 
     student_model = StudentModel()
+    agent_model = AgentModel()
     recorder = TapGameAudioRecorder()
     pronunciation_handler = PronunciationHandler()
     current_round_word = ""
 
     game_commander = None
+    robot_commander = None
     log_listener = None
+    letters = None
+    passed = None
 
     states = ['GAME_START', 'ROUND_START', 'ROUND_ACTIVE',
               'PLAYER_PRONOUNCE', 'ROBOT_PRONOUNCE', 'SHOW_RESULTS',
@@ -115,7 +131,7 @@ class TapGameFSM: # pylint: disable=no-member
         """
         print("got to init_first round!")
         self.current_round_word = self.student_model.get_next_best_word()
-        self.send_cmd(TapGameCommand.INIT_ROUND, json.dumps(self.current_round_word))
+        self.send_game_cmd(TapGameCommand.INIT_ROUND, json.dumps(self.current_round_word))
 
         # #send message every 2s in case it gets dropped
         # while(not self.state == "ROUND_ACTIVE"):
@@ -130,7 +146,15 @@ class TapGameFSM: # pylint: disable=no-member
         Should send msg to Unity game telling it to begin countdown and make buzzers active
         """
         print('got to start round cb')
-        self.send_cmd(TapGameCommand.START_ROUND)
+        self.send_game_cmd(TapGameCommand.START_ROUND)
+
+        # get the next robot action
+        next_action = self.agent_model.get_next_action()
+
+        if next_action == ActionSpace.RING_ANSWER_CORRECT:
+            time.sleep(WAIT_TO_BUZZ_TIME_MS / 1000.0)
+            self.send_robot_cmd(next_action)
+            self.send_game_cmd(TapGameCommand.ROBOT_RING_IN)
 
     def on_robot_ring_in(self):
         """
@@ -138,7 +162,18 @@ class TapGameFSM: # pylint: disable=no-member
         Should send msg to Unity game telling it to load robot pronunciation screen
         """
         print('got to robot ring in cb')
-        self.handle_SHOW_RESULTS()
+
+        # Send message to robot telling it to pronounce
+
+        # Wait a few seconds
+        time.sleep(RECORD_TIME_MS / 1000.0)
+
+        # Move to evaluation phase
+        self.letters = list(self.current_round_word)
+        self.passed = ['1'] * len(self.letters) #TODO: robot always gets it perfect for now
+
+        #self.send
+        self.robot_pronounce_eval()
 
     def on_player_ring_in(self):
         """
@@ -149,26 +184,30 @@ class TapGameFSM: # pylint: disable=no-member
         print('got to player ring in cb')
 
         # Initializes a new audio recorder object if one hasn't been created
-        if self.recorder == None:
+        if self.recorder is None:
             self.recorder = TapGameAudioRecorder()
 
         #SEND SHOW_PRONUNCIATION_PAGE MSG
-        self.recorder.startRecording()
+        self.recorder.start_recording()
         time.sleep(RECORD_TIME_MS / 1000.0)
-        self.recorder.stopRecording()
+        self.recorder.stop_recording()
 
         ##Evaluates the action message
 
         ## If given a word to evaluate and done recording send the information to speechace
-        if self.current_round_word and self.recorder.has_recorded % 2 == 0 and self.recorder.has_recorded != 0:
-            audioFile = TapGameAudioRecorder.WAV_OUTPUT_FILENAME
-            word_score_list = self.recorder.speechace(audioFile, self.current_round_word)
+        if self.current_round_word and \
+           self.recorder.has_recorded % 2 == 0 and\
+           self.recorder.has_recorded != 0:
+
+            audio_file = TapGameAudioRecorder.WAV_OUTPUT_FILENAME
+            word_score_list = self.recorder.speechace(audio_file, self.current_round_word)
             print("WORD SCORE LIST")
             print(word_score_list)
 
             for word_results in word_score_list:
                 print("Message for ROS")
-                self.letters, self.passed = self.pronunciation_handler.process_speechace_word_results(word_results)
+                self.letters, self.passed = \
+                    self.pronunciation_handler.process_speechace_word_results(word_results)
                 print(self.letters)
                 print(self.passed)
 
@@ -193,9 +232,12 @@ class TapGameFSM: # pylint: disable=no-member
         print('got to player pronounce eval cb')
         # Get the actual results here
         # TODO: the [1] is only for fully correct answers!!!!
+        tmp = [int(x) for x in self.passed]
+        passed_ratio = (sum(tmp) / len(tmp)) #TODO: do this over phonemes, not letters!
         means, variances = self.student_model.train_and_compute_posterior([self.current_round_word],
-                                                                          [1])
+                                                                          [passed_ratio])
 
+        print("LATEST MEANS / VARS")
         print(self.student_model.curriculum)
         print(means)
         print(variances)
@@ -205,7 +247,7 @@ class TapGameFSM: # pylint: disable=no-member
         results_params['letters'] = self.letters
         results_params['passed'] = self.passed
 
-        self.send_cmd(TapGameCommand.SHOW_RESULTS, json.dumps(results_params))
+        self.send_game_cmd(TapGameCommand.SHOW_RESULTS, json.dumps(results_params))
         time.sleep(SHOW_RESULTS_TIME_MS / 1000.0)
         self.handle_round_end()
 
@@ -217,6 +259,13 @@ class TapGameFSM: # pylint: disable=no-member
         """
 
         #TODO Send message to Game to show results for three seconds, sleep, + handle round_end
+
+        results_params = {}
+        results_params['letters'] = self.letters
+        results_params['passed'] = self.passed
+
+        self.send_game_cmd(TapGameCommand.SHOW_RESULTS, json.dumps(results_params))
+        time.sleep(SHOW_RESULTS_TIME_MS / 1000.0)
         self.handle_round_end()
 
     def on_round_reset(self):
@@ -227,7 +276,7 @@ class TapGameFSM: # pylint: disable=no-member
         """
         print('got to round reset')
         self.round_index += 1
-        self.send_cmd(TapGameCommand.RESET_NEXT_ROUND)
+        self.send_game_cmd(TapGameCommand.RESET_NEXT_ROUND)
 
 
 
@@ -237,7 +286,8 @@ class TapGameFSM: # pylint: disable=no-member
         Sends msg to the Unity game to load the game end screen
         """
         print('got to game finished')
-        self.send_cmd(TapGameCommand.SHOW_GAME_END)
+        #self.student_model.plot_curricular_distro()
+        self.send_game_cmd(TapGameCommand.SHOW_GAME_END)
 
 
 
@@ -280,7 +330,7 @@ class TapGameFSM: # pylint: disable=no-member
             if data.message == TapGameLog.RESET_NEXT_ROUND_DONE:
                 print('Done Resetting Round!')
                 self.current_round_word = self.student_model.get_next_best_word()
-                self.send_cmd(TapGameCommand.INIT_ROUND, json.dumps(self.current_round_word))
+                self.send_game_cmd(TapGameCommand.INIT_ROUND, json.dumps(self.current_round_word))
 
             if data.message == TapGameLog.SHOW_GAME_END_DONE:
                 print('GAME OVER!')
@@ -294,7 +344,7 @@ class TapGameFSM: # pylint: disable=no-member
         """
         print('Sub Node started')
         rospy.init_node('FSM_Listener_Controller', anonymous=True)
-        self.log_listener = rospy.Subscriber(TAP_GAME_TO_ROS_TOPIC, TapGameLog,
+        self.log_listener = rospy.Subscriber(TAP_GAME_TO_ROSCORE_TOPIC, TapGameLog,
                                              self.on_log_received)
         
 
@@ -302,19 +352,37 @@ class TapGameFSM: # pylint: disable=no-member
         """
         Starts up the command publisher node
         """
-        print('Pub Node started')
-        self.game_commander = rospy.Publisher(ROS_TO_TAP_GAME_TOPIC, TapGameCommand, queue_size=10)
+        print('GameCmd Pub Node started')
+        self.game_commander = rospy.Publisher(ROSCORE_TO_TAP_GAME_TOPIC,
+                                              TapGameCommand, queue_size=10)
         rate = rospy.Rate(10)  # spin at 10 Hz
         rate.sleep()  # sleep to wait for subscribers
         #rospy.spin()
 
+    def start_robot_publisher(self):
+        """
+        Starts up the robot publisher node
+        """
+        print('Robot Pub Node started')
 
-    def send_cmd(self, command, *args):
+        if GlobalSettings.USE_TEGA:
+            msg_type = TegaAction
+            msg_topic = ROSCORE_TO_TEGA_TOPIC
+        else:
+            msg_type = JiboAction
+            msg_topic = ROSCORE_TO_JIBO_TOPIC
+
+        self.robot_commander = rospy.Publisher(msg_topic, msg_type, queue_size=10)
+        rate = rospy.Rate(10)  # spin at 10 Hz
+        rate.sleep()  # sleep to wait for subscribers
+
+
+    def send_game_cmd(self, command, *args):
         """
         send a TapGameCommand to game
         Args are optional parameters
         """
-    
+
         # send message to tablet game
         if self.game_commander is None:
             self.start_cmd_publisher()
@@ -330,6 +398,39 @@ class TapGameFSM: # pylint: disable=no-member
             msg.params = args[0]
         self.game_commander.publish(msg)
         rospy.loginfo(msg)
+
+    def send_robot_cmd(self, command, *args):
+        """
+        send a Command from the ActionSpace to the robot
+        This function maps actions from the ActionSpace into actual ROS Msgs
+        """
+
+        if GlobalSettings.USE_TEGA:
+            msg = TegaAction()
+        else:
+            msg = JiboAction()
+
+        if self.robot_commander is None:
+            self.start_robot_publisher()
+
+        # add header
+        msg.header = Header()
+        msg.header.stamp = rospy.Time.now()
+
+
+        if command == 'RING_ANSWER_CORRECT': #this handles the mapping
+            msg.do_motion = True
+            msg.motion = "YES" if GlobalSettings.USE_TEGA else JiboAction.SILENT_CONFIRM
+            if len(args) > 0:
+                msg.params = args[0]
+
+        self.robot_commander.publish(msg)
+        rospy.loginfo(msg)
+
+        #elif command == 'REACT_FRUSTRATED':
+        #    msg.do_motion = True
+        #    msg.motion = "CONFIRM" if GlobalSettings.USE_TEGA else JiboAction.SILENT_CONFIRM
+
 
 
     def is_last_round(self):

@@ -3,24 +3,43 @@
 from TapGameController import TapGameFSM
 from unity_game_msgs.msg import TapGameCommand
 import rospy
+import time
+import signal
+import sys
+
 
 import warnings
 
 def fxn():
     warnings.warn("deprecated", DeprecationWarning)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
 
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
-    fxn()
+
+def signal_handler(signal, frame):
+    print('Closing!')
+    sys.exit()
 
 def main():
 
     my_FSM = TapGameFSM.TapGameFSM()
     my_FSM.start_log_listener()
     print('nodes started!')
-    rospy.spin()
+    signal.signal(signal.SIGINT, signal_handler)
+    #rospy.spin()
+
+
+    while(True):
+        try:
+           my_FSM.student_model.plot_curricular_distro()
+           my_FSM.student_model.fig.canvas.flush_events()
+           time.sleep(1)
+        except KeyboardInterrupt: 
+            print('Closing!')
+            sys.exit()
+    
 
     ##
 
-
+fxn()
 main()

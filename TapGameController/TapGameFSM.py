@@ -125,6 +125,9 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
                                      initial='GAME_START')
 
+        print('graphing distribution!')
+        self.student_model.plot_curricular_distro()
+
     def on_init_first_round(self):
         """
         Called when the game registers with the controller

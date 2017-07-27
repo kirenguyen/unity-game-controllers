@@ -36,8 +36,12 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
 
         self.means = [.5] * len(self.curriculum)  # These are the most recent posteriors
         self.variances = [1] * len(self.curriculum) # Together they form the Student Model!
-        self.fig = None # Figure for drawing
-        self.plts = None #Plots
+        #self.fig = None # Figure for drawing
+        #self.plts = None #Plots
+
+        self.n_rows = 2 # needs to be > 1
+
+        self.fig, self.plts = plt.subplots(self.n_rows, int(len(self.curriculum) / self.n_rows), figsize=(15, 10))
 
 
     def init_model(self):
@@ -169,13 +173,11 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
         Plots the most recent distribution
         """
 
-        n_rows = 2 # needs to be > 1
 
         # f, plts = plt.subplots(n_rows, int(test_space_size / n_rows),
-        #                        sharex='col', sharey='row', figsize=(15,10))
-        fig, plts = plt.subplots(n_rows, int(len(self.curriculum) / n_rows), figsize=(15, 10))
-        self.fig = fig
-        self.plts = plts
+        #                        sharex='col', sharey='row', figsize=(15,10))        
+        #self.fig = fig
+        #self.plts = plts
         # print(plts)
 
 
@@ -188,9 +190,9 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
 
         for i in range(len(self.curriculum)):
             row_index = int(i / (len(self.curriculum) * .5))
-            col_index = int(i % (len(self.curriculum) / n_rows))
-            self.plts[row_index][col_index].set_xlim([-3, 3])
-            self.plts[row_index][col_index].set_ylim([-1.5, 1.5])
+            col_index = int(i % (len(self.curriculum) / self.n_rows))
+            self.plts[row_index][col_index].set_xlim([-2, 2])
+            self.plts[row_index][col_index].set_ylim([0, 3])
 
             #data = f_post[:][i]
             #print(self.curriculum[i])
@@ -201,12 +203,21 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
             # plts[row_index][col_index].scatter(data, np.zeros(n_samples))
 
             x = np.linspace(-3, 3, 50)
+            self.clear_old_plot_lines()
             self.plts[row_index][col_index].plot(x, scipy.stats.norm.pdf(x, self.means[i],
-                                                                         self.variances[i]))
+                                                                         self.variances[i]),
+                                                color='b')
             self.plts[row_index][col_index].set_title(
                 self.curriculum[i] + ": u= " + str(round(self.means[i], 2)) + ", var= " + str(
                     round(self.variances[i], 2)))
 
-        plt.subplots_adjust(left, bottom, right, top, wspace, hspace)
-        plt.show()
+        plt.subplots_adjust(left, bottom, right, top, wspace, hspace)        
+        plt.show(block=False)
+        self.fig.canvas.flush_events()
         plt.draw()
+
+    def clear_old_plot_lines(self):
+        for plotRow in self.plts:
+            for plot in plotRow:
+                if len(plot.lines) > 1:
+                    del plot.lines[0]

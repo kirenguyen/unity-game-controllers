@@ -6,3 +6,4 @@ matplotlib
 pyaudio
 six
 pronouncing
+PyQt5

@@ -5,6 +5,7 @@ This is a module that exports certain global runtime settings
 
 USE_ROS = True
 USE_TEGA = False # if False, we are using Jibo
+USE_SPACY = False # if False, do not load the full SpaCy language model
 
 class TapGameLog(): # pylint: disable=too-few-public-methods
     """

@@ -8,7 +8,9 @@ from random import randint
 import numpy as np
 import scipy.stats
 import matplotlib.pyplot as plt
+import spacy
 from .TapGameUtils.Curriculum import Curriculum
+from .TapGameUtils.GlobalSettings import USE_SPACY
 
 class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
 
@@ -21,6 +23,10 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
     """
 
     def __init__(self):
+
+        if USE_SPACY:
+            self.nlp = spacy.load('en') #sets spacy up with the english language model
+
         #fancy python one-liner to read all string attributes off of a class
         self.curriculum = [p for p in dir(Curriculum)
                            if isinstance(getattr(Curriculum, p), str)
@@ -193,14 +199,6 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
             col_index = int(i % (len(self.curriculum) / self.n_rows))
             self.plts[row_index][col_index].set_xlim([-2, 2])
             self.plts[row_index][col_index].set_ylim([0, 3])
-
-            #data = f_post[:][i]
-            #print(self.curriculum[i])
-            #print(np.mean(data))
-            #print(np.var(data))
-            #print(self.means[i])
-            #print(self.variances[i])
-            # plts[row_index][col_index].scatter(data, np.zeros(n_samples))
 
             x = np.linspace(-3, 3, 50)
             self.clear_old_plot_lines()

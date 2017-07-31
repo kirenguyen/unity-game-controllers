@@ -431,9 +431,10 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
         if command == 'RING_ANSWER_CORRECT' and not GlobalSettings.USE_TEGA: #this handles the mapping
             msg.do_motion = False
-            msg.do_tts = True
+            msg.do_tts = False
             msg.do_lookat = False
-            msg.tts_text = "BUZZ"
+            msg.do_sound_playback = True
+            msg.audio_filename = JiboAction.RING_IN_SOUND
             if len(args) > 0:
                 msg.params = args[0]
 

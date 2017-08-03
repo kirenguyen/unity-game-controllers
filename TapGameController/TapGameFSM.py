@@ -37,7 +37,7 @@ ROSCORE_TO_TEGA_TOPIC = '/tega'
 
 RECORD_TIME_MS = 3500
 SHOW_RESULTS_TIME_MS = 3500
-WAIT_TO_BUZZ_TIME_MS = 3500 #note, game currently waits 3000ms after receiving message
+WAIT_TO_BUZZ_TIME_MS = 3000 #note, game currently waits 3000ms after receiving message
 
 FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
                     TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
@@ -54,6 +54,9 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
     round_index = 1
     max_rounds = 5
+
+    player_score = 0
+    robot_score = 0
 
     student_model = StudentModel()
     agent_model = AgentModel()
@@ -242,8 +245,12 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         # TODO: the [1] is only for fully correct answers!!!!
         tmp = [int(x) for x in self.passed]
         passed_ratio = (sum(tmp) / len(tmp)) #TODO: do this over phonemes, not letters!
+        print("PASSED RATIO WAS" + str(passed_ratio))
         means, variances = self.student_model.train_and_compute_posterior([self.current_round_word],
                                                                           [passed_ratio])
+
+        if(passed_ratio > .8):
+            self.player_score += 1
 
         print("LATEST MEANS / VARS")
         print(self.student_model.curriculum)
@@ -272,6 +279,8 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         results_params['letters'] = self.letters
         results_params['passed'] = self.passed
 
+        self.robot_score += 1
+
         self.send_game_cmd(TapGameCommand.SHOW_RESULTS, json.dumps(results_params))
         time.sleep(SHOW_RESULTS_TIME_MS / 1000.0)
         self.handle_round_end()
@@ -294,7 +303,13 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         Sends msg to the Unity game to load the game end screen
         """
         print('got to game finished')
-        #self.student_model.plot_curricular_distro()
+        if(self.player_score < self.robot_score):
+            self.send_robot_cmd("JIBO_WIN_MOTION")
+            self.send_robot_cmd("JIBO_WIN_SPEECH")
+        else:
+            self.send_robot_cmd("JIBO_LOSE_MOTION")
+            self.send_robot_cmd("JIBO_LOSE_SPEECH")
+
         self.send_game_cmd(TapGameCommand.SHOW_GAME_END)
 
 
@@ -304,6 +319,8 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         Called when the player wants to replay the game after finishing.
         Sends msg to the Unity game to reset the game and start over
         """
+        self.send_game_cmd() #START GAME OVER
+        self.send_game_cmd()
 
 
     def on_log_received(self, data):
@@ -340,6 +357,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
             if data.message == TapGameLog.RESET_NEXT_ROUND_DONE:
                 print('Done Resetting Round!')
+                self.send_robot_cmd("LOOK_AT_TABLET")
                 self.current_round_word = self.student_model.get_next_best_word()
                 self.send_game_cmd(TapGameCommand.INIT_ROUND, json.dumps(self.current_round_word))
 
@@ -416,35 +434,82 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         This function maps actions from the ActionSpace into actual ROS Msgs
         """
 
+        if self.robot_commander is None:
+            self.start_robot_publisher()
+
+        #choose which platform
         if GlobalSettings.USE_TEGA:
             msg = TegaAction()
         else:
             msg = JiboAction()
-
-        if self.robot_commander is None:
-            self.start_robot_publisher()
 
         # add header
         msg.header = Header()
         msg.header.stamp = rospy.Time.now()
 
 
-        if command == 'RING_ANSWER_CORRECT' and not GlobalSettings.USE_TEGA: #this handles the mapping
-            msg.do_motion = False
-            msg.do_tts = False
-            msg.do_lookat = False
-            msg.do_sound_playback = True
-            msg.audio_filename = JiboAction.RING_IN_SOUND
-            if len(args) > 0:
-                msg.params = args[0]
+        if not GlobalSettings.USE_TEGA:
+            if command == 'LOOK_AT_TABLET':
+                msg.do_motion = True
+                msg.do_tts = False
+                msg.do_lookat = False
+                msg.do_sound_playback = False
+                msg.motion = JiboAction.LOOK_DOWN
+                if len(args) > 0:
+                    msg.params = args[0]
 
-        if command == 'PRONOUNCE_CORRECT' and not GlobalSettings.USE_TEGA: #this handles the mapping
-            msg.do_motion = False
-            msg.do_tts = True
-            msg.do_lookat = False
-            msg.tts_text = self.current_round_word
-            if len(args) > 0:
-                msg.params = args[0]
+            if command == 'RING_ANSWER_CORRECT':
+                msg.do_motion = True
+                msg.do_tts = False
+                msg.do_lookat = False
+                msg.do_sound_playback = False
+                msg.motion = JiboAction.RING_IN_ANIM
+                if len(args) > 0:
+                    msg.params = args[0]
+
+            elif command == 'PRONOUNCE_CORRECT':
+                msg.do_motion = False
+                msg.do_tts = True
+                msg.do_lookat = False
+                msg.tts_text = self.current_round_word
+                if len(args) > 0:
+                    msg.params = args[0]
+
+            elif command == 'JIBO_WIN_MOTION':
+                msg.do_motion = True
+                msg.do_tts = False
+                msg.do_lookat = False
+                msg.motion = JiboAction.HAPPY_GO_LUCKY_DANCE
+                if len(args) > 0:
+                    msg.params = args[0]
+            
+            elif command == 'JIBO_WIN_SPEECH':
+                msg.do_motion = True
+                msg.do_tts = True
+                msg.do_lookat = False
+                msg.tts_text = "I win I win I win I win I win"
+                if len(args) > 0:
+                    msg.params = args[0]
+
+            elif command == 'JIBO_LOSE_MOTION':
+                msg.do_motion = True
+                msg.do_tts = False
+                msg.do_lookat = False
+                msg.motion = JiboAction.EMOJI_RAINCLOUD
+                if len(args) > 0:
+                    msg.params = args[0]
+            
+            elif command == 'JIBO_LOSE_SPEECH':
+                msg.do_motion = True
+                msg.do_tts = True
+                msg.do_lookat = False
+                msg.tts_text = "I lost. Oh well. I'll beat you next time"
+                if len(args) > 0:
+                    msg.params = args[0]                    
+
+        else:
+            pass
+            #USE TEGA 
 
 
         self.robot_commander.publish(msg)

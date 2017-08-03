@@ -40,6 +40,7 @@ class AgentModel():
         """
         # randint is inclusive
         next_action = (self.action_space[randint(0, len(self.action_space) - 1)])
+        #next_action = "RING_ANSWER_WRONG"
         self.action_history.append(next_action)
         print('NEXT_ACTION is ' + next_action)
         return next_action

@@ -130,8 +130,11 @@ class TapGameAudioRecorder:
 
         #only do the recording if we are actually getting streaming audio data
         if Utils.is_rostopic_present(TapGameAudioRecorder.ANDROID_MIC_TO_ROS_TOPIC):
+            print('Audio Topic found, recording!')
             thread.start_new_thread(self.record_audio, (self.buffered_audio_data,))
             time.sleep(.1)
+        else:
+            print('NOT RECORDING, NO AUDIO TOPIC FOUND!')
 
     def stop_recording(self):
         """

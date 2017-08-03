@@ -41,7 +41,7 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
         self.Y_train = []
 
         self.means = [.5] * len(self.curriculum)  # These are the most recent posteriors
-        self.variances = [1] * len(self.curriculum) # Together they form the Student Model!
+        self.variances = [.3] * len(self.curriculum) # Together they form the Student Model!
         #self.fig = None # Figure for drawing
         #self.plts = None #Plots
 

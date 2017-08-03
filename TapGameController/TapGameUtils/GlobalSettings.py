@@ -3,7 +3,7 @@ This is a module that exports certain global runtime settings
 """
 # -*- coding: utf-8 -*-
 
-USE_ROS = True
+USE_ROS = False
 USE_TEGA = False # if False, we are using Jibo
 USE_SPACY = False # if False, do not load the full SpaCy language model
 
@@ -22,6 +22,7 @@ class TapGameLog(): # pylint: disable=too-few-public-methods
     SHOW_GAME_END_DONE = "SHOW_GAME_END_DONE"
     END_ROUND_DONE = "END_ROUND_DONE"
     SHOW_RESULTS_DONE = "SHOW_RESULTS_DONE"
+    PLAYER_BEAT_ROBOT = "PLAYER_BEAT_ROBOT"
 
     def __init__(self):
         pass

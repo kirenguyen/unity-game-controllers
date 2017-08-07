@@ -9,6 +9,7 @@ import numpy as np
 import scipy.stats
 import matplotlib.pyplot as plt
 from .TapGameUtils.Curriculum import Curriculum
+from .TapGameUtils.PronunciationResultsHandler import PronunciationResultsHandler
 
 class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
 
@@ -149,20 +150,25 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
         Will eventually incorporate conceptnet and other phonetic metrics
         """
 
-        if word_a == word_b:
-            return 1
+        # if word_a == word_b:
+        #     return 1
 
-        score = 0
-        for letter_a in word_a:
-            if letter_a in word_b:
-                score += 1
+        # score = 0
+        # for letter_a in word_a:
+        #     if letter_a in word_b:
+        #         score += 1
 
-        for letter_b in word_b:
-            if letter_b in word_a:
-                score += 1
+        # for letter_b in word_b:
+        #     if letter_b in word_a:
+        #         score += 1
 
-        ratio = (score / (len(word_a) + len(word_b)))
-        return round(ratio, 2)
+        # ratio = (score / (len(word_a) + len(word_b)))
+        # return round(ratio, 2)
+        self.pronunciationHandler = PronunciationResultsHandler()
+        return self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b)
+
+       
+
 
     def plot_curricular_distro(self):
         """

@@ -85,11 +85,16 @@ class TapGameAudioRecorder:
         Subscribes to the microphone to receive data
         Returns the buffered audio data
         """
-        buff = queue.Queue()
-        self.sub_audio = rospy.Subscriber(TapGameAudioRecorder.ANDROID_MIC_TO_ROS_TOPIC,
-                                          AndroidAudio, self.fill_buffer, buff)
 
-        return self.audio_data_generator(buff, buffered_audio_data)
+        #only do the recording if we are actually getting streaming audio data
+        if Utils.is_rostopic_present(TapGameAudioRecorder.ANDROID_MIC_TO_ROS_TOPIC):
+            print('Android Audio Topic found, recording!')
+            buff = queue.Queue()
+            self.sub_audio = rospy.Subscriber(TapGameAudioRecorder.ANDROID_MIC_TO_ROS_TOPIC,
+                                              AndroidAudio, self.fill_buffer, buff)
+            return self.audio_data_generator(buff, buffered_audio_data) #TODO: Return statement necessary?    
+        else:
+            print('NOT RECORDING, NO ANDROID AUDIO TOPIC FOUND!')
 
     def record_usb_audio(self, buffered_audio_data):
         mic_index = None
@@ -99,25 +104,26 @@ class TapGameAudioRecorder:
 
         for i in range(0, numdevices):
             if (audio.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
-                print ("Input Device id:", i, " - ", audio.get_device_info_by_host_api_device_index(0, i).get('name'))
                 if audio.get_device_info_by_host_api_device_index(0, i).get('name') == self.EXTERNAL_MIC_NAME:
                     mic_index = i
                     break
 
+        if mic_index == None:
+            print('NOT RECORDING, NO USB AUDIO DEVICE FOUND!')
+            pass
+        else:
+            # start Recording
+            print('USB Audio Device found, recording!')
+            stream = audio.open(format=self.FORMAT, channels=self.CHANNELS, rate=self.RATE, input=True, frames_per_buffer=self.CHUNK, input_device_index=mic_index)
 
-        # start Recording
-        stream = audio.open(format=self.FORMAT, channels=self.CHANNELS, rate=self.RATE, input=True, frames_per_buffer=self.CHUNK, input_device_index=mic_index)
+            while self.is_recording:
+                data = stream.read(self.CHUNK)
+                buffered_audio_data.append(data)
 
-        while self.is_recording:
-            data = stream.read(self.CHUNK)
-            buffered_audio_data.append(data)
-
-        # Stops the recording
-        stream.stop_stream()
-        stream.close()
-        audio.terminate()
-
-
+            # Stops the recording
+            stream.stop_stream()
+            stream.close()
+            audio.terminate()
 
     def speechace(self, audio_file, correct_text):
         """
@@ -159,18 +165,13 @@ class TapGameAudioRecorder:
         self.has_recorded += 1
         self.buffered_audio_data = []  # Resets audio data
 
-        #only do the recording if we are actually getting streaming audio data
-        if Utils.is_rostopic_present(TapGameAudioRecorder.ANDROID_MIC_TO_ROS_TOPIC):
-            print('Audio Topic found, recording!')
-
-            if GlobalSettings.USE_USB_MIC:
-                thread.start_new_thread(self.record_usb_audio, (self.buffered_audio_data,))
-                time.sleep(.1)
-            else:
-                thread.start_new_thread(self.record_android_audio, (self.buffered_audio_data,))
-                time.sleep(.1)
-        else:
-            print('NOT RECORDING, NO AUDIO TOPIC FOUND!')
+        if GlobalSettings.USE_USB_MIC:
+            thread.start_new_thread(self.record_usb_audio, (self.buffered_audio_data,))
+            time.sleep(.1)
+        else: #try to use streaming audio from Android device
+            thread.start_new_thread(self.record_android_audio, (self.buffered_audio_data,))
+            time.sleep(.1)
+        
 
     def stop_recording(self):
         """
@@ -182,7 +183,8 @@ class TapGameAudioRecorder:
         time.sleep(.2)  # Gives time to return the data
 
         #only if we are actually getting streaming audio data
-        if Utils.is_rostopic_present(TapGameAudioRecorder.ANDROID_MIC_TO_ROS_TOPIC):
+        if len(self.buffered_audio_data) > 0:
+            print('RECORDING SUCCESFUL, writing to wav')
             wav_file = wave.open(TapGameAudioRecorder.WAV_OUTPUT_FILENAME, 'wb')
             wav_file.setnchannels(TapGameAudioRecorder.CHANNELS)
             wav_file.setsampwidth(2)

@@ -23,7 +23,7 @@ def signal_handler(signal, frame):
 def main():
 
     my_FSM = TapGameFSM.TapGameFSM()
-    my_FSM.start_log_listener()
+    my_FSM.ros_node_mgr.start_log_listener(my_FSM.on_log_received)
     print('nodes started!')
     signal.signal(signal.SIGINT, signal_handler)
     #rospy.spin()

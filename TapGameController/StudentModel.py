@@ -12,7 +12,7 @@ import spacy
 from .TapGameUtils.Curriculum import Curriculum
 from .TapGameUtils.GlobalSettings import USE_SPACY
 
-class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
+class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,too-many-instance-attributes
 
     """
     This class implements a Gaussian Process, intended to model student vocabulary knowledge
@@ -47,7 +47,8 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
 
         self.n_rows = 2 # needs to be > 1
 
-        self.fig, self.plts = plt.subplots(self.n_rows, int(len(self.curriculum) / self.n_rows), figsize=(15, 10))
+        self.fig, self.plts = plt.subplots(self.n_rows, int(len(self.curriculum) / self.n_rows),
+                                           figsize=(15, 10))
 
 
     def init_model(self):
@@ -179,14 +180,6 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
         Plots the most recent distribution
         """
 
-
-        # f, plts = plt.subplots(n_rows, int(test_space_size / n_rows),
-        #                        sharex='col', sharey='row', figsize=(15,10))        
-        #self.fig = fig
-        #self.plts = plts
-        # print(plts)
-
-
         left = 0.125  # the left side of the subplots of the figure
         right = 0.9  # the right side of the subplots of the figure
         bottom = 0.4  # the bottom of the subplots of the figure
@@ -204,17 +197,20 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
             self.clear_old_plot_lines()
             self.plts[row_index][col_index].plot(x, scipy.stats.norm.pdf(x, self.means[i],
                                                                          self.variances[i]),
-                                                color='b')
+                                                 color='b')
             self.plts[row_index][col_index].set_title(
                 self.curriculum[i] + ": u= " + str(round(self.means[i], 2)) + ", var= " + str(
                     round(self.variances[i], 2)))
 
-        plt.subplots_adjust(left, bottom, right, top, wspace, hspace)        
+        plt.subplots_adjust(left, bottom, right, top, wspace, hspace)
         plt.show(block=False)
         self.fig.canvas.flush_events()
         plt.draw()
 
     def clear_old_plot_lines(self):
+        """
+        clears the previous lines that were drawn on the graph
+        """
         for plotRow in self.plts:
             for plot in plotRow:
                 if len(plot.lines) > 1:

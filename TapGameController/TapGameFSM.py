@@ -23,8 +23,6 @@ if GlobalSettings.USE_ROS:
 else:
     TapGameLog = GlobalSettings.TapGameLog #Mock object, used for testing in non-ROS environments
     TapGameCommand = GlobalSettings.TapGameCommand
-    TegaAction = GlobalSettings.TegaAction
-    JiboAction = GlobalSettings.JiboAction
 
 RECORD_TIME_MS = 3500
 SHOW_RESULTS_TIME_MS = 3500
@@ -130,7 +128,8 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         """
         print("got to init_first round!")
         self.current_round_word = self.student_model.get_next_best_word()
-        self.ros_node_mgr.send_game_cmd(TapGameCommand.INIT_ROUND, json.dumps(self.current_round_word))
+        self.ros_node_mgr.send_game_cmd(TapGameCommand.INIT_ROUND,
+                                        json.dumps(self.current_round_word))
 
         # #send message every 2s in case it gets dropped
         # while(not self.state == "ROUND_ACTIVE"):
@@ -176,6 +175,9 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         self.robot_pronounce_eval()
 
     def player_beat_robot(self):
+        """
+        This function details what happens when the robot wants to buzz, but gets beat by the human
+        """
         print("PLAYER BEAT ROBOT TO THE PUNCH!")
 
 
@@ -233,14 +235,13 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         """
         print('got to player pronounce eval cb')
         # Get the actual results here
-        # TODO: the [1] is only for fully correct answers!!!!
         tmp = [int(x) for x in self.passed]
         passed_ratio = (sum(tmp) / len(tmp)) #TODO: do this over phonemes, not letters!
         print("PASSED RATIO WAS" + str(passed_ratio))
         means, variances = self.student_model.train_and_compute_posterior([self.current_round_word],
                                                                           [passed_ratio])
 
-        if(passed_ratio > .8):
+        if passed_ratio > .8:
             self.player_score += 1
 
         print("LATEST MEANS / VARS")
@@ -248,7 +249,6 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         print(means)
         print(variances)
 
-        # TODO Send message to Game to show results for three seconds, sleep, + handle round_end
         results_params = {}
         results_params['letters'] = self.letters
         results_params['passed'] = self.passed
@@ -263,8 +263,6 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         to show results
         handle_round_end() to transition to next round
         """
-
-        #TODO Send message to Game to show results for three seconds, sleep, + handle round_end
 
         results_params = {}
         results_params['letters'] = self.letters
@@ -282,7 +280,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         'max_rounds" yet
         Should increment round index, and send cmd to game to reset for the next round
         """
-        print('got to round reset')        
+        print('got to round reset')
         self.round_index += 1
         self.ros_node_mgr.send_game_cmd(TapGameCommand.RESET_NEXT_ROUND)
 
@@ -294,7 +292,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         Sends msg to the Unity game to load the game end screen
         """
         print('got to game finished')
-        if(self.player_score < self.robot_score):
+        if self.player_score < self.robot_score:
             self.ros_node_mgr.send_game_cmd("JIBO_WIN_MOTION")
             self.ros_node_mgr.send_game_cmd("JIBO_WIN_SPEECH")
         else:
@@ -312,6 +310,50 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         """
         self.ros_node_mgr.send_game_cmd() #START GAME OVER
         self.ros_node_mgr.send_game_cmd()
+
+
+    def on_log_received(self, data):
+        """
+        Rospy Callback for when we get log messages
+        """
+
+        if data.message in FSM_LOG_MESSAGES:
+
+            if data.message == TapGameLog.CHECK_IN:
+                print('Game Checked in!')
+
+            if data.message == TapGameLog.GAME_START_PRESSED:
+                self.send_robot_cmd("LOOK_AT_TABLET")
+                self.init_first_round()  # makes state transition + calls self.on_init_first_round()
+
+            if data.message == TapGameLog.INIT_ROUND_DONE:
+                print('done initializing')
+                self.start_round()
+
+            if data.message == TapGameLog.START_ROUND_DONE:
+                print('I heard Start Round DONE. Waiting for player input')
+
+            if data.message == TapGameLog.PLAYER_RING_IN:
+                print('Player Rang in!')
+                self.player_ring_in()
+
+            if data.message == TapGameLog.ROBOT_RING_IN:
+                print('Robot Rang in!')
+                self.robot_ring_in()
+
+            if data.message == TapGameLog.PLAYER_BEAT_ROBOT:
+                self.player_beat_robot()
+
+            if data.message == TapGameLog.RESET_NEXT_ROUND_DONE:
+                print('Done Resetting Round!')
+                self.send_robot_cmd("LOOK_AT_TABLET")
+                self.current_round_word = self.student_model.get_next_best_word()
+                self.send_game_cmd(TapGameCommand.INIT_ROUND, json.dumps(self.current_round_word))
+
+            if data.message == TapGameLog.SHOW_GAME_END_DONE:
+                print('GAME OVER!')
+        else:
+            print('NOT A REAL MESSAGE?!?!?!?')
 
 
     def is_last_round(self):

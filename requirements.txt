@@ -6,5 +6,4 @@ matplotlib
 pyaudio
 six
 pronouncing
-PyQt5
 spacy

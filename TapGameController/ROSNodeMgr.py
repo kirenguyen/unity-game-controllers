@@ -4,8 +4,6 @@ This is the main class that manages the creation / parsing of ROS Node Communica
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error
 
-
-import json
 from .TapGameUtils import GlobalSettings
 
 if GlobalSettings.USE_ROS:
@@ -14,7 +12,7 @@ if GlobalSettings.USE_ROS:
     from unity_game_msgs.msg import TapGameCommand
     from unity_game_msgs.msg import TapGameLog
     from r1d1_msgs.msg import TegaAction
-    from jibo_msgs.msg import JiboAction  # TODO: uncomment when JiboMessage exists
+    from jibo_msgs.msg import JiboAction
 else:
     TapGameLog = GlobalSettings.TapGameLog  # Mock object, used for testing in non-ROS environments
     TapGameCommand = GlobalSettings.TapGameCommand
@@ -26,13 +24,6 @@ TAP_GAME_TO_ROSCORE_TOPIC = '/tap_game_to_ros'
 
 ROSCORE_TO_JIBO_TOPIC = '/jibo'
 ROSCORE_TO_TEGA_TOPIC = '/tega'
-
-FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
-                    TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
-                    TapGameLog.PLAYER_RING_IN, TapGameLog.END_ROUND_DONE,
-                    TapGameLog.RESET_NEXT_ROUND_DONE, TapGameLog.SHOW_GAME_END_DONE,
-                    TapGameLog.PLAYER_BEAT_ROBOT]
-
 
 class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
     """
@@ -49,59 +40,14 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         pass
 
 
-
-    def on_log_received(self, data):
-        """
-        Rospy Callback for when we get log messages
-        """
-        rospy.loginfo(rospy.get_caller_id() + "I heard " + data.message)
-
-        if data.message in FSM_LOG_MESSAGES:
-
-            if data.message == TapGameLog.CHECK_IN:
-                print('Game Checked in!')
-
-            if data.message == TapGameLog.GAME_START_PRESSED:
-                self.send_robot_cmd("LOOK_AT_TABLET")
-                self.init_first_round()  # makes state transition + calls self.on_init_first_round()
-
-            if data.message == TapGameLog.INIT_ROUND_DONE:
-                print('done initializing')
-                self.start_round()
-
-            if data.message == TapGameLog.START_ROUND_DONE:
-                print('I heard Start Round DONE. Waiting for player input')
-
-            if data.message == TapGameLog.PLAYER_RING_IN:
-                print('Player Rang in!')
-                self.player_ring_in()
-
-            if data.message == TapGameLog.ROBOT_RING_IN:
-                print('Robot Rang in!')
-                self.robot_ring_in()
-
-            if data.message == TapGameLog.PLAYER_BEAT_ROBOT:
-                self.player_beat_robot()
-
-            if data.message == TapGameLog.RESET_NEXT_ROUND_DONE:
-                print('Done Resetting Round!')
-                self.send_robot_cmd("LOOK_AT_TABLET")
-                self.current_round_word = self.student_model.get_next_best_word()
-                self.send_game_cmd(TapGameCommand.INIT_ROUND, json.dumps(self.current_round_word))
-
-            if data.message == TapGameLog.SHOW_GAME_END_DONE:
-                print('GAME OVER!')
-        else:
-            print('NOT A REAL MESSAGE?!?!?!?')
-
-    def start_log_listener(self):
+    def start_log_listener(self, on_log_callback):
         """
         Start up the Game Log Subscriber node
         """
         print('Sub Node started')
         rospy.init_node('FSM_Listener_Controller', anonymous=True)
         self.log_listener = rospy.Subscriber(TAP_GAME_TO_ROSCORE_TOPIC, TapGameLog,
-                                             self.on_log_received)
+                                             on_log_callback)
 
     def start_cmd_publisher(self):
         """
@@ -153,7 +99,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         self.game_commander.publish(msg)
         rospy.loginfo(msg)
 
-    def send_robot_cmd(self, command, *args):
+    def send_robot_cmd(self, command, *args): #pylint: disable=too-many-branches, too-many-statements
         """
         send a Command from the ActionSpace to the robot
         This function maps actions from the ActionSpace into actual ROS Msgs

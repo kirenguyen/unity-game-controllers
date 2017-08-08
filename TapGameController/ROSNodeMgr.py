@@ -62,6 +62,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 print('Game Checked in!')
 
             if data.message == TapGameLog.GAME_START_PRESSED:
+                self.send_robot_cmd("LOOK_AT_TABLET")
                 self.init_first_round()  # makes state transition + calls self.on_init_first_round()
 
             if data.message == TapGameLog.INIT_ROUND_DONE:

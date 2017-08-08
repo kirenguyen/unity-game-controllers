@@ -9,7 +9,7 @@ import numpy as np
 import scipy.stats
 import matplotlib.pyplot as plt
 from .TapGameUtils.Curriculum import Curriculum
-from .TapGameUtils.PronunciationResultsHandler import PronunciationResultsHandler
+from .TapGameUtils.PronunciationUtils import PronunciationHandler
 
 class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
 

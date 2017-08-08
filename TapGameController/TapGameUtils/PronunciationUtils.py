@@ -8,6 +8,8 @@ grapheme utilities
 import pronouncing
 import csv
 import os
+import numpy as np
+import pandas as pd
 
 SCORE_THRESHOLD = 70 # Score threshold we use to determine whether a word was passed or not
                      # by SpeechAce
@@ -260,3 +262,6 @@ https://archive.ics.uci.edu/ml/machine-learning-databases/undocumented/connectio
         normalized_score = result / float(denominator)
         print(normalized_score)
         return normalized_score
+
+test = PronunciationHandler()
+out=test.measure_weighted_levenshtein_distance("tiger","pig")

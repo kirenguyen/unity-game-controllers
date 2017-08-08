@@ -151,7 +151,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
         if next_action == ActionSpace.RING_ANSWER_CORRECT:
             time.sleep(WAIT_TO_BUZZ_TIME_MS / 1000.0)
-            self.ros_node_mgr.send_game_cmd(next_action)
+            self.ros_node_mgr.send_robot_cmd(next_action)
             self.ros_node_mgr.send_game_cmd(TapGameCommand.ROBOT_RING_IN)
 
     def on_robot_ring_in(self):
@@ -165,7 +165,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
         # Wait a few seconds, pronounce word, then wait again
         time.sleep((RECORD_TIME_MS / 2) / 1000.0)
-        self.ros_node_mgr.send_game_cmd("PRONOUNCE_CORRECT")
+        self.ros_node_mgr.send_robot_cmd("PRONOUNCE_CORRECT", self.current_round_word)
         time.sleep((RECORD_TIME_MS / 2) / 1000.0)
 
         # Move to evaluation phase
@@ -293,11 +293,11 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         """
         print('got to game finished')
         if self.player_score < self.robot_score:
-            self.ros_node_mgr.send_game_cmd("JIBO_WIN_MOTION")
-            self.ros_node_mgr.send_game_cmd("JIBO_WIN_SPEECH")
+            self.ros_node_mgr.send_robot_cmd("JIBO_WIN_MOTION")
+            self.ros_node_mgr.send_robot_cmd("JIBO_WIN_SPEECH")
         else:
-            self.ros_node_mgr.send_game_cmd("JIBO_LOSE_MOTION")
-            self.ros_node_mgr.send_game_cmd("JIBO_LOSE_SPEECH")
+            self.ros_node_mgr.send_robot_cmd("JIBO_LOSE_MOTION")
+            self.ros_node_mgr.send_robot_cmd("JIBO_LOSE_SPEECH")
 
         self.ros_node_mgr.send_game_cmd(TapGameCommand.SHOW_GAME_END)
 
@@ -323,7 +323,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
                 print('Game Checked in!')
 
             if data.message == TapGameLog.GAME_START_PRESSED:
-                self.send_robot_cmd("LOOK_AT_TABLET")
+                self.ros_node_mgr.send_robot_cmd("LOOK_AT_TABLET")
                 self.init_first_round()  # makes state transition + calls self.on_init_first_round()
 
             if data.message == TapGameLog.INIT_ROUND_DONE:
@@ -346,9 +346,9 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
             if data.message == TapGameLog.RESET_NEXT_ROUND_DONE:
                 print('Done Resetting Round!')
-                self.send_robot_cmd("LOOK_AT_TABLET")
+                self.ros_node_mgr.send_robot_cmd("LOOK_AT_TABLET")
                 self.current_round_word = self.student_model.get_next_best_word()
-                self.send_game_cmd(TapGameCommand.INIT_ROUND, json.dumps(self.current_round_word))
+                self.ros_node_mgr.send_game_cmd(TapGameCommand.INIT_ROUND, json.dumps(self.current_round_word))
 
             if data.message == TapGameLog.SHOW_GAME_END_DONE:
                 print('GAME OVER!')

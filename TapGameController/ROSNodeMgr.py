@@ -95,7 +95,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         # fill in command and any params:
         msg.command = command
         if len(args) > 0:
-            msg.params = args[0]
+            msg.params = args[0]        
         self.game_commander.publish(msg)
         rospy.loginfo(msg)
 
@@ -125,8 +125,6 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 msg.do_lookat = False
                 msg.do_sound_playback = False
                 msg.motion = JiboAction.LOOK_DOWN
-                if len(args) > 0:
-                    msg.params = args[0]
 
             if command == 'RING_ANSWER_CORRECT':
                 msg.do_motion = True
@@ -134,49 +132,37 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 msg.do_lookat = False
                 msg.do_sound_playback = False
                 msg.motion = JiboAction.RING_IN_ANIM
-                if len(args) > 0:
-                    msg.params = args[0]
 
             elif command == 'PRONOUNCE_CORRECT':
                 msg.do_motion = False
                 msg.do_tts = True
                 msg.do_lookat = False
-                msg.tts_text = self.current_round_word
-                if len(args) > 0:
-                    msg.params = args[0]
+                msg.tts_text = args[0]
 
             elif command == 'JIBO_WIN_MOTION':
                 msg.do_motion = True
                 msg.do_tts = False
                 msg.do_lookat = False
                 msg.motion = JiboAction.HAPPY_GO_LUCKY_DANCE
-                if len(args) > 0:
-                    msg.params = args[0]
 
             elif command == 'JIBO_WIN_SPEECH':
                 msg.do_motion = True
                 msg.do_tts = True
                 msg.do_lookat = False
                 msg.tts_text = "I win I win I win I win I win"
-                if len(args) > 0:
-                    msg.params = args[0]
 
             elif command == 'JIBO_LOSE_MOTION':
                 msg.do_motion = True
                 msg.do_tts = False
                 msg.do_lookat = False
                 msg.motion = JiboAction.EMOJI_RAINCLOUD
-                if len(args) > 0:
-                    msg.params = args[0]
 
             elif command == 'JIBO_LOSE_SPEECH':
                 msg.do_motion = True
                 msg.do_tts = True
                 msg.do_lookat = False
                 msg.tts_text = "I lost. Oh well. I'll beat you next time"
-                if len(args) > 0:
-                    msg.params = args[0]
-
+                               
         else:
             pass
             # USE TEGA

@@ -7,3 +7,5 @@ pyaudio
 six
 pronouncing
 weighted-levenshtein
+csv
+pandas

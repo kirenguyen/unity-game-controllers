@@ -6,6 +6,7 @@ This is a module that exports certain global runtime settings
 USE_ROS = False
 USE_TEGA = False # if False, we are using Jibo
 USE_SPACY = False # if False, do not load the full SpaCy language model
+USE_USB_MIC = True #if True, use the external USB microphone
 
 class TapGameLog(): # pylint: disable=too-few-public-methods
     """

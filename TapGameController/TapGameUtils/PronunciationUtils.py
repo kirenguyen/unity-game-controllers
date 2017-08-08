@@ -202,7 +202,7 @@ https://archive.ics.uci.edu/ml/machine-learning-databases/undocumented/connectio
         print(output)
         return output
 
-        def conversion_for_phonetic_similarity(self,iword):
+    def conversion_for_phonetic_similarity(self,iword):
         '''
         convert a given word into a unique phonetic transcription, 
         which allows for measuring phonetic siimlarity with other words

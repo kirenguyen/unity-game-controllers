@@ -60,6 +60,8 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     letters = None
     passed = None
 
+    round_input_received = False # flag to mark if player or robot rings in
+
     states = ['GAME_START', 'ROUND_START', 'ROUND_ACTIVE',
               'PLAYER_PRONOUNCE', 'ROBOT_PRONOUNCE', 'SHOW_RESULTS',
               'GAME_FINISHED']
@@ -332,9 +334,13 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
             if data.message == TapGameLog.START_ROUND_DONE:
                 print('I heard Start Round DONE. Waiting for player input')
+                while not self.round_input_received:
+                    self.ros_node_mgr.send_robot_cmd("EYE_FIDGET")
+                    time.sleep(1000 / 1000)
 
             if data.message == TapGameLog.PLAYER_RING_IN:
                 print('Player Rang in!')
+                self.round_input_received = True
                 self.player_ring_in()
 
             if data.message == TapGameLog.ROBOT_RING_IN:
@@ -345,8 +351,9 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
                 self.player_beat_robot()
 
             if data.message == TapGameLog.RESET_NEXT_ROUND_DONE:
-                print('Done Resetting Round!')
+                print('Game Done Resetting Round!')
                 self.ros_node_mgr.send_robot_cmd("LOOK_AT_TABLET")
+                self.round_input_received = False
                 self.current_round_word = self.student_model.get_next_best_word()
                 self.ros_node_mgr.send_game_cmd(TapGameCommand.INIT_ROUND, json.dumps(self.current_round_word))
 

@@ -146,7 +146,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 msg.motion = JiboAction.HAPPY_GO_LUCKY_DANCE
 
             elif command == 'JIBO_WIN_SPEECH':
-                msg.do_motion = True
+                msg.do_motion = False
                 msg.do_tts = True
                 msg.do_lookat = False
                 msg.tts_text = "I win I win I win I win I win"
@@ -158,10 +158,16 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 msg.motion = JiboAction.EMOJI_RAINCLOUD
 
             elif command == 'JIBO_LOSE_SPEECH':
-                msg.do_motion = True
+                msg.do_motion = False
                 msg.do_tts = True
                 msg.do_lookat = False
                 msg.tts_text = "I lost. Oh well. I'll beat you next time"
+
+            elif command == 'LOOK_FIDGET':
+                msg.do_motion = True
+                msg.do_tts = False
+                msg.do_lookat = False
+                msg.motion = JiboAction.EYE_FIDGET
                                
         else:
             pass

@@ -70,7 +70,7 @@ class iSpyAudioRecorder:
 		"""
 		buff = queue.Queue()
 		self.sub_audio = None
-		self.sub_audio = rospy.Subscriber(ROS_TO_ANDROID_MIC_TOPIC, AndroidAudio, self._fill_buffer, buff)
+		self.sub_audio = rospy.Subscriber(self.ROS_TO_ANDROID_MIC_TOPIC, AndroidAudio, self._fill_buffer, buff)
 
 		return self._audio_data_generator(buff,buffered_audio_data)
 

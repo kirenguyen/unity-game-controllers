@@ -313,7 +313,7 @@ class iSpyGameROSController: # pylint: disable=no-member
 
 			if word_score_list:
 				for word in word_score_list:
-					letters, passed = self.results_handler.process_speechace_word_results
+					letters, passed = self.results_handler.process_speechace_word_results()
 				print ("Message to Unity")
 				print (letters)
 				print (passed)
@@ -406,7 +406,7 @@ class iSpyGameROSController: # pylint: disable=no-member
 					msg.properties = json.dumps(args[0])
 
 				elif command == SEND_TASKS_TO_UNITY:
-					converted_result = Utils.convert_speechaceResult_to_JSON(args[0])
+					converted_result = json.dumps(args[0])
 					msg.properties = converted_result
 
 			# send message to tablet game

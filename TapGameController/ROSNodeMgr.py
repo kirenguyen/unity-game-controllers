@@ -4,7 +4,7 @@ This is the main class that manages the creation / parsing of ROS Node Communica
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error
 
-from .TapGameUtils import GlobalSettings
+from GameUtils import GlobalSettings
 
 if GlobalSettings.USE_ROS:
     import rospy

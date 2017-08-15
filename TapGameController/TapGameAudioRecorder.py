@@ -4,18 +4,18 @@ This is a helper class that handles the audio recording and sending it to Speech
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error, wrong-import-order
 
-import json
 import _thread as thread
 import binascii
-import wave
-import time
+import json
 import subprocess
-from six.moves import queue
+import time
+import wave
+
 import pyaudio
+from six.moves import queue
 
-from .TapGameUtils import GlobalSettings
-from .TapGameUtils import Utils
-
+from GameUtils import GlobalSettings
+from GameUtils import ROSUtils
 
 if GlobalSettings.USE_ROS:
     import rospy
@@ -87,7 +87,7 @@ class TapGameAudioRecorder:
         """
 
         #only do the recording if we are actually getting streaming audio data
-        if Utils.is_rostopic_present(TapGameAudioRecorder.ANDROID_MIC_TO_ROS_TOPIC):
+        if ROSUtils.is_rostopic_present(TapGameAudioRecorder.ANDROID_MIC_TO_ROS_TOPIC):
             print('Android Audio Topic found, recording!')
             buff = queue.Queue()
             self.sub_audio = rospy.Subscriber(TapGameAudioRecorder.ANDROID_MIC_TO_ROS_TOPIC,

@@ -2,33 +2,25 @@
 """
 This is a basic class for the Game Controller
 """
-# -*- coding: utf-8 -*-
-# pylint: disable=import-error
-from transitions import Machine
-# from TapGameUtils import Curriculum
-from ..TapGameController.TapGameUtils import GlobalSettings
-from ..TapGameController.TapGameUtils.PronunciationUtils import PronunciationHandler
-from ..TapGameController.TapGameUtils.GlobalSettings import iSpyGameStates as gs
-# from StudentModel import StudentModel
-from six.moves import queue
-
-
-
-import sys, json
-import os
-import rospy
-import binascii
-import pyaudio
-import wave
+import json
 import time
-import thread
-import subprocess
 
 import iSpyAudioRecorder
 import iSpyTaskController
+import rospy
+import thread
+# -*- coding: utf-8 -*-
+# pylint: disable=import-error
+from transitions import Machine
+
+# from GameUtils import Curriculum
+from GameUtils import GlobalSettings
+from GameUtils.GlobalSettings import iSpyGameStates as gs
+from ..TapGameController.TapGameUtils.PronunciationUtils import PronunciationHandler
+
+# from StudentModel import StudentModel
 
 if GlobalSettings.USE_ROS:
-	from r1d1_msgs.msg import AndroidAudio
 	from std_msgs.msg import Header  # standard ROS msg header
 	from std_msgs.msg import String
 	from unity_game_msgs.msg import iSpyCommand

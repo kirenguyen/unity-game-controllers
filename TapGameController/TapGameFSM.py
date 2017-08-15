@@ -7,15 +7,16 @@ This is the main FSM / Game Logic class for the Tap Game
 
 import json
 import time
+
 from transitions import Machine
-from .TapGameUtils import GlobalSettings
-from .TapGameUtils.PronunciationUtils import PronunciationHandler
-from .StudentModel import StudentModel
-from .TapGameAudioRecorder import TapGameAudioRecorder
+
+from GameUtils import GlobalSettings
 from .AgentModel import ActionSpace
 from .AgentModel import AgentModel
 from .ROSNodeMgr import ROSNodeMgr
-
+from .StudentModel import StudentModel
+from .TapGameAudioRecorder import TapGameAudioRecorder
+from GameUtils.PronunciationUtils import PronunciationHandler
 
 if GlobalSettings.USE_ROS:
     from unity_game_msgs.msg import TapGameCommand

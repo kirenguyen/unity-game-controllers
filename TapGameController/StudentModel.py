@@ -5,12 +5,15 @@ http://katbailey.github.io/post/gaussian-processes-for-dummies/
 ^ Great intro article for rolling your own GP
 """
 from random import randint
+
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats
-import matplotlib.pyplot as plt
 import spacy
-from .TapGameUtils.Curriculum import Curriculum
-from .TapGameUtils.GlobalSettings import USE_SPACY
+
+from GameUtils.GlobalSettings import USE_SPACY
+from GameUtils.Curriculum import Curriculum
+
 
 class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,too-many-instance-attributes
 

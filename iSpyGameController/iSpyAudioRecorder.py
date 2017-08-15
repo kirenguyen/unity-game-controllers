@@ -1,20 +1,18 @@
 #!/usr/bin/env python
 
-import rospy
-import json
-import pyaudio
-import thread
 import binascii
-import wave
-import time
+import json
 import subprocess
+import time
+import wave
 
-from six.moves import queue
-from unity_game_msgs.msg import iSpyAction
+import pyaudio
+import rospy
+import thread
 from r1d1_msgs.msg import AndroidAudio
-from ..TapGameController.TapGameUtils import GlobalSettings
+from six.moves import queue
 
-import iSpyGameFSM
+from GameUtils import GlobalSettings
 
 
 class iSpyAudioRecorder:

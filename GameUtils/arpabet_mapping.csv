@@ -1,6 +1,6 @@
-a,AA		wad,dot,odd
-b,B		bad
-c,AO		o in "or", au in "caught", aw in "awe"
+a,AA,		wad,dot,odd
+b,B,		bad
+c,AO,		o in "or", au in "caught", aw in "awe"
 d,D,		add
 e,EY,		angel,blade,way
 f,F,		farm
@@ -33,7 +33,7 @@ K,K SH,		anxious,sexual**
 L,L,		evil,able
 M,M,		chasm**
 N,N,		shorten,basin**
-O,OY		oil,boyz
+O,OY,		oil,boy
 Q,K W,		quilt**
 R,ER,		honer,after,satyr
 S,SH,		ocean,wish

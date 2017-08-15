@@ -16,7 +16,7 @@ from transitions import Machine
 # from GameUtils import Curriculum
 from GameUtils import GlobalSettings
 from GameUtils.GlobalSettings import iSpyGameStates as gs
-from ..TapGameController.TapGameUtils.PronunciationUtils import PronunciationHandler
+from GameUtils.PronunciationUtils import PronunciationHandler
 
 # from StudentModel import StudentModel
 
@@ -47,7 +47,7 @@ GAME_FINISHED = 99
 VALID_ISPY_COMMANDS = [RESET, SHOW_PRONOUNCIATION_PANEL, SHOW_PRONOUNCIATION_PANEL, SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, SEND_TASKS_TO_UNITY, GAME_FINISHED]
 
 
-class iSpyGameROSController: # pylint: disable=no-member
+class iSpyGameFSM: # pylint: disable=no-member
 	"""
 	Receives and sends out ROS messages.
 	"""
@@ -417,7 +417,7 @@ class iSpyGameROSController: # pylint: disable=no-member
 			print ("Not a valid command")
 
 if __name__ == '__main__':
-	control = iSpyGameROSController()
+	control = iSpyGameFSM()
 	print ("FSM Started!")
 	thread.start_new_thread(control.start_ispy_transition_listener, ())
 	thread.start_new_thread(control.start_ispy_log_listener, ())

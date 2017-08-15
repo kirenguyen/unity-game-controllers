@@ -1,11 +1,12 @@
 ##USAGE: python -m start_main_controller.py
 
 from iSpyGameController import iSpyGameFSM
-from unity_game_msgs.msg import iSpyGameCommand
+from unity_game_msgs.msg import iSpyCommand
 import rospy
 import time
 import signal
 import sys
+import _thread as thread # in Python3, the module is called _thread
 
 
 import warnings
@@ -21,25 +22,10 @@ def signal_handler(signal, frame):
     sys.exit()
 
 def main():
+    control = iSpyGameFSM()
+    print("FSM Started!")
+    thread.start_new_thread(control.start_ispy_transition_listener, ())
+    thread.start_new_thread(control.start_ispy_log_listener, ())
+    control.start_ispy_action_listener()
 
-    my_FSM = iSpyGameFSM.TapGameFSM()
-    my_FSM.ros_node_mgr.start_log_listener(my_FSM.on_log_received)
-    print('nodes started!')
-    signal.signal(signal.SIGINT, signal_handler)
-    #rospy.spin()
-
-
-    while(True):
-        try:
-           my_FSM.student_model.plot_curricular_distro()
-           my_FSM.student_model.fig.canvas.flush_events()
-           time.sleep(1)
-        except KeyboardInterrupt: 
-            print('Closing!')
-            sys.exit()
-    
-
-    ##
-
-fxn()
 main()

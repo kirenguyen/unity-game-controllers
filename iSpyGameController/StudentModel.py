@@ -3,7 +3,7 @@ This Module handles all aspects of student modeling and assessment
 """
 from random import randint
 import numpy as np
-from .iSpyGameUtils.Curriculum import Curriculum
+from GameUtils.Curriculum import Curriculum
 
 class StudentModel():
     """

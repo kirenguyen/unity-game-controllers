@@ -2,9 +2,6 @@ import csv
 import os
 import random
 
-# from TapGameController.TapGameUtils import GlobalSettings
-
-
 class iSpyTaskController():
 	"""docstring for iSpyTaskController"""
 
@@ -45,11 +42,11 @@ class iSpyTaskController():
 			spamreader = csv.reader(csvfile, delimiter=',')
 			for row in spamreader:
 				if row[0] != "":
- 					self.task_dict[int(row[0])] = (row[1], row[2], row[3])
+					self.task_dict[int(row[0])] = (row[1], row[2], row[3])
 
- 		# Fill the available quests list with the ID of all the quests
+		# Fill the available quests list with the ID of all the quests
  		for i in self.task_dict:
- 			self.available_quests.append(i)
+			self.available_quests.append(i)
 
 	def load_object_list(self):
 		""" Loads the object_list csv file into a 2d array """
@@ -65,7 +62,7 @@ class iSpyTaskController():
 			spamreader = csv.reader(csvfile, delimiter=',')
 			for row in spamreader:
 				if row[0] != "" and row[0] != "key_object":
- 					self.object_dict[row[0]] = (row[2], row[3], row[4], row[5])
+					self.object_dict[row[0]] = (row[2], row[3], row[4], row[5])
 
 	def load_outdoors_object_list(self):
 		""" Loads the object_list csv file into a 2d array """
@@ -81,7 +78,7 @@ class iSpyTaskController():
 			spamreader = csv.reader(csvfile, delimiter=',')
 			for row in spamreader:
 				if row[0] != "" and row[0] != "key_object":
- 					self.object_dict[row[0]] = (row[1], row[2], row[3], row[4], row[5], row[6])
+					self.object_dict[row[0]] = (row[1], row[2], row[3], row[4], row[5], row[6])
 
 
 	def get_random_task(self):

@@ -45,7 +45,7 @@ class iSpyTaskController():
 					self.task_dict[int(row[0])] = (row[1], row[2], row[3])
 
 		# Fill the available quests list with the ID of all the quests
- 		for i in self.task_dict:
+		for i in self.task_dict:
 			self.available_quests.append(i)
 
 	def load_object_list(self):

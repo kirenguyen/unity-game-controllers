@@ -5,10 +5,10 @@ This is a basic class for the Game Controller
 import json
 import time
 
-import iSpyAudioRecorder
-import iSpyTaskController
+from .iSpyAudioRecorder import iSpyAudioRecorder
+from .iSpyTaskController import iSpyTaskController
 import rospy
-import thread
+import _thread as thread
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error
 from transitions import Machine
@@ -65,7 +65,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		# Bool telling if the cmd message was heard from Unity
 		self.message_received = False
 
-		self.task_controller = iSpyTaskController.iSpyTaskController()
+		self.task_controller = iSpyTaskController()
 
 		self.results_handler = PronunciationHandler()
 
@@ -289,7 +289,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			#Initializes a new audio recorder object if one hasn't been created
 			if self.recorder == None:
-				self.recorder = iSpyAudioRecorder.iSpyAudioRecorder()
+				self.recorder = iSpyAudioRecorder()
 	
 			# print (ispy_action_msg.speakingStage)
 			self.recorder.speakingStage(ispy_action_msg.speakingStage)

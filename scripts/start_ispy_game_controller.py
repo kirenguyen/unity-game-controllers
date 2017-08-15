@@ -22,7 +22,7 @@ def signal_handler(signal, frame):
     sys.exit()
 
 def main():
-    control = iSpyGameFSM()
+    control = iSpyGameFSM.iSpyGameFSM()
     print("FSM Started!")
     thread.start_new_thread(control.start_ispy_transition_listener, ())
     thread.start_new_thread(control.start_ispy_log_listener, ())

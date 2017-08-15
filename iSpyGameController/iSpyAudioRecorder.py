@@ -8,7 +8,7 @@ import wave
 
 import pyaudio
 import rospy
-import thread
+import _thread as thread
 from r1d1_msgs.msg import AndroidAudio
 from six.moves import queue
 

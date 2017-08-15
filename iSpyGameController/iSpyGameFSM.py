@@ -305,7 +305,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			if word_score_list:
 				for word in word_score_list:
-					letters, passed = self.results_handler.process_speechace_word_results()
+					letters, passed = self.results_handler.process_speechace_word_results(word)
 				print ("Message to Unity")
 				print (letters)
 				print (passed)

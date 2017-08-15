@@ -1,4 +1,7 @@
-bananas	bxn@nxz	>0>1<0	0
+bananas	bxn@nxz
+laptop	l@ptap
+rainbow	re-nbo-
+rooster	ru-st-R
 aardvark	a-rdvark	1<<<>2<<	0
 aback	xb@k-	0>1<<	0
 abacus	@bxkxs	1<0>0<	0
@@ -444,6 +447,7 @@ aileron	e-lxran	1>>0>2<	0
 ailment	e-lmxnt	1<<>0<<	0
 aim	e-m	1<<	0
 air	@-r	1<<	0
+airplane	@-rplen-
 aircraft	@-rkr@ft	1<<>>2<<	0
 airlift	@-rlIft	1<<>2<<	0
 airliner	@-rlAn-R	1<<>2>0<	0
@@ -15395,7 +15399,6 @@ room	ru-m	>1<<	0
 roomette	ru-mEt--	>1<<1<<<	0
 roommate	ru-mmet-	>1<<>2<<	0
 roost	ru-st	>1<<<	0
-rooster	ru-st-R	>1<<>0<	0
 root	ru-t	>1<<	0
 rootlet	ru-tlxt	>1<<>0<	0
 rope	rop-	>1<<	0

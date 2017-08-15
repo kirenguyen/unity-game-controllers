@@ -34,7 +34,10 @@ If you are new to Python or new to creating Python projects, see Kenneth Reitz's
 	
 	UBUNTU
 	`sudo apt-get install portaudio19-dev`
-	`sudo apt-get install python3-catkin-pkg`
+	`pip install rospkg`
+	`pip install catkin_pkg`
+	`pip install pymongo`
+	`pip install twisted`
 
 ### Install the project's python development and runtime requirements::
 

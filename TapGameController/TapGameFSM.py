@@ -42,7 +42,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     """
 
     round_index = 1
-    max_rounds = 5
+    max_rounds = 10
 
     player_score = 0
     robot_score = 0
@@ -53,6 +53,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     pronunciation_handler = PronunciationHandler()
     ros_node_mgr = ROSNodeMgr()
     current_round_word = ""
+    current_round_action = None
 
     game_commander = None
     robot_commander = None
@@ -149,11 +150,11 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         self.ros_node_mgr.send_game_cmd(TapGameCommand.START_ROUND)
 
         # get the next robot action
-        next_action = self.agent_model.get_next_action()
+        self.current_round_action = self.agent_model.get_next_action()
 
-        if next_action == ActionSpace.RING_ANSWER_CORRECT:
+        if self.current_round_action == ActionSpace.RING_ANSWER_CORRECT:
             time.sleep(WAIT_TO_BUZZ_TIME_MS / 1000.0)
-            self.ros_node_mgr.send_robot_cmd(next_action)
+            self.ros_node_mgr.send_robot_cmd(self.current_round_action)
             self.ros_node_mgr.send_game_cmd(TapGameCommand.ROBOT_RING_IN)
 
     def on_robot_ring_in(self):
@@ -334,9 +335,10 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
             if data.message == TapGameLog.START_ROUND_DONE:
                 print('I heard Start Round DONE. Waiting for player input')
-                while not self.round_input_received:
-                    self.ros_node_mgr.send_robot_cmd("EYE_FIDGET")
-                    time.sleep(1000 / 1000)
+                # if (not self.current_round_action == ActionSpace.RING_ANSWER_CORRECT) and \
+                #       (not self.round_input_received):
+                #     time.sleep(2500 / 1000)                    
+                #     self.ros_node_mgr.send_robot_cmd("EYE_FIDGET")
 
             if data.message == TapGameLog.PLAYER_RING_IN:
                 print('Player Rang in!')

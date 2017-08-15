@@ -163,7 +163,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 msg.do_lookat = False
                 msg.tts_text = "I lost. Oh well. I'll beat you next time"
 
-            elif command == 'LOOK_FIDGET':
+            elif command == 'EYE_FIDGET':
                 msg.do_motion = True
                 msg.do_tts = False
                 msg.do_lookat = False

@@ -4,18 +4,18 @@ This is a helper class that handles the audio recording and sending it to Speech
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error, wrong-import-order
 
-import json
 import _thread as thread
 import binascii
-import wave
-import time
+import json
 import subprocess
-from six.moves import queue
+import time
+import wave
+
 import pyaudio
+from six.moves import queue
 
-from .TapGameUtils import GlobalSettings
-from .TapGameUtils import Utils
-
+from GameUtils import GlobalSettings
+from GameUtils import ROSUtils
 
 if GlobalSettings.USE_ROS:
     import rospy
@@ -25,7 +25,7 @@ else:
     TapGameCommand = GlobalSettings.TapGameCommand
 
 
-class TapGameAudioRecorder:
+class AudioRecorder:
     """
     Helper class that handles audio recording, converting to wav, and sending to SpeechAce
     """
@@ -55,6 +55,11 @@ class TapGameAudioRecorder:
 
         # Audio Subscriber node
         self.sub_audio = None
+
+        # True if actually recorded from android audio
+        # False so that it doesn't take the last audio data
+        # Without this it won't send a pass because it didn't hear you message 
+        self.valid_recording = True
 
 
     def audio_data_generator(self, buff, buffered_audio_data):
@@ -87,14 +92,17 @@ class TapGameAudioRecorder:
         """
 
         #only do the recording if we are actually getting streaming audio data
-        if Utils.is_rostopic_present(TapGameAudioRecorder.ANDROID_MIC_TO_ROS_TOPIC):
+        if ROSUtils.is_rostopic_present(AudioRecorder.ANDROID_MIC_TO_ROS_TOPIC):
+            self.valid_recording = True
             print('Android Audio Topic found, recording!')
             buff = queue.Queue()
-            self.sub_audio = rospy.Subscriber(TapGameAudioRecorder.ANDROID_MIC_TO_ROS_TOPIC,
+            self.sub_audio = rospy.Subscriber(AudioRecorder.ANDROID_MIC_TO_ROS_TOPIC,
                                               AndroidAudio, self.fill_buffer, buff)
             return self.audio_data_generator(buff, buffered_audio_data) #TODO: Return statement necessary?    
         else:
             print('NOT RECORDING, NO ANDROID AUDIO TOPIC FOUND!')
+            self.valid_recording = False
+            return
 
     def record_usb_audio(self, buffered_audio_data):
         mic_index = None
@@ -123,7 +131,8 @@ class TapGameAudioRecorder:
             # Stops the recording
             stream.stop_stream()
             stream.close()
-            audio.terminate()
+        audio.terminate()
+        return
 
     def speechace(self, audio_file, correct_text):
         """
@@ -145,8 +154,6 @@ class TapGameAudioRecorder:
         # decode json outputs from speechace api
         try:
             result = json.loads(out_json)['text_score']
-            print('result is:')
-            print(result)
             #result_text = result['text']
             #result_qualityScore = result['quality_score']
             result_word_score_list = result['word_score_list']
@@ -154,7 +161,7 @@ class TapGameAudioRecorder:
             return result_word_score_list
         except: #pylint: disable= bare-except
             print("DID NOT GET VALID RESPONSE")
-            return None
+            return
 
 
     def start_recording(self):
@@ -184,10 +191,10 @@ class TapGameAudioRecorder:
 
         #only if we are actually getting streaming audio data
         if len(self.buffered_audio_data) > 0:
-            print('RECORDING SUCCESFUL, writing to wav')
-            wav_file = wave.open(TapGameAudioRecorder.WAV_OUTPUT_FILENAME, 'wb')
-            wav_file.setnchannels(TapGameAudioRecorder.CHANNELS)
+            print('RECORDING SUCCESSFUL, writing to wav')
+            wav_file = wave.open(AudioRecorder.WAV_OUTPUT_FILENAME, 'wb')
+            wav_file.setnchannels(AudioRecorder.CHANNELS)
             wav_file.setsampwidth(2)
-            wav_file.setframerate(TapGameAudioRecorder.RATE)
+            wav_file.setframerate(AudioRecorder.RATE)
             wav_file.writeframes(b''.join(self.buffered_audio_data))
             wav_file.close()

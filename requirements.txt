@@ -6,4 +6,6 @@ matplotlib
 pyaudio
 six
 pronouncing
+weighted-levenshtein
+pandas
 spacy

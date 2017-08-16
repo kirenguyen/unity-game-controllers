@@ -7,15 +7,16 @@ This is the main FSM / Game Logic class for the Tap Game
 
 import json
 import time
+
 from transitions import Machine
-from .TapGameUtils import GlobalSettings
-from .TapGameUtils.PronunciationUtils import PronunciationHandler
-from .StudentModel import StudentModel
-from .TapGameAudioRecorder import TapGameAudioRecorder
+
+from GameUtils import GlobalSettings
+from GameUtils.PronunciationUtils import PronunciationHandler
+from GameUtils.AudioRecorder import AudioRecorder
 from .AgentModel import ActionSpace
 from .AgentModel import AgentModel
 from .ROSNodeMgr import ROSNodeMgr
-
+from .StudentModel import StudentModel
 
 if GlobalSettings.USE_ROS:
     from unity_game_msgs.msg import TapGameCommand
@@ -49,7 +50,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
     student_model = StudentModel()
     agent_model = AgentModel()
-    recorder = TapGameAudioRecorder()
+    recorder = AudioRecorder()
     pronunciation_handler = PronunciationHandler()
     ros_node_mgr = ROSNodeMgr()
     current_round_word = ""
@@ -194,7 +195,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
         # Initializes a new audio recorder object if one hasn't been created
         if self.recorder is None:
-            self.recorder = TapGameAudioRecorder()
+            self.recorder = AudioRecorder()
 
         #SEND SHOW_PRONUNCIATION_PAGE MSG
         self.recorder.start_recording()
@@ -208,23 +209,30 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
            self.recorder.has_recorded % 2 == 0 and\
            self.recorder.has_recorded != 0:
 
-            audio_file = TapGameAudioRecorder.WAV_OUTPUT_FILENAME
-            word_score_list = self.recorder.speechace(audio_file, self.current_round_word)
-            print("WORD SCORE LIST")
-            print(word_score_list)
+           # If you couldn't find the android audio topic, automatically pass
+            # instead of using the last audio recording
+            if not self.recorder.valid_recording:
+                self.letters = list(self.origText)
+                self.passed = ['1'] * len(letters)
+                print ("NO, RECORDING SO YOU AUTOMATICALLY PASS")
+            else: 
+                audio_file = AudioRecorder.WAV_OUTPUT_FILENAME
+                word_score_list = self.recorder.speechace(audio_file, self.current_round_word)
+                print("WORD SCORE LIST")
+                print(word_score_list)
 
-            # if we didn't record, there will be no word score list
-            if word_score_list:
-                for word_results in word_score_list:
-                    print("Message for ROS")
-                    self.letters, self.passed = \
-                        self.pronunciation_handler.process_speechace_word_results(word_results)
-                    print(self.letters)
-                    print(self.passed)
-            else:
-                self.letters = list(self.current_round_word)
-                self.passed = ['1'] * len(self.letters)
-                print('NO RECORDING, SO YOU AUTO-PASS!!')
+                # if we didn't record, there will be no word score list
+                if word_score_list:
+                    for word_results in word_score_list:
+                        print("Message for ROS")
+                        self.letters, self.passed = \
+                            self.pronunciation_handler.process_speechace_word_results(word_results)
+                        print(self.letters)
+                        print(self.passed)
+                else:
+                    self.letters = list(self.current_round_word)
+                    self.passed = ['1'] * len(self.letters)
+                    print('NO RECORDING, SO YOU AUTO-PASS!!')
 
             self.player_pronounce_eval()
         else:

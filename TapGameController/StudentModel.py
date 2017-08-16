@@ -5,12 +5,15 @@ http://katbailey.github.io/post/gaussian-processes-for-dummies/
 ^ Great intro article for rolling your own GP
 """
 from random import randint
+
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats
-import matplotlib.pyplot as plt
 import spacy
-from .TapGameUtils.Curriculum import Curriculum
-from .TapGameUtils.GlobalSettings import USE_SPACY
+
+from GameUtils.GlobalSettings import USE_SPACY
+from GameUtils.Curriculum import Curriculum
+
 
 class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,too-many-instance-attributes
 
@@ -160,20 +163,25 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         Will eventually incorporate conceptnet and other phonetic metrics
         """
 
-        if word_a == word_b:
-            return 1
+        # if word_a == word_b:
+        #     return 1
 
-        score = 0
-        for letter_a in word_a:
-            if letter_a in word_b:
-                score += 1
+        # score = 0
+        # for letter_a in word_a:
+        #     if letter_a in word_b:
+        #         score += 1
 
-        for letter_b in word_b:
-            if letter_b in word_a:
-                score += 1
+        # for letter_b in word_b:
+        #     if letter_b in word_a:
+        #         score += 1
 
-        ratio = (score / (len(word_a) + len(word_b)))
-        return round(ratio, 2)
+        # ratio = (score / (len(word_a) + len(word_b)))
+        # return round(ratio, 2)
+        self.pronunciationHandler = PronunciationResultsHandler()
+        return self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b)
+
+       
+
 
     def plot_curricular_distro(self):
         """

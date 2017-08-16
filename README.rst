@@ -25,15 +25,21 @@ If you are new to Python or new to creating Python projects, see Kenneth Reitz's
 - [pytest](http://pytest.org/latest/)
 - [Hitchhiker's Guide to Python](http://docs.python-guide.org/en/latest/)
 
-##Project Setup
+## Project Setup
 
-###. Install the project's non-python development and runtime requirements::
+### Install the project's non-python development and runtime requirements::
 
-	brew install portaudio
-	sudo apt-get install portaudio19-dev 
+	OS X
+	`brew install portaudio`
+	
+	UBUNTU
+	`sudo apt-get install portaudio19-dev`
+	`pip install rospkg`
+	`pip install catkin_pkg`
+	`pip install pymongo`
+	`pip install twisted`
 
-
-###. Install the project's python development and runtime requirements::
+### Install the project's python development and runtime requirements::
 
         pip install -r requirements-dev.txt
 

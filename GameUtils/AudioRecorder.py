@@ -25,7 +25,7 @@ else:
     TapGameCommand = GlobalSettings.TapGameCommand
 
 
-class TapGameAudioRecorder:
+class AudioRecorder:
     """
     Helper class that handles audio recording, converting to wav, and sending to SpeechAce
     """
@@ -87,10 +87,10 @@ class TapGameAudioRecorder:
         """
 
         #only do the recording if we are actually getting streaming audio data
-        if ROSUtils.is_rostopic_present(TapGameAudioRecorder.ANDROID_MIC_TO_ROS_TOPIC):
+        if ROSUtils.is_rostopic_present(AudioRecorder.ANDROID_MIC_TO_ROS_TOPIC):
             print('Android Audio Topic found, recording!')
             buff = queue.Queue()
-            self.sub_audio = rospy.Subscriber(TapGameAudioRecorder.ANDROID_MIC_TO_ROS_TOPIC,
+            self.sub_audio = rospy.Subscriber(AudioRecorder.ANDROID_MIC_TO_ROS_TOPIC,
                                               AndroidAudio, self.fill_buffer, buff)
             return self.audio_data_generator(buff, buffered_audio_data) #TODO: Return statement necessary?    
         else:
@@ -185,9 +185,9 @@ class TapGameAudioRecorder:
         #only if we are actually getting streaming audio data
         if len(self.buffered_audio_data) > 0:
             print('RECORDING SUCCESFUL, writing to wav')
-            wav_file = wave.open(TapGameAudioRecorder.WAV_OUTPUT_FILENAME, 'wb')
-            wav_file.setnchannels(TapGameAudioRecorder.CHANNELS)
+            wav_file = wave.open(AudioRecorder.WAV_OUTPUT_FILENAME, 'wb')
+            wav_file.setnchannels(AudioRecorder.CHANNELS)
             wav_file.setsampwidth(2)
-            wav_file.setframerate(TapGameAudioRecorder.RATE)
+            wav_file.setframerate(AudioRecorder.RATE)
             wav_file.writeframes(b''.join(self.buffered_audio_data))
             wav_file.close()

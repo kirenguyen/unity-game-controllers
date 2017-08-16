@@ -5,7 +5,7 @@ This is a basic class for the Game Controller
 import json
 import time
 
-from .iSpyAudioRecorder import iSpyAudioRecorder
+from GameUtils.AudioRecorder import AudioRecorder
 from .iSpyTaskController import iSpyTaskController
 import rospy
 import _thread as thread
@@ -261,10 +261,15 @@ class iSpyGameFSM: # pylint: disable=no-member
 			if object_name:	
 				self.origText = object_name		#Sets origText to the object clicked
 
-
 		def onPinch(boolean):
 			if boolean:
 				print ("Fine at this point")
+
+		def speakingStage(stage):
+			if stage == "speakingStart":
+				self.recorder.start_recording()
+			elif stage == "speakingEnd":
+				self.recorder.stop_recording()
 	
 		
 		def msg_evaluator(ispy_action_msg):
@@ -289,16 +294,16 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			#Initializes a new audio recorder object if one hasn't been created
 			if self.recorder == None:
-				self.recorder = iSpyAudioRecorder()
+				self.recorder = AudioRecorder()
 	
 			# print (ispy_action_msg.speakingStage)
-			self.recorder.speakingStage(ispy_action_msg.speakingStage)
+			speakingStage(ispy_action_msg.speakingStage)
 
 
-		##Evaluates the action message
+		# Evaluates the action message
 		msg_evaluator(ispy_action_msg)
 
-		## If given a word to evaluate and done recording send the information to speechace
+		# If given a word to evaluate and done recording send the information to speechace
 		if self.origText and self.recorder.has_recorded % 2 == 0 and self.recorder.has_recorded != 0:
 			audioFile = "audioFile.wav"
 			word_score_list = self.recorder.speechace(audioFile, self.origText)

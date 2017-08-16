@@ -11,12 +11,12 @@ import time
 from transitions import Machine
 
 from GameUtils import GlobalSettings
+from GameUtils.PronunciationUtils import PronunciationHandler
+from GameUtils.AudioRecorder import AudioRecorder
 from .AgentModel import ActionSpace
 from .AgentModel import AgentModel
 from .ROSNodeMgr import ROSNodeMgr
 from .StudentModel import StudentModel
-from .TapGameAudioRecorder import TapGameAudioRecorder
-from GameUtils.PronunciationUtils import PronunciationHandler
 
 if GlobalSettings.USE_ROS:
     from unity_game_msgs.msg import TapGameCommand
@@ -50,7 +50,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
     student_model = StudentModel()
     agent_model = AgentModel()
-    recorder = TapGameAudioRecorder()
+    recorder = AudioRecorder()
     pronunciation_handler = PronunciationHandler()
     ros_node_mgr = ROSNodeMgr()
     current_round_word = ""
@@ -194,7 +194,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
         # Initializes a new audio recorder object if one hasn't been created
         if self.recorder is None:
-            self.recorder = TapGameAudioRecorder()
+            self.recorder = AudioRecorder()
 
         #SEND SHOW_PRONUNCIATION_PAGE MSG
         self.recorder.start_recording()
@@ -208,7 +208,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
            self.recorder.has_recorded % 2 == 0 and\
            self.recorder.has_recorded != 0:
 
-            audio_file = TapGameAudioRecorder.WAV_OUTPUT_FILENAME
+            audio_file = AudioRecorder.WAV_OUTPUT_FILENAME
             word_score_list = self.recorder.speechace(audio_file, self.current_round_word)
             print("WORD SCORE LIST")
             print(word_score_list)

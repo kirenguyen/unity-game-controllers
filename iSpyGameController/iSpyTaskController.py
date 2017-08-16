@@ -30,7 +30,7 @@ class iSpyTaskController():
 		# Ex:
 		# {1: ("What objects are related to weather?", object_type, weather)}
 
-		with open('/home/mikekulinski/catkin_ws/src/tap-game-controller/GameUtils/task_list.csv','r') as csvfile:
+		with open('/home/mikekulinski/catkin_ws/src/unity-game-controllers/GameUtils/task_list.csv','r') as csvfile:
 			spamreader = csv.reader(csvfile, delimiter=',')
 			for row in spamreader:
 				if row[0] != "":
@@ -51,7 +51,7 @@ class iSpyTaskController():
 		# Ex:
 		# {'airplane': ('airplane', 'red', 'huge', 'sky', 'wings')}
 
-		with open('/home/mikekulinski/catkin_ws/src/tap-game-controller/GameUtils/object_list.csv','r') as csvfile:
+		with open('/home/mikekulinski/catkin_ws/src/unity-game-controllers/GameUtils/object_list.csv','r') as csvfile:
 			spamreader = csv.reader(csvfile, delimiter=',')
 			for row in spamreader:
 				if row[0] != "" and row[0] != "key_object":

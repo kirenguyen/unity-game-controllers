@@ -56,6 +56,11 @@ class AudioRecorder:
         # Audio Subscriber node
         self.sub_audio = None
 
+        # True if actually recorded from android audio
+        # False so that it doesn't take the last audio data
+        # Without this it won't send a pass because it didn't hear you message 
+        self.valid_recording = True
+
 
     def audio_data_generator(self, buff, buffered_audio_data):
         """
@@ -88,6 +93,7 @@ class AudioRecorder:
 
         #only do the recording if we are actually getting streaming audio data
         if ROSUtils.is_rostopic_present(AudioRecorder.ANDROID_MIC_TO_ROS_TOPIC):
+            self.valid_recording = True
             print('Android Audio Topic found, recording!')
             buff = queue.Queue()
             self.sub_audio = rospy.Subscriber(AudioRecorder.ANDROID_MIC_TO_ROS_TOPIC,
@@ -95,6 +101,8 @@ class AudioRecorder:
             return self.audio_data_generator(buff, buffered_audio_data) #TODO: Return statement necessary?    
         else:
             print('NOT RECORDING, NO ANDROID AUDIO TOPIC FOUND!')
+            self.valid_recording = False
+            return
 
     def record_usb_audio(self, buffered_audio_data):
         mic_index = None
@@ -123,7 +131,8 @@ class AudioRecorder:
             # Stops the recording
             stream.stop_stream()
             stream.close()
-            audio.terminate()
+        audio.terminate()
+        return
 
     def speechace(self, audio_file, correct_text):
         """
@@ -145,8 +154,6 @@ class AudioRecorder:
         # decode json outputs from speechace api
         try:
             result = json.loads(out_json)['text_score']
-            print('result is:')
-            print(result)
             #result_text = result['text']
             #result_qualityScore = result['quality_score']
             result_word_score_list = result['word_score_list']
@@ -154,7 +161,7 @@ class AudioRecorder:
             return result_word_score_list
         except: #pylint: disable= bare-except
             print("DID NOT GET VALID RESPONSE")
-            return None
+            return
 
 
     def start_recording(self):
@@ -184,7 +191,7 @@ class AudioRecorder:
 
         #only if we are actually getting streaming audio data
         if len(self.buffered_audio_data) > 0:
-            print('RECORDING SUCCESFUL, writing to wav')
+            print('RECORDING SUCCESSFUL, writing to wav')
             wav_file = wave.open(AudioRecorder.WAV_OUTPUT_FILENAME, 'wb')
             wav_file.setnchannels(AudioRecorder.CHANNELS)
             wav_file.setsampwidth(2)

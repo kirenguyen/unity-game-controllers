@@ -270,6 +270,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 				self.recorder.start_recording()
 			elif stage == "speakingEnd":
 				self.recorder.stop_recording()
+
 	
 		
 		def msg_evaluator(ispy_action_msg):
@@ -305,20 +306,28 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		# If given a word to evaluate and done recording send the information to speechace
 		if self.origText and self.recorder.has_recorded % 2 == 0 and self.recorder.has_recorded != 0:
-			audioFile = "audioFile.wav"
-			word_score_list = self.recorder.speechace(audioFile, self.origText)
-
-			if word_score_list:
-				for word in word_score_list:
-					letters, passed = self.results_handler.process_speechace_word_results(word)
-				print ("Message to Unity")
-				print (letters)
-				print (passed)
-
-			else:
+			# If you couldn't find the android audio topic, automatically pass
+			# instead of using the last audio recording
+			if not self.recorder.valid_recording:
 				letters = list(self.origText)
 				passed = ['1'] * len(letters)
 				print ("NO, RECORDING SO YOU AUTOMATICALLY PASS")
+
+			else:
+				audioFile = "audioFile.wav"
+				word_score_list = self.recorder.speechace(audioFile, self.origText)
+
+				if word_score_list:
+					for word in word_score_list:
+						letters, passed = self.results_handler.process_speechace_word_results(word)
+					print ("Message to Unity")
+					print (letters)
+					print (passed)
+
+				else:
+					letters = list(self.origText)
+					passed = ['1'] * len(letters)
+					print ("NO, RECORDING SO YOU AUTOMATICALLY PASS")
 				
 			results_params = {}
 			results_params["letters"] = letters

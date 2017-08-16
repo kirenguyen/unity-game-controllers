@@ -208,23 +208,30 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
            self.recorder.has_recorded % 2 == 0 and\
            self.recorder.has_recorded != 0:
 
-            audio_file = AudioRecorder.WAV_OUTPUT_FILENAME
-            word_score_list = self.recorder.speechace(audio_file, self.current_round_word)
-            print("WORD SCORE LIST")
-            print(word_score_list)
+           # If you couldn't find the android audio topic, automatically pass
+            # instead of using the last audio recording
+            if not self.recorder.valid_recording:
+                self.letters = list(self.origText)
+                self.passed = ['1'] * len(letters)
+                print ("NO, RECORDING SO YOU AUTOMATICALLY PASS")
+            else: 
+                audio_file = AudioRecorder.WAV_OUTPUT_FILENAME
+                word_score_list = self.recorder.speechace(audio_file, self.current_round_word)
+                print("WORD SCORE LIST")
+                print(word_score_list)
 
-            # if we didn't record, there will be no word score list
-            if word_score_list:
-                for word_results in word_score_list:
-                    print("Message for ROS")
-                    self.letters, self.passed = \
-                        self.pronunciation_handler.process_speechace_word_results(word_results)
-                    print(self.letters)
-                    print(self.passed)
-            else:
-                self.letters = list(self.current_round_word)
-                self.passed = ['1'] * len(self.letters)
-                print('NO RECORDING, SO YOU AUTO-PASS!!')
+                # if we didn't record, there will be no word score list
+                if word_score_list:
+                    for word_results in word_score_list:
+                        print("Message for ROS")
+                        self.letters, self.passed = \
+                            self.pronunciation_handler.process_speechace_word_results(word_results)
+                        print(self.letters)
+                        print(self.passed)
+                else:
+                    self.letters = list(self.current_round_word)
+                    self.passed = ['1'] * len(self.letters)
+                    print('NO RECORDING, SO YOU AUTO-PASS!!')
 
             self.player_pronounce_eval()
         else:

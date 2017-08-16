@@ -6,7 +6,9 @@ which should be idempotent and assume no state or context
 # pylint: disable=import-error
 
 import subprocess
+
 from . import GlobalSettings
+
 
 def is_rostopic_present(topic_name):
     """

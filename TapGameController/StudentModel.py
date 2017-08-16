@@ -5,13 +5,17 @@ http://katbailey.github.io/post/gaussian-processes-for-dummies/
 ^ Great intro article for rolling your own GP
 """
 from random import randint
+
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats
-import matplotlib.pyplot as plt
-from .TapGameUtils.Curriculum import Curriculum
-from .TapGameUtils.PronunciationUtils import PronunciationHandler
+import spacy
 
-class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
+from GameUtils.GlobalSettings import USE_SPACY
+from GameUtils.Curriculum import Curriculum
+
+
+class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,too-many-instance-attributes
 
     """
     This class implements a Gaussian Process, intended to model student vocabulary knowledge
@@ -22,6 +26,10 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
     """
 
     def __init__(self):
+
+        if USE_SPACY:
+            self.nlp = spacy.load('en') #sets spacy up with the english language model
+
         #fancy python one-liner to read all string attributes off of a class
         self.curriculum = [p for p in dir(Curriculum)
                            if isinstance(getattr(Curriculum, p), str)
@@ -36,9 +44,14 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
         self.Y_train = []
 
         self.means = [.5] * len(self.curriculum)  # These are the most recent posteriors
-        self.variances = [1] * len(self.curriculum) # Together they form the Student Model!
-        self.fig = None # Figure for drawing
-        self.plts = None #Plots
+        self.variances = [.3] * len(self.curriculum) # Together they form the Student Model!
+        #self.fig = None # Figure for drawing
+        #self.plts = None #Plots
+
+        self.n_rows = 2 # needs to be > 1
+
+        self.fig, self.plts = plt.subplots(self.n_rows, int(len(self.curriculum) / self.n_rows),
+                                           figsize=(15, 10))
 
 
     def init_model(self):
@@ -175,16 +188,6 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
         Plots the most recent distribution
         """
 
-        n_rows = 2 # needs to be > 1
-
-        # f, plts = plt.subplots(n_rows, int(test_space_size / n_rows),
-        #                        sharex='col', sharey='row', figsize=(15,10))
-        fig, plts = plt.subplots(n_rows, int(len(self.curriculum) / n_rows), figsize=(15, 10))
-        self.fig = fig
-        self.plts = plts
-        # print(plts)
-
-
         left = 0.125  # the left side of the subplots of the figure
         right = 0.9  # the right side of the subplots of the figure
         bottom = 0.4  # the bottom of the subplots of the figure
@@ -194,25 +197,29 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate
 
         for i in range(len(self.curriculum)):
             row_index = int(i / (len(self.curriculum) * .5))
-            col_index = int(i % (len(self.curriculum) / n_rows))
-            self.plts[row_index][col_index].set_xlim([-3, 3])
-            self.plts[row_index][col_index].set_ylim([-1.5, 1.5])
-
-            #data = f_post[:][i]
-            #print(self.curriculum[i])
-            #print(np.mean(data))
-            #print(np.var(data))
-            #print(self.means[i])
-            #print(self.variances[i])
-            # plts[row_index][col_index].scatter(data, np.zeros(n_samples))
+            col_index = int(i % (len(self.curriculum) / self.n_rows))
+            self.plts[row_index][col_index].set_xlim([-2, 2])
+            self.plts[row_index][col_index].set_ylim([0, 3])
 
             x = np.linspace(-3, 3, 50)
+            self.clear_old_plot_lines()
             self.plts[row_index][col_index].plot(x, scipy.stats.norm.pdf(x, self.means[i],
-                                                                         self.variances[i]))
+                                                                         self.variances[i]),
+                                                 color='b')
             self.plts[row_index][col_index].set_title(
                 self.curriculum[i] + ": u= " + str(round(self.means[i], 2)) + ", var= " + str(
                     round(self.variances[i], 2)))
 
         plt.subplots_adjust(left, bottom, right, top, wspace, hspace)
-        plt.show()
+        plt.show(block=False)
+        self.fig.canvas.flush_events()
         plt.draw()
+
+    def clear_old_plot_lines(self):
+        """
+        clears the previous lines that were drawn on the graph
+        """
+        for plotRow in self.plts:
+            for plot in plotRow:
+                if len(plot.lines) > 1:
+                    del plot.lines[0]

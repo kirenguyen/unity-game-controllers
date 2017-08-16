@@ -3,8 +3,10 @@ This is a module that exports certain global runtime settings
 """
 # -*- coding: utf-8 -*-
 
-USE_ROS = False
-USE_TEGA = True # if False, we are using Jibo
+USE_ROS = True
+USE_TEGA = False # if False, we are using Jibo
+USE_SPACY = False # if False, do not load the full SpaCy language model
+USE_USB_MIC = False #if True, use the external USB microphone
 
 class TapGameLog(): # pylint: disable=too-few-public-methods
     """
@@ -21,6 +23,33 @@ class TapGameLog(): # pylint: disable=too-few-public-methods
     SHOW_GAME_END_DONE = "SHOW_GAME_END_DONE"
     END_ROUND_DONE = "END_ROUND_DONE"
     SHOW_RESULTS_DONE = "SHOW_RESULTS_DONE"
+    PLAYER_BEAT_ROBOT = "PLAYER_BEAT_ROBOT"
+
+    def __init__(self):
+        pass
+
+class iSpyGameStates(): # pylint: disable=too-few-public-methods
+    """
+    this is a mock class that allows tests to pass in a non-ROS environment
+    """
+
+    GAME_START = "gameSTART"
+    EXPLORATION_MODE = "explorationMODE"
+    MISSION_MODE = "missionMODE"
+    PRONUNCIATION_PANEL = "pronunciationPANEL"
+    PRONUNCIATION_RESULT = "pronunciationRESULT"
+    WORD_DISPLAY = "wordDISPLAY"
+
+    class Triggers():
+        START_BUTTON_PRESSED = "startButtonPressed"
+        TOPLEFT_BUTTON_PRESSED = "topLeftButtonPressed"
+        OBJECT_CLICKED = "objectClicked"
+        SAY_BUTTON_PRESSED = "sayButtonPressed"
+        CLOSE_BUTTON_PRESSED = "closeButtonPressed"
+        PRACTICE_FINISHED = "practiceFinished"
+        PRACTICE_FAILED = "practiceFailed"
+        N_SECONDS_LATER = "secondsLater"
+        triggers = ["startButtonPressed","topLeftButtonPressed","objectClicked","sayButtonPressed", "closeButtonPressed", "practiceFinished", "practiceFailed", "secondsLater"]
 
     def __init__(self):
         pass

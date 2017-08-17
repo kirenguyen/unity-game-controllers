@@ -49,7 +49,7 @@ class Curriculum: # pylint: disable=too-few-public-methods
     STOVE = 'STOVE'
     TABLE = 'TABLE'
     TOILET = 'TOILET'
-    
+
 
 
 

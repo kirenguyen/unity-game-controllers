@@ -8,6 +8,8 @@ grapheme utilities
 import pronouncing
 import csv
 import os
+from weighted_levenshtein.clev import levenshtein as lev
+import numpy as np
 
 SCORE_THRESHOLD = 70 # Score threshold we use to determine whether a word was passed or not
 					 # by SpeechAce
@@ -201,3 +203,41 @@ https://archive.ics.uci.edu/ml/machine-learning-databases/undocumented/connectio
 				break
 		print(output)
 		return output
+
+
+	def measure_weighted_levenshtein_distance(self, word1, word2):
+		# import weighted levenshtein library. if clev is missing, change the __init__.py in the weighted_levenshtein lib to add clev.so path to sys.
+		# /anaconda3/lib/python3.6/site-packages/weighted_levenshtein
+		# delete "from clev import *" in __init__.py
+
+		substitute_costs = np.ones((128, 128), dtype=np.float64)  # make a 2D array of 1's. ASCII table
+
+		# read weighted phonemic similarity matrix,
+		# downloaded from https://github.com/benhixon/benhixon.github.com/blob/master/wpsm.txt
+		wpsm_filepath = 'wpsm.csv'
+		# load the matrix csv file into a dataframe
+		df = pd.read_csv(wpsm_filepath, sep=',', header=0, index_col=0)
+
+		arpabet_phonemes = df.keys()
+
+		# check whether arpabet map is empty. if it is, then load the map
+		if not self.arpabet_map:
+			print("load mapping")
+			self.load_arpabet_mapping()
+			print(self.arpabet_map)
+
+		# update the original substituion matrix
+		for key1 in arpabet_phonemes:
+			for key2 in arpabet_phonemes:
+				nkey1 = self.arpabet_map[key1]
+				nkey2 = self.arpabet_map[key2]
+				substitute_costs[ord(nkey1), ord(nkey2)] = df[key1][key2]
+
+		result = lev(word1.encode(), word2.encode(), substitute_costs=substitute_costs)
+		print(result)
+
+		# normalize the levenshtein score by taking max(str1,str2)
+		denominator = max(len(word1), len(word2))
+		normalized_score = result / float(denominator)
+		print(normalized_score)
+		return normalized_score

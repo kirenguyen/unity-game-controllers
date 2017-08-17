@@ -212,8 +212,8 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
            # If you couldn't find the android audio topic, automatically pass
             # instead of using the last audio recording
             if not self.recorder.valid_recording:
-                self.letters = list(self.origText)
-                self.passed = ['1'] * len(letters)
+                self.letters = list(self.current_round_word)
+                self.passed = ['1'] * len(self.letters)
                 print ("NO, RECORDING SO YOU AUTOMATICALLY PASS")
             else: 
                 audio_file = AudioRecorder.WAV_OUTPUT_FILENAME

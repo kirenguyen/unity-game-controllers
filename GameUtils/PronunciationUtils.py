@@ -8,6 +8,7 @@ grapheme utilities
 import pronouncing
 import csv
 import os
+import pandas as pd
 from weighted_levenshtein.clev import levenshtein as lev
 import numpy as np
 
@@ -214,9 +215,10 @@ https://archive.ics.uci.edu/ml/machine-learning-databases/undocumented/connectio
 
 		# read weighted phonemic similarity matrix,
 		# downloaded from https://github.com/benhixon/benhixon.github.com/blob/master/wpsm.txt
-		wpsm_filepath = 'wpsm.csv'
+		wpsm_filepath = '/GameUtils/wpsm.csv'
+		print(os.getcwd())
 		# load the matrix csv file into a dataframe
-		df = pd.read_csv(wpsm_filepath, sep=',', header=0, index_col=0)
+		df = pd.read_csv(os.getcwd() + wpsm_filepath, sep=',', header=0, index_col=0)
 
 		arpabet_phonemes = df.keys()
 

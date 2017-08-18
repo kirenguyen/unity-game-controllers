@@ -43,7 +43,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     """
 
     round_index = 1
-    max_rounds = 10
+    max_rounds = 8
 
     player_score = 0
     robot_score = 0

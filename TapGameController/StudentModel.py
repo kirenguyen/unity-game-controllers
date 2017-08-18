@@ -14,7 +14,7 @@ import spacy
 
 from GameUtils.GlobalSettings import USE_SPACY
 from GameUtils.Curriculum import Curriculum
-from GameUtils.PronunciationUtils import PronunciationResultsHandler
+from GameUtils.PronunciationUtils import PronunciationHandler
 
 
 class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,too-many-instance-attributes
@@ -165,22 +165,22 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         Will eventually incorporate conceptnet and other phonetic metrics
         """
 
-        # if word_a == word_b:
-        #     return 1
+        if word_a == word_b:
+            return 1
 
-        # score = 0
-        # for letter_a in word_a:
-        #     if letter_a in word_b:
-        #         score += 1
+        score = 0
+        for letter_a in word_a:
+            if letter_a in word_b:
+                score += 1
 
-        # for letter_b in word_b:
-        #     if letter_b in word_a:
-        #         score += 1
+        for letter_b in word_b:
+            if letter_b in word_a:
+                score += 1
 
-        # ratio = (score / (len(word_a) + len(word_b)))
-        # return round(ratio, 2)
-        self.pronunciationHandler = PronunciationResultsHandler()
-        return self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b)
+        ratio = (score / (len(word_a) + len(word_b)))
+        return round(ratio, 2)
+        #self.pronunciationHandler = PronunciationHandler()
+        #return self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b)
 
        
 

@@ -15,6 +15,7 @@ import numpy as np
 SCORE_THRESHOLD = 70 # Score threshold we use to determine whether a word was passed or not
 					 # by SpeechAce
 
+PHONEME_SUB_COST_PATH = '/GameUtils/phoneme_sub_costs'
 
 class PronunciationHandler:
 	"""
@@ -28,6 +29,10 @@ class PronunciationHandler:
 
 		# load nettalk.data dictionary, which is used to alignment word graphemes and phonemes
 		self.load_nettalk_dataset()
+
+		# read the phoneme substitution costs from disk
+		self.substitute_costs = np.load(os.getcwd() + PHONEME_SUB_COST_PATH + '.npy')
+
 
 		self.current_word = None
 		self.pho_results = None
@@ -192,9 +197,9 @@ https://archive.ics.uci.edu/ml/machine-learning-databases/undocumented/connectio
 		corresponds uniquely to a phone
 		"""
 
-		phonemes_raw = pronouncing.phones_for_word(word)[0].split(' ')
+		phonemes_raw = pronouncing.phones_for_word(word.lower())[0].split(' ')
 		phonemes = [''.join(filter(lambda c: not c.isdigit(), pho)) for pho in phonemes_raw]
-		print(phonemes_raw)
+		#print(phonemes_raw)
 		output = ''
 		for phoneme in phonemes:
 			if phoneme in self.arpabet_map:
@@ -202,25 +207,21 @@ https://archive.ics.uci.edu/ml/machine-learning-databases/undocumented/connectio
 			else:
 				print("phone ( " + phoneme + " ) does not exist in arpabet map")
 				break
-		print(output)
+		
+		#print(word + " become " + output)
 		return output
 
-
-	def measure_weighted_levenshtein_distance(self, word1, word2):
-		# import weighted levenshtein library. if clev is missing, change the __init__.py in the weighted_levenshtein lib to add clev.so path to sys.
-		# /anaconda3/lib/python3.6/site-packages/weighted_levenshtein
-		# delete "from clev import *" in __init__.py
-
-		substitute_costs = np.ones((128, 128), dtype=np.float64)  # make a 2D array of 1's. ASCII table
+	def build_substitution_score_matrix(self):		
 
 		# read weighted phonemic similarity matrix,
 		# downloaded from https://github.com/benhixon/benhixon.github.com/blob/master/wpsm.txt
 		wpsm_filepath = '/GameUtils/wpsm.csv'
-		print(os.getcwd())
 		# load the matrix csv file into a dataframe
 		df = pd.read_csv(os.getcwd() + wpsm_filepath, sep=',', header=0, index_col=0)
 
 		arpabet_phonemes = df.keys()
+		print(arpabet_phonemes)
+		print(len(arpabet_phonemes))
 
 		# check whether arpabet map is empty. if it is, then load the map
 		if not self.arpabet_map:
@@ -228,6 +229,7 @@ https://archive.ics.uci.edu/ml/machine-learning-databases/undocumented/connectio
 			self.load_arpabet_mapping()
 			print(self.arpabet_map)
 
+		substitute_costs = np.ones((128, 128), dtype=np.float64)  # make a 2D array of 1's. ASCII table
 		# update the original substituion matrix
 		for key1 in arpabet_phonemes:
 			for key2 in arpabet_phonemes:
@@ -235,11 +237,20 @@ https://archive.ics.uci.edu/ml/machine-learning-databases/undocumented/connectio
 				nkey2 = self.arpabet_map[key2]
 				substitute_costs[ord(nkey1), ord(nkey2)] = df[key1][key2]
 
-		result = lev(word1.encode(), word2.encode(), substitute_costs=substitute_costs)
-		print(result)
+		np.save(os.getcwd() + PHONEME_SUB_COST_PATH, substitute_costs)
+		np.savetxt(os.getcwd() + PHONEME_SUB_COST_PATH + '.txt', substitute_costs)
+
+
+	def measure_weighted_levenshtein_distance(self, word1, word2):
+		# import weighted levenshtein library. if clev is missing, change the __init__.py in the weighted_levenshtein lib to add clev.so path to sys.
+		# /anaconda3/lib/python3.6/site-packages/weighted_levenshtein
+		# delete "from clev import *" in __init__.py
+
+		result = lev(self.get_phonetic_similarity_rep(word1).encode(),
+		 			 self.get_phonetic_similarity_rep(word2).encode(),
+		 			 substitute_costs=self.substitute_costs)	
 
 		# normalize the levenshtein score by taking max(str1,str2)
 		denominator = max(len(word1), len(word2))
 		normalized_score = result / float(denominator)
-		print(normalized_score)
 		return normalized_score

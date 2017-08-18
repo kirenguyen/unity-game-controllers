@@ -154,9 +154,9 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         self.current_round_action = self.agent_model.get_next_action()
 
         if self.current_round_action == ActionSpace.RING_ANSWER_CORRECT:
-            time.sleep(WAIT_TO_BUZZ_TIME_MS / 1000.0)
-            self.ros_node_mgr.send_robot_cmd(self.current_round_action)
-            self.ros_node_mgr.send_game_cmd(TapGameCommand.ROBOT_RING_IN)
+           time.sleep(WAIT_TO_BUZZ_TIME_MS / 1000.0)
+           self.ros_node_mgr.send_robot_cmd(self.current_round_action)
+           self.ros_node_mgr.send_game_cmd(TapGameCommand.ROBOT_RING_IN)
 
     def on_robot_ring_in(self):
         """

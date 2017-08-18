@@ -37,6 +37,8 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
                            if isinstance(getattr(Curriculum, p), str)
                            and not p.startswith('__')]
 
+        self.pronunciationHandler = PronunciationHandler()                           
+
         # these parameters govern the assumed Gaussian noise added to the child's recorded
         # pronunciation assessment
         self.noise_mu = 0
@@ -50,7 +52,7 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         #self.fig = None # Figure for drawing
         #self.plts = None #Plots
 
-        self.n_rows = 6 # needs to be > 1
+        self.n_rows = 2 # needs to be > 1
 
         self.fig, self.plts = plt.subplots(self.n_rows, math.ceil(len(self.curriculum) / self.n_rows),
                                            figsize=(15, 10))
@@ -178,9 +180,12 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
                 score += 1
 
         ratio = (score / (len(word_a) + len(word_b)))
-        return round(ratio, 2)
-        #self.pronunciationHandler = PronunciationHandler()
-        #return self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b)
+        print("letter counting similarity between " + word_a + " and " + word_b)
+        print(round(ratio, 2))
+        
+        print("inverse weighted lev distance between " + word_a + " and " + word_b)
+        print(1 - self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b))
+        return(1 - self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b))
 
        
 

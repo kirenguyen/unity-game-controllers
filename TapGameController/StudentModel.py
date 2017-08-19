@@ -185,7 +185,8 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         
         print("inverse weighted lev distance between " + word_a + " and " + word_b)
         print(1 - self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b))
-        return(1 - self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b))
+        #return(1 - self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b))
+        return (round(ratio, 2))
 
        
 

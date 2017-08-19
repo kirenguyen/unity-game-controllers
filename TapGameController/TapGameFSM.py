@@ -43,7 +43,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     """
 
     round_index = 1
-    max_rounds = 8
+    max_score = 3 #game ends when someone gets to this score
 
     player_score = 0
     robot_score = 0
@@ -113,7 +113,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
         {'trigger': 'replay_game',
          'source': 'GAME_FINISHED',
-         'dest': 'ROUND_START',
+         'dest': 'GAME_START',
          'after': 'on_game_replay'},
     ]
 
@@ -321,8 +321,14 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         """
 
         # reset all state variables (rounds, score)
-        self.ros_node_mgr.send_game_cmd() #START GAME OVER
-        self.ros_node_mgr.send_game_cmd()
+        self.player_score = 0
+        self.robot_score = 0
+        self.init_first_round()
+
+        #reset student model here if needed
+
+        #self.ros_node_mgr.send_game_cmd(TapGameCommand.RESTART_GAME) #START GAME OVER
+        #self.ros_node_mgr.send_game_cmd()
 
 
     def on_log_received(self, data):
@@ -373,7 +379,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
                 print('GAME OVER! WAIT FOR RESET SINAL')
 
             if data.message == TapGameLog.RESTART_GAME:
-                print('GAME OVER! WAIT FOR RESET SINAL')
+                self.replay_game()
         else:
             print('NOT A REAL MESSAGE?!?!?!?')
 
@@ -382,7 +388,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         """
         used by FSM to determine whether to start next round or end game
         """
-        return self.round_index == self.max_rounds
+        return (self.robot_score >= self.max_score or self.player_score >= self.max_score)
 
     def is_not_last_round(self):
         """

@@ -24,6 +24,7 @@ class TapGameLog(): # pylint: disable=too-few-public-methods
     END_ROUND_DONE = "END_ROUND_DONE"
     SHOW_RESULTS_DONE = "SHOW_RESULTS_DONE"
     PLAYER_BEAT_ROBOT = "PLAYER_BEAT_ROBOT"
+    RESTART_GAME = "RESTART_GAME"
 
     def __init__(self):
         pass

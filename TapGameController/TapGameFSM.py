@@ -33,7 +33,7 @@ FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameL
                     TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
                     TapGameLog.PLAYER_RING_IN, TapGameLog.END_ROUND_DONE,
                     TapGameLog.RESET_NEXT_ROUND_DONE, TapGameLog.SHOW_GAME_END_DONE,
-                    TapGameLog.PLAYER_BEAT_ROBOT]
+                    TapGameLog.PLAYER_BEAT_ROBOT, TapGameLog.RESTART_GAME]
 
 
 
@@ -319,6 +319,8 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         Called when the player wants to replay the game after finishing.
         Sends msg to the Unity game to reset the game and start over
         """
+
+        # reset all state variables (rounds, score)
         self.ros_node_mgr.send_game_cmd() #START GAME OVER
         self.ros_node_mgr.send_game_cmd()
 
@@ -368,7 +370,10 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
                 self.ros_node_mgr.send_game_cmd(TapGameCommand.INIT_ROUND, json.dumps(self.current_round_word))
 
             if data.message == TapGameLog.SHOW_GAME_END_DONE:
-                print('GAME OVER!')
+                print('GAME OVER! WAIT FOR RESET SINAL')
+
+            if data.message == TapGameLog.RESTART_GAME:
+                print('GAME OVER! WAIT FOR RESET SINAL')
         else:
             print('NOT A REAL MESSAGE?!?!?!?')
 

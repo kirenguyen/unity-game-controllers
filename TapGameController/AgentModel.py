@@ -2,7 +2,9 @@
 This Module handles all aspects of the robot/agent's decision-making,
 modeling, and gameplay.
 """
-from random import randint
+import random
+from GameUtils.GlobalSettings import DO_EPSILON_DECREASING_POLICY
+
 
 
 class ActionSpace(): # pylint: disable=too-few-public-methods
@@ -10,8 +12,8 @@ class ActionSpace(): # pylint: disable=too-few-public-methods
     This class defines constants signifying the potential actions an agent can take
     """
     RING_ANSWER_CORRECT = "RING_ANSWER_CORRECT"
-    RING_ANSWER_WRONG = "RING_ANSWER_WRONG"
-    #DONT_RING = "DONT_RING"
+    #RING_ANSWER_WRONG = "RING_ANSWER_WRONG"
+    DONT_RING = "DONT_RING"
 
     #REACT_FRUSTRATED = "REACT_FRUSTRATED"
 
@@ -33,17 +35,31 @@ class AgentModel():
                              and not p.startswith('__')]
 
         self.action_history = []
+        self.ring_rate = .2
+        self.ring_increase_factor = .05 # amount each round that the starting_ring_rate increases
 
     def get_next_action(self):
         """
         Returns one of the actions from the ActionSpace
         """
-        # randint is inclusive
-        next_action = (self.action_space[randint(0, len(self.action_space) - 1)])
-        #next_action = "RING_ANSWER_WRONG"
-        self.action_history.append(next_action)
-        print('NEXT_ACTION is ' + next_action)
-        return next_action
+
+        if DO_EPSILON_DECREASING_POLICY:
+
+            if(random.random() > self.ring_rate):
+                next_action = ActionSpace.RING_ANSWER_CORRECT
+            else:
+                next_action = ActionSpace.DONT_RING
+
+            self.ring_rate += self.ring_increase_factor
+            print('NEXT_ACTION is ' + next_action)
+            return next_action
+
+        else:
+            # randint is inclusive
+            next_action = (self.action_space[random.randint(0, len(self.action_space) - 1)])
+            self.action_history.append(next_action)
+            print('NEXT_ACTION is ' + next_action)
+            return next_action
 
     def get_action_history(self):
         """

@@ -13,8 +13,11 @@ import scipy.stats
 import spacy
 
 from GameUtils.GlobalSettings import USE_SPACY
+from GameUtils.GlobalSettings import DO_ACTIVE_LEARNING
 from GameUtils.Curriculum import Curriculum
 from GameUtils.PronunciationUtils import PronunciationHandler
+
+from .AgentModel import ActionSpace
 
 
 class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,too-many-instance-attributes
@@ -126,12 +129,43 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         return mu, variance
 
 
-    def get_next_best_word(self):
+    def get_next_best_word(self, action):
         """
         gives an external caller the next best word to achieve some objective
-        Active Learning paradigm should be implemented here!
+        Active Learning paradigm is implemented here!
         """
-        return self.curriculum[randint(0, len(self.curriculum) - 1)] #randint is inclusive
+
+        if DO_ACTIVE_LEARNING:
+            if action == ActionSpace.RING_ANSWER_CORRECT:
+
+                # choose lowest mean word
+                lowest_mean = self.means[0]
+                lowest_mean_index = 0
+
+                for i in range(0, len(self.means)):
+                    if self.means[i] < lowest_mean:
+                        lowest_mean = self.means[i]
+                        lowest_mean_index = i
+                chosen_word = self.curriculum[lowest_mean_index]
+
+
+            elif action == ActionSpace.DONT_RING:
+
+                # choose highest var word
+                highest_var = self.variances[0]
+                highest_var_index = 0
+
+                for i in range(0, len(self.variances)):
+                    if self.variances[i] > highest_var:
+                        highest_var = self.variances[i]
+                        highest_var_index = i
+                chosen_word = self.curriculum[highest_var_index]
+
+            else:
+                chosen_word = self.curriculum[randint(0, len(self.curriculum) - 1)] #randint is inclusive
+
+
+        return chosen_word
 
     def rbf_kernel(self, input_a, input_b, length_scale):
         """

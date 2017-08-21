@@ -8,6 +8,12 @@ USE_TEGA = False # if False, we are using Jibo
 USE_SPACY = False # if False, do not load the full SpaCy language model
 USE_USB_MIC = False #if True, use the external USB microphone
 
+DO_EPSILON_DECREASING_POLICY = True # if True, agent use a decreasing-ratio of Ringing / Waiting
+                                    # actions. Otherwise, chooses randomly
+
+DO_ACTIVE_LEARNING = True #if True, use the active learning protocol in the StudentModel
+                          # otherwise choose words randomly
+
 class TapGameLog(): # pylint: disable=too-few-public-methods
     """
     this is a mock class that allows tests to pass in a non-ROS environment

@@ -131,7 +131,9 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         Should send msg to Unity game telling it the word to load for the first round
         """
         print("got to init_first round!")
-        self.current_round_word = self.student_model.get_next_best_word()
+        # get the next robot action
+        self.current_round_action = self.agent_model.get_next_action()
+        self.current_round_word = self.student_model.get_next_best_word(self.current_round_action)
         self.ros_node_mgr.send_game_cmd(TapGameCommand.INIT_ROUND,
                                         json.dumps(self.current_round_word))
 
@@ -149,9 +151,6 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         """
         print('got to start round cb')
         self.ros_node_mgr.send_game_cmd(TapGameCommand.START_ROUND)
-
-        # get the next robot action
-        self.current_round_action = self.agent_model.get_next_action()
 
         if self.current_round_action == ActionSpace.RING_ANSWER_CORRECT:
            time.sleep(WAIT_TO_BUZZ_TIME_MS / 1000.0)
@@ -369,10 +368,13 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
                 self.player_beat_robot()
 
             if data.message == TapGameLog.RESET_NEXT_ROUND_DONE:
-                print('Game Done Resetting Round!')
+                print('Game Done Resetting Round! Now initing new round')
                 self.ros_node_mgr.send_robot_cmd("LOOK_AT_TABLET")
                 self.round_input_received = False
-                self.current_round_word = self.student_model.get_next_best_word()
+
+                self.current_round_action = self.agent_model.get_next_action()
+                self.current_round_word = self.student_model.get_next_best_word(self.current_round_action)
+
                 self.ros_node_mgr.send_game_cmd(TapGameCommand.INIT_ROUND, json.dumps(self.current_round_word))
 
             if data.message == TapGameLog.SHOW_GAME_END_DONE:

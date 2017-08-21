@@ -33,7 +33,7 @@ FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameL
                     TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
                     TapGameLog.PLAYER_RING_IN, TapGameLog.END_ROUND_DONE,
                     TapGameLog.RESET_NEXT_ROUND_DONE, TapGameLog.SHOW_GAME_END_DONE,
-                    TapGameLog.PLAYER_BEAT_ROBOT]
+                    TapGameLog.PLAYER_BEAT_ROBOT, TapGameLog.RESTART_GAME]
 
 
 
@@ -43,7 +43,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     """
 
     round_index = 1
-    max_rounds = 10
+    max_score = 3 #game ends when someone gets to this score
 
     player_score = 0
     robot_score = 0
@@ -113,7 +113,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
         {'trigger': 'replay_game',
          'source': 'GAME_FINISHED',
-         'dest': 'ROUND_START',
+         'dest': 'GAME_START',
          'after': 'on_game_replay'},
     ]
 
@@ -154,9 +154,9 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         self.current_round_action = self.agent_model.get_next_action()
 
         if self.current_round_action == ActionSpace.RING_ANSWER_CORRECT:
-            time.sleep(WAIT_TO_BUZZ_TIME_MS / 1000.0)
-            self.ros_node_mgr.send_robot_cmd(self.current_round_action)
-            self.ros_node_mgr.send_game_cmd(TapGameCommand.ROBOT_RING_IN)
+           time.sleep(WAIT_TO_BUZZ_TIME_MS / 1000.0)
+           self.ros_node_mgr.send_robot_cmd(self.current_round_action)
+           self.ros_node_mgr.send_game_cmd(TapGameCommand.ROBOT_RING_IN)
 
     def on_robot_ring_in(self):
         """
@@ -212,8 +212,8 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
            # If you couldn't find the android audio topic, automatically pass
             # instead of using the last audio recording
             if not self.recorder.valid_recording:
-                self.letters = list(self.origText)
-                self.passed = ['1'] * len(letters)
+                self.letters = list(self.current_round_word)
+                self.passed = ['1'] * len(self.letters)
                 print ("NO, RECORDING SO YOU AUTOMATICALLY PASS")
             else: 
                 audio_file = AudioRecorder.WAV_OUTPUT_FILENAME
@@ -319,8 +319,16 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         Called when the player wants to replay the game after finishing.
         Sends msg to the Unity game to reset the game and start over
         """
-        self.ros_node_mgr.send_game_cmd() #START GAME OVER
-        self.ros_node_mgr.send_game_cmd()
+
+        # reset all state variables (rounds, score)
+        self.player_score = 0
+        self.robot_score = 0
+        self.init_first_round()
+
+        #reset student model here if needed
+
+        #self.ros_node_mgr.send_game_cmd(TapGameCommand.RESTART_GAME) #START GAME OVER
+        #self.ros_node_mgr.send_game_cmd()
 
 
     def on_log_received(self, data):
@@ -368,7 +376,10 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
                 self.ros_node_mgr.send_game_cmd(TapGameCommand.INIT_ROUND, json.dumps(self.current_round_word))
 
             if data.message == TapGameLog.SHOW_GAME_END_DONE:
-                print('GAME OVER!')
+                print('GAME OVER! WAIT FOR RESET SINAL')
+
+            if data.message == TapGameLog.RESTART_GAME:
+                self.replay_game()
         else:
             print('NOT A REAL MESSAGE?!?!?!?')
 
@@ -377,7 +388,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         """
         used by FSM to determine whether to start next round or end game
         """
-        return self.round_index == self.max_rounds
+        return (self.robot_score >= self.max_score or self.player_score >= self.max_score)
 
     def is_not_last_round(self):
         """

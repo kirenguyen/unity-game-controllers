@@ -6,6 +6,7 @@ http://katbailey.github.io/post/gaussian-processes-for-dummies/
 """
 from random import randint
 
+import math
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats
@@ -13,6 +14,7 @@ import spacy
 
 from GameUtils.GlobalSettings import USE_SPACY
 from GameUtils.Curriculum import Curriculum
+from GameUtils.PronunciationUtils import PronunciationHandler
 
 
 class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,too-many-instance-attributes
@@ -35,6 +37,8 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
                            if isinstance(getattr(Curriculum, p), str)
                            and not p.startswith('__')]
 
+        self.pronunciationHandler = PronunciationHandler()                           
+
         # these parameters govern the assumed Gaussian noise added to the child's recorded
         # pronunciation assessment
         self.noise_mu = 0
@@ -50,7 +54,7 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
 
         self.n_rows = 2 # needs to be > 1
 
-        self.fig, self.plts = plt.subplots(self.n_rows, int(len(self.curriculum) / self.n_rows),
+        self.fig, self.plts = plt.subplots(self.n_rows, math.ceil(len(self.curriculum) / self.n_rows),
                                            figsize=(15, 10))
 
 
@@ -163,22 +167,26 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         Will eventually incorporate conceptnet and other phonetic metrics
         """
 
-        # if word_a == word_b:
-        #     return 1
+        if word_a == word_b:
+            return 1
 
-        # score = 0
-        # for letter_a in word_a:
-        #     if letter_a in word_b:
-        #         score += 1
+        score = 0
+        for letter_a in word_a:
+            if letter_a in word_b:
+                score += 1
 
-        # for letter_b in word_b:
-        #     if letter_b in word_a:
-        #         score += 1
+        for letter_b in word_b:
+            if letter_b in word_a:
+                score += 1
 
-        # ratio = (score / (len(word_a) + len(word_b)))
-        # return round(ratio, 2)
-        self.pronunciationHandler = PronunciationResultsHandler()
-        return self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b)
+        ratio = (score / (len(word_a) + len(word_b)))
+        print("letter counting similarity between " + word_a + " and " + word_b)
+        print(round(ratio, 2))
+        
+        print("inverse weighted lev distance between " + word_a + " and " + word_b)
+        print(1 - self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b))
+        #return(1 - self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b))
+        return (round(ratio, 2))
 
        
 
@@ -196,7 +204,7 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         hspace = 0.2  # the amount of height reserved for white space between subplots
 
         for i in range(len(self.curriculum)):
-            row_index = int(i / (len(self.curriculum) * .5))
+            row_index = int(i / (len(self.curriculum) / self.n_rows))
             col_index = int(i % (len(self.curriculum) / self.n_rows))
             self.plts[row_index][col_index].set_xlim([-2, 2])
             self.plts[row_index][col_index].set_ylim([0, 3])

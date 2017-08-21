@@ -30,6 +30,30 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # PILLOW = 'PILLOW'
     # DRESSER = 'DRESSER'
 
+    #UNCOMENT FROM HERE LATER
+    # BOWL = 'BOWL'
+    # BROOM = 'BROOM'
+    # BUCKET = 'BUCKET'
+    # CLOCK = 'CLOCK'
+    # COMPUTER = 'COMPUTER'
+    # COUCH = 'COUCH'
+    # CUP = 'CUP'
+    # DOOR = 'DOOR'
+    # DRESSER = 'DRESSER'
+    # FORK = 'FORK'
+    # IRON = 'IRON'
+    # KETTLE = 'KETTLE'
+    # LAMP = 'LAMP'
+    # MIRROR = 'MIRROR'
+    # MOP = 'MOP'
+    # PAINTING = 'PAINTING'
+    # REFRIDGERATOR = 'REFRIDGERATOR'
+    # STOVE = 'STOVE'
+    # TABLE = 'TABLE'
+    # TOILET = 'TOILET'
+
+
+
 
     ###############
     #JUNGLE/FOREST#
@@ -42,7 +66,7 @@ class Curriculum: # pylint: disable=too-few-public-methods
     ###############
 
 
-    # GOAT = 'GOAT'
+    GOAT = 'GOAT'
     # HORSE = 'HORSE'
     # COW = 'COW'
     # DUCK = 'DUCK'
@@ -62,11 +86,11 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # DEER = 'DEER'
     # FROG = 'FROG'
 
-    # SUN = 'SUN'
+    SUN = 'SUN'
     # MOON = 'MOON'
     # SAND = 'SAND'
 
-    # FLOWER = 'FLOWER'
+    FLOWER = 'FLOWER'
     # WOODS = 'WOODS'
     # FOREST = 'FOREST'
     # LAKE = 'LAKE'
@@ -82,10 +106,15 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # RAT = 'RAT'
     # BUS = 'BUS'
     # MAILBOX = 'MAILBOX'
-    # AIRPLANE = 'AIRPLANE'
     # TELEPHONE = 'TELEPHONE'
     # TRAIN = 'TRAIN'
-    # CLOCK = 'CLOCK'
+
+    PLANE = 'PLANE'
+    BICYCLE = 'BICYCLE'
+    BOAT = 'BOAT'
+    BUS = 'BUS'
+    CAR = 'CAR'
+
 
     ###############
     #    BEACH    #
@@ -104,14 +133,14 @@ class Curriculum: # pylint: disable=too-few-public-methods
     #    ZOO      #
     ###############
 
-    BEE = 'BEE'
-    CHICKEN = 'CHICKEN'
-    MONKEY = 'MONKEY'
-    RABBIT = 'RABBIT'
+    # BEE = 'BEE'
+    # CHICKEN = 'CHICKEN'
+    # MONKEY = 'MONKEY'
+    # RABBIT = 'RABBIT'
     ROOSTER = 'ROOSTER'
-    SHEEP = 'SHEEP'
-    TIGER = 'TIGER'
-    SNAKE = 'SNAKE'
+    # SHEEP = 'SHEEP'
+    # TIGER = 'TIGER'
+    # SNAKE = 'SNAKE'
     # DRAGON = 'DRAGON'
     # LION = 'LION'
 

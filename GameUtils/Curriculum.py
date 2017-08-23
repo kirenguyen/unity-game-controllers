@@ -26,7 +26,7 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # DRESS = 'DRESS'
     # SHOES = 'SHOES'
 
-    # WINDOW = 'WINDOW'
+    WINDOW = 'WINDOW'
     # PILLOW = 'PILLOW'
     # DRESSER = 'DRESSER'
 
@@ -86,11 +86,11 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # DEER = 'DEER'
     # FROG = 'FROG'
 
-    SUN = 'SUN'
+    # SUN = 'SUN'
     # MOON = 'MOON'
     # SAND = 'SAND'
 
-    FLOWER = 'FLOWER'
+    # FLOWER = 'FLOWER'
     # WOODS = 'WOODS'
     # FOREST = 'FOREST'
     # LAKE = 'LAKE'
@@ -105,15 +105,15 @@ class Curriculum: # pylint: disable=too-few-public-methods
 
     # RAT = 'RAT'
     # BUS = 'BUS'
-    # MAILBOX = 'MAILBOX'
+    MAILBOX = 'MAILBOX'
     # TELEPHONE = 'TELEPHONE'
-    # TRAIN = 'TRAIN'
+    TRAIN = 'TRAIN'
 
-    PLANE = 'PLANE'
+    #PLANE = 'PLANE'
     BICYCLE = 'BICYCLE'
-    BOAT = 'BOAT'
-    BUS = 'BUS'
-    CAR = 'CAR'
+    #BOAT = 'BOAT'
+    #BUS = 'BUS'
+    #CAR = 'CAR'
 
 
     ###############
@@ -137,7 +137,7 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # CHICKEN = 'CHICKEN'
     # MONKEY = 'MONKEY'
     # RABBIT = 'RABBIT'
-    ROOSTER = 'ROOSTER'
+    # ROOSTER = 'ROOSTER'
     # SHEEP = 'SHEEP'
     # TIGER = 'TIGER'
     # SNAKE = 'SNAKE'

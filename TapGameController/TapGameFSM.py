@@ -27,7 +27,7 @@ else:
 
 RECORD_TIME_MS = 3500
 SHOW_RESULTS_TIME_MS = 3500
-WAIT_TO_BUZZ_TIME_MS = 3000 #note, game currently waits 3000ms after receiving message
+WAIT_TO_BUZZ_TIME_MS = 4000 #note, game currently waits 3000ms after receiving message
 
 FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
                     TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
@@ -342,6 +342,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
             if data.message == TapGameLog.GAME_START_PRESSED:
                 self.ros_node_mgr.send_robot_cmd("LOOK_AT_TABLET")
+                time.sleep(500 / 1000.0)
                 self.init_first_round()  # makes state transition + calls self.on_init_first_round()
 
             if data.message == TapGameLog.INIT_ROUND_DONE:

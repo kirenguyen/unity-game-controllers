@@ -7,14 +7,18 @@ http://katbailey.github.io/post/gaussian-processes-for-dummies/
 from random import randint
 
 import math
+import operator
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats
 import spacy
 
 from GameUtils.GlobalSettings import USE_SPACY
+from GameUtils.GlobalSettings import DO_ACTIVE_LEARNING
 from GameUtils.Curriculum import Curriculum
 from GameUtils.PronunciationUtils import PronunciationHandler
+
+from .AgentModel import ActionSpace
 
 
 class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,too-many-instance-attributes
@@ -108,12 +112,14 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         L = np.linalg.cholesky(K + 0.00005 * np.eye(len(self.X_train)) +
                                ((self.noise_sigma ** 2) * np.eye(len(self.X_train))))
 
-        L_y = np.linalg.solve(L, self.Y_train)
+        L_y = np.linalg.solve(L, (list(map(operator.sub, self.Y_train, self.get_mean(self.X_train))))) #pythonic way to subtract two lists
+        #L_y = np.linalg.solve(L, self.Y_train) #zero mean function version
         a = np.linalg.solve(L.T, L_y)
 
         # Compute the mean at our test points.
         K_s = self.concept_net_kernel(self.X_train, Xtest)
-        mu = np.dot(K_s.T, a).reshape(len(self.curriculum), )
+        mu = self.get_mean(Xtest) + np.dot(K_s.T, a).reshape(len(self.curriculum), )
+        #mu = np.dot(K_s.T, a).reshape(len(self.curriculum), ) #zero mean function version
         v = np.linalg.solve(L, K_s)
 
         # we only want the diagonal bc we want to know
@@ -126,12 +132,43 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         return mu, variance
 
 
-    def get_next_best_word(self):
+    def get_next_best_word(self, action):
         """
         gives an external caller the next best word to achieve some objective
-        Active Learning paradigm should be implemented here!
+        Active Learning paradigm is implemented here!
         """
-        return self.curriculum[randint(0, len(self.curriculum) - 1)] #randint is inclusive
+
+        if DO_ACTIVE_LEARNING:
+            if action == ActionSpace.RING_ANSWER_CORRECT:
+
+                # choose lowest mean word
+                lowest_mean = self.means[0]
+                lowest_mean_index = 0
+
+                for i in range(0, len(self.means)):
+                    if self.means[i] < lowest_mean:
+                        lowest_mean = self.means[i]
+                        lowest_mean_index = i
+                chosen_word = self.curriculum[lowest_mean_index]
+
+
+            elif action == ActionSpace.DONT_RING:
+
+                # choose highest var word
+                highest_var = self.variances[0]
+                highest_var_index = 0
+
+                for i in range(0, len(self.variances)):
+                    if self.variances[i] > highest_var:
+                        highest_var = self.variances[i]
+                        highest_var_index = i
+                chosen_word = self.curriculum[highest_var_index]
+
+            else:
+                chosen_word = self.curriculum[randint(0, len(self.curriculum) - 1)] #randint is inclusive
+
+
+        return chosen_word
 
     def rbf_kernel(self, input_a, input_b, length_scale):
         """
@@ -187,6 +224,18 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         print(1 - self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b))
         #return(1 - self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b))
         return (round(ratio, 2))
+
+    def get_mean(self, X):
+        """
+        Implements a mean function for the Gaussian Process. Returns a list of means
+        Given a list of words
+        """
+
+        #handles both vectors and scalars
+        if (len(X) > 0):
+            return ([0.5] * len(X))
+        else:
+            return 0.5
 
        
 

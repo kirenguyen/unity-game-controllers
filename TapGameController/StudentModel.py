@@ -7,6 +7,7 @@ http://katbailey.github.io/post/gaussian-processes-for-dummies/
 from random import randint
 
 import math
+import operator
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats
@@ -111,12 +112,14 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         L = np.linalg.cholesky(K + 0.00005 * np.eye(len(self.X_train)) +
                                ((self.noise_sigma ** 2) * np.eye(len(self.X_train))))
 
-        L_y = np.linalg.solve(L, self.Y_train)
+        L_y = np.linalg.solve(L, (list(map(operator.sub, self.Y_train, self.get_mean(self.X_train))))) #pythonic way to subtract two lists
+        #L_y = np.linalg.solve(L, self.Y_train) #zero mean function version
         a = np.linalg.solve(L.T, L_y)
 
         # Compute the mean at our test points.
         K_s = self.concept_net_kernel(self.X_train, Xtest)
-        mu = np.dot(K_s.T, a).reshape(len(self.curriculum), )
+        mu = self.get_mean(Xtest) + np.dot(K_s.T, a).reshape(len(self.curriculum), )
+        #mu = np.dot(K_s.T, a).reshape(len(self.curriculum), ) #zero mean function version
         v = np.linalg.solve(L, K_s)
 
         # we only want the diagonal bc we want to know
@@ -221,6 +224,18 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         print(1 - self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b))
         #return(1 - self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b))
         return (round(ratio, 2))
+
+    def get_mean(self, X):
+        """
+        Implements a mean function for the Gaussian Process. Returns a list of means
+        Given a list of words
+        """
+
+        #handles both vectors and scalars
+        if (len(X) > 0):
+            return ([0.5] * len(X))
+        else:
+            return 0.5
 
        
 

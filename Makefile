@@ -5,3 +5,6 @@ test:
 
 lint:
 	pylint TapGameController/*.py TapGameController/**/*.py
+
+lev_matrix:
+	python -m scripts.generate_levenshtein_weight_matrix

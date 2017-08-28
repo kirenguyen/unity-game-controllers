@@ -7,6 +7,7 @@ This is the main FSM / Game Logic class for the Tap Game
 
 import json
 import time
+import _thread as thread
 
 from transitions import Machine
 
@@ -27,7 +28,7 @@ else:
 
 RECORD_TIME_MS = 3500
 SHOW_RESULTS_TIME_MS = 3500
-WAIT_TO_BUZZ_TIME_MS = 4000 #note, game currently waits 3000ms after receiving message
+WAIT_TO_BUZZ_TIME_MS = 4500 #note, game currently waits 3000ms after receiving message
 
 FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
                     TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
@@ -43,7 +44,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     """
 
     round_index = 1
-    max_score = 3 #game ends when someone gets to this score
+    max_score = 10 #game ends when someone gets to this score
 
     player_score = 0
     robot_score = 0
@@ -122,8 +123,9 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
                                      initial='GAME_START')
 
-        print('graphing distribution!')
-        self.student_model.plot_curricular_distro()
+        # print('graphing distribution!')        
+        # self.student_model.plot_curricular_distro()
+        self.ros_node_mgr.init_ros_node()
 
     def on_init_first_round(self):
         """
@@ -132,17 +134,20 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         """
         print("got to init_first round!")
         # get the next robot action
-        self.current_round_action = self.agent_model.get_next_action()
-        self.current_round_word = self.student_model.get_next_best_word(self.current_round_action)
-        self.ros_node_mgr.send_game_cmd(TapGameCommand.INIT_ROUND,
-                                        json.dumps(self.current_round_word))
+        self.current_round_action = self.agent_model.get_next_action()        
 
-        # #send message every 2s in case it gets dropped
-        # while(not self.state == "ROUND_ACTIVE"):
-        #     self.send_cmd(TapGameCommand.INIT_ROUND, self.student_model.get_next_best_word() )
-        #     print('sent command!')
-        #     print(self.state)
-        #     time.sleep(2)
+        #send message every 2s in case it gets dropped
+        def send_msg_til_received():
+            while(not self.state == "ROUND_ACTIVE"):
+                self.current_round_word = self.student_model.get_next_best_word(self.current_round_action)
+                self.ros_node_mgr.send_game_cmd(TapGameCommand.INIT_ROUND,
+                                        json.dumps(self.current_round_word))
+                print('sent command!')
+                print(self.state)
+                time.sleep(5)
+
+        thread.start_new_thread(send_msg_til_received, ())
+        
 
     def on_start_round(self):
         """

@@ -45,7 +45,7 @@ class AgentModel():
 
         if DO_EPSILON_DECREASING_POLICY:
 
-            if(random.random() > self.ring_rate):
+            if(random.random() < self.ring_rate):
                 next_action = ActionSpace.RING_ANSWER_CORRECT
             else:
                 next_action = ActionSpace.DONT_RING

@@ -12,6 +12,7 @@ if GlobalSettings.USE_ROS:
     from unity_game_msgs.msg import TapGameCommand
     from unity_game_msgs.msg import TapGameLog
     from r1d1_msgs.msg import TegaAction
+    from r1d1_msgs.msg import Vec3
     from jibo_msgs.msg import JiboAction
 else:
     TapGameLog = GlobalSettings.TapGameLog  # Mock object, used for testing in non-ROS environments
@@ -40,12 +41,14 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         pass
 
 
+    def init_ros_node(self):
+        rospy.init_node('FSM_Listener_Controller', anonymous=True)
+        
     def start_log_listener(self, on_log_callback):
         """
         Start up the Game Log Subscriber node
         """
-        print('Sub Node started')
-        rospy.init_node('FSM_Listener_Controller', anonymous=True)
+        print('Sub Node started')        
         self.log_listener = rospy.Subscriber(TAP_GAME_TO_ROSCORE_TOPIC, TapGameLog,
                                              on_log_callback)
 
@@ -170,7 +173,15 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 msg.motion = JiboAction.EYE_FIDGET
                                
         else:
-            pass
+            if command == 'LOOK_AT_TABLET':
+                msg.do_motion = False
+                msg.do_text_to_speech = False
+                msg.do_look_at = True
+                lookat_pos = Vec3()
+                lookat_pos.x = 0
+                lookat_pos.y = -30
+                lookat_pos.z = 40
+                msg.look_at = lookat_pos
             # USE TEGA
 
         self.robot_commander.publish(msg)

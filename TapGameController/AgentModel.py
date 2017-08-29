@@ -3,7 +3,7 @@ This Module handles all aspects of the robot/agent's decision-making,
 modeling, and gameplay.
 """
 import random
-from GameUtils.GlobalSettings import DO_EPSILON_DECREASING_POLICY
+from GameUtils.GlobalSettings import DO_EPSILON_INCREASING_POLICY
 
 
 
@@ -43,7 +43,7 @@ class AgentModel():
         Returns one of the actions from the ActionSpace
         """
 
-        if DO_EPSILON_DECREASING_POLICY:
+        if DO_EPSILON_INCREASING_POLICY:
 
             if(random.random() < self.ring_rate):
                 next_action = ActionSpace.RING_ANSWER_CORRECT

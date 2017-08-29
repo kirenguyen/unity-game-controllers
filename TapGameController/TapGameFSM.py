@@ -27,8 +27,8 @@ else:
     TapGameCommand = GlobalSettings.TapGameCommand
 
 RECORD_TIME_MS = 3500
-SHOW_RESULTS_TIME_MS = 3500
-WAIT_TO_BUZZ_TIME_MS = 4500 #note, game currently waits 3000ms after receiving message
+SHOW_RESULTS_TIME_MS = 2500
+WAIT_TO_BUZZ_TIME_MS = 1500 #note, game currently waits 3000ms after receiving message
 
 FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
                     TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
@@ -138,7 +138,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
         #send message every 2s in case it gets dropped
         def send_msg_til_received():
-            while(not self.state == "ROUND_ACTIVE"):
+            while(self.state == "ROUND_START"):
                 self.current_round_word = self.student_model.get_next_best_word(self.current_round_action)
                 self.ros_node_mgr.send_game_cmd(TapGameCommand.INIT_ROUND,
                                         json.dumps(self.current_round_word))

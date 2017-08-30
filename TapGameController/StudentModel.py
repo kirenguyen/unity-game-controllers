@@ -217,11 +217,11 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
                 score += 1
 
         ratio = (score / (len(word_a) + len(word_b)))
-        print("letter counting similarity between " + word_a + " and " + word_b)
-        print(round(ratio, 2))
+        #print("letter counting similarity between " + word_a + " and " + word_b)
+        #print(round(ratio, 2))
         
-        print("inverse weighted lev distance between " + word_a + " and " + word_b)
-        print(1 - self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b))
+        #print("inverse weighted lev distance between " + word_a + " and " + word_b)
+        #print(1 - self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b))
         #return(1 - self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b))
         return (round(ratio, 2))
 

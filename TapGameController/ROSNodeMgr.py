@@ -129,6 +129,13 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 msg.do_sound_playback = False
                 msg.motion = JiboAction.LOOK_DOWN
 
+            if command == 'LOOK_CENTER':
+                msg.do_motion = True
+                msg.do_tts = False
+                msg.do_lookat = False
+                msg.do_sound_playback = False
+                msg.motion = JiboAction.DEFAULT
+
             if command == 'RING_ANSWER_CORRECT':
                 msg.do_motion = True
                 msg.do_tts = False
@@ -171,17 +178,47 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 msg.do_tts = False
                 msg.do_lookat = False
                 msg.motion = JiboAction.EYE_FIDGET
+
+            if command == 'REACT_TO_BEAT':
+                msg.do_motion = True                
+                msg.do_lookat = False                
+                msg.motion = "Misc/Frustrated_01_04.keys"                
                                
         else:
             if command == 'LOOK_AT_TABLET':
                 msg.do_motion = False
-                msg.do_text_to_speech = False
                 msg.do_look_at = True
                 lookat_pos = Vec3()
                 lookat_pos.x = 0
-                lookat_pos.y = -30
+                lookat_pos.y = -10
+                lookat_pos.z = 20
+                msg.look_at = lookat_pos
+
+            if command == 'LOOK_CENTER':
+                msg.do_motion = False
+                msg.do_look_at = True
+                lookat_pos = Vec3()
+                lookat_pos.x = 0
+                lookat_pos.y = 10
                 lookat_pos.z = 40
                 msg.look_at = lookat_pos
+
+            if command == 'RING_ANSWER_CORRECT':
+                msg.do_motion = True                
+                msg.do_look_at = False                
+                msg.motion = "PERKUP"
+
+            if command == 'REACT_TO_BEAT':
+                msg.do_motion = True                
+                msg.do_look_at = False                
+                msg.motion = "FRUSTRATED"
+
+            if command == 'PRONOUNCE_CORRECT':                               
+                msg.do_sound_playback = True
+                msg.wav_filename = "vocab_games/" + args[0].lower() + ".wav"
+                self.robot_commander.publish(msg)
+                rospy.loginfo(msg)    
+            
             # USE TEGA
 
         self.robot_commander.publish(msg)

@@ -126,6 +126,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         # print('graphing distribution!')        
         # self.student_model.plot_curricular_distro()
         self.ros_node_mgr.init_ros_node()
+        self.ros_node_mgr.send_robot_cmd("LOOK_CENTER")
 
     def on_init_first_round(self):
         """
@@ -185,8 +186,9 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     def player_beat_robot(self):
         """
         This function details what happens when the robot wants to buzz, but gets beat by the human
-        """
+        """        
         print("PLAYER BEAT ROBOT TO THE PUNCH!")
+        self.ros_node_mgr.send_robot_cmd("REACT_TO_BEAT")
 
 
     def on_player_ring_in(self):
@@ -217,8 +219,8 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
             # instead of using the last audio recording
             if not self.recorder.valid_recording:
                 self.letters = list(self.current_round_word)
-                self.passed = ['1'] * len(self.letters)
-                print ("NO, RECORDING SO YOU AUTOMATICALLY PASS")
+                self.passed = ['0'] * len(self.letters)
+                print ("NO RECORDING SO YOU AUTOMATICALLY FAIL")
             else: 
                 audio_file = AudioRecorder.WAV_OUTPUT_FILENAME
                 word_score_list = self.recorder.speechace(audio_file, self.current_round_word)
@@ -235,8 +237,8 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
                         print(self.passed)
                 else:
                     self.letters = list(self.current_round_word)
-                    self.passed = ['1'] * len(self.letters)
-                    print('NO RECORDING, SO YOU AUTO-PASS!!')
+                    self.passed = ['0'] * len(self.letters)
+                    print('NO RECORDING, SO YOU AUTO-FAIL!!')
 
             self.player_pronounce_eval()
         else:

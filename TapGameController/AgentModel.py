@@ -35,7 +35,7 @@ class AgentModel():
                              and not p.startswith('__')]
 
         self.action_history = []
-        self.ring_rate = .2
+        self.ring_rate = .4
         self.ring_increase_factor = .05 # amount each round that the starting_ring_rate increases
 
     def get_next_action(self):
@@ -46,7 +46,7 @@ class AgentModel():
         if DO_EPSILON_INCREASING_POLICY:
 
             if(random.random() < self.ring_rate):
-                next_action = ActionSpace.RING_ANSWER_CORRECT
+                next_action = ActionSpace.RING_ANSWER_CORRECT #ActionSpace.DONT_RING #ActionSpace.RING_ANSWER_CORRECT
             else:
                 next_action = ActionSpace.DONT_RING
 

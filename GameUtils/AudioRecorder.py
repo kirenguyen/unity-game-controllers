@@ -61,6 +61,9 @@ class AudioRecorder:
         # Without this it won't send a pass because it didn't hear you message 
         self.valid_recording = True
 
+        # placeholder variable so we can see how long we recorded for
+        self.start_recording_time = 0
+
 
     def audio_data_generator(self, buff, buffered_audio_data):
         """
@@ -110,17 +113,24 @@ class AudioRecorder:
         info = audio.get_host_api_info_by_index(0)
         numdevices = info.get('deviceCount')
 
+        #print(numdevices)
+        #print("# of devices")
+
         for i in range(0, numdevices):
+
+            #print(audio.get_device_info_by_host_api_device_index(0, i).get('name'))
             if (audio.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
                 if audio.get_device_info_by_host_api_device_index(0, i).get('name') == self.EXTERNAL_MIC_NAME:
                     mic_index = i
                     break
 
         if mic_index == None:
+            self.valid_recording = False
             print('NOT RECORDING, NO USB AUDIO DEVICE FOUND!')
             pass
         else:
             # start Recording
+            self.valid_recording = True            
             print('USB Audio Device found, recording!')
             stream = audio.open(format=self.FORMAT, channels=self.CHANNELS, rate=self.RATE, input=True, frames_per_buffer=self.CHUNK, input_device_index=mic_index)
 
@@ -145,6 +155,7 @@ class AudioRecorder:
         api_command = "curl --form text='" + correct_text + "' --form user_audio_file=@" + audio_file + " --form dialect=general_american --form user_id=1234 \"https://api.speechace.co/api/scoring/text/v0.1/json?key=po%2Fc4gm%2Bp4KIrcoofC5QoiFHR2BTrgfUdkozmpzHFuP%2BEuoCI1sSoDFoYOCtaxj8N6Y%2BXxYpVqtvj1EeYqmXYSp%2BfgNfgoSr5urt6%2FPQzAQwieDDzlqZhWO2qFqYKslE&user_id=002\"" # pylint: disable=line-too-long
         process = subprocess.Popen(api_command, shell=True, stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
+        process.wait()
         pouts = process.stdout.readlines()
         out_json = pouts[3]
 
@@ -161,6 +172,7 @@ class AudioRecorder:
             return result_word_score_list
         except: #pylint: disable= bare-except
             print("DID NOT GET VALID RESPONSE")
+            print(out_json)
             return
 
 
@@ -171,6 +183,7 @@ class AudioRecorder:
         self.is_recording = True
         self.has_recorded += 1
         self.buffered_audio_data = []  # Resets audio data
+        self.start_recording_time = time.time()
 
         if GlobalSettings.USE_USB_MIC:
             thread.start_new_thread(self.record_usb_audio, (self.buffered_audio_data,))
@@ -187,10 +200,12 @@ class AudioRecorder:
         """
         self.is_recording = False  # Ends the recording
         self.has_recorded += 1
-        time.sleep(.2)  # Gives time to return the data
+        time.sleep(.1)  # Gives time to return the data
 
         #only if we are actually getting streaming audio data
         if len(self.buffered_audio_data) > 0:
+            elapsed_time = time.time() - self.start_recording_time
+            print("recorded speech for " + str(elapsed_time) + " seconds")
             print('RECORDING SUCCESSFUL, writing to wav')
             wav_file = wave.open(AudioRecorder.WAV_OUTPUT_FILENAME, 'wb')
             wav_file.setnchannels(AudioRecorder.CHANNELS)

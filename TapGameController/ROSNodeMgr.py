@@ -4,6 +4,7 @@ This is the main class that manages the creation / parsing of ROS Node Communica
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error
 
+import time
 from GameUtils import GlobalSettings
 
 if GlobalSettings.USE_ROS:
@@ -89,6 +90,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         # send message to tablet game
         if self.game_commander is None:
             self.start_cmd_publisher()
+            time.sleep(.5)
 
         msg = TapGameCommand()
         # add header
@@ -110,6 +112,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
 
         if self.robot_commander is None:
             self.start_robot_publisher()
+            time.sleep(.5)
 
         # choose which platform
         if GlobalSettings.USE_TEGA:
@@ -149,25 +152,25 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 msg.do_lookat = False
                 msg.tts_text = args[0]
 
-            elif command == 'JIBO_WIN_MOTION':
+            elif command == 'WIN_MOTION':
                 msg.do_motion = True
                 msg.do_tts = False
                 msg.do_lookat = False
                 msg.motion = JiboAction.HAPPY_GO_LUCKY_DANCE
 
-            elif command == 'JIBO_WIN_SPEECH':
+            elif command == 'WIN_SPEECH':
                 msg.do_motion = False
                 msg.do_tts = True
                 msg.do_lookat = False
                 msg.tts_text = "I win I win I win I win I win"
 
-            elif command == 'JIBO_LOSE_MOTION':
+            elif command == 'LOSE_MOTION':
                 msg.do_motion = True
                 msg.do_tts = False
                 msg.do_lookat = False
                 msg.motion = JiboAction.EMOJI_RAINCLOUD
 
-            elif command == 'JIBO_LOSE_SPEECH':
+            elif command == 'LOSE_SPEECH':
                 msg.do_motion = False
                 msg.do_tts = True
                 msg.do_lookat = False
@@ -207,6 +210,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 msg.do_motion = True                
                 msg.do_look_at = False                
                 msg.motion = "PERKUP"
+                #msg.motion = "LAUGH_YES" #seems to interfere with sound playback
 
             if command == 'REACT_TO_BEAT':
                 msg.do_motion = True                
@@ -215,11 +219,32 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
 
             if command == 'PRONOUNCE_CORRECT':                               
                 msg.do_sound_playback = True
-                msg.wav_filename = "vocab_games/" + args[0].lower() + ".wav"
-                self.robot_commander.publish(msg)
-                rospy.loginfo(msg)    
+                msg.wav_filename = "vocab_games/words/" + args[0].lower() + ".wav"                
+
+            elif command == 'WIN_MOTION':
+                msg.do_motion = True                
+                msg.motion = TegaAction.MOTION_EXCITED
+
+            elif command == 'WIN_SPEECH':
+                pass
+                # msg.do_sound_playback = True
+                # msg.wav_filename = "vocab_games/effects/woohoo1.wav"                
+
+            elif command == 'LOSE_MOTION':
+                msg.do_motion = True                
+                msg.motion = TegaAction.MOTION_SAD
+
+            elif command == 'LOSE_SPEECH':
+                pass
+                # msg.do_sound_playback = True
+                # msg.wav_filename = "vocab_games/effects/sigh1.wav"
+                
+
             
             # USE TEGA
 
-        self.robot_commander.publish(msg)
+        if GlobalSettings.USE_TEGA:
+            self.robot_commander.publish(msg) #would be nice to guarantee message performance here
+        else:
+            self.robot_commander.publish(msg)
         rospy.loginfo(msg)

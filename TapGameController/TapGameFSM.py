@@ -29,6 +29,7 @@ else:
 RECORD_TIME_MS = 3500
 SHOW_RESULTS_TIME_MS = 2500
 WAIT_TO_BUZZ_TIME_MS = 1500 #note, game currently waits 3000ms after receiving message
+SIMULATED_ROBOT_RESULTS_TIME_MS = 2500 # time to wait while we "process" robot speech (should be close to SpeechAce roundtrip time)
 
 FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
                     TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
@@ -44,7 +45,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     """
 
     round_index = 1
-    max_score = 10 #game ends when someone gets to this score
+    max_score = 3 #game ends when someone gets to this score
 
     player_score = 0
     robot_score = 0
@@ -281,6 +282,8 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         handle_round_end() to transition to next round
         """
 
+        time.sleep(SIMULATED_ROBOT_RESULTS_TIME_MS / 1000.0)
+
         results_params = {}
         results_params['letters'] = self.letters
         results_params['passed'] = self.passed
@@ -309,12 +312,13 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         Sends msg to the Unity game to load the game end screen
         """
         print('got to game finished')
-        if self.player_score < self.robot_score:
-            self.ros_node_mgr.send_robot_cmd("JIBO_WIN_MOTION")
-            self.ros_node_mgr.send_robot_cmd("JIBO_WIN_SPEECH")
+        if self.player_score >= self.robot_score:
+            self.ros_node_mgr.send_robot_cmd("LOSE_MOTION")
+            self.ros_node_mgr.send_robot_cmd("LOSE_SPEECH")
         else:
-            self.ros_node_mgr.send_robot_cmd("JIBO_LOSE_MOTION")
-            self.ros_node_mgr.send_robot_cmd("JIBO_LOSE_SPEECH")
+            self.ros_node_mgr.send_robot_cmd("WIN_MOTION")
+            self.ros_node_mgr.send_robot_cmd("WIN_SPEECH")
+            
 
         self.ros_node_mgr.send_game_cmd(TapGameCommand.SHOW_GAME_END)
 

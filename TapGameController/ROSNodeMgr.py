@@ -189,8 +189,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                                
         else:
             if command == 'LOOK_AT_TABLET':
-                msg.do_motion = False
-                msg.do_look_at = True
+                
                 lookat_pos = Vec3()
                 lookat_pos.x = 0
                 lookat_pos.y = -10
@@ -198,8 +197,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 msg.look_at = lookat_pos
 
             if command == 'LOOK_CENTER':
-                msg.do_motion = False
-                msg.do_look_at = True
+                
                 lookat_pos = Vec3()
                 lookat_pos.x = 0
                 lookat_pos.y = 10
@@ -207,22 +205,18 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 msg.look_at = lookat_pos
 
             if command == 'RING_ANSWER_CORRECT':
-                msg.do_motion = True                
-                msg.do_look_at = False                
+                              
                 msg.motion = "PERKUP"
                 #msg.motion = "LAUGH_YES" #seems to interfere with sound playback
 
             if command == 'REACT_TO_BEAT':
-                msg.do_motion = True                
-                msg.do_look_at = False                
+                              
                 msg.motion = "FRUSTRATED"
 
             if command == 'PRONOUNCE_CORRECT':                               
-                msg.do_sound_playback = True
                 msg.wav_filename = "vocab_games/words/" + args[0].lower() + ".wav"                
 
             elif command == 'WIN_MOTION':
-                msg.do_motion = True                
                 msg.motion = TegaAction.MOTION_EXCITED
 
             elif command == 'WIN_SPEECH':
@@ -231,7 +225,6 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 # msg.wav_filename = "vocab_games/effects/woohoo1.wav"                
 
             elif command == 'LOSE_MOTION':
-                msg.do_motion = True                
                 msg.motion = TegaAction.MOTION_SAD
 
             elif command == 'LOSE_SPEECH':

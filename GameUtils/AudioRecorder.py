@@ -157,6 +157,8 @@ class AudioRecorder:
                                    stderr=subprocess.STDOUT)
         process.wait()
         pouts = process.stdout.readlines()
+        print("RESULT")
+        print(pouts)
         out_json = pouts[3]
 
         elapsed_time = time.time() - start_time

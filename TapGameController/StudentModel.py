@@ -56,7 +56,7 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         #self.fig = None # Figure for drawing
         #self.plts = None #Plots
 
-        self.n_rows = 2 # needs to be > 1
+        self.n_rows = 8 # needs to be > 1
 
         self.fig, self.plts = plt.subplots(self.n_rows, math.ceil(len(self.curriculum) / self.n_rows),
                                            figsize=(15, 10))
@@ -255,7 +255,7 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         for i in range(len(self.curriculum)):
             row_index = int(i / (len(self.curriculum) / self.n_rows))
             col_index = int(i % (len(self.curriculum) / self.n_rows))
-            self.plts[row_index][col_index].set_xlim([-2, 2])
+            self.plts[row_index][col_index].set_xlim([-.5, 1.5])
             self.plts[row_index][col_index].set_ylim([0, 3])
 
             x = np.linspace(-3, 3, 50)
@@ -268,6 +268,8 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
                     round(self.variances[i], 2)))
 
         plt.subplots_adjust(left, bottom, right, top, wspace, hspace)
+        self.fig.tight_layout()
+
         plt.show(block=False)
         self.fig.canvas.flush_events()
         plt.draw()

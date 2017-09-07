@@ -194,6 +194,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 lookat_pos.x = 0
                 lookat_pos.y = -10
                 lookat_pos.z = 20
+                msg.do_look_at = True
                 msg.look_at = lookat_pos
 
             if command == 'LOOK_CENTER':
@@ -202,6 +203,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 lookat_pos.x = 0
                 lookat_pos.y = 10
                 lookat_pos.z = 40
+                msg.do_look_at = True
                 msg.look_at = lookat_pos
 
             if command == 'RING_ANSWER_CORRECT':
@@ -213,7 +215,8 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                               
                 msg.motion = "FRUSTRATED"
 
-            if command == 'PRONOUNCE_CORRECT':                               
+            if command == 'PRONOUNCE_CORRECT':
+                msg.enqueue = True
                 msg.wav_filename = "vocab_games/words/" + args[0].lower() + ".wav"                
 
             elif command == 'WIN_MOTION':

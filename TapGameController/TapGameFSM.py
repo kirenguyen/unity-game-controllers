@@ -425,7 +425,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         #send message every 2s in case it gets dropped
     def send_player_prompts_til_input_received(self):
         while(self.state == "ROUND_ACTIVE"):                
-            time.sleep(3 + randint(1,3))
+            time.sleep(5 + randint(1,3))
             self.ros_node_mgr.send_robot_cmd("PLAYER_PROMPT")
             print('sent command!')
             print(self.state)

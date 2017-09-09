@@ -8,6 +8,7 @@ This is the main FSM / Game Logic class for the Tap Game
 import json
 import time
 import _thread as thread
+from random import randint
 
 from transitions import Machine
 
@@ -31,6 +32,8 @@ SHOW_RESULTS_TIME_MS = 2500
 WAIT_TO_BUZZ_TIME_MS = 1500 #note, game currently waits 3000ms after receiving message
 SIMULATED_ROBOT_RESULTS_TIME_MS = 2500 # time to wait while we "process" robot speech (should be close to SpeechAce roundtrip time)
 
+PASSING_RATIO_THRESHOLD = .8
+
 FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
                     TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
                     TapGameLog.PLAYER_RING_IN, TapGameLog.END_ROUND_DONE,
@@ -45,7 +48,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     """
 
     round_index = 1
-    max_score = 3 #game ends when someone gets to this score
+    max_score = 10 #game ends when someone gets to this score
 
     player_score = 0
     robot_score = 0
@@ -189,7 +192,15 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         This function details what happens when the robot wants to buzz, but gets beat by the human
         """        
         print("PLAYER BEAT ROBOT TO THE PUNCH!")
-        self.ros_node_mgr.send_robot_cmd("REACT_TO_BEAT")
+
+        tmp = [int(x) for x in self.passed]
+        passed_ratio = (sum(tmp) / len(tmp)) #TODO: do this over phonemes, not letters!
+        print("ROUND PASSED RATIO WAS" + str(passed_ratio))
+
+        if passed_ratio > PASSING_RATIO_THRESHOLD:
+            self.ros_node_mgr.send_robot_cmd("REACT_TO_BEAT_CORRECT")
+        else:
+            self.ros_node_mgr.send_robot_cmd("REACT_TO_BEAT_WRONG")
 
 
     def on_player_ring_in(self):
@@ -259,7 +270,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         means, variances = self.student_model.train_and_compute_posterior([self.current_round_word],
                                                                           [passed_ratio])
 
-        if passed_ratio > .8:
+        if passed_ratio > PASSING_RATIO_THRESHOLD:
             self.player_score += 1
 
         print("LATEST MEANS / VARS")
@@ -291,6 +302,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         self.robot_score += 1
 
         self.ros_node_mgr.send_game_cmd(TapGameCommand.SHOW_RESULTS, json.dumps(results_params))
+        self.ros_node_mgr.send_robot_cmd("REACT_ANSWER_CORRECT")
         time.sleep(SHOW_RESULTS_TIME_MS / 1000.0)
         self.handle_round_end()
 
@@ -362,11 +374,11 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
             if data.message == TapGameLog.START_ROUND_DONE:
                 print('I heard Start Round DONE. Waiting for player input')
-                # if (not self.current_round_action == ActionSpace.RING_ANSWER_CORRECT) and \
-                #       (not self.round_input_received):
-                #     time.sleep(2500 / 1000)                    
-                #     self.ros_node_mgr.send_robot_cmd("EYE_FIDGET")
 
+                #send various prompts to elicit response from player
+                if self.current_round_action == ActionSpace.DONT_RING:
+                    thread.start_new_thread(self.send_player_prompts_til_input_received, ())
+                
             if data.message == TapGameLog.PLAYER_RING_IN:
                 print('Player Rang in!')
                 self.round_input_received = True
@@ -409,3 +421,14 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         used by FSM to determine whether to start next round or end game
         """
         return not self.is_last_round()
+
+        #send message every 2s in case it gets dropped
+    def send_player_prompts_til_input_received(self):
+        while(self.state == "ROUND_ACTIVE"):                
+            time.sleep(3 + randint(1,3))
+            self.ros_node_mgr.send_robot_cmd("PLAYER_PROMPT")
+            print('sent command!')
+            print(self.state)
+            
+
+        

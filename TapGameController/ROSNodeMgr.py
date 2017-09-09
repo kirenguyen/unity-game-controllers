@@ -6,6 +6,8 @@ This is the main class that manages the creation / parsing of ROS Node Communica
 
 import time
 from GameUtils import GlobalSettings
+from random import randint
+
 
 if GlobalSettings.USE_ROS:
     import rospy
@@ -206,34 +208,48 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 msg.do_look_at = True
                 msg.look_at = lookat_pos
 
-            if command == 'RING_ANSWER_CORRECT':
-                              
-                msg.motion = "PERKUP"
-                #msg.motion = "LAUGH_YES" #seems to interfere with sound playback
+            elif command == 'RING_ANSWER_CORRECT':
+                msg.motion = "PERKUP"                
 
-            if command == 'REACT_TO_BEAT':
-                              
-                msg.motion = "FRUSTRATED"
+            elif command == 'REACT_TO_BEAT_CORRECT':
+                num = randint(0,2)
+                if num == 0:
+                    msg.motion = "FRUSTRATED"
+                elif num == 1:
+                    msg.wav_filename = "vocab_games/effects/angry2.wav"
+                elif num == 2:
+                    msg.wav_filename = "vocab_games/effects/angry4.wav"
+                
 
-            if command == 'PRONOUNCE_CORRECT':
+            elif command == 'REACT_TO_BEAT_WRONG':
+                num = randint(0,2)
+                if num == 0:
+                    msg.wav_filename = "vocab_games/effects/laugh1.wav"
+                elif num == 1:
+                    msg.wav_filename = "vocab_games/effects/laugh2.wav"                
+
+            elif command == 'REACT_ANSWER_CORRECT':
+                msg.motion = "SMILE"
+
+            elif command == 'PRONOUNCE_CORRECT':
                 msg.enqueue = True
                 msg.wav_filename = "vocab_games/words/" + args[0].lower() + ".wav"                
 
             elif command == 'WIN_MOTION':
                 msg.motion = TegaAction.MOTION_EXCITED
-
+                
             elif command == 'WIN_SPEECH':
-                pass
-                # msg.do_sound_playback = True
+                pass                
                 # msg.wav_filename = "vocab_games/effects/woohoo1.wav"                
 
             elif command == 'LOSE_MOTION':
                 msg.motion = TegaAction.MOTION_SAD
 
             elif command == 'LOSE_SPEECH':
-                pass
-                # msg.do_sound_playback = True
+                pass                
                 # msg.wav_filename = "vocab_games/effects/sigh1.wav"
+            elif command == 'PLAYER_PROMPT':     
+                msg.wav_filename = "vocab_games/effects/puzzled1.wav"                           
                 
 
             

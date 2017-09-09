@@ -31,7 +31,7 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # DRESSER = 'DRESSER'
 
     #UNCOMENT FROM HERE LATER
-    BOWL = 'BOWL'
+    #BOWL = 'BOWL'
     BROOM = 'BROOM'
     BUCKET = 'BUCKET'
     CLOCK = 'CLOCK'

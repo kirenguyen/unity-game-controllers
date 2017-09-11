@@ -54,3 +54,7 @@ Problem: "cannot find module `clev`"
 Solution: Navigate to the install site of the `weighted-levenshtein` package, edit __init__.py, and remove
 
 
+Problem: "cannot find module `em`"
+
+Solution: pip install empy
+

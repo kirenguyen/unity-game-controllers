@@ -25,7 +25,8 @@ If you are new to Python or new to creating Python projects, see Kenneth Reitz's
 - [pytest](http://pytest.org/latest/)
 - [Hitchhiker's Guide to Python](http://docs.python-guide.org/en/latest/)
 
-## Project Setup
+Project Setup
+---------------
 
 ### Install the project's non-python development and runtime requirements::
 
@@ -42,5 +43,14 @@ If you are new to Python or new to creating Python projects, see Kenneth Reitz's
 ### Install the project's python development and runtime requirements::
 
         pip install -r requirements-dev.txt
-
+	
 **Project setup is now complete!**
+
+
+Troubleshooting:
+------------------
+Problem: "cannot find module `clev`"
+
+Solution: Navigate to the install site of the `weighted-levenshtein` package, edit __init__.py, and remove
+
+

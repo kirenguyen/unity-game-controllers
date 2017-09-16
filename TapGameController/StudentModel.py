@@ -4,7 +4,7 @@ Some code remixed from
 http://katbailey.github.io/post/gaussian-processes-for-dummies/
 ^ Great intro article for rolling your own GP
 """
-from random import randint
+import random
 
 import math
 import operator
@@ -106,6 +106,12 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
             self.Y_train.append(new_Y_train[i])
 
         # compute cov of train set wrt itself + cov of all words wrt all words
+        print("COMPUTING NEW GP POSTERIOR")
+        print("XTRAIN, YTRAIN, MU, VAR")
+        print(self.X_train)
+        print(self.Y_train)
+        print(self.means)
+        print(self.variances)
         K = self.concept_net_kernel(self.X_train, self.X_train)
         K_ss = self.concept_net_kernel(Xtest, Xtest)
 
@@ -129,6 +135,12 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
 
         self.means = mu
         self.variances = variance
+        print("GP POSTERIOR IS NOW")
+        print("XTRAIN, YTRAIN, MU, VAR")
+        print(self.X_train)
+        print(self.Y_train)
+        print(self.means)
+        print(self.variances)
         return mu, variance
 
 
@@ -138,7 +150,8 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         Active Learning paradigm is implemented here!
         """
 
-        if DO_ACTIVE_LEARNING:
+        
+        if DO_ACTIVE_LEARNING and random.random() < .25:
             if action == ActionSpace.RING_ANSWER_CORRECT:
 
                 # choose lowest mean word
@@ -164,8 +177,8 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
                         highest_var_index = i
                 chosen_word = self.curriculum[highest_var_index]
 
-            else:
-                chosen_word = self.curriculum[randint(0, len(self.curriculum) - 1)] #randint is inclusive
+        else:
+            chosen_word = self.curriculum[random.randint(0, len(self.curriculum) - 1)] #randint is inclusive
 
 
         return chosen_word

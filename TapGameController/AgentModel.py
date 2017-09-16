@@ -35,8 +35,8 @@ class AgentModel():
                              and not p.startswith('__')]
 
         self.action_history = []
-        self.ring_rate = .4
-        self.ring_increase_factor = .05 # amount each round that the starting_ring_rate increases
+        self.ring_rate = .5
+        self.ring_increase_factor = .03 # amount each round that the starting_ring_rate increases
 
     def get_next_action(self):
         """

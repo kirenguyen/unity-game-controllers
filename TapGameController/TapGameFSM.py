@@ -32,7 +32,7 @@ SHOW_RESULTS_TIME_MS = 2500
 WAIT_TO_BUZZ_TIME_MS = 1500 #note, game currently waits 3000ms after receiving message
 SIMULATED_ROBOT_RESULTS_TIME_MS = 2500 # time to wait while we "process" robot speech (should be close to SpeechAce roundtrip time)
 
-PASSING_RATIO_THRESHOLD = .8
+PASSING_RATIO_THRESHOLD = .65
 
 FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
                     TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
@@ -48,7 +48,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     """
 
     round_index = 1
-    max_score = 10 #game ends when someone gets to this score
+    max_score = 5 #game ends when someone gets to this score
 
     player_score = 0
     robot_score = 0
@@ -231,7 +231,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
             # instead of using the last audio recording
             if not self.recorder.valid_recording:
                 self.letters = list(self.current_round_word)
-                self.passed = ['0'] * len(self.letters)
+                self.passed = ['1'] * len(self.letters)
                 print ("NO RECORDING SO YOU AUTOMATICALLY FAIL")
             else: 
                 audio_file = AudioRecorder.WAV_OUTPUT_FILENAME
@@ -424,11 +424,20 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
         #send message every 2s in case it gets dropped
     def send_player_prompts_til_input_received(self):
+        start_time = time.time()
+
+        time.sleep(5)
         while(self.state == "ROUND_ACTIVE"):                
-            time.sleep(5 + randint(1,3))
-            self.ros_node_mgr.send_robot_cmd("PLAYER_PROMPT")
-            print('sent command!')
-            print(self.state)
+            time.sleep(3 + randint(1,3))
+
+            if time.time() - start_time > 10:
+                self.current_round_action = ActionSpace.RING_ANSWER_CORRECT # Change to "LATE_RING"
+                self.ros_node_mgr.send_robot_cmd(self.current_round_action)                       
+                self.ros_node_mgr.send_game_cmd(TapGameCommand.ROBOT_RING_IN)
+            else:
+                self.ros_node_mgr.send_robot_cmd("PLAYER_PROMPT")
+                print('sent command!')
+                print(self.state)
             
 
         

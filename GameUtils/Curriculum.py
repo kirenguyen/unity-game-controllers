@@ -35,6 +35,8 @@ class Curriculum: # pylint: disable=too-few-public-methods
     BROOM = 'BROOM'
     BUCKET = 'BUCKET'
     CLOCK = 'CLOCK'
+
+    
     # COMPUTER = 'COMPUTER'
     COUCH = 'COUCH'
     CRIB = 'CRIB'

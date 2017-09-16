@@ -24,7 +24,8 @@ If you are new to Python or new to creating Python projects, see Kenneth Reitz's
 
 - [Hitchhiker's Guide to Python](http://docs.python-guide.org/en/latest/)
 
-## Project Setup
+Project Setup
+---------------
 
 ### System Dependencies
 
@@ -49,5 +50,18 @@ We recommend using Anaconda with Python 2.7 as your default system-wide Python e
 ### Install the project's python development and runtime requirements::
 
         pip install -r requirements-dev.txt
-
+	
 **Project setup is now complete!**
+
+
+Troubleshooting:
+------------------
+Problem: "cannot find module `clev`"
+
+Solution: Navigate to the install site of the `weighted-levenshtein` package, edit __init__.py, and remove
+
+
+Problem: "cannot find module `em`"
+
+Solution: pip install empy
+

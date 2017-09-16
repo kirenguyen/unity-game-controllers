@@ -4,7 +4,10 @@ This is the main class that manages the creation / parsing of ROS Node Communica
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error
 
+import time
 from GameUtils import GlobalSettings
+from random import randint
+
 
 if GlobalSettings.USE_ROS:
     import rospy
@@ -89,6 +92,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         # send message to tablet game
         if self.game_commander is None:
             self.start_cmd_publisher()
+            time.sleep(.5)
 
         msg = TapGameCommand()
         # add header
@@ -110,6 +114,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
 
         if self.robot_commander is None:
             self.start_robot_publisher()
+            time.sleep(.5)
 
         # choose which platform
         if GlobalSettings.USE_TEGA:
@@ -129,6 +134,13 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 msg.do_sound_playback = False
                 msg.motion = JiboAction.LOOK_DOWN
 
+            if command == 'LOOK_CENTER':
+                msg.do_motion = True
+                msg.do_tts = False
+                msg.do_lookat = False
+                msg.do_sound_playback = False
+                msg.motion = JiboAction.DEFAULT
+
             if command == 'RING_ANSWER_CORRECT':
                 msg.do_motion = True
                 msg.do_tts = False
@@ -142,25 +154,25 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 msg.do_lookat = False
                 msg.tts_text = args[0]
 
-            elif command == 'JIBO_WIN_MOTION':
+            elif command == 'WIN_MOTION':
                 msg.do_motion = True
                 msg.do_tts = False
                 msg.do_lookat = False
                 msg.motion = JiboAction.HAPPY_GO_LUCKY_DANCE
 
-            elif command == 'JIBO_WIN_SPEECH':
+            elif command == 'WIN_SPEECH':
                 msg.do_motion = False
                 msg.do_tts = True
                 msg.do_lookat = False
                 msg.tts_text = "I win I win I win I win I win"
 
-            elif command == 'JIBO_LOSE_MOTION':
+            elif command == 'LOSE_MOTION':
                 msg.do_motion = True
                 msg.do_tts = False
                 msg.do_lookat = False
                 msg.motion = JiboAction.EMOJI_RAINCLOUD
 
-            elif command == 'JIBO_LOSE_SPEECH':
+            elif command == 'LOSE_SPEECH':
                 msg.do_motion = False
                 msg.do_tts = True
                 msg.do_lookat = False
@@ -171,18 +183,80 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 msg.do_tts = False
                 msg.do_lookat = False
                 msg.motion = JiboAction.EYE_FIDGET
+
+            if command == 'REACT_TO_BEAT':
+                msg.do_motion = True                
+                msg.do_lookat = False                
+                msg.motion = "Misc/Frustrated_01_04.keys"                
                                
         else:
             if command == 'LOOK_AT_TABLET':
-                msg.do_motion = False
-                msg.do_text_to_speech = False
-                msg.do_look_at = True
+                
                 lookat_pos = Vec3()
                 lookat_pos.x = 0
-                lookat_pos.y = -30
-                lookat_pos.z = 40
+                lookat_pos.y = -10
+                lookat_pos.z = 20
+                msg.do_look_at = True
                 msg.look_at = lookat_pos
+
+            if command == 'LOOK_CENTER':
+                
+                lookat_pos = Vec3()
+                lookat_pos.x = 0
+                lookat_pos.y = 10
+                lookat_pos.z = 40
+                msg.do_look_at = True
+                msg.look_at = lookat_pos
+
+            elif command == 'RING_ANSWER_CORRECT':
+                msg.motion = "PERKUP"                
+
+            elif command == 'REACT_TO_BEAT_CORRECT':
+                num = randint(0,2)
+                if num == 0:
+                    msg.motion = "FRUSTRATED"
+                elif num == 1:
+                    msg.wav_filename = "vocab_games/effects/angry2.wav"
+                elif num == 2:
+                    msg.wav_filename = "vocab_games/effects/angry4.wav"
+                
+
+            elif command == 'REACT_TO_BEAT_WRONG':
+                num = randint(0,2)
+                if num == 0:
+                    msg.wav_filename = "vocab_games/effects/laugh1.wav"
+                elif num == 1:
+                    msg.wav_filename = "vocab_games/effects/laugh2.wav"                
+
+            elif command == 'REACT_ANSWER_CORRECT':
+                msg.motion = "SMILE"
+
+            elif command == 'PRONOUNCE_CORRECT':
+                msg.enqueue = True
+                msg.wav_filename = "vocab_games/words/" + args[0].lower() + ".wav"                
+
+            elif command == 'WIN_MOTION':
+                msg.motion = TegaAction.MOTION_EXCITED
+                
+            elif command == 'WIN_SPEECH':
+                pass                
+                # msg.wav_filename = "vocab_games/effects/woohoo1.wav"                
+
+            elif command == 'LOSE_MOTION':
+                msg.motion = TegaAction.MOTION_SAD
+
+            elif command == 'LOSE_SPEECH':
+                pass                
+                # msg.wav_filename = "vocab_games/effects/sigh1.wav"
+            elif command == 'PLAYER_PROMPT':     
+                msg.wav_filename = "vocab_games/effects/puzzled1.wav"                           
+                
+
+            
             # USE TEGA
 
-        self.robot_commander.publish(msg)
+        if GlobalSettings.USE_TEGA:
+            self.robot_commander.publish(msg) #would be nice to guarantee message performance here
+        else:
+            self.robot_commander.publish(msg)
         rospy.loginfo(msg)

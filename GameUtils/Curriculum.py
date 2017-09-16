@@ -22,7 +22,7 @@ class Curriculum: # pylint: disable=too-few-public-methods
 
     # HAT = 'HAT'
     # SOCK = 'SOCK'
-    # SHIRT = 'SHIRT'
+    SHIRT = 'SHIRT'
     # DRESS = 'DRESS'
     # SHOES = 'SHOES'
 
@@ -31,21 +31,24 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # DRESSER = 'DRESSER'
 
     #UNCOMENT FROM HERE LATER
-    # BOWL = 'BOWL'
-    # BROOM = 'BROOM'
-    # BUCKET = 'BUCKET'
-    # CLOCK = 'CLOCK'
+    #BOWL = 'BOWL'
+    BROOM = 'BROOM'
+    BUCKET = 'BUCKET'
+    CLOCK = 'CLOCK'
+
+    
     # COMPUTER = 'COMPUTER'
-    # COUCH = 'COUCH'
-    # CUP = 'CUP'
-    # DOOR = 'DOOR'
-    # DRESSER = 'DRESSER'
+    COUCH = 'COUCH'
+    CRIB = 'CRIB'
+    CUP = 'CUP'
+    DOOR = 'DOOR'
+    DRESSER = 'DRESSER'
     # FORK = 'FORK'
     # IRON = 'IRON'
-    # KETTLE = 'KETTLE'
+    KETTLE = 'KETTLE'
     # LAMP = 'LAMP'
-    # MIRROR = 'MIRROR'
-    # MOP = 'MOP'
+    MIRROR = 'MIRROR'
+    MOP = 'MOP'
     # PAINTING = 'PAINTING'
     # REFRIDGERATOR = 'REFRIDGERATOR'
     # STOVE = 'STOVE'
@@ -73,7 +76,7 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # BIRD = 'BIRD'
     # CHICK = 'CHICK'
     # CAT = 'CAT'
-    # PIG = 'PIG'
+    PIG = 'PIG'
     # WAGON = 'WAGON'
     # TRACTOR = 'TRACTOR'
     # DONKEY = 'DONKEY'
@@ -86,18 +89,18 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # DEER = 'DEER'
     # FROG = 'FROG'
 
-    # SUN = 'SUN'
+    SUN = 'SUN'
     # MOON = 'MOON'
     # SAND = 'SAND'
 
-    # FLOWER = 'FLOWER'
+    FLOWER = 'FLOWER'
     # WOODS = 'WOODS'
     # FOREST = 'FOREST'
     # LAKE = 'LAKE'
     # POND = 'POND'
-    # CLOUD = 'CLOUD'
+    CLOUD = 'CLOUD'
     # SKY = 'SKY'
-    # MOUNTAIN = 'MOUNTAIN'
+    MOUNTAIN = 'MOUNTAIN'
 
     ###############
     #    CITY     #
@@ -109,11 +112,11 @@ class Curriculum: # pylint: disable=too-few-public-methods
     # TELEPHONE = 'TELEPHONE'
     TRAIN = 'TRAIN'
 
-    #PLANE = 'PLANE'
+    PLANE = 'PLANE'
     BICYCLE = 'BICYCLE'
-    #BOAT = 'BOAT'
+    BOAT = 'BOAT'
     #BUS = 'BUS'
-    #CAR = 'CAR'
+    CAR = 'CAR'
 
 
     ###############
@@ -122,10 +125,10 @@ class Curriculum: # pylint: disable=too-few-public-methods
 
     # SEAL = 'SEAL'
     # DOLPHIN = 'DOLPHIN'
-    # BUCKET = 'BUCKET'
-    # COCONUT = 'COCONUT'
-    # SHELL = 'SHELL'
-    # CASTLE = 'CASTLE'
+    BUCKET = 'BUCKET'
+    COCONUT = 'COCONUT'
+    SEASHELL = 'SEASHELL'
+    CASTLE = 'CASTLE'
     # FISH = 'FISH'
 
 
@@ -135,9 +138,9 @@ class Curriculum: # pylint: disable=too-few-public-methods
 
     # BEE = 'BEE'
     # CHICKEN = 'CHICKEN'
-    # MONKEY = 'MONKEY'
+    MONKEY = 'MONKEY'
     # RABBIT = 'RABBIT'
-    # ROOSTER = 'ROOSTER'
+    ROOSTER = 'ROOSTER'
     # SHEEP = 'SHEEP'
     # TIGER = 'TIGER'
     # SNAKE = 'SNAKE'

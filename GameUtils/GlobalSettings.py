@@ -4,11 +4,11 @@ This is a module that exports certain global runtime settings
 # -*- coding: utf-8 -*-
 
 USE_ROS = True
-USE_TEGA = False # if False, we are using Jibo
+USE_TEGA = True # if False, we are using Jibo
 USE_SPACY = False # if False, do not load the full SpaCy language model
-USE_USB_MIC = False #if True, use the external USB microphone
+USE_USB_MIC = True #if True, use the external USB microphone
 
-DO_EPSILON_DECREASING_POLICY = True # if True, agent use a decreasing-ratio of Ringing / Waiting
+DO_EPSILON_INCREASING_POLICY = True # if True, agent use a increasing-ratio of Ringing / Waiting
                                     # actions. Otherwise, chooses randomly
 
 DO_ACTIVE_LEARNING = True #if True, use the active learning protocol in the StudentModel

@@ -8,6 +8,7 @@ This is the main FSM / Game Logic class for the Tap Game
 import json
 import time
 import _thread as thread
+from random import randint
 
 from transitions import Machine
 
@@ -27,8 +28,11 @@ else:
     TapGameCommand = GlobalSettings.TapGameCommand
 
 RECORD_TIME_MS = 3500
-SHOW_RESULTS_TIME_MS = 3500
-WAIT_TO_BUZZ_TIME_MS = 4500 #note, game currently waits 3000ms after receiving message
+SHOW_RESULTS_TIME_MS = 2500
+WAIT_TO_BUZZ_TIME_MS = 1500 #note, game currently waits 3000ms after receiving message
+SIMULATED_ROBOT_RESULTS_TIME_MS = 2500 # time to wait while we "process" robot speech (should be close to SpeechAce roundtrip time)
+
+PASSING_RATIO_THRESHOLD = .65
 
 FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
                     TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
@@ -44,7 +48,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     """
 
     round_index = 1
-    max_score = 10 #game ends when someone gets to this score
+    max_score = 5 #game ends when someone gets to this score
 
     player_score = 0
     robot_score = 0
@@ -126,6 +130,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         # print('graphing distribution!')        
         # self.student_model.plot_curricular_distro()
         self.ros_node_mgr.init_ros_node()
+        self.ros_node_mgr.send_robot_cmd("LOOK_CENTER")
 
     def on_init_first_round(self):
         """
@@ -138,7 +143,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
         #send message every 2s in case it gets dropped
         def send_msg_til_received():
-            while(not self.state == "ROUND_ACTIVE"):
+            while(self.state == "ROUND_START"):
                 self.current_round_word = self.student_model.get_next_best_word(self.current_round_action)
                 self.ros_node_mgr.send_game_cmd(TapGameCommand.INIT_ROUND,
                                         json.dumps(self.current_round_word))
@@ -185,8 +190,17 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     def player_beat_robot(self):
         """
         This function details what happens when the robot wants to buzz, but gets beat by the human
-        """
+        """        
         print("PLAYER BEAT ROBOT TO THE PUNCH!")
+
+        tmp = [int(x) for x in self.passed]
+        passed_ratio = (sum(tmp) / len(tmp)) #TODO: do this over phonemes, not letters!
+        print("ROUND PASSED RATIO WAS" + str(passed_ratio))
+
+        if passed_ratio > PASSING_RATIO_THRESHOLD:
+            self.ros_node_mgr.send_robot_cmd("REACT_TO_BEAT_CORRECT")
+        else:
+            self.ros_node_mgr.send_robot_cmd("REACT_TO_BEAT_WRONG")
 
 
     def on_player_ring_in(self):
@@ -218,7 +232,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
             if not self.recorder.valid_recording:
                 self.letters = list(self.current_round_word)
                 self.passed = ['1'] * len(self.letters)
-                print ("NO, RECORDING SO YOU AUTOMATICALLY PASS")
+                print ("NO RECORDING SO YOU AUTOMATICALLY FAIL")
             else: 
                 audio_file = AudioRecorder.WAV_OUTPUT_FILENAME
                 word_score_list = self.recorder.speechace(audio_file, self.current_round_word)
@@ -235,8 +249,8 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
                         print(self.passed)
                 else:
                     self.letters = list(self.current_round_word)
-                    self.passed = ['1'] * len(self.letters)
-                    print('NO RECORDING, SO YOU AUTO-PASS!!')
+                    self.passed = ['0'] * len(self.letters)
+                    print('NO RECORDING, SO YOU AUTO-FAIL!!')
 
             self.player_pronounce_eval()
         else:
@@ -256,7 +270,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         means, variances = self.student_model.train_and_compute_posterior([self.current_round_word],
                                                                           [passed_ratio])
 
-        if passed_ratio > .8:
+        if passed_ratio > PASSING_RATIO_THRESHOLD:
             self.player_score += 1
 
         print("LATEST MEANS / VARS")
@@ -279,6 +293,8 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         handle_round_end() to transition to next round
         """
 
+        time.sleep(SIMULATED_ROBOT_RESULTS_TIME_MS / 1000.0)
+
         results_params = {}
         results_params['letters'] = self.letters
         results_params['passed'] = self.passed
@@ -286,6 +302,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         self.robot_score += 1
 
         self.ros_node_mgr.send_game_cmd(TapGameCommand.SHOW_RESULTS, json.dumps(results_params))
+        self.ros_node_mgr.send_robot_cmd("REACT_ANSWER_CORRECT")
         time.sleep(SHOW_RESULTS_TIME_MS / 1000.0)
         self.handle_round_end()
 
@@ -307,12 +324,13 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         Sends msg to the Unity game to load the game end screen
         """
         print('got to game finished')
-        if self.player_score < self.robot_score:
-            self.ros_node_mgr.send_robot_cmd("JIBO_WIN_MOTION")
-            self.ros_node_mgr.send_robot_cmd("JIBO_WIN_SPEECH")
+        if self.player_score >= self.robot_score:
+            self.ros_node_mgr.send_robot_cmd("LOSE_MOTION")
+            self.ros_node_mgr.send_robot_cmd("LOSE_SPEECH")
         else:
-            self.ros_node_mgr.send_robot_cmd("JIBO_LOSE_MOTION")
-            self.ros_node_mgr.send_robot_cmd("JIBO_LOSE_SPEECH")
+            self.ros_node_mgr.send_robot_cmd("WIN_MOTION")
+            self.ros_node_mgr.send_robot_cmd("WIN_SPEECH")
+            
 
         self.ros_node_mgr.send_game_cmd(TapGameCommand.SHOW_GAME_END)
 
@@ -356,11 +374,11 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
             if data.message == TapGameLog.START_ROUND_DONE:
                 print('I heard Start Round DONE. Waiting for player input')
-                # if (not self.current_round_action == ActionSpace.RING_ANSWER_CORRECT) and \
-                #       (not self.round_input_received):
-                #     time.sleep(2500 / 1000)                    
-                #     self.ros_node_mgr.send_robot_cmd("EYE_FIDGET")
 
+                #send various prompts to elicit response from player
+                if self.current_round_action == ActionSpace.DONT_RING:
+                    thread.start_new_thread(self.send_player_prompts_til_input_received, ())
+                
             if data.message == TapGameLog.PLAYER_RING_IN:
                 print('Player Rang in!')
                 self.round_input_received = True
@@ -403,3 +421,23 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         used by FSM to determine whether to start next round or end game
         """
         return not self.is_last_round()
+
+        #send message every 2s in case it gets dropped
+    def send_player_prompts_til_input_received(self):
+        start_time = time.time()
+
+        time.sleep(5)
+        while(self.state == "ROUND_ACTIVE"):                
+            time.sleep(3 + randint(1,3))
+
+            if time.time() - start_time > 10:
+                self.current_round_action = ActionSpace.RING_ANSWER_CORRECT # Change to "LATE_RING"
+                self.ros_node_mgr.send_robot_cmd(self.current_round_action)                       
+                self.ros_node_mgr.send_game_cmd(TapGameCommand.ROBOT_RING_IN)
+            else:
+                self.ros_node_mgr.send_robot_cmd("PLAYER_PROMPT")
+                print('sent command!')
+                print(self.state)
+            
+
+        

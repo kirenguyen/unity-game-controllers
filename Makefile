@@ -4,7 +4,7 @@ init:
 .PHONY: init
 
 test:
-	nosetests -v --nocapture tests
+	python -m scripts.run_unit_tests
 .PHONY: test
 
 lint:

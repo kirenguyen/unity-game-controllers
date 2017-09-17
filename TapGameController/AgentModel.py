@@ -3,7 +3,7 @@ This Module handles all aspects of the robot/agent's decision-making,
 modeling, and gameplay.
 """
 import random
-from GameUtils.GlobalSettings import DO_EPSILON_INCREASING_POLICY
+from GameUtils.GlobalSettings import DO_EPSILON_INCREASING_POLICY # pylint: disable=import-error
 
 
 
@@ -45,8 +45,8 @@ class AgentModel():
 
         if DO_EPSILON_INCREASING_POLICY:
 
-            if(random.random() < self.ring_rate):
-                next_action = ActionSpace.RING_ANSWER_CORRECT #ActionSpace.DONT_RING #ActionSpace.RING_ANSWER_CORRECT
+            if random.random() < self.ring_rate:
+                next_action = ActionSpace.RING_ANSWER_CORRECT
             else:
                 next_action = ActionSpace.DONT_RING
 

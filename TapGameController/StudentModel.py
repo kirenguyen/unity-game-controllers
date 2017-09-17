@@ -57,7 +57,7 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
 
         self.n_rows = 8 # needs to be > 1
 
-        self.fig, self.plts = plt.subplots(self.n_rows, math.ceil(len(self.curriculum) / self.n_rows),
+        self.fig, self.plts = plt.subplots(self.n_rows, math.ceil(len(self.curriculum)/self.n_rows),
                                            figsize=(15, 10))
 
 
@@ -149,7 +149,7 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         Active Learning paradigm is implemented here!
         """
 
-        
+
         if DO_ACTIVE_LEARNING and random.random() < .25:
             if action == ActionSpace.RING_ANSWER_CORRECT:
 

@@ -2,11 +2,11 @@
 This is the main class that manages the creation / parsing of ROS Node Communication
 """
 # -*- coding: utf-8 -*-
-# pylint: disable=import-error
+# pylint: disable=import-error, invalid-name
 
 import time
-from GameUtils import GlobalSettings
 from random import randint
+from GameUtils import GlobalSettings
 
 
 if GlobalSettings.USE_ROS:
@@ -44,14 +44,17 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         pass
 
 
-    def init_ros_node(self):
+    def init_ros_node(self): #pylint: disable=no-self-use
+        """
+        Start up the game connection ROS node
+        """
         rospy.init_node('FSM_Listener_Controller', anonymous=True)
-        
+
     def start_log_listener(self, on_log_callback):
         """
         Start up the Game Log Subscriber node
         """
-        print('Sub Node started')        
+        print('Sub Node started')
         self.log_listener = rospy.Subscriber(TAP_GAME_TO_ROSCORE_TOPIC, TapGameLog,
                                              on_log_callback)
 
@@ -102,7 +105,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         # fill in command and any params:
         msg.command = command
         if len(args) > 0:
-            msg.params = args[0]        
+            msg.params = args[0]
         self.game_commander.publish(msg)
         rospy.loginfo(msg)
 
@@ -185,13 +188,12 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 msg.motion = JiboAction.EYE_FIDGET
 
             if command == 'REACT_TO_BEAT':
-                msg.do_motion = True                
-                msg.do_lookat = False                
-                msg.motion = "Misc/Frustrated_01_04.keys"                
-                               
+                msg.do_motion = True
+                msg.do_lookat = False
+                msg.motion = "Misc/Frustrated_01_04.keys"
+
         else:
             if command == 'LOOK_AT_TABLET':
-                
                 lookat_pos = Vec3()
                 lookat_pos.x = 0
                 lookat_pos.y = -10
@@ -200,7 +202,6 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 msg.look_at = lookat_pos
 
             if command == 'LOOK_CENTER':
-                
                 lookat_pos = Vec3()
                 lookat_pos.x = 0
                 lookat_pos.y = 10
@@ -209,50 +210,48 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 msg.look_at = lookat_pos
 
             elif command == 'RING_ANSWER_CORRECT':
-                msg.motion = "PERKUP"                
+                msg.motion = "PERKUP"
 
             elif command == 'REACT_TO_BEAT_CORRECT':
-                num = randint(0,2)
+                num = randint(0, 2)
                 if num == 0:
                     msg.motion = "FRUSTRATED"
                 elif num == 1:
                     msg.wav_filename = "vocab_games/effects/angry2.wav"
                 elif num == 2:
                     msg.wav_filename = "vocab_games/effects/angry4.wav"
-                
+
 
             elif command == 'REACT_TO_BEAT_WRONG':
-                num = randint(0,2)
+                num = randint(0, 2)
                 if num == 0:
                     msg.wav_filename = "vocab_games/effects/laugh1.wav"
                 elif num == 1:
-                    msg.wav_filename = "vocab_games/effects/laugh2.wav"                
+                    msg.wav_filename = "vocab_games/effects/laugh2.wav"
 
             elif command == 'REACT_ANSWER_CORRECT':
                 msg.motion = "SMILE"
 
             elif command == 'PRONOUNCE_CORRECT':
                 msg.enqueue = True
-                msg.wav_filename = "vocab_games/words/" + args[0].lower() + ".wav"                
+                msg.wav_filename = "vocab_games/words/" + args[0].lower() + ".wav"
 
             elif command == 'WIN_MOTION':
                 msg.motion = TegaAction.MOTION_EXCITED
-                
+
             elif command == 'WIN_SPEECH':
-                pass                
-                # msg.wav_filename = "vocab_games/effects/woohoo1.wav"                
+                pass
+                # msg.wav_filename = "vocab_games/effects/woohoo1.wav"
 
             elif command == 'LOSE_MOTION':
                 msg.motion = TegaAction.MOTION_SAD
 
             elif command == 'LOSE_SPEECH':
-                pass                
+                pass
                 # msg.wav_filename = "vocab_games/effects/sigh1.wav"
-            elif command == 'PLAYER_PROMPT':     
-                msg.wav_filename = "vocab_games/effects/puzzled1.wav"                           
-                
+            elif command == 'PLAYER_PROMPT':
+                msg.wav_filename = "vocab_games/effects/puzzled1.wav"
 
-            
             # USE TEGA
 
         if GlobalSettings.USE_TEGA:

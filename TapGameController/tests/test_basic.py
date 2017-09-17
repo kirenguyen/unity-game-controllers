@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .context import TapGameFSM
+from .. import TapGameFSM
 
 import unittest
 
@@ -11,6 +11,9 @@ class BasicTestSuite(unittest.TestCase):
     def test_absolute_truth_and_meaning(self):
         assert True
 
+    def test_imports(self):
+        assert (not TapGameFSM is None)
 
-if __name__ == '__main__':
-    unittest.main()
+
+
+unittest.main()

@@ -13,7 +13,7 @@ from random import randint
 from transitions import Machine
 
 from GameUtils import GlobalSettings
-from GameUtils.PronunciationUtils import PronunciationHandler
+from GameUtils.PronunciationUtils.PronunciationUtils import PronunciationUtils
 from GameUtils.AudioRecorder import AudioRecorder
 from .AgentModel import ActionSpace
 from .AgentModel import AgentModel
@@ -56,7 +56,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     student_model = StudentModel()
     agent_model = AgentModel()
     recorder = AudioRecorder()
-    pronunciation_handler = PronunciationHandler()
+    pronunciation_utils = PronunciationUtils()
     ros_node_mgr = ROSNodeMgr()
     current_round_word = ""
     current_round_action = None
@@ -244,7 +244,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
                     for word_results in word_score_list:
                         print("Message for ROS")
                         self.letters, self.passed = \
-                            self.pronunciation_handler.process_speechace_word_results(word_results)
+                            self.pronunciation_utils.process_speechace_word_results(word_results)
                         print(self.letters)
                         print(self.passed)
                 else:

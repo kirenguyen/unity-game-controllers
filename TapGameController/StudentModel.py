@@ -37,10 +37,10 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
                            if isinstance(getattr(Curriculum, p), str)
                            and not p.startswith('__')]
 
-        self.pronunciationUtils = PronunciationUtils()
+        self.pronunciation_utils = PronunciationUtils()
 
         self.loaded_covariance_matrix = np.load(
-            os.getcwd() + self.PronunciationUtils.COVARIANCE_PATH + '.npy')
+            os.getcwd() + self.pronunciation_utils.COVARIANCE_PATH + '.npy')
 
         # these parameters govern the assumed Gaussian noise added to the child's recorded
         # pronunciation assessment

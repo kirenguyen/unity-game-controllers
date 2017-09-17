@@ -11,12 +11,11 @@ import operator
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats
-import spacy
+import os
 
-from GameUtils.GlobalSettings import USE_SPACY
 from GameUtils.GlobalSettings import DO_ACTIVE_LEARNING
 from GameUtils.Curriculum import Curriculum
-from GameUtils.PronunciationUtils import PronunciationHandler
+from GameUtils.PronunciationUtils.PronunciationUtils import PronunciationUtils
 
 from .AgentModel import ActionSpace
 
@@ -33,15 +32,15 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
 
     def __init__(self):
 
-        if USE_SPACY:
-            self.nlp = spacy.load('en') #sets spacy up with the english language model
-
         #fancy python one-liner to read all string attributes off of a class
         self.curriculum = [p for p in dir(Curriculum)
                            if isinstance(getattr(Curriculum, p), str)
                            and not p.startswith('__')]
 
-        self.pronunciationHandler = PronunciationHandler()                           
+        self.pronunciationUtils = PronunciationUtils()
+
+        self.loaded_covariance_matrix = np.load(
+            os.getcwd() + self.PronunciationUtils.COVARIANCE_PATH + '.npy')
 
         # these parameters govern the assumed Gaussian noise added to the child's recorded
         # pronunciation assessment
@@ -78,7 +77,7 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         # we only care about evaluating the GP at this finite collection of points
         x_test = self.curriculum
 
-        K_ss = self.concept_net_kernel(x_test, x_test) #the Kernel Matrix for the words
+        K_ss = self.psdm_kernel(x_test, x_test) #the Kernel Matrix for the words
 
         # Get cholesky decomposition (square root) of the
         # covariance matrix
@@ -112,8 +111,8 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         print(self.Y_train)
         print(self.means)
         print(self.variances)
-        K = self.concept_net_kernel(self.X_train, self.X_train)
-        K_ss = self.concept_net_kernel(Xtest, Xtest)
+        K = self.psdm_kernel(self.X_train, self.X_train)
+        K_ss = self.psdm_kernel(Xtest, Xtest)
 
         L = np.linalg.cholesky(K + 0.00005 * np.eye(len(self.X_train)) +
                                ((self.noise_sigma ** 2) * np.eye(len(self.X_train))))
@@ -123,7 +122,7 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         a = np.linalg.solve(L.T, L_y)
 
         # Compute the mean at our test points.
-        K_s = self.concept_net_kernel(self.X_train, Xtest)
+        K_s = self.psdm_kernel(self.X_train, Xtest)
         mu = self.get_mean(Xtest) + np.dot(K_s.T, a).reshape(len(self.curriculum), )
         #mu = np.dot(K_s.T, a).reshape(len(self.curriculum), ) #zero mean function version
         v = np.linalg.solve(L, K_s)
@@ -193,9 +192,9 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         return np.exp(-.5 * (1 / length_scale) * sqdist)
 
 
-    def concept_net_kernel(self, word_set_a, word_set_b):
+    def psdm_kernel(self, word_set_a, word_set_b):
         """
-        Implements a conceptnet based covariance matrix
+        Calculates word matrix covariance via a phonetic-semantic distance metric
         """
         #k = np.empty((len(word_set_a), len(word_set_b),))
 
@@ -211,32 +210,17 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
 
         return k
 
-    def get_word_cov(self, word_a, word_b):
+    def get_word_cov(self, word1, word2):
         """
-        Currently, just implements a letter counting distance metric.
-        Will eventually incorporate conceptnet and other phonetic metrics
+        Returns specific values from the global covariance matrix
         """
 
-        if word_a == word_b:
-            return 1
+        index1 = self.curriculum.index(word1)
+        index2 = self.curriculum.index(word2)
 
-        score = 0
-        for letter_a in word_a:
-            if letter_a in word_b:
-                score += 1
-
-        for letter_b in word_b:
-            if letter_b in word_a:
-                score += 1
-
-        ratio = (score / (len(word_a) + len(word_b)))
-        #print("letter counting similarity between " + word_a + " and " + word_b)
-        #print(round(ratio, 2))
-        
-        #print("inverse weighted lev distance between " + word_a + " and " + word_b)
-        #print(1 - self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b))
-        #return(1 - self.pronunciationHandler.measure_weighted_levenshtein_distance(word_a,word_b))
-        return (round(ratio, 2))
+        print("covariance between " + word1 + " and " + word2)
+        print(round(self.loaded_covariance_matrix[index1][index2], 3))
+        return round(self.loaded_covariance_matrix[index1][index2], 3)
 
     def get_mean(self, X):
         """

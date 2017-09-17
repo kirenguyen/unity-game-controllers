@@ -4,14 +4,16 @@ Some code remixed from
 http://katbailey.github.io/post/gaussian-processes-for-dummies/
 ^ Great intro article for rolling your own GP
 """
+# pylint: disable=import-error
 import random
 
 import math
 import operator
+import os
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats
-import os
+
 
 from GameUtils.GlobalSettings import DO_ACTIVE_LEARNING
 from GameUtils.Curriculum import Curriculum
@@ -117,7 +119,7 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         L = np.linalg.cholesky(K + 0.00005 * np.eye(len(self.X_train)) +
                                ((self.noise_sigma ** 2) * np.eye(len(self.X_train))))
 
-        L_y = np.linalg.solve(L, (list(map(operator.sub, self.Y_train, self.get_mean(self.X_train))))) #pythonic way to subtract two lists
+        L_y = np.linalg.solve(L, (list(map(operator.sub, self.Y_train, self.get_mean(self.X_train))))) #pythonic way to subtract two lists #pylint: disable=line-too-long
         #L_y = np.linalg.solve(L, self.Y_train) #zero mean function version
         a = np.linalg.solve(L.T, L_y)
 
@@ -177,7 +179,8 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
                 chosen_word = self.curriculum[highest_var_index]
 
         else:
-            chosen_word = self.curriculum[random.randint(0, len(self.curriculum) - 1)] #randint is inclusive
+            # randint is inclusive
+            chosen_word = self.curriculum[random.randint(0, len(self.curriculum) - 1)]
 
 
         return chosen_word
@@ -229,12 +232,12 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         """
 
         #handles both vectors and scalars
-        if (len(X) > 0):
-            return ([0.5] * len(X))
+        if len(X) > 0:
+            return [0.5] * len(X)
         else:
             return 0.5
 
-       
+
 
 
     def plot_curricular_distro(self):

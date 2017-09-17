@@ -2,6 +2,7 @@
 This Module handles all aspects of the robot/agent's decision-making,
 modeling, and gameplay.
 """
+# pylint: disable=import-error
 import random
 from GameUtils.GlobalSettings import DO_EPSILON_INCREASING_POLICY # pylint: disable=import-error
 

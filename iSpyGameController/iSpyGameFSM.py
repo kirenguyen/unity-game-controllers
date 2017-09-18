@@ -16,7 +16,7 @@ from transitions import Machine
 # from GameUtils import Curriculum
 from GameUtils import GlobalSettings
 from GameUtils.GlobalSettings import iSpyGameStates as gs
-from GameUtils.PronunciationUtils import PronunciationHandler
+from GameUtils.PronunciationUtils.PronunciationUtils import PronunciationUtils
 
 # from StudentModel import StudentModel
 
@@ -67,7 +67,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		self.task_controller = iSpyTaskController()
 
-		self.results_handler = PronunciationHandler()
+		self.results_handler = PronunciationUtils()
 
 		# Times entered explore or mission mode not including on game start
 		self.entered_explore_mode = 0

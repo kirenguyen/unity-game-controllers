@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 killall rosmaster
 killall roslaunch
 sleep 0.5s

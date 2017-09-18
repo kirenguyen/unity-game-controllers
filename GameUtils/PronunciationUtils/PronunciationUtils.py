@@ -65,7 +65,7 @@ class PronunciationUtils:
 
 		for i in range(len(phonemes)):
 			score = phoneme_results[i]["quality_score"]
-			if score >= SCORE_THRESHOLD:
+			if score >= PronunciationUtils.SCORE_THRESHOLD:
 				pass_list.append("1")
 			else:
 				pass_list.append("0")

@@ -41,7 +41,7 @@ class AudioRecorder:
     EXTERNAL_MIC_NAME = 'USB audio CODEC: Audio (hw:1,0)'
 
 
-    def __init__(self, participant_id=0, experimenter_id='Leo'):
+    def __init__(self, participant_id='p00', experimenter_id='Leo'):
         # True if the phone is currently recording
         self.is_recording = False
 
@@ -64,6 +64,8 @@ class AudioRecorder:
         self.start_recording_time = 0
 
         #
+        self.participant_id = participant_id
+        self.experimenter_id = experimenter_id
         self.WAV_OUTPUT_FILENAME = self.participant_id + '_' + self.experimenter_id + '.wav'
 
 

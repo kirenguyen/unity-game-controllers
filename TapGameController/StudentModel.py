@@ -221,8 +221,8 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         index1 = self.curriculum.index(word1)
         index2 = self.curriculum.index(word2)
 
-        print("covariance between " + word1 + " and " + word2)
-        print(round(self.loaded_covariance_matrix[index1][index2], 3))
+        #print("covariance between " + word1 + " and " + word2)
+        #print(round(self.loaded_covariance_matrix[index1][index2], 3))
         return round(self.loaded_covariance_matrix[index1][index2], 3)
 
     def get_mean(self, X):

@@ -42,6 +42,8 @@ We recommend using Anaconda with Python 2.7 as your default system-wide Python e
 	
 	UBUNTU
 	`sudo apt-get install portaudio19-dev`
+	`sudo apt-get install xdotool` 
+	`sudo apt-get install wmctrl` 
 	`pip install rospkg`
 	`pip install catkin_pkg`
 	`pip install pymongo`

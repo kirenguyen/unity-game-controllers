@@ -122,7 +122,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
          'after': 'on_game_replay'},
     ]
 
-    def __init__(self):
+    def __init__(self, participant_id, experimenter_name):
 
         self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
                                      initial='GAME_START')
@@ -131,6 +131,8 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         # self.student_model.plot_curricular_distro()
         self.ros_node_mgr.init_ros_node()
         self.ros_node_mgr.send_robot_cmd("LOOK_CENTER")
+        self.participant_id = participant_id
+        self.experimenter_name = experimenter_name
 
     def on_init_first_round(self):
         """
@@ -234,7 +236,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
                 self.passed = ['1'] * len(self.letters)
                 print ("NO RECORDING SO YOU AUTOMATICALLY FAIL")
             else: 
-                audio_file = AudioRecorder.WAV_OUTPUT_FILENAME
+                audio_file = self.recorder.WAV_OUTPUT_FILENAME
                 word_score_list = self.recorder.speechace(audio_file, self.current_round_word)
                 print("WORD SCORE LIST")
                 print(word_score_list)

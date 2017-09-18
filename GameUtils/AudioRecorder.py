@@ -36,13 +36,12 @@ class AudioRecorder:
     RATE = 16000
     RECORD_SECONDS = 4
     CHUNK = 16000
-    WAV_OUTPUT_FILENAME = "audioFile.wav"
     ANDROID_MIC_TO_ROS_TOPIC = 'android_audio'
 
     EXTERNAL_MIC_NAME = 'USB audio CODEC: Audio (hw:1,0)'
 
 
-    def __init__(self):
+    def __init__(self, participant_id=0, experimenter_id='Leo'):
         # True if the phone is currently recording
         self.is_recording = False
 
@@ -63,6 +62,9 @@ class AudioRecorder:
 
         # placeholder variable so we can see how long we recorded for
         self.start_recording_time = 0
+
+        #
+        self.WAV_OUTPUT_FILENAME = self.participant_id + '_' + self.experimenter_id + '.wav'
 
 
     def audio_data_generator(self, buff, buffered_audio_data):
@@ -209,7 +211,7 @@ class AudioRecorder:
             elapsed_time = time.time() - self.start_recording_time
             print("recorded speech for " + str(elapsed_time) + " seconds")
             print('RECORDING SUCCESSFUL, writing to wav')
-            wav_file = wave.open(AudioRecorder.WAV_OUTPUT_FILENAME, 'wb')
+            wav_file = wave.open(self.WAV_OUTPUT_FILENAME, 'wb')
             wav_file.setnchannels(AudioRecorder.CHANNELS)
             wav_file.setsampwidth(2)
             wav_file.setframerate(AudioRecorder.RATE)

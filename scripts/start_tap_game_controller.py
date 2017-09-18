@@ -9,19 +9,13 @@ import sys
 import _thread as thread
 
 
-import warnings
-
-def fxn():
-    warnings.warn("deprecated", DeprecationWarning)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-
-
 def signal_handler(signal, frame):
     print('Closing!')
     sys.exit()
 
-def main():
+def main(argv):
+
+    #TegaDemo(argv[0],int(argv[1]),argv[2],argv[3])
 
     my_FSM = TapGameFSM.TapGameFSM()
     thread.start_new_thread(my_FSM.ros_node_mgr.start_log_listener, (my_FSM.on_log_received,))
@@ -42,5 +36,14 @@ def main():
 
     ##
 
-fxn()
-main()
+
+
+
+if __name__ == "__main__":
+    if len(sys.argv) == 2:
+        main()
+    else:
+        print("Usage: python -m scripts.start_tap_game_controller <p-ID> <experimenter_name>")
+        exit()
+
+

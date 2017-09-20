@@ -7,7 +7,8 @@ import os
 import numpy as np
 
 
-nlp = spacy.load('en')  # sets spacy up with the english language model
+#nlp = spacy.load('en')  # sets spacy up with the basic english language model (5000 words)
+nlp = spacy.load('en_core_web_md') #this contains the FULL english word vector model (about 1mm words)
 myUtils = PronunciationUtils()
 myCurriculum = [p for p in dir(Curriculum)
                        if isinstance(getattr(Curriculum, p), str)

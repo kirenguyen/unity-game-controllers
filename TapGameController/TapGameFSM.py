@@ -40,6 +40,7 @@ FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameL
                     TapGameLog.RESET_NEXT_ROUND_DONE, TapGameLog.SHOW_GAME_END_DONE,
                     TapGameLog.PLAYER_BEAT_ROBOT, TapGameLog.RESTART_GAME]
 
+EXPERIMENT_PHASES = ["practice", "experiment", "posttest"]
 
 
 class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
@@ -122,17 +123,20 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
          'after': 'on_game_replay'},
     ]
 
-    def __init__(self, participant_id, experimenter_name):
+    def __init__(self, participant_id, experimenter_name, starting_phase):
 
         self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
                                      initial='GAME_START')
 
-        # print('graphing distribution!')        
-        # self.student_model.plot_curricular_distro()
         self.ros_node_mgr.init_ros_node()
         self.ros_node_mgr.send_robot_cmd("LOOK_CENTER")
         self.participant_id = participant_id
         self.experimenter_name = experimenter_name
+        self.starting_phase = starting_phase
+
+        if self.starting_phase not in EXPERIMENT_PHASES:
+            print("starting phase " + str(self.starting_phase) + " is not a valid experiment phase")
+            exit()
 
     def on_init_first_round(self):
         """

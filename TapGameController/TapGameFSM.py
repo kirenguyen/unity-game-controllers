@@ -55,8 +55,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     robot_score = 0
 
     student_model = StudentModel()
-    agent_model = AgentModel()
-    recorder = AudioRecorder()
+    agent_model = AgentModel()    
     pronunciation_utils = PronunciationUtils()
     ros_node_mgr = ROSNodeMgr()
     current_round_word = ""
@@ -138,6 +137,9 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
             print("starting phase " + str(self.starting_phase) + " is not a valid experiment phase")
             exit()
 
+        # Initializes a new audio recorder object if one hasn't been created
+        self.recorder = AudioRecorder(self.participant_id, self.experimenter_name)                     
+
     def on_init_first_round(self):
         """
         Called when the game registers with the controller
@@ -215,14 +217,10 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         Should send msg to Unity game telling it to load the pronunciation screen
         And also start recording from the phone for 5 seconds + writing to wav
         """
-        print('got to player ring in cb')
-
-        # Initializes a new audio recorder object if one hasn't been created
-        if self.recorder is None:
-            self.recorder = AudioRecorder()
+        print('got to player ring in cb')        
 
         #SEND SHOW_PRONUNCIATION_PAGE MSG
-        self.recorder.start_recording()
+        self.recorder.start_recording(self.current_round_word)
         time.sleep(RECORD_TIME_MS / 1000.0)
         self.recorder.stop_recording()
 
@@ -240,8 +238,8 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
                 self.passed = ['1'] * len(self.letters)
                 print ("NO RECORDING SO YOU AUTOMATICALLY FAIL")
             else: 
-                audio_file = self.recorder.WAV_OUTPUT_FILENAME
-                word_score_list = self.recorder.speechace(audio_file, self.current_round_word)
+                audio_file = self.recorder.WAV_OUTPUT_FILENAME_PREFIX + self.current_round_word + '.wav'
+                word_score_list = self.recorder.speechace(audio_file)
                 print("WORD SCORE LIST")
                 print(word_score_list)
 

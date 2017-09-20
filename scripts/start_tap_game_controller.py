@@ -40,11 +40,11 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 3:
+    if len(sys.argv) == 4:
         main(sys.argv)
     else:
         print(sys.argv)
-        print("Usage: python -m scripts.start_tap_game_controller <p-ID> <experimenter_name>")
+        print("Usage: python -m scripts.start_tap_game_controller <p-ID> <experimenter_name> <experiment_phase>")
         exit()
 
 

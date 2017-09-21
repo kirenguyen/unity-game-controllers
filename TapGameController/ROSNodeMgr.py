@@ -6,8 +6,8 @@ This is the main class that manages the creation / parsing of ROS Node Communica
 
 import time
 from GameUtils import GlobalSettings
-from . import JiboBehaviors
-from . import TegaBehaviors
+from .JiboBehaviors import JiboBehaviors
+from .TegaBehaviors import TegaBehaviors
 
 
 if GlobalSettings.USE_ROS:
@@ -123,9 +123,9 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
 
         # choose which platform
         if GlobalSettings.USE_TEGA:
-            msg = TegaBehaviors.get_msg_from_behavior(command)
+            msg = TegaBehaviors.get_msg_from_behavior(command, args)
         else:
-            msg = JiboBehaviors.get_msg_from_behavior(command)
+            msg = JiboBehaviors.get_msg_from_behavior(command, args)
 
         # add header
         self.robot_commander.publish(msg)  # would be nice to guarantee message performance here

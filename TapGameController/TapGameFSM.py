@@ -195,7 +195,8 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
             self.passed = ['1'] * len(self.letters) #robot always gets it right if intentional ring
 
         elif self.current_round_action == ActionSpace.LATE_RING:
-            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.PRONOUNCE_WRONG_S)
+            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.PRONOUNCE_WRONG_SOUND)
+            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.PRONOUNCE_WRONG_SPEECH)
             self.letters = list(self.current_round_word)
             self.passed = ['0'] * len(self.letters) #robot always gets it wrong if late ring
 
@@ -454,6 +455,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
                 self.current_round_action = ActionSpace.LATE_RING # Change to "LATE_RING"
                 self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LATE_RING)
                 self.ros_node_mgr.send_game_cmd(TapGameCommand.ROBOT_RING_IN)
+                rang_in = True
             else:
                 self.ros_node_mgr.send_robot_cmd(RobotBehaviors.PLAYER_RING_PROMPT)
                 self.ros_node_mgr.send_robot_cmd(RobotBehaviors.EYE_FIDGET)

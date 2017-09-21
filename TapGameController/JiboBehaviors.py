@@ -26,8 +26,8 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     """
     A Class definition for "cosmetic" robot behavior strings, which get translated by the ROSNodeMgr
     """
-
-    def get_msg_from_behavior(command, args): #pylint: disable=too-many-branches, too-many-statements
+    @staticmethod
+    def get_msg_from_behavior(command, *args): #pylint: disable=too-many-branches, too-many-statements
 
         msg = JiboAction()
         msg.header = Header()
@@ -65,7 +65,8 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_motion = False
             msg.do_tts = True
             msg.do_lookat = False
-            msg.tts_text = args[0]
+            msg.tts_text = args[0][0]
+            print(args[0][0])
 
         elif command == RobotBehaviors.PRONOUNCE_WRONG_SOUND:
             msg.do_motion = False

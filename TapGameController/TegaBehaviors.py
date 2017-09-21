@@ -27,8 +27,8 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     """
     A Class definition for "cosmetic" robot behavior strings, which get translated by the ROSNodeMgr
     """
-
-    def get_msg_from_behavior(command, args): #pylint: disable=too-many-branches, too-many-statements
+    @staticmethod
+    def get_msg_from_behavior(command, *args): #pylint: disable=too-many-branches, too-many-statements
 
         msg = TegaAction()
         msg.header = Header()
@@ -75,7 +75,7 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
 
         elif command == RobotBehaviors.PRONOUNCE_CORRECT:
             msg.enqueue = True
-            msg.wav_filename = "vocab_games/words/" + args[0].lower() + ".wav"
+            msg.wav_filename = "vocab_games/words/" + args[0][0].lower() + ".wav"
 
         elif command == RobotBehaviors.WIN_MOTION:
             msg.motion = TegaAction.MOTION_EXCITED

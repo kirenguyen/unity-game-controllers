@@ -13,6 +13,7 @@ class ActionSpace(): # pylint: disable=too-few-public-methods
     This class defines constants signifying the potential actions an agent can take
     """
     RING_ANSWER_CORRECT = "RING_ANSWER_CORRECT"
+    LATE_RING = "LATE_RING"
     #RING_ANSWER_WRONG = "RING_ANSWER_WRONG"
     DONT_RING = "DONT_RING"
 

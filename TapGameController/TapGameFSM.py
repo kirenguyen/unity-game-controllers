@@ -186,12 +186,19 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
         # Wait a few seconds, pronounce word, then wait again
         time.sleep((RECORD_TIME_MS / 2) / 1000.0)
-        self.ros_node_mgr.send_robot_cmd("PRONOUNCE_CORRECT", self.current_round_word)
+        if self.current_round_action == ActionSpace.RING_ANSWER_CORRECT:
+            self.ros_node_mgr.send_robot_cmd("PRONOUNCE_CORRECT", self.current_round_word)
+            self.letters = list(self.current_round_word)
+            self.passed = ['1'] * len(self.letters) #TODO: robot always gets it perfect if it meant to
+
+        elif self.current_round_action == ActionSpace.LATE_RING:
+            self.ros_node_mgr.send_robot_cmd("PRONOUNCE_WRONG", self.current_round_word)
+            self.letters = list(self.current_round_word)
+            self.passed = ['0'] * len(self.letters)
+
         time.sleep((RECORD_TIME_MS / 2) / 1000.0)
 
-        # Move to evaluation phase
-        self.letters = list(self.current_round_word)
-        self.passed = ['1'] * len(self.letters) #TODO: robot always gets it perfect for now
+        # Move to evaluation phase       
 
         self.robot_pronounce_eval()
 
@@ -303,10 +310,16 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         results_params['letters'] = self.letters
         results_params['passed'] = self.passed
 
-        self.robot_score += 1
+        
 
         self.ros_node_mgr.send_game_cmd(TapGameCommand.SHOW_RESULTS, json.dumps(results_params))
-        self.ros_node_mgr.send_robot_cmd("REACT_ANSWER_CORRECT")
+        
+        if self.current_round_action == ActionSpace.RING_ANSWER_CORRECT:
+            self.robot_score += 1
+            self.ros_node_mgr.send_robot_cmd("REACT_ANSWER_CORRECT")
+        elif self.current_round_action == ActionSpace.LATE_RING:
+            self.ros_node_mgr.send_robot_cmd("REACT_ANSWER_WRONG")
+        
         time.sleep(SHOW_RESULTS_TIME_MS / 1000.0)
         self.handle_round_end()
 
@@ -429,13 +442,14 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         #send message every 2s in case it gets dropped
     def send_player_prompts_til_input_received(self):
         start_time = time.time()
+        rang_in = False
 
         time.sleep(5)
         while(self.state == "ROUND_ACTIVE"):                
             time.sleep(3 + randint(1,3))
 
-            if time.time() - start_time > 10:
-                self.current_round_action = ActionSpace.RING_ANSWER_CORRECT # Change to "LATE_RING"
+            if time.time() - start_time > 10 and not rang_in:
+                self.current_round_action = ActionSpace.LATE_RING # Change to "LATE_RING"
                 self.ros_node_mgr.send_robot_cmd(self.current_round_action)                       
                 self.ros_node_mgr.send_game_cmd(TapGameCommand.ROBOT_RING_IN)
             else:

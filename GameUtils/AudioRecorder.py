@@ -208,7 +208,7 @@ class AudioRecorder:
         self.start_recording_time = time.time()
 
         if GlobalSettings.USE_USB_MIC:
-            self.record_usb_audio(3.5)
+            self.record_usb_audio(2.5)
         else: #try to use streaming audio from Android device
             thread.start_new_thread(self.record_android_audio, (self.buffered_audio_data,))
             time.sleep(.1)

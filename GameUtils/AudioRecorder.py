@@ -112,7 +112,7 @@ class AudioRecorder:
             self.valid_recording = False
             return
 
-    def record_usb_audio(self, record_length):
+    def record_usb_audio(self, record_length_ms):
         mic_index = None
         audio = pyaudio.PyAudio()
         info = audio.get_host_api_info_by_index(0)
@@ -145,8 +145,9 @@ class AudioRecorder:
             #     buffered_audio_data.append(data)
             print(self.RATE)
             print(self.CHUNK)
-            print(record_length)
-            for i in range(math.ceil((self.RATE / self.CHUNK) * record_length)):
+            print(record_length_ms)
+
+            for i in range(math.ceil((self.RATE / self.CHUNK) * (record_length_ms / 1000))):
                 data = stream.read(self.CHUNK)
                 frames.append(data)
 
@@ -161,6 +162,10 @@ class AudioRecorder:
         wav_file.setframerate(AudioRecorder.RATE)
         wav_file.writeframes(b''.join(frames))
         wav_file.close()
+
+        elapsed_time = time.time() - self.start_recording_time
+        print("recorded speech for " + str(elapsed_time) + " seconds")
+        print('RECORDING SUCCESSFUL, writing to wav')
         return
 
     def speechace(self, audio_file):
@@ -197,7 +202,7 @@ class AudioRecorder:
             return
 
 
-    def start_recording(self, expected_text):
+    def start_recording(self, expected_text, recording_length_ms):
         """
         Starts a new thread that records the microphones audio.
         """
@@ -208,7 +213,7 @@ class AudioRecorder:
         self.start_recording_time = time.time()
 
         if GlobalSettings.USE_USB_MIC:
-            self.record_usb_audio(2.5)
+            self.record_usb_audio(recording_length_ms)
         else: #try to use streaming audio from Android device
             thread.start_new_thread(self.record_android_audio, (self.buffered_audio_data,))
             time.sleep(.1)
@@ -217,16 +222,16 @@ class AudioRecorder:
     def stop_recording(self):
         """
         ends the recording and makes the data into
-        a wav file
+        a wav file. Only saves out if we are recording from Tega
         """
         self.is_recording = False  # Ends the recording
         self.has_recorded += 1
         time.sleep(.1)  # Gives time to return the data
 
         #only if we are actually getting streaming audio data
-        if len(self.buffered_audio_data) > 0:
+        if not GlobalSettings.USE_USB_MIC and (self.buffered_audio_data) > 0:
             elapsed_time = time.time() - self.start_recording_time
-            print("recorded speech for " + str(elapsed_time) + " seconds")
+            print("recorded speech from Tega for " + str(elapsed_time) + " seconds")
             print('RECORDING SUCCESSFUL, writing to wav')
             wav_file = wave.open(self.WAV_OUTPUT_FILENAME_PREFIX + self.expected_text + '.wav', 'wb')
             wav_file.setnchannels(AudioRecorder.CHANNELS)

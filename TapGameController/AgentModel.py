@@ -1,6 +1,5 @@
 """
-This Module handles all aspects of the robot/agent's decision-making,
-modeling, and gameplay.
+This Module handles aspects of the agent architecture's decision-making and gameplay.
 """
 # pylint: disable=import-error
 import random

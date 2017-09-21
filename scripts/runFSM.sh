@@ -10,8 +10,8 @@ echo
 
 sleep 0.5s
 echo "IM HERE"
-python -m scripts.start_tap_game_controller '$1' '$2' '$3'
-#xterm -geometry 45x20+600+0 -T "Main FSM" -e bash -c "python -m scripts.start_tap_game_controller '$1' '$2'"
+#python -m scripts.start_tap_game_controller '$1' '$2' '$3'
+xterm -geometry 45x20+600+0 -T "Main FSM" -e bash -c "python -m scripts.start_tap_game_controller '$1' '$2' '$3'"
 #xterm -geometry 45x20+300+350 -T "Affect Recognition" -e bash -c $CATKIN_DIR/devel/lib/affect_processing/affect_processing &
 #xterm -geometry 45x20+600+350 -T "Affect Result" -e bash -c 'python tega/cognition/affect_interaction.py'
 #xterm --title "Face Recognition" -e "python tega/cognition/face_recognition.py train=false"

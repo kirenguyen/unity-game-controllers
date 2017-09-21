@@ -16,7 +16,7 @@ def signal_handler(signal, frame):
 def main(argv):
 
     #TegaDemo(argv[0],int(argv[1]),argv[2],argv[3])
-
+    print(argv)
     my_FSM = TapGameFSM.TapGameFSM(argv[1], argv[2], argv[3])
     thread.start_new_thread(my_FSM.ros_node_mgr.start_log_listener, (my_FSM.on_log_received,))
     print('nodes started!')

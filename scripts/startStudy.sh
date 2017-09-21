@@ -12,7 +12,7 @@ if ! [[ $list =~ (^| )$1($| ) ]]; then
 fi
 
 #check $2
-list='sam'
+list="sam"
 if ! [[ $list =~ (^| )$2($| ) ]]; then
   echo "error: experimenter [$2] does not exist"
   echo "Usage: ./startStudy.sh <participant_id> <experimenter_name> <study_phase>"
@@ -21,7 +21,7 @@ if ! [[ $list =~ (^| )$2($| ) ]]; then
 fi
 
 #check $3
-list='practice experiment posttest'
+list="practice experiment posttest"
 if ! [[ $list =~ (^| )$3($| ) ]]; then
   echo "error: study phase [$3] does not exist"
   echo "Usage: ./startStudy.sh <participant_id> <experimenter_name> <study_phase>"

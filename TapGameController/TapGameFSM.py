@@ -54,7 +54,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     robot_score = 0
 
     student_model = StudentModel()
-    agent_model = AgentModel()    
+    agent_model = AgentModel()
     pronunciation_utils = PronunciationUtils()
     ros_node_mgr = ROSNodeMgr()
     current_round_word = ""

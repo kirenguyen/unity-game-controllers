@@ -15,6 +15,7 @@ from transitions import Machine
 from GameUtils import GlobalSettings
 from GameUtils.PronunciationUtils.PronunciationUtils import PronunciationUtils
 from GameUtils.AudioRecorder import AudioRecorder
+from .StudentModel import StudentModel
 
 from .ROSNodeMgr import ROSNodeMgr
 from GameUtils.Curriculum import Curriculum
@@ -39,7 +40,7 @@ FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameL
                     TapGameLog.RESTART_GAME]
 
 
-class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
+class TapGamePosttestFSM: # pylint: disable=no-member, too-many-instance-attributes
     """
     An FSM for the Tap Game. Contains Game Logic and some nodes for interacting w the Unity "View"
     """
@@ -50,6 +51,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     player_score = 0
     robot_score = 0
 
+    student_model = StudentModel()
     pronunciation_utils = PronunciationUtils()
     ros_node_mgr = ROSNodeMgr()
     current_round_word = ""
@@ -113,8 +115,8 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         self.experimenter_name = experimenter_name
         self.experiment_phase = experiment_phase
 
-        if not  self.experiment_phase == 'practice':
-            print(str(self.experiment_phase) + " was not 'practice'")
+        if not self.experiment_phase == 'posttest':
+            print(str(self.experiment_phase) + " was not 'posttest'")
             exit()
 
         # Initializes a new audio recorder object if one hasn't been created

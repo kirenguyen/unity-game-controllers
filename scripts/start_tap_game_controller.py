@@ -1,6 +1,7 @@
 ##USAGE: python -m start_main_controller.py
 
-from TapGameController import TapGameFSM
+from TapGameController.TapGameFSM import TapGameFSM
+from TapGameController.TapGamePosttestFSM import TapGamePosttestFSM
 from unity_game_msgs.msg import TapGameCommand
 import rospy
 import time
@@ -17,10 +18,22 @@ def main(argv):
 
     #TegaDemo(argv[0],int(argv[1]),argv[2],argv[3])
     print(argv)
-    my_FSM = TapGameFSM.TapGameFSM(argv[1], argv[2], argv[3])
-    thread.start_new_thread(my_FSM.ros_node_mgr.start_log_listener, (my_FSM.on_log_received,))
-    print('nodes started!')
-    signal.signal(signal.SIGINT, signal_handler)
+    if (argv[3] == 'practice'):
+        my_FSM = TapGameFSM(argv[1], argv[2], argv[3])
+        thread.start_new_thread(my_FSM.ros_node_mgr.start_log_listener, (my_FSM.on_log_received,))
+        print('nodes started!')
+        signal.signal(signal.SIGINT, signal_handler)
+    elif (argv[3] == 'experiment'):
+        my_FSM = TapGameFSM(argv[1], argv[2], argv[3])
+        thread.start_new_thread(my_FSM.ros_node_mgr.start_log_listener, (my_FSM.on_log_received,))
+        print('nodes started!')
+        signal.signal(signal.SIGINT, signal_handler)
+    elif (argv[3] == 'posttest'):
+        my_FSM = TapGamePosttestFSM(argv[1], argv[2], argv[3])
+        thread.start_new_thread(my_FSM.ros_node_mgr.start_log_listener, (my_FSM.on_log_received,))
+        print('nodes started!')
+        signal.signal(signal.SIGINT, signal_handler)
+    
     #rospy.spin()
 
 

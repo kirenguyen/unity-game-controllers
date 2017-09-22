@@ -139,6 +139,7 @@ class AudioRecorder:
             self.valid_recording = True            
             print('USB Audio Device found, recording!')
             stream = audio.open(format=self.FORMAT, channels=self.CHANNELS, rate=self.RATE, input=True, frames_per_buffer=self.CHUNK, input_device_index=mic_index)
+            #send msg back to game to start speaking?
 
             frames = []
             # while self.is_recording:
@@ -155,19 +156,18 @@ class AudioRecorder:
             # Stops the recording
             stream.stop_stream()
             stream.close()
-        audio.terminate()
+            audio.terminate()
 
-        wav_file = wave.open(self.WAV_OUTPUT_FILENAME_PREFIX + self.expected_text + '.wav', 'wb')
-        wav_file.setnchannels(AudioRecorder.CHANNELS)
-        wav_file.setsampwidth(2)
-        wav_file.setframerate(AudioRecorder.RATE)
-        wav_file.writeframes(b''.join(frames))
-        wav_file.close()
+            wav_file = wave.open(self.WAV_OUTPUT_FILENAME_PREFIX + self.expected_text + '.wav', 'wb')
+            wav_file.setnchannels(AudioRecorder.CHANNELS)
+            wav_file.setsampwidth(2)
+            wav_file.setframerate(AudioRecorder.RATE)
+            wav_file.writeframes(b''.join(frames))
+            wav_file.close()
 
-        elapsed_time = time.time() - self.start_recording_time
-        print("recorded speech for " + str(elapsed_time) + " seconds")
-        print('RECORDING SUCCESSFUL, writing to wav')
-        return
+            elapsed_time = time.time() - self.start_recording_time
+            print("recorded speech for " + str(elapsed_time) + " seconds")
+            print('RECORDING SUCCESSFUL, writing to wav')        
 
     def speechace(self, audio_file):
         """

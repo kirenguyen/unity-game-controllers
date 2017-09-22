@@ -37,7 +37,7 @@ def main(argv):
     
     #rospy.spin()
 
-
+    time.sleep(1)
     while(True):
         try:
            my_FSM.student_model.plot_curricular_distro()

@@ -55,7 +55,6 @@ class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attribu
     player_score = 0
     robot_score = 0
 
-    student_model = StudentModel()
     pronunciation_utils = PronunciationUtils()
     ros_node_mgr = ROSNodeMgr()
     current_round_word = ""
@@ -136,6 +135,8 @@ class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attribu
         self.participant_id = participant_id
         self.experimenter_name = experimenter_name
         self.starting_phase = starting_phase
+
+        self.student_model = StudentModel()
 
         if self.starting_phase not in EXPERIMENT_PHASES:
             print("starting phase " + str(self.starting_phase) + " is not a valid experiment phase")
@@ -283,16 +284,10 @@ class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attribu
         tmp = [int(x) for x in self.passed]
         passed_ratio = (sum(tmp) / len(tmp)) #TODO: do this over phonemes, not letters!
         print("PASSED RATIO WAS" + str(passed_ratio))
-        means, variances = self.student_model.train_and_compute_posterior([self.current_round_word],
-                                                                          [passed_ratio])
+        
 
         if passed_ratio > PASSING_RATIO_THRESHOLD:
             self.player_score += 1
-
-        print("LATEST MEANS / VARS")
-        print(self.student_model.curriculum)
-        print(means)
-        print(variances)
 
         results_params = {}
         results_params['letters'] = self.letters
@@ -428,7 +423,7 @@ class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attribu
         """
         used by FSM to determine whether to start next round or end game
         """
-        return (self.round_index > self.max_rounds)
+        return (self.round_index >= self.max_rounds)
 
     def is_not_last_round(self):
         """

@@ -70,7 +70,8 @@ class AudioRecorder:
         self.WAV_OUTPUT_FILENAME_PREFIX = 'GameUtils/PronunciationUtils/data/recordings/' + self.participant_id + '_' + self.experimenter_id + '_' + self.experiment_phase + '_'
         self.expected_text = None #this dynamically updates each time start_recording is called. It is the current word we expect to be recording
 
-        thread.start_new_thread(self.start_audio_stream, ())
+        if GlobalSettings.USE_USB_MIC: #start recording so we dont have to repoen a new stream every time
+            thread.start_new_thread(self.start_audio_stream, ())
 
 
     def start_audio_stream(self):
@@ -106,7 +107,7 @@ class AudioRecorder:
             print(self.RATE)
             print(self.CHUNK)
 
-            while(True and not self.is_recording):
+            while(not self.is_recording): 
                 data = self.stream.read(self.CHUNK, exception_on_overflow=False) #just read data off the stream so it doesnt overflow
 
 
@@ -221,7 +222,11 @@ class AudioRecorder:
         self.start_recording_time = time.time()
 
         if GlobalSettings.USE_USB_MIC:
-            self.record_usb_audio(recording_length_ms)
+            if self.valid_recording:
+                self.record_usb_audio(recording_length_ms)
+            else: 
+                time.sleep((recording_length_ms / 1000) + 2) #if configured to use USB Mic, but it doesn't exist, then just sleep
+
         else: #try to use streaming audio from Android device
             thread.start_new_thread(self.record_android_audio, (self.buffered_audio_data,))
             time.sleep(.1)

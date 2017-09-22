@@ -41,8 +41,6 @@ FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameL
                     TapGameLog.RESET_NEXT_ROUND_DONE, TapGameLog.SHOW_GAME_END_DONE,
                     TapGameLog.PLAYER_BEAT_ROBOT, TapGameLog.RESTART_GAME]
 
-EXPERIMENT_PHASES = ["practice", "experiment", "posttest"]
-
 
 class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     """
@@ -122,21 +120,21 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
          'after': 'on_game_replay'},
     ]
 
-    def __init__(self, participant_id, experimenter_name, starting_phase):
+    def __init__(self, participant_id, experimenter_name, experiment_phase):
 
         self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
                                      initial='GAME_START')
 
         self.participant_id = participant_id
         self.experimenter_name = experimenter_name
-        self.starting_phase = starting_phase
+        self.experiment_phase = experiment_phase
 
-        if self.starting_phase not in EXPERIMENT_PHASES:
-            print("starting phase " + str(self.starting_phase) + " is not a valid experiment phase")
+        if not  self.experiment_phase == 'experiment':
+            print(str(self.experiment_phase) + " was not 'experiment'")
             exit()
 
         # Initializes a new audio recorder object if one hasn't been created
-        self.recorder = AudioRecorder(self.participant_id, self.experimenter_name)
+        self.recorder = AudioRecorder(self.participant_id, self.experimenter_name, self.experiment_phase)
 
         # Tell robot to look at Tablet
         self.ros_node_mgr.init_ros_node()

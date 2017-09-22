@@ -34,10 +34,9 @@ SIMULATED_ROBOT_RESULTS_TIME_MS = 2500 # time to wait while we "process" robot s
 PASSING_RATIO_THRESHOLD = .65
 
 FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
-                    TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
-                    TapGameLog.PLAYER_RING_IN, TapGameLog.END_ROUND_DONE,
+                    TapGameLog.START_ROUND_DONE, TapGameLog.PLAYER_RING_IN, TapGameLog.END_ROUND_DONE,
                     TapGameLog.RESET_NEXT_ROUND_DONE, TapGameLog.SHOW_GAME_END_DONE,
-                    TapGameLog.PLAYER_BEAT_ROBOT, TapGameLog.RESTART_GAME]
+                    TapGameLog.RESTART_GAME]
 
 
 class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
@@ -105,21 +104,21 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
          'after': 'on_game_replay'},
     ]
 
-    def __init__(self, participant_id, experimenter_name, starting_phase):
+    def __init__(self, participant_id, experimenter_name, experiment_phase):
 
         self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
                                      initial='GAME_START')
 
         self.participant_id = participant_id
         self.experimenter_name = experimenter_name
-        self.starting_phase = starting_phase
+        self.experiment_phase = experiment_phase
 
-        if not  self.starting_phase == 'practice':
-            print("starting phase " + str(self.starting_phase) + " is not a valid experiment phase")
+        if not  self.experiment_phase == 'practice':
+            print(str(self.experiment_phase) + " was not 'practice'")
             exit()
 
         # Initializes a new audio recorder object if one hasn't been created
-        self.recorder = AudioRecorder(self.participant_id, self.experimenter_name)
+        self.recorder = AudioRecorder(self.participant_id, self.experimenter_name, self.experiment_phase)
 
         # Tell robot to look at Tablet
         self.ros_node_mgr.init_ros_node()
@@ -288,7 +287,6 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
                 print('Game Checked in!')
 
             if data.message == TapGameLog.GAME_START_PRESSED:
-                self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LOOK_AT_TABLET)
                 time.sleep(500 / 1000.0)
                 self.init_first_round()  # makes state transition + calls self.on_init_first_round()
 

@@ -41,7 +41,7 @@ class AudioRecorder:
     EXTERNAL_MIC_NAME = 'USB audio CODEC: Audio (hw:1,0)'
 
 
-    def __init__(self, participant_id='p00', experimenter_id='Leo'):
+    def __init__(self, participant_id='p00', experimenter_id='Leo', experiment_phase='practice'):
         # True if the phone is currently recording
         self.is_recording = False
 
@@ -63,10 +63,11 @@ class AudioRecorder:
         # placeholder variable so we can see how long we recorded for
         self.start_recording_time = 0
 
-        #
+        # These variables compose the filename for recorded audio
         self.participant_id = participant_id
         self.experimenter_id = experimenter_id
-        self.WAV_OUTPUT_FILENAME_PREFIX = 'GameUtils/PronunciationUtils/data/recordings/' + self.participant_id + '_' + self.experimenter_id + '_'
+        self.experiment_phase = experiment_phase
+        self.WAV_OUTPUT_FILENAME_PREFIX = 'GameUtils/PronunciationUtils/data/recordings/' + self.participant_id + '_' + self.experimenter_id + '_' + self.experiment_phase + '_'
         self.expected_text = None #this dynamically updates each time start_recording is called. It is the current word we expect to be recording
 
 

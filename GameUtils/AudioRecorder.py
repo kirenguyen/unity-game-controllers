@@ -33,7 +33,7 @@ class AudioRecorder:
     # CONSTANTS
     FORMAT = pyaudio.paInt16
     CHANNELS = 1
-    RATE = 16000
+    RATE = 48000
 
     CHUNK = 16000
     ANDROID_MIC_TO_ROS_TOPIC = 'android_audio'
@@ -69,6 +69,46 @@ class AudioRecorder:
         self.experiment_phase = experiment_phase
         self.WAV_OUTPUT_FILENAME_PREFIX = 'GameUtils/PronunciationUtils/data/recordings/' + self.participant_id + '_' + self.experimenter_id + '_' + self.experiment_phase + '_'
         self.expected_text = None #this dynamically updates each time start_recording is called. It is the current word we expect to be recording
+
+        thread.start_new_thread(self.start_audio_stream, ())
+
+
+    def start_audio_stream(self):
+        mic_index = None
+        audio = pyaudio.PyAudio()
+        info = audio.get_host_api_info_by_index(0)
+        numdevices = info.get('deviceCount')
+
+        #print(numdevices)
+        #print("# of devices")
+
+        for i in range(0, numdevices):
+
+            #print(audio.get_device_info_by_host_api_device_index(0, i).get('name'))
+            if (audio.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
+                if audio.get_device_info_by_host_api_device_index(0, i).get('name') == self.EXTERNAL_MIC_NAME:
+                    mic_index = i
+                    break
+
+        if mic_index == None:
+            self.valid_recording = False
+            print('NOT RECORDING, NO USB AUDIO DEVICE FOUND!')
+            pass
+        else:
+            # start Recording
+            self.valid_recording = True            
+            print('USB Audio Device found, recording!')
+            self.stream = audio.open(format=self.FORMAT, channels=self.CHANNELS, rate=self.RATE, input=True, frames_per_buffer=self.CHUNK, input_device_index=mic_index)
+
+            # while self.is_recording:
+            #     data = stream.read(self.CHUNK)
+            #     buffered_audio_data.append(data)
+            print(self.RATE)
+            print(self.CHUNK)
+
+            while(True and not self.is_recording):
+                data = self.stream.read(self.CHUNK, exception_on_overflow=False) #just read data off the stream so it doesnt overflow
+
 
 
     def audio_data_generator(self, buff, buffered_audio_data):
@@ -114,49 +154,16 @@ class AudioRecorder:
             return
 
     def record_usb_audio(self, record_length_ms):
-        mic_index = None
-        audio = pyaudio.PyAudio()
-        info = audio.get_host_api_info_by_index(0)
-        numdevices = info.get('deviceCount')
-
-        #print(numdevices)
-        #print("# of devices")
-
-        for i in range(0, numdevices):
-
-            #print(audio.get_device_info_by_host_api_device_index(0, i).get('name'))
-            if (audio.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
-                if audio.get_device_info_by_host_api_device_index(0, i).get('name') == self.EXTERNAL_MIC_NAME:
-                    mic_index = i
-                    break
-
-        if mic_index == None:
-            self.valid_recording = False
-            print('NOT RECORDING, NO USB AUDIO DEVICE FOUND!')
-            pass
-        else:
-            # start Recording
-            self.valid_recording = True            
-            print('USB Audio Device found, recording!')
-            stream = audio.open(format=self.FORMAT, channels=self.CHANNELS, rate=self.RATE, input=True, frames_per_buffer=self.CHUNK, input_device_index=mic_index)
-            #send msg back to game to start speaking?
 
             frames = []
-            # while self.is_recording:
-            #     data = stream.read(self.CHUNK)
-            #     buffered_audio_data.append(data)
-            print(self.RATE)
-            print(self.CHUNK)
-            print(record_length_ms)
-
-            for i in range(math.ceil((self.RATE / self.CHUNK) * (record_length_ms / 1000))):
-                data = stream.read(self.CHUNK)
+            for i in range(math.ceil((self.RATE / self.CHUNK) * (record_length_ms / 1000))):                
+                data = self.stream.read(self.CHUNK, exception_on_overflow=False)
                 frames.append(data)
 
             # Stops the recording
-            stream.stop_stream()
-            stream.close()
-            audio.terminate()
+            #stream.stop_stream()
+            #stream.close()
+            #audio.terminate()
 
             wav_file = wave.open(self.WAV_OUTPUT_FILENAME_PREFIX + self.expected_text + '.wav', 'wb')
             wav_file.setnchannels(AudioRecorder.CHANNELS)

@@ -44,19 +44,18 @@ FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameL
 EXPERIMENT_PHASES = ["practice", "experiment", "posttest"]
 
 
-class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
+class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attributes
     """
     An FSM for the Tap Game. Contains Game Logic and some nodes for interacting w the Unity "View"
     """
 
     round_index = 1
-    max_score = 5 #game ends when someone gets to this score
+    max_rounds = 7 #practice ends after this many rounds
 
     player_score = 0
     robot_score = 0
 
     student_model = StudentModel()
-    agent_model = AgentModel()    
     pronunciation_utils = PronunciationUtils()
     ros_node_mgr = ROSNodeMgr()
     current_round_word = ""
@@ -67,6 +66,13 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     log_listener = None
     letters = None
     passed = None
+
+    # Scripted Sequence of Actions and Words to use in Game
+    practice_actions = [ActionSpace.DONT_RING, ActionSpace.DONT_RING, ActionSpace.DONT_RING,
+                        ActionSpace.RING_ANSWER_CORRECT, ActionSpace.RING_ANSWER_CORRECT, ActionSpace.DONT_RING,
+                        ActionSpace.DONT_RING]
+
+    practice_words = ["FORK", "FROG", "FISH", "DUCK", "CAT", "DOG", "DAD"]
 
 
     states = ['GAME_START', 'ROUND_START', 'ROUND_ACTIVE',
@@ -140,7 +146,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
         # Tell robot to look at Tablet
         self.ros_node_mgr.init_ros_node()
-        #self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LOOK_AT_TABLET)
+        self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LOOK_AT_TABLET)
 
     def on_init_first_round(self):
         """
@@ -149,13 +155,13 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         """
         print("got to init_first round!")
         # get the next robot action
-        self.current_round_action = self.agent_model.get_next_action()
+        self.current_round_action = self.practice_actions[self.round_index - 1]
 
 
         #send message every 2s in case it gets dropped
         def send_msg_til_received():
             while(self.state == "ROUND_START"):
-                self.current_round_word = self.student_model.get_next_best_word(self.current_round_action)
+                self.current_round_word = self.practice_words[self.round_index - 1]
                 self.ros_node_mgr.send_game_cmd(TapGameCommand.INIT_ROUND,
                                         json.dumps(self.current_round_word))
                 print('sent command!')
@@ -194,10 +200,6 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
             self.letters = list(self.current_round_word)
             self.passed = ['1'] * len(self.letters) #robot always gets it right if intentional ring
 
-        elif self.current_round_action == ActionSpace.LATE_RING:
-            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.PRONOUNCE_WRONG_S)
-            self.letters = list(self.current_round_word)
-            self.passed = ['0'] * len(self.letters) #robot always gets it wrong if late ring
 
         time.sleep((RECORD_TIME_MS / 2) / 1000.0)
 
@@ -395,10 +397,6 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
             if data.message == TapGameLog.START_ROUND_DONE:
                 print('I heard Start Round DONE. Waiting for player input')
-
-                #send various prompts to elicit response from player
-                if self.current_round_action == ActionSpace.DONT_RING:
-                    thread.start_new_thread(self.send_player_prompts_til_input_received, ())
                 
             if data.message == TapGameLog.PLAYER_RING_IN:
                 print('Player Rang in!')
@@ -408,15 +406,12 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
                 print('Robot Rang in!')
                 self.robot_ring_in()
 
-            if data.message == TapGameLog.PLAYER_BEAT_ROBOT:
-                self.player_beat_robot()
-
             if data.message == TapGameLog.RESET_NEXT_ROUND_DONE:
                 print('Game Done Resetting Round! Now initing new round')
                 self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LOOK_AT_TABLET)
 
-                self.current_round_action = self.agent_model.get_next_action()
-                self.current_round_word = self.student_model.get_next_best_word(self.current_round_action)
+                self.current_round_action = self.practice_actions[self.round_index - 1]
+                self.current_round_word = self.practice_words[self.round_index - 1]
 
                 self.ros_node_mgr.send_game_cmd(TapGameCommand.INIT_ROUND, json.dumps(self.current_round_word))
 
@@ -433,32 +428,12 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         """
         used by FSM to determine whether to start next round or end game
         """
-        return (self.robot_score >= self.max_score or self.player_score >= self.max_score)
+        return (self.round_index > self.max_rounds)
 
     def is_not_last_round(self):
         """
         used by FSM to determine whether to start next round or end game
         """
         return not self.is_last_round()
-
-        #send message every 2s in case it gets dropped
-    def send_player_prompts_til_input_received(self):
-        start_time = time.time()
-        rang_in = False
-
-        time.sleep(5)
-        while(self.state == "ROUND_ACTIVE"):
-            time.sleep(3 + randint(1,3))
-
-            if time.time() - start_time > 12 and not rang_in:
-                self.current_round_action = ActionSpace.LATE_RING # Change to "LATE_RING"
-                self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LATE_RING)
-                self.ros_node_mgr.send_game_cmd(TapGameCommand.ROBOT_RING_IN)
-            else:
-                self.ros_node_mgr.send_robot_cmd(RobotBehaviors.PLAYER_RING_PROMPT)
-                self.ros_node_mgr.send_robot_cmd(RobotBehaviors.EYE_FIDGET)
-                print('sent command!')
-                print(self.state)
-            
 
         

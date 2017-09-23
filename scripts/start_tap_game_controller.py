@@ -2,6 +2,7 @@
 
 from TapGameController.TapGameFSM import TapGameFSM
 from TapGameController.TapGamePosttestFSM import TapGamePosttestFSM
+from TapGameController.TapGamePracticeFSM import TapGamePracticeFSM
 from unity_game_msgs.msg import TapGameCommand
 import rospy
 import time
@@ -19,7 +20,7 @@ def main(argv):
     #TegaDemo(argv[0],int(argv[1]),argv[2],argv[3])
     print(argv)
     if (argv[3] == 'practice'):
-        my_FSM = TapGameFSM(argv[1], argv[2], argv[3])
+        my_FSM = TapGamePracticeFSM(argv[1], argv[2], argv[3])
         thread.start_new_thread(my_FSM.ros_node_mgr.start_log_listener, (my_FSM.on_log_received,))
         print('nodes started!')
         signal.signal(signal.SIGINT, signal_handler)

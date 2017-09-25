@@ -16,7 +16,7 @@ from transitions import Machine
 # from GameUtils import Curriculum
 from GameUtils import GlobalSettings
 from GameUtils.GlobalSettings import iSpyGameStates as gs
-from GameUtils.PronunciationUtils import PronunciationHandler
+from GameUtils.PronunciationUtils.PronunciationUtils import PronunciationUtils
 
 # from StudentModel import StudentModel
 
@@ -29,6 +29,9 @@ else:
 	pass
 	# TapGameLog = GlobalSettings.TapGameLog #Mock ob-ject, used for testing in non-ROS environments
 	# TapGameCommand = GlobalSettings.TapGameCommand
+
+#Recording Time Constant
+RECORD_TIME_MS = 3500
 
 #set up ros topics for ispy game
 ROS_TO_ISPY_GAME_TOPIC = 'ispy_cmd_topic'
@@ -67,7 +70,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		self.task_controller = iSpyTaskController()
 
-		self.results_handler = PronunciationHandler()
+		self.results_handler = PronunciationUtils()
 
 		# Times entered explore or mission mode not including on game start
 		self.entered_explore_mode = 0
@@ -267,7 +270,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		def speakingStage(stage):
 			if stage == "speakingStart":
-				self.recorder.start_recording()
+				self.recorder.start_recording(self.origText, RECORD_TIME_MS) #TODO: Update 'test' to actual word
 			elif stage == "speakingEnd":
 				self.recorder.stop_recording()
 
@@ -314,8 +317,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 				print ("NO, RECORDING SO YOU AUTOMATICALLY PASS")
 
 			else:
-				audioFile = "audioFile.wav"
-				word_score_list = self.recorder.speechace(audioFile, self.origText)
+				audioFile = self.recorder.WAV_OUTPUT_FILENAME_PREFIX + self.origText + '.wav'
+				word_score_list = self.recorder.speechace(audioFile)
 
 				if word_score_list:
 					for word in word_score_list:

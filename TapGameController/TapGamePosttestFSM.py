@@ -15,11 +15,10 @@ from transitions import Machine
 from GameUtils import GlobalSettings
 from GameUtils.PronunciationUtils.PronunciationUtils import PronunciationUtils
 from GameUtils.AudioRecorder import AudioRecorder
-from .AgentModel import ActionSpace
-from .AgentModel import AgentModel
-from .ROSNodeMgr import ROSNodeMgr
 from .StudentModel import StudentModel
-from .RobotBehaviorList import RobotBehaviors
+
+from .ROSNodeMgr import ROSNodeMgr
+from GameUtils.Curriculum import Curriculum
 
 if GlobalSettings.USE_ROS:
     from unity_game_msgs.msg import TapGameCommand
@@ -36,13 +35,12 @@ SIMULATED_ROBOT_RESULTS_TIME_MS = 2500 # time to wait while we "process" robot s
 PASSING_RATIO_THRESHOLD = .65
 
 FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
-                    TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
-                    TapGameLog.PLAYER_RING_IN, TapGameLog.END_ROUND_DONE,
+                    TapGameLog.START_ROUND_DONE, TapGameLog.PLAYER_RING_IN, TapGameLog.END_ROUND_DONE,
                     TapGameLog.RESET_NEXT_ROUND_DONE, TapGameLog.SHOW_GAME_END_DONE,
-                    TapGameLog.PLAYER_BEAT_ROBOT, TapGameLog.RESTART_GAME]
+                    TapGameLog.RESTART_GAME]
 
 
-class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
+class TapGamePosttestFSM: # pylint: disable=no-member, too-many-instance-attributes
     """
     An FSM for the Tap Game. Contains Game Logic and some nodes for interacting w the Unity "View"
     """
@@ -54,11 +52,9 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
     robot_score = 0
 
     student_model = StudentModel()
-    agent_model = AgentModel()
     pronunciation_utils = PronunciationUtils()
     ros_node_mgr = ROSNodeMgr()
     current_round_word = ""
-    current_round_action = None
 
     game_commander = None
     robot_commander = None
@@ -68,7 +64,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
 
     states = ['GAME_START', 'ROUND_START', 'ROUND_ACTIVE',
-              'PLAYER_PRONOUNCE', 'ROBOT_PRONOUNCE', 'SHOW_RESULTS',
+              'PLAYER_PRONOUNCE', 'SHOW_RESULTS',
               'GAME_FINISHED']
 
     transitions = [
@@ -82,11 +78,6 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
          'dest': 'ROUND_ACTIVE',
          'after': 'on_start_round'},
 
-        {'trigger': 'robot_ring_in',
-         'source': 'ROUND_ACTIVE',
-         'dest': 'ROBOT_PRONOUNCE',
-         'after': 'on_robot_ring_in'},
-
         {'trigger': 'player_ring_in',
          'source': 'ROUND_ACTIVE',
          'dest': 'PLAYER_PRONOUNCE',
@@ -96,11 +87,6 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
          'source': 'PLAYER_PRONOUNCE',
          'dest': 'SHOW_RESULTS',
          'after': 'on_player_pronounce_eval'},
-
-        {'trigger': 'robot_pronounce_eval',
-         'source': 'ROBOT_PRONOUNCE',
-         'dest': 'SHOW_RESULTS',
-         'after': 'on_robot_pronounce_eval'},
 
         {'trigger': 'handle_round_end',
          'source': 'SHOW_RESULTS',
@@ -129,8 +115,8 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         self.experimenter_name = experimenter_name
         self.experiment_phase = experiment_phase
 
-        if not  self.experiment_phase == 'experiment':
-            print(str(self.experiment_phase) + " was not 'experiment'")
+        if not self.experiment_phase == 'posttest':
+            print(str(self.experiment_phase) + " was not 'posttest'")
             exit()
 
         # Initializes a new audio recorder object if one hasn't been created
@@ -140,28 +126,30 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         self.ros_node_mgr.init_ros_node()
         #self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LOOK_AT_TABLET)
 
+        # fancy python one-liner to read all string attributes off of a class
+        self.curriculum = [p for p in dir(Curriculum)
+                           if isinstance(getattr(Curriculum, p), str)
+                           and not p.startswith('__')]
+
     def on_init_first_round(self):
         """
         Called when the game registers with the controller
         Should send msg to Unity game telling it the word to load for the first round
         """
         print("got to init_first round!")
-        # get the next robot action
-        self.current_round_action = self.agent_model.get_next_action()
-
 
         #send message every 2s in case it gets dropped
         def send_msg_til_received():
             while(self.state == "ROUND_START"):
-                self.current_round_word = self.student_model.get_next_best_word(self.current_round_action)
+                self.current_round_word = self.curriculum[self.round_index - 1]
                 self.ros_node_mgr.send_game_cmd(TapGameCommand.INIT_ROUND,
-                                        json.dumps(self.current_round_word))
+                                                json.dumps(self.current_round_word))
                 print('sent command!')
                 print(self.state)
                 time.sleep(5)
 
         thread.start_new_thread(send_msg_til_received, ())
-        
+
 
     def on_start_round(self):
         """
@@ -171,53 +159,6 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         print('got to start round cb')
         self.ros_node_mgr.send_game_cmd(TapGameCommand.START_ROUND)
 
-        if self.current_round_action == ActionSpace.RING_ANSWER_CORRECT:
-           time.sleep(WAIT_TO_BUZZ_TIME_MS / 1000.0)
-           self.ros_node_mgr.send_robot_cmd(RobotBehaviors.RING_ANSWER_CORRECT)
-           self.ros_node_mgr.send_game_cmd(TapGameCommand.ROBOT_RING_IN)
-
-    def on_robot_ring_in(self):
-        """
-        Called when the game registers that the robot 'buzzed in'
-        Should send msg to Unity game telling it to load robot pronunciation screen
-        """
-        print('got to robot ring in cb')
-
-        # Send message to robot telling it to pronounce
-
-        # Wait a few seconds, pronounce word, then wait again
-        time.sleep((RECORD_TIME_MS / 2) / 1000.0)
-        if self.current_round_action == ActionSpace.RING_ANSWER_CORRECT:
-            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.PRONOUNCE_CORRECT, self.current_round_word)
-            self.letters = list(self.current_round_word)
-            self.passed = ['1'] * len(self.letters) #robot always gets it right if intentional ring
-
-        elif self.current_round_action == ActionSpace.LATE_RING:
-            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.PRONOUNCE_WRONG_SOUND)
-            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.PRONOUNCE_WRONG_SPEECH)
-            self.letters = list(self.current_round_word)
-            self.passed = ['0'] * len(self.letters) #robot always gets it wrong if late ring
-
-        time.sleep((RECORD_TIME_MS / 2) / 1000.0)
-
-        # Move to evaluation phase
-        self.robot_pronounce_eval()
-
-    def player_beat_robot(self):
-        """
-        This function details what happens when the robot wants to buzz, but gets beat by the human
-        """        
-        print("PLAYER BEAT ROBOT TO THE PUNCH!")
-
-        tmp = [int(x) for x in self.passed]
-        passed_ratio = (sum(tmp) / len(tmp)) #TODO: do this over phonemes, not letters!
-        print("ROUND PASSED RATIO WAS" + str(passed_ratio))
-
-        if passed_ratio > PASSING_RATIO_THRESHOLD:
-            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.REACT_TO_BEAT_CORRECT)
-        else:
-            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.REACT_TO_BEAT_WRONG)
-
 
     def on_player_ring_in(self):
         """
@@ -225,7 +166,7 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         Should send msg to Unity game telling it to load the pronunciation screen
         And also start recording from the phone for 5 seconds + writing to wav
         """
-        print('got to player ring in cb')        
+        print('got to player ring in cb')
 
         #SEND SHOW_PRONUNCIATION_PAGE MSG
         self.recorder.start_recording(self.current_round_word, RECORD_TIME_MS)
@@ -236,16 +177,16 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
 
         ## If given a word to evaluate and done recording send the information to speechace
         if self.current_round_word and \
-           self.recorder.has_recorded % 2 == 0 and\
-           self.recorder.has_recorded != 0:
+                                self.recorder.has_recorded % 2 == 0 and \
+                        self.recorder.has_recorded != 0:
 
-           # If you couldn't find the android audio topic, automatically pass
+            # If you couldn't find the android audio topic, automatically pass
             # instead of using the last audio recording
             if not self.recorder.valid_recording:
                 self.letters = list(self.current_round_word)
                 self.passed = ['0'] * len(self.letters)
                 print ("NO RECORDING SO YOU AUTOMATICALLY FAIL")
-            else: 
+            else:
                 audio_file = self.recorder.WAV_OUTPUT_FILENAME_PREFIX + self.current_round_word + '.wav'
                 print("SENDING TO SPEECHACE")
                 word_score_list = self.recorder.speechace(audio_file)
@@ -299,34 +240,6 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         time.sleep(SHOW_RESULTS_TIME_MS / 1000.0)
         self.handle_round_end()
 
-    def on_robot_pronounce_eval(self):
-        """
-        Called after the robot has 'pronounced' a word. Should send mesage to Game telling it
-        to show results
-        handle_round_end() to transition to next round
-        """
-
-        time.sleep(SIMULATED_ROBOT_RESULTS_TIME_MS / 1000.0)
-
-        results_params = {}
-        results_params['letters'] = self.letters
-        results_params['passed'] = self.passed
-
-        tmp = [int(x) for x in self.passed]
-        passed_ratio = (sum(tmp) / len(tmp))  # TODO: do this over phonemes, not letters!
-        print("PASSED RATIO WAS" + str(passed_ratio))
-
-        self.ros_node_mgr.send_game_cmd(TapGameCommand.SHOW_RESULTS, json.dumps(results_params))
-
-        if passed_ratio > PASSING_RATIO_THRESHOLD:
-            self.robot_score += 1
-            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.REACT_ANSWER_CORRECT)
-        else:
-            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.REACT_ANSWER_WRONG)
-
-        time.sleep(SHOW_RESULTS_TIME_MS / 1000.0)
-        self.handle_round_end()
-
     def on_round_reset(self):
         """
         Called after finishing a round in the game, but we have not hit
@@ -345,14 +258,6 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         Sends msg to the Unity game to load the game end screen
         """
         print('got to game finished')
-        if self.player_score >= self.robot_score:
-            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LOSE_MOTION)
-            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LOSE_SPEECH)
-        else:
-            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.WIN_MOTION)
-            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.WIN_SPEECH)
-
-
         self.ros_node_mgr.send_game_cmd(TapGameCommand.SHOW_GAME_END)
 
 
@@ -384,7 +289,6 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
                 print('Game Checked in!')
 
             if data.message == TapGameLog.GAME_START_PRESSED:
-                self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LOOK_AT_TABLET)
                 time.sleep(500 / 1000.0)
                 self.init_first_round()  # makes state transition + calls self.on_init_first_round()
 
@@ -395,32 +299,18 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
             if data.message == TapGameLog.START_ROUND_DONE:
                 print('I heard Start Round DONE. Waiting for player input')
 
-                #send various prompts to elicit response from player
-                if self.current_round_action == ActionSpace.DONT_RING:
-                    thread.start_new_thread(self.send_player_prompts_til_input_received, ())
-                
+
             if data.message == TapGameLog.PLAYER_RING_IN:
                 print('Player Rang in!')
                 self.player_ring_in()
 
-            if data.message == TapGameLog.ROBOT_RING_IN:
-                print('Robot Rang in!')
-                self.robot_ring_in()
-
-            if data.message == TapGameLog.PLAYER_BEAT_ROBOT:
-                self.player_beat_robot()
-
             if data.message == TapGameLog.RESET_NEXT_ROUND_DONE:
                 print('Game Done Resetting Round! Now initing new round')
-                self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LOOK_AT_TABLET)
-
-                self.current_round_action = self.agent_model.get_next_action()
-                self.current_round_word = self.student_model.get_next_best_word(self.current_round_action)
-
+                self.current_round_word = self.curriculum[self.round_index - 1]
                 self.ros_node_mgr.send_game_cmd(TapGameCommand.INIT_ROUND, json.dumps(self.current_round_word))
 
             if data.message == TapGameLog.SHOW_GAME_END_DONE:
-                print('GAME OVER! WAIT FOR RESET SINAL')
+                print('GAME OVER! WAIT FOR RESET SIGNAL')
 
             if data.message == TapGameLog.RESTART_GAME:
                 self.replay_game()
@@ -432,33 +322,10 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
         """
         used by FSM to determine whether to start next round or end game
         """
-        return (self.robot_score >= self.max_score or self.player_score >= self.max_score)
+        return (self.round_index == len(self.curriculum))
 
     def is_not_last_round(self):
         """
         used by FSM to determine whether to start next round or end game
         """
         return not self.is_last_round()
-
-        #send message every 2s in case it gets dropped
-    def send_player_prompts_til_input_received(self):
-        start_time = time.time()
-        rang_in = False
-
-        time.sleep(5)
-        while(self.state == "ROUND_ACTIVE"):
-            time.sleep(3 + randint(1,3))
-
-            if time.time() - start_time > 12 and not rang_in:
-                self.current_round_action = ActionSpace.LATE_RING # Change to "LATE_RING"
-                self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LATE_RING)
-                self.ros_node_mgr.send_game_cmd(TapGameCommand.ROBOT_RING_IN)
-                rang_in = True
-            else:
-                self.ros_node_mgr.send_robot_cmd(RobotBehaviors.PLAYER_RING_PROMPT)
-                self.ros_node_mgr.send_robot_cmd(RobotBehaviors.EYE_FIDGET)
-                print('sent command!')
-                print(self.state)
-            
-
-        

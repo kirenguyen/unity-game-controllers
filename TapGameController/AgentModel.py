@@ -1,9 +1,9 @@
 """
-This Module handles all aspects of the robot/agent's decision-making,
-modeling, and gameplay.
+This Module handles aspects of the agent architecture's decision-making and gameplay.
 """
+# pylint: disable=import-error
 import random
-from GameUtils.GlobalSettings import DO_EPSILON_INCREASING_POLICY
+from GameUtils.GlobalSettings import DO_EPSILON_INCREASING_POLICY # pylint: disable=import-error
 
 
 
@@ -12,6 +12,7 @@ class ActionSpace(): # pylint: disable=too-few-public-methods
     This class defines constants signifying the potential actions an agent can take
     """
     RING_ANSWER_CORRECT = "RING_ANSWER_CORRECT"
+    LATE_RING = "LATE_RING"
     #RING_ANSWER_WRONG = "RING_ANSWER_WRONG"
     DONT_RING = "DONT_RING"
 
@@ -45,8 +46,8 @@ class AgentModel():
 
         if DO_EPSILON_INCREASING_POLICY:
 
-            if(random.random() < self.ring_rate):
-                next_action = ActionSpace.RING_ANSWER_CORRECT #ActionSpace.DONT_RING #ActionSpace.RING_ANSWER_CORRECT
+            if random.random() < self.ring_rate:
+                next_action = ActionSpace.RING_ANSWER_CORRECT
             else:
                 next_action = ActionSpace.DONT_RING
 

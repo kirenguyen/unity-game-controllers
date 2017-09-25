@@ -1,69 +1,51 @@
 import pronouncing
 import csv
 import os
+from GameUtils.Curriculum import Curriculum
 
 class PhonemeCounter():
 	def __init__(self):
-		self.load_nettalk_dataset()
-		self.phonemes2graphemes("apple")
+		self.load_phoneme_dict()
+		self.build_curriculum()
+		self.count_all_phonemes()
 
-	def load_nettalk_dataset(self):
-		"""
-		nettalk contains phonetic transcription of 20,008 english words
-		dataset can be accessed at:
-	https://archive.ics.uci.edu/ml/machine-learning-databases/undocumented/connectionist-bench/nettalk/
-		"""
+	def build_curriculum(self):
+	    # fancy python one-liner to read all string attributes off of a class
+	    self.curriculum = [p for p in dir(Curriculum)
+	                       if isinstance(getattr(Curriculum, p), str)
+	                       and not p.startswith('__')]
 
+	def load_phoneme_dict(self):
 		dir_path = os.path.dirname(os.path.realpath(__file__))
 
-		self.nettalk_dataset = dict()
-		with open(dir_path + '/data/nettalk.data', 'r') as csvfile:
-			spamreader = csv.reader(csvfile, delimiter='\t')
+		# dictionary to store arpabet mapping
+		self.phoneme_dict = {}
+		with open(dir_path + '/data/arpabet_mapping.csv', 'r') as csvfile:
+			spamreader = csv.reader(csvfile, delimiter=',')
 			for row in spamreader:
-				# row[0]: word. row[1]: phonetic transcription
-				self.nettalk_dataset.update({row[0]: row[1]})
+				# row[1] is CMU arpabet, row[0] is modified version of arpabet for NETTalk database
+				self.phoneme_dict.update({row[1]: 0})
 
-	def phonemes2graphemes(self, word):
+	def get_and_update_phonemes(self, word):
 		"""
 		align a given word's graphemes with its phonemes using Nettalk
 		"""
-
 		print(word)
-		print(pronouncing.phones_for_word(word.lower()))
-
 		# need to use lowercase form of word for pronouncing and nettalk dict lookup
 		phonemes_raw = pronouncing.phones_for_word(word.lower())[0].split(' ')
 		phonemes = [''.join(filter(lambda c: not c.isdigit(), pho)) for pho in phonemes_raw]
 
-		# find the phoneme-grapheme alignment in Nettalk database
-		# get exact alignment
-		phos = self.nettalk_dataset[word.lower()]
+		print(phonemes)
 
-		print(phos)
+		for p in phonemes:
+			self.phoneme_dict[p] += 1
 
-		phos = list(phos)
-		graphemes = list()
-		grapheme = ''
-		for i in range(0, len(phos), 1):
-			if phos[i] != '-':
-				# one phoneme is matched to one letter
-				if grapheme != '':
-					graphemes.append(grapheme)
-				grapheme = word[i]
-			else:
-				# one phoneme is matched to an additional letter
-				grapheme += word[i]
-		graphemes.append(grapheme)
+	def count_all_phonemes(self):
+		for word in self.curriculum:
+			self.get_and_update_phonemes(word)
 
-		# TODO: This is hack-ey and should not be done. Let this comment stand as a reminder
-		# TODO: that sometimes phonemes and graphemes dont line up right...
 
-		# For some reason camera doesn't line up phonemes and graphemes correctly
-		# if word == "camera":
-		#	graphemes = ['c', 'a', 'm', 'er', 'a']
-
-		print([graphemes, phonemes])
-		return [graphemes, phonemes]
+		print(self.phoneme_dict)
 
 	# def count_phonemes(self)
 

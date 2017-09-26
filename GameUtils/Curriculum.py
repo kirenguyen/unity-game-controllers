@@ -13,47 +13,61 @@ class Curriculum: # pylint: disable=too-few-public-methods
     ###############
 
     # DAD = 'DAD'
+    FATHER = "FATHER"
     # MOM = 'MOM'
+    MOTHER = "MOTHER"
     # GRANDMOTHER = 'GRANDMOTHER'
+    GRANDMA = "GRANDMA"
     # GRANDFATHER = 'GRANDFATHER'
-    # BABY = 'BABY'
+    GRANDPA = "GRANDPA"
+    BABY = 'BABY'
 
-    # DOG = 'DOG'
+    DOG = 'DOG'
 
-    # HAT = 'HAT'
-    # SOCK = 'SOCK'
+    DRESS = 'DRESS'
+    HAT = 'HAT'
+    PANTS = 'PANTS'
+    SOCKS = 'SOCKS'
     SHIRT = 'SHIRT'
-    # DRESS = 'DRESS'
-    # SHOES = 'SHOES'
+    SHOES = 'SHOES'
+    SWEATER = 'SWEATER'
 
     WINDOW = 'WINDOW'
-    # PILLOW = 'PILLOW'
-    # DRESSER = 'DRESSER'
+    PILLOW = 'PILLOW'
+    DRESSER = 'DRESSER'
+    BED = "BED"
+    SHELF = 'SHELF'
+    TV = 'TV'
 
     #UNCOMENT FROM HERE LATER
-    #BOWL = 'BOWL'
+    BOWL = 'BOWL'
     BROOM = 'BROOM'
     BUCKET = 'BUCKET'
     CLOCK = 'CLOCK'
+    UMBRELLA = 'UMBRELLA'
 
-    
-    # COMPUTER = 'COMPUTER'
+    BATHTUB = 'BATHTUB'
+    CHAIR = 'CHAIR'
+    COMPUTER = 'COMPUTER'
     COUCH = 'COUCH'
     CRIB = 'CRIB'
     CUP = 'CUP'
     DOOR = 'DOOR'
     DRESSER = 'DRESSER'
-    # FORK = 'FORK'
-    # IRON = 'IRON'
+    FORK = 'FORK'
+    IRON = 'IRON'
     KETTLE = 'KETTLE'
-    # LAMP = 'LAMP'
+    LAMP = 'LAMP'
     MIRROR = 'MIRROR'
     MOP = 'MOP'
-    # PAINTING = 'PAINTING'
-    # REFRIDGERATOR = 'REFRIDGERATOR'
-    # STOVE = 'STOVE'
-    # TABLE = 'TABLE'
-    # TOILET = 'TOILET'
+    PAINTING = 'PAINTING'
+    REFRIDGERATOR = 'REFRIDGERATOR'
+    SPOON = 'SPOON'
+    STATUE = 'STATUE'
+    STOVE = 'STOVE'
+    TABLE = 'TABLE'
+    TOILET = 'TOILET'
+    TOWEL = 'TOWEL'
 
 
 
@@ -70,15 +84,16 @@ class Curriculum: # pylint: disable=too-few-public-methods
 
 
     GOAT = 'GOAT'
-    # HORSE = 'HORSE'
+    HORSE = 'HORSE'
     # COW = 'COW'
-    # DUCK = 'DUCK'
-    # BIRD = 'BIRD'
+    DUCK = 'DUCK'
+    BIRD = 'BIRD'
     # CHICK = 'CHICK'
-    # CAT = 'CAT'
+    CAT = 'CAT'
     PIG = 'PIG'
+    MOUSE = 'MOUSE'
     # WAGON = 'WAGON'
-    # TRACTOR = 'TRACTOR'
+    TRACTOR = 'TRACTOR'
     # DONKEY = 'DONKEY'
 
 
@@ -86,8 +101,8 @@ class Curriculum: # pylint: disable=too-few-public-methods
     #    NATURE   #
     ###############
 
-    # DEER = 'DEER'
-    # FROG = 'FROG'
+    DEER = 'DEER'
+    FROG = 'FROG'
 
     SUN = 'SUN'
     # MOON = 'MOON'
@@ -95,7 +110,7 @@ class Curriculum: # pylint: disable=too-few-public-methods
 
     FLOWER = 'FLOWER'
     # WOODS = 'WOODS'
-    # FOREST = 'FOREST'
+    FOREST = 'FOREST'
     # LAKE = 'LAKE'
     # POND = 'POND'
     CLOUD = 'CLOUD'
@@ -115,7 +130,7 @@ class Curriculum: # pylint: disable=too-few-public-methods
     PLANE = 'PLANE'
     BICYCLE = 'BICYCLE'
     BOAT = 'BOAT'
-    #BUS = 'BUS'
+    BUS = 'BUS'
     CAR = 'CAR'
 
 
@@ -123,13 +138,13 @@ class Curriculum: # pylint: disable=too-few-public-methods
     #    BEACH    #
     ###############
 
-    # SEAL = 'SEAL'
-    # DOLPHIN = 'DOLPHIN'
+    SEAL = 'SEAL'
+    DOLPHIN = 'DOLPHIN'
     BUCKET = 'BUCKET'
     COCONUT = 'COCONUT'
     SEASHELL = 'SEASHELL'
     CASTLE = 'CASTLE'
-    # FISH = 'FISH'
+    FISH = 'FISH'
 
 
     ###############
@@ -138,14 +153,15 @@ class Curriculum: # pylint: disable=too-few-public-methods
 
     # BEE = 'BEE'
     # CHICKEN = 'CHICKEN'
+    GIRAFFE = 'GIRAFFE'
     MONKEY = 'MONKEY'
-    # RABBIT = 'RABBIT'
+    RABBIT = 'RABBIT'
     ROOSTER = 'ROOSTER'
     # SHEEP = 'SHEEP'
     # TIGER = 'TIGER'
     # SNAKE = 'SNAKE'
     # DRAGON = 'DRAGON'
-    # LION = 'LION'
+    LION = 'LION'
 
 
     ###############
@@ -154,17 +170,18 @@ class Curriculum: # pylint: disable=too-few-public-methods
 
     # HILL = 'HILL'
     # SIT = 'SIT'
-    # RUN = 'RUN'
+    RUNNING = 'RUNNING'
     # CLAP = 'CLAP'
-    # JUMP = 'JUMP'
+    JUMPING = 'JUMPING'
     # SHOUT = 'SHOUT'
-    # EAT = 'EAT'
+    EATING = 'EATING'
+    FISHING = 'FISHING'
     # TASTE = 'TASTE'
-    # DIG = 'DIG'
+    DIGGING = 'DIGGING'
     # HUG = 'HUG'
-    # SLEEP = 'SLEEP'
+    SLEEPING = 'SLEEPING'
     # FLY = 'FLY'
-    # WAVE = 'WAVE'
+    WAVING = 'WAVING'
 
     # RED = 'RED'
     # GREEN = 'GREEN'

@@ -13,6 +13,8 @@ The **Controller** includes agent decision-making algorithm and game logic, impl
 
 In addition, we have a number of **Sensors** that provide real-time interactive features to **Models**
 
+
+
 Basics
 --------------
 
@@ -44,6 +46,14 @@ We recommend using Anaconda with Python 2.7 as your default system-wide Python e
 	$ pip install catkin_pkg
 	$ pip install pymongo
 	$ pip install twisted
+	
+	# External catkin repos necessary for message passing and other functions
+	# Clone these to ~/catkin_ws/src, then run "catkin_make" from ~/catkin_ws
+	$ https://github.com/bosch-ros-pkg/usb_cam.git
+	$ https://github.com/mitmedialab/unity_game_msgs.git
+	$ https://github.com/mitmedialab/r1d1_msgs.git (to communicate w Tega)
+	$ https://github.com/mitmedialab/jibo_msgs.git (to communicate w Jibo)
+
 
 ###Install the project's python development and runtime requirements::
 

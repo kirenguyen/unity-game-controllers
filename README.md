@@ -1,4 +1,4 @@
-#Unity Game Controllers
+# Unity Game Controllers
 ---------------------
 
 This repository contains the Controllers, Models, and various Utilities for Unity-backed game environments.
@@ -25,7 +25,7 @@ If you are new to Python or new to creating Python projects, see Kenneth Reitz's
 Project Setup
 ---------------
 
-###System Dependencies
+### System Dependencies
 
 This project was built and tested on Ubuntu 14.04, with a full desktop installation of ROS Indigo
 
@@ -33,7 +33,7 @@ We recommend using Anaconda with Python 2.7 as your default system-wide Python e
 
 **All Python code should be Python 3 compatible.**
 
-###Install the project's non-python development and runtime requirements::	
+### Install the project's non-python development and runtime requirements::	
 	
 	UBUNTU 14.04 System dependencies
 	$ sudo apt-get install portaudio19-dev
@@ -55,14 +55,14 @@ We recommend using Anaconda with Python 2.7 as your default system-wide Python e
 	$ https://github.com/mitmedialab/jibo_msgs.git (to communicate w Jibo)
 
 
-###Install the project's python development and runtime requirements::
+### Install the project's python development and runtime requirements::
 
     $ make init
 	
 **Project setup is now complete!**
 
 
-##Running a Unity Game Controller
+## Running a Unity Game Controller
 ---------------
 
 To run a Unity Game Controller, there are three major components of the back-end system
@@ -73,7 +73,7 @@ To run a Unity Game Controller, there are three major components of the back-end
 	- Create one in a new terminal by running `$ roslaunch rosbridge_server rosbridge_websocket.launch`; Requires install of Rosbridge (not included with regular ROS Desktop install), above.
 - *GameController (any
 
-###Tap Game
+### Tap Game
 -------------
 
 After installing the dependencies, you can launch the Rosbridge Webserver and ROSCore together by running `$ ./scripts/startROS.sh`
@@ -88,7 +88,7 @@ e.g.
 
 You can test the tap game in `practice` or `posttest` mode, by passing those arguments in as the `experiment_phase`
 
-###ISpy Game
+### ISpy Game
 -------------
 
 After installing the dependencies, you can launch the Rosbridge Webserver and ROSCore together by running `$ ./scripts/startROS.sh`

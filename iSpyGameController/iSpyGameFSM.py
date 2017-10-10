@@ -16,7 +16,10 @@ from transitions import Machine
 # from GameUtils import Curriculum
 from GameUtils import GlobalSettings
 from GameUtils.GlobalSettings import iSpyGameStates as gs
+from GameUtils.GlobalSettings import iSpyRobotInteractionStates as ris
 from GameUtils.PronunciationUtils.PronunciationUtils import PronunciationUtils
+
+
 
 # from StudentModel import StudentModel
 
@@ -50,12 +53,66 @@ GAME_FINISHED = 99
 VALID_ISPY_COMMANDS = [RESET, SHOW_PRONOUNCIATION_PANEL, SHOW_PRONOUNCIATION_PANEL, SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, SEND_TASKS_TO_UNITY, GAME_FINISHED]
 
 
+
+
 class iSpyGameFSM: # pylint: disable=no-member
 	"""
 	Receives and sends out ROS messages.
 	"""
+	class ChildRobotInteractionFSM:
+		def __init__(self):
+			##MAGGIE TODO: after add ROSNodeMrg.py, pass it to this class from its constructor
+			self.states = [ ris.ROBOT_TURN, ris.CHILD_TURN ]
+			self.transitions = [
+				{'trigger': ris.Triggers.CHILD_TURN_DONE, 'source': ris.CHILD_TURN, 'dest': ris.ROBOT_TURN },
+				{'trigger': ris.Triggers.ROBOT_TURN_DONE, 'source': ris.ROBOT_TURN, 'dest': ris.CHILD_TURN},
+			]
+			self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
+									 initial=ris.ROBOT_TURN)
+		def test(self):
+			print("current state: "+self.state)
+			self.Robot_Turn_Done()
+			print("after child turn done")
+			print("current state: "+self.state)
 
+		def respond(self):
+			'''
+			check the current interaction FSM to decide whether the robot should respond
+			then, use agent model to decide how the robot should respond if it needs to respond
+			'''
+			if self.state == ris.ROBOT_TURN:
+				# choose an action for robot
+				robot_role = self.get_role()
+				physical_action, virtual_action = self.get_actions(robot_role)
+
+			elif self.state == ris.CHILD_TURN:
+				# no need to respond at this point 
+				pass
+
+			self.perform_robot_virtual_action(virtual_action)
+			self.perform_robot_physical_action(physical_action)
+
+		def perform_physical_action(self,action):
+			##MAGGIE TODO: send the physical action to Jibo via ROSNodeMgr
+			pass
+		def perform_virtual_action(self,action):
+			##MAGGIE TODO: send the virtual action to ispy game here via ROSNodeMgr
+			pass 
+		def get_actions(self,role):
+			'''
+			Get corresponding virtual and physical actions for a given input robot's role
+			'''
+			##MAGGIE TODO: return physical action (sent to Jibo) and virtual action (sent as a ispyGameCommand to the unity game)
+			##MAGGIE TODO: may need to create new custom ROS messages for the commnands in iSpyGameCommands 
+			pass
+		def get_role(self):
+			'''
+			get the most approriate role from agent model
+			'''
+			##MAGGIE TODO: at this point, just make the role equal to robot_expert_role
+			pass
 	def __init__(self):
+		self.interaction = self.ChildRobotInteractionFSM()
 		# Keeps track of the word the child is supposed to say
 		self.origText = ""
 
@@ -71,6 +128,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		self.task_controller = iSpyTaskController()
 
 		self.results_handler = PronunciationUtils()
+
 
 		# Times entered explore or mission mode not including on game start
 		self.entered_explore_mode = 0
@@ -106,6 +164,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 				{'trigger': gs.Triggers.PRACTICE_FINISHED, 'source':gs.PRONUNCIATION_RESULT , 'dest': gs.MISSION_MODE},
 				{'trigger': gs.Triggers.OBJECT_CLICKED, 'source': gs.EXPLORATION_MODE, 'dest':gs.WORD_DISPLAY },
 				{'trigger': gs.Triggers.N_SECONDS_LATER, 'source': gs.WORD_DISPLAY, 'dest': gs.EXPLORATION_MODE}
+				
 		]
 		
 		self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
@@ -114,7 +173,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		self.override_FSM_transition_callback()
 
-	
+		self.interaction.test()
+
 
 	def override_FSM_transition_callback(self):
 		'''
@@ -157,6 +217,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 		self.tapped_and_pronounced.append((self.origText, time.time() - self.time_tapped))
 		print (self.tapped_and_pronounced)
 
+	
+
 	def onWordDisplay(self):
 		'''callback function when entering word display'''
 		#TODO: show word bubbles for the clicked object
@@ -198,6 +260,9 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 					time_in_explore_mode = time.time() - self.explore_time_start
 					print("Time spent in explore mode is %s seconds" %time_in_explore_mode)
+
+					# Check how the robot's should respond (physically and virtually through ispy game)
+					self.interaction.respond()
 
 			# Starts keeping track of time in explore mode when the game starts
 			elif transition_msg.data == gs.Triggers.START_BUTTON_PRESSED:

@@ -20,6 +20,12 @@ from GameUtils.GlobalSettings import iSpyRobotInteractionStates as ris
 from GameUtils.PronunciationUtils.PronunciationUtils import PronunciationUtils
 
 
+from .AgentModel import AgentModel
+from .ROSNodeMgr import ROSNodeMgr
+from .StudentModel import StudentModel
+from .RobotBehaviorList import RobotBehaviors
+from .RobotBehaviorList import RobotRoles
+from .RobotBehaviorList import RobotRolesBehaviorsMap
 
 # from StudentModel import StudentModel
 
@@ -61,11 +67,9 @@ class iSpyGameFSM: # pylint: disable=no-member
 	Receives and sends out ROS messages.
 	"""
 
-	agent_model = AgentModel()
-	ros_node_mgr = ROSNodeMgr()
 
 	class ChildRobotInteractionFSM:
-		def __init__(self):
+		def __init__(self,ros_node_mgr):
 			##MAGGIE TODO: after add ROSNodeMrg.py, pass it to this class from its constructor
 
 			self.states = [ ris.ROBOT_TURN, ris.CHILD_TURN ]
@@ -76,9 +80,12 @@ class iSpyGameFSM: # pylint: disable=no-member
 			self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
 									 initial=ris.ROBOT_TURN)
 
-			self.happy_rate = 0.3
+			self.ros_node_mgr = ros_node_mgr
 
-			self.ros_node_mgr.init_ros_node()
+			self.agent_model = AgentModel()
+
+			self.role_behavior_mapping = RobotRolesBehaviorsMap()
+
 
 		def test(self):
 			print("current state: "+self.state)
@@ -94,51 +101,55 @@ class iSpyGameFSM: # pylint: disable=no-member
 			if self.state == ris.ROBOT_TURN:
 				# choose an action for robot
 				robot_role = self.get_role()
-				physical_action, virtual_action = self.get_actions(robot_role)
+				actions = self.get_behaviors(robot_role)
+				physical_action = actions['physical'] 
+				virtual_action = actions['virtual']
 
 			elif self.state == ris.CHILD_TURN:
 				# no need to respond at this point 
 				pass
 
-			self.perform_robot_virtual_action(virtual_action)
-			self.perform_robot_physical_action(physical_action)
+			if physical_action:
+				self.perform_robot_physical_action(physical_action)
+			if virtual_actions:
+				self.perform_robot_virtual_action(virtual_action)
+
+		def get_behaviors(self,role):
+            '''
+            Get corresponding virtual and physical actions for a given input robot's role
+            '''
+            return self.role_behavior_mapping.get_actions(role)
 
 		def perform_physical_action(self,action):
+			'''
+			send the physical action message via ROS to the robot
+			'''
 			##MAGGIE TODO: send the physical action to Jibo via ROSNodeMgr
-
-			## Robot will pronounce the word accordingly
-			## For propability of happy_rate, robot will smile to the kid
-			## Happy rate increases as the game goes as a source of encouragement to the kid
-
-			self.ros_node_mgr.send_robot_cmd(RobotBehaviors.PRONOUNCE_CORRECT)
-			if random.random() < self.happy_rate:
-				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.REACT_ROBOT_CORRECT)
-				self.happy_rate += 0.05
+			#self.ros_node_mgr.send_robot_cmd(Rob)
+			pass
 
 		def perform_virtual_action(self,action):
+			'''
+			send the virtual action message via ROS to the tablet 
+			'''
 			##MAGGIE TODO: send the virtual action to ispy game here via ROSNodeMgr
+			self.ros_node_mgr.send_game_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,action)
 			
-			self.ros_node_mgr.send_game_cmd(iSpyCommand.SHOW_PRONOUNCIATION_PANEL)
-			if self.state == "EXPLORATION_MODE":
-				self.ros_node_mgr.send_game_cmd(iSpyCommand.SHOW_OBJECT_DESCR_PANEL)
-
-		def get_actions(self,role):
-			'''
-			Get corresponding virtual and physical actions for a given input robot's role
-			'''
-			##MAGGIE TODO: return physical action (sent to Jibo) and virtual action (sent as a ispyGameCommand to the unity game)
-			##MAGGIE TODO: may need to create new custom ROS messages for the commnands in iSpyGameCommands 
-			return (self.perform_physical_action(), self.perform_virtual_action())
 
 		def get_role(self):
 			'''
 			get the most approriate role from agent model
 			'''
 			##MAGGIE TODO: at this point, just make the role equal to robot_expert_role
-			self.role = self.agent_model.robot_expert_role()
+			self.role = self.agent_model.get_next_robot_role()
 
 	def __init__(self):
-		self.interaction = self.ChildRobotInteractionFSM()
+
+		self.ros_node_mgr = ROSNodeMgr()
+		self.ros_node_mgr.init_ros_node()
+
+		self.interaction = self.ChildRobotInteractionFSM(self.ros_node_mgr)
+
 		# Keeps track of the word the child is supposed to say
 		self.origText = ""
 
@@ -199,7 +210,6 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		self.override_FSM_transition_callback()
 
-		self.interaction.test()
 
 
 	def override_FSM_transition_callback(self):

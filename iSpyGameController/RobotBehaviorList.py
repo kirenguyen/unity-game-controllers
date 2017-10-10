@@ -4,7 +4,7 @@ Robot Behaviors
 """
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error, invalid-name
-
+from unity_game_msgs.msg import iSpyCommand
 
 class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     """
@@ -15,9 +15,7 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     LOOK_AT_TABLET = 'LOOK_AT_TABLET'
     LOOK_CENTER= 'LOOK_CENTER'
 
-    # Action Space Actions
-    RING_ANSWER_CORRECT = 'RING_ANSWER_CORRECT'
-    LATE_RING = 'RING_ANSWER_CORRECT'
+    
 
     #Pronunciation Actions the robot can do 
     PRONOUNCE_CORRECT = 'PRONOUNCE_CORRECT'
@@ -26,7 +24,30 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     REACT_ROBOT_CORRECT = 'REACT_ROBOT_CORRECT'
     REACT_CHILD_CORRECT = 'REACT_CHILD_CORRECT'
 
-    # Reactions to the robot getting beaten on the buzz
-    REACT_TO_BEAT = 'REACT_TO_BEAT' # played when the robot buzzes in, but player already got there
-    REACT_TO_BEAT_CORRECT = 'REACT_TO_BEAT_CORRECT' # played when players results are revealed
-    REACT_TO_BEAT_WRONG = 'REACT_TO_BEAT_WRONG' # played when players results are revealed
+    # virtual actions on the app
+    VIRTUALLY_CLICK_CORRECT_OBJ = "CLICK_CORRECT_OBJ" # click correct obj
+
+class RobotRoles(Enum):
+    '''
+    contains a list of social roles that are avaiable to robot to perform
+    '''
+    CUR_EXPERT = 1
+    #CUR_NOVICE = 2
+    #NCUR_EXPERT = 3
+    #NCUR_NOVICE = 4
+
+class RobotRolesBehaviorsMap:
+    '''
+    mapping between robot's social role and robot's specific behaviors
+    '''  
+    def __init__(self):
+        self.mapping = {}
+        self.mapping.update({RobotRoles.CUR_EXPERT:{'physical':RobotBehaviors.LOOK_AT_TABLET, 'virtual': RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ}})
+
+    def get_actions(self,role):
+        if isinstance(role, RobotRoles) && role in self.mapping.keys():
+            # if the role is an instance of robotRoles
+            # return a sequence of specific actions that the robot needs to execute for a given role
+            return self.mapping[role]
+        else:
+            return []

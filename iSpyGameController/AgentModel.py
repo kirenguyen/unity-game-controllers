@@ -5,21 +5,7 @@ This Module handles aspects of the agent architecture's decision-making and game
 import random
 
 
-class ActionSpace(): # pylint: disable=too-few-public-methods
-    """
-    This class defines constants signifying the potential actions an agent can take
-    """
 
-    # CLicking under exploration / mission mode helps decides what panel to show up
-    CLICK_EXPLORE = "CLICK_EXPLORE"
-    CLICK_MISSION = "CLICK_MISSION"
-
-    # Robot kicking in to help 
-    RING_ANSWER = "RING_ANSWER"
-    WAIT_FOR_RESPONSE = "WAIT_FOR_RESPONSE"
-
-    def __init__(self):
-        pass
 
 
 
@@ -30,35 +16,27 @@ class AgentModel():
     """
 
     def __init__(self):
-        # fancy python one-liner to read all string attributes off of a class
-        self.action_space = [p for p in dir(ActionSpace)
-                             if isinstance(getattr(ActionSpace, p), str)
-                             and not p.startswith('__')]
 
-        self.action_history = []
-        self.help_rate = 0.2
+        self.role_space=[RobotRoles.CUR_EXPERT]
+        self.role_history=[]
+        RobotRolesBehaviorsMap()
 
-    def robot_expert_mode(self):
-        self.help_rate = 0.6
+    def get_behaviors(self,role):
+            '''
+            Get corresponding virtual and physical actions for a given input robot's role
+            '''
+            ##MAGGIE TODO: return physical action (sent to Jibo) and virtual action (sent as a ispyGameCommand to the unity game)
+            ##MAGGIE TODO: may need to create new custom ROS messages for the commnands in iSpyGameCommands 
+            return (self.perform_physical_action(), self.perform_virtual_action())
 
-        if random.random() < self.help_rate:
-            return get_next_action()
-        else:
-            return ActionSpace.RING_ANSWER
-
-    def random_selection(self):
-    	return random.choice([ActionSpace.RING_ANSWER, ActionSpace.WAIT_FOR_RESPONSE])
-
-    def get_next_action(self):
+    def get_next_robot_role(self):
         """
         Returns one of the actions from the ActionSpace
         """
 
-        next_action = self.random_selection()
+        next_action = random.choice(self.role_space)
         return next_action
 
-    def get_action_history(self):
-        """
-        Returns one of the actions from the ActionSpace
-        """
-        return self.action_history
+
+
+

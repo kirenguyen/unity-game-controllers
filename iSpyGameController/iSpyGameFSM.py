@@ -47,6 +47,7 @@ ROS_TO_ANDROID_MIC_TOPIC = 'android_audio'
 RESET = 0
 SHOW_PRONOUNCIATION_PANEL = 1
 SHOW_OBJECT_DESCR_PANEL = 2
+ROBOT_EXPERT_ROLE = 3
 SEND_PRONOUNCIATION_ACCURACY_TO_UNITY = 10
 SEND_TASKS_TO_UNITY = 20
 GAME_FINISHED = 99
@@ -59,9 +60,14 @@ class iSpyGameFSM: # pylint: disable=no-member
 	"""
 	Receives and sends out ROS messages.
 	"""
+
+	agent_model = AgentModel()
+	ros_node_mgr = ROSNodeMgr()
+
 	class ChildRobotInteractionFSM:
 		def __init__(self):
 			##MAGGIE TODO: after add ROSNodeMrg.py, pass it to this class from its constructor
+
 			self.states = [ ris.ROBOT_TURN, ris.CHILD_TURN ]
 			self.transitions = [
 				{'trigger': ris.Triggers.CHILD_TURN_DONE, 'source': ris.CHILD_TURN, 'dest': ris.ROBOT_TURN },
@@ -69,6 +75,11 @@ class iSpyGameFSM: # pylint: disable=no-member
 			]
 			self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
 									 initial=ris.ROBOT_TURN)
+
+			self.happy_rate = 0.3
+
+			self.ros_node_mgr.init_ros_node()
+
 		def test(self):
 			print("current state: "+self.state)
 			self.Robot_Turn_Done()
@@ -94,23 +105,38 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		def perform_physical_action(self,action):
 			##MAGGIE TODO: send the physical action to Jibo via ROSNodeMgr
-			pass
+
+			## Robot will pronounce the word accordingly
+			## For propability of happy_rate, robot will smile to the kid
+			## Happy rate increases as the game goes as a source of encouragement to the kid
+
+			self.ros_node_mgr.send_robot_cmd(RobotBehaviors.PRONOUNCE_CORRECT)
+			if random.random() < self.happy_rate:
+				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.REACT_ROBOT_CORRECT)
+				self.happy_rate += 0.05
+
 		def perform_virtual_action(self,action):
 			##MAGGIE TODO: send the virtual action to ispy game here via ROSNodeMgr
-			pass 
+			
+			self.ros_node_mgr.send_game_cmd(iSpyCommand.SHOW_PRONOUNCIATION_PANEL)
+			if self.state == "EXPLORATION_MODE":
+				self.ros_node_mgr.send_game_cmd(iSpyCommand.SHOW_OBJECT_DESCR_PANEL)
+
 		def get_actions(self,role):
 			'''
 			Get corresponding virtual and physical actions for a given input robot's role
 			'''
 			##MAGGIE TODO: return physical action (sent to Jibo) and virtual action (sent as a ispyGameCommand to the unity game)
 			##MAGGIE TODO: may need to create new custom ROS messages for the commnands in iSpyGameCommands 
-			pass
+			return (self.perform_physical_action(), self.perform_virtual_action())
+
 		def get_role(self):
 			'''
 			get the most approriate role from agent model
 			'''
 			##MAGGIE TODO: at this point, just make the role equal to robot_expert_role
-			pass
+			self.role = self.agent_model.robot_expert_role()
+
 	def __init__(self):
 		self.interaction = self.ChildRobotInteractionFSM()
 		# Keeps track of the word the child is supposed to say

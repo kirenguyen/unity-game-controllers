@@ -3,20 +3,20 @@ This Module handles aspects of the agent architecture's decision-making and game
 """
 # pylint: disable=import-error
 import random
-from GameUtils.GlobalSettings import DO_EPSILON_INCREASING_POLICY # pylint: disable=import-error
-
 
 
 class ActionSpace(): # pylint: disable=too-few-public-methods
     """
     This class defines constants signifying the potential actions an agent can take
     """
-    RING_ANSWER_CORRECT = "RING_ANSWER_CORRECT"
-    LATE_RING = "LATE_RING"
-    #RING_ANSWER_WRONG = "RING_ANSWER_WRONG"
-    DONT_RING = "DONT_RING"
 
-    #REACT_FRUSTRATED = "REACT_FRUSTRATED"
+    # CLicking under exploration / mission mode helps decides what panel to show up
+    CLICK_EXPLORE = "CLICK_EXPLORE"
+    CLICK_MISSION = "CLICK_MISSION"
+
+    # Robot kicking in to help 
+    RING_ANSWER = "RING_ANSWER"
+    WAIT_FOR_RESPONSE = "WAIT_FOR_RESPONSE"
 
     def __init__(self):
         pass
@@ -36,11 +36,18 @@ class AgentModel():
                              and not p.startswith('__')]
 
         self.action_history = []
-        self.ring_rate = .5
-        self.ring_increase_factor = .03 # amount each round that the starting_ring_rate increases
+        self.help_rate = 0.2
+
+    def robot_expert_mode(self):
+        self.help_rate = 0.6
+
+        if random.random() < self.help_rate:
+            return get_next_action()
+        else:
+            return ActionSpace.RING_ANSWER
 
     def random_selection(self):
-    	return random.choice([ActionSpace.RING_ANSWER_CORRECT, ActionSpace.LATE_RING, ActionSpace.DONT_RING])
+    	return random.choice([ActionSpace.RING_ANSWER, ActionSpace.WAIT_FOR_RESPONSE])
 
     def get_next_action(self):
         """

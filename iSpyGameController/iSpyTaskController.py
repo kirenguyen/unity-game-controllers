@@ -30,7 +30,7 @@ class iSpyTaskController():
 		# Ex:
 		# {1: ("What objects are related to weather?", object_type, weather)}
 		# 
-		with open(dir_path + '/../GameUtils/task_list.csv','r') as csvfile:
+		with open(dir_path + '/../GameUtils/task_list2.csv','r') as csvfile:
 			spamreader = csv.reader(csvfile, delimiter=',')
 			for row in spamreader:
 				if row[0] != "":
@@ -46,12 +46,26 @@ class iSpyTaskController():
 		print (dir_path)
 
 		self.object_dict= dict()
+
 		# What one row will look like
 		# {object: (word, color, size, object_type, location, attribute)}
 		# Ex:
 		# {'airplane': ('airplane', 'red', 'huge', 'sky', 'wings')}
-
+		"""
+		# WORKS WITH OBJECT_LIST.CSV
 		with open(dir_path + '/../GameUtils/object_list.csv','r') as csvfile:
+			spamreader = csv.reader(csvfile)
+			for row in spamreader:
+				if row[0] != "" and row[0] != "key_object":
+					self.object_dict[row[0]] = (row[1], row[2], row[3], row[4], row[5], row[6])
+		"""
+
+		# What one row will look like
+		# {object: (word, object_type, object_vocab, attribute, color)}
+		# Ex:
+		# {'bicycle': ('bicycle', 'vehicle', 'vehicle', '2wheels:road', 'emerald')}
+		# WORKS WITH OBJECT_LIST2.CSV
+		with open(dir_path + '/../GameUtils/object_list2.csv','r') as csvfile:
 			spamreader = csv.reader(csvfile)
 			for row in spamreader:
 				if row[0] != "" and row[0] != "key_object":
@@ -82,22 +96,31 @@ class iSpyTaskController():
 
 		self.task_in_progress = True
 
-		return {"task": task, "list" : self.target_list}
+		task_message = self.get_task_message(str(len(self.target_list)),task_category,task_attribute)
+		return {"task": task_message, "list" : self.target_list}
 
+	def get_task_message(self, how_many, task_category, task_attribute):
+		if task_category == "color":
+			obj = "things with color " + task_attribute
+		elif task_category == "animal":
+			obj = task_attribute + " animals"
+
+		task_message = "Can you find " + how_many + " " + obj + "?"
+		return task_message
 
 	def category_to_index(self, category):
 		""" Find what the index is for the given category """
 		if category == "word":
 			return 0
-		elif category == "color":
-			return 1
-		elif category == "size":
-			return 2
 		elif category == "object_type":
-			return 3
-		elif category == "location":
-			return 4
+			return 1
+		elif category == "object_vocab":
+			return 2
 		elif category == "attribute":
+			return 3
+		elif category == "color":
+			return 4
+		elif category == "animal":
 			return 5
 
 	def isTarget(self, object_name):

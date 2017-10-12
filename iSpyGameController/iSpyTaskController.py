@@ -97,7 +97,7 @@ class iSpyTaskController():
 		self.task_in_progress = True
 
 		task_message = self.get_task_message(str(len(self.target_list)),task_category,task_attribute)
-		return {"task": task_message, "list" : self.target_list}
+		return {"task": task_message, "task_vocab": task_attribute, "list" : self.target_list}
 
 	def get_task_message(self, how_many, task_category, task_attribute):
 		if task_category == "color":

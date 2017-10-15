@@ -141,19 +141,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             msg.command = command
             if len(args) > 0:
                 if command == SEND_PRONOUNCIATION_ACCURACY_TO_UNITY:
-                    # Checks each letter and if one letter is False then the word is not perfectly said
-                    passed = args[0]["passed"]
-                    for i in passed:
-                        if i == '0':
-                            perfect_word = False
-                            break
-
-                    # If the word was pronounced perfectly then reset origText
-                    if perfect_word:
-                        if self.task_controller.isTarget(self.origText):
-                            self.task_controller.update_target_list(self.origText)
-
-                        self.origText = ""
+                    
 
                     
                     msg.properties = json.dumps(args[0])

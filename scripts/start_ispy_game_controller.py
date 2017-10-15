@@ -28,6 +28,6 @@ def main():
     
     thread.start_new_thread(control.ros_node_mgr.start_ispy_log_listener, (control.on_ispy_log_received,))
     
-    control.ros_node_mgr.start_ispy_action_listener((control.on_ispy_action_received,))
+    control.ros_node_mgr.start_ispy_action_listener(control.on_ispy_action_received)
     
 main()

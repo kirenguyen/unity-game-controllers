@@ -344,6 +344,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 		"""
 		Rospy callback for when we get ispy action from the unity game over ROS
 		"""
+		print("ispy action msg")
+		print(ispy_action_msg)
 		
 		def isScalingUp(boolean):			
 			if boolean:
@@ -436,6 +438,18 @@ class iSpyGameFSM: # pylint: disable=no-member
 			results_params = {}
 			results_params["letters"] = letters
 			results_params["passed"] = passed
+
+			# Checks each letter and if one letter is False then the word is not perfectly said
+			perfect_word = True
+			for i in passed:
+				if i == '0':
+					perfect_word = False
+					break
+			# If the word was pronounced perfectly then reset origText
+			if perfect_word:
+				if self.task_controller.isTarget(self.origText):
+					self.task_controller.update_target_list(self.origText)
+					self.origText = ""
 
 			self.ros_node_mgr.send_ispy_cmd(SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, results_params)
 			self.recorder.has_recorded = 0

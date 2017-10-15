@@ -61,6 +61,13 @@ class iSpyGameStates(): # pylint: disable=too-few-public-methods
     def __init__(self):
         pass
 
+class iSpyRobotInteractionStates():
+    ROBOT_TURN="robotTURN"
+    CHILD_TURN="chidlTURN"
+    class Triggers():
+        CHILD_TURN_DONE="childTurnDone"
+        ROBOT_TURN_DONE="RobotTurnDone"
+
 class TapGameCommand(): # pylint: disable=too-few-public-methods
     """
     this is a mock class that allows tests to pass in a non-ROS environment

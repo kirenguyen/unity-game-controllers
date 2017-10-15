@@ -52,11 +52,12 @@ class iSpyGameStates(): # pylint: disable=too-few-public-methods
         TOPLEFT_BUTTON_PRESSED = "topLeftButtonPressed"
         OBJECT_CLICKED = "objectClicked"
         SAY_BUTTON_PRESSED = "sayButtonPressed"
-        CLOSE_BUTTON_PRESSED = "closeButtonPressed"
+        TARGET_OBJECT_COLLECTED = "targetObjectCollected"
+        PRONUNCIATION_PANEL_CLOSED = "pronunciationPanelClosed"
         PRACTICE_FINISHED = "practiceFinished"
         PRACTICE_FAILED = "practiceFailed"
         N_SECONDS_LATER = "secondsLater"
-        triggers = ["startButtonPressed","topLeftButtonPressed","objectClicked","sayButtonPressed", "closeButtonPressed", "practiceFinished", "practiceFailed", "secondsLater"]
+        triggers = ["startButtonPressed","targetObjectCollected","pronunciationPanelClosed","topLeftButtonPressed","objectClicked","sayButtonPressed", "closeButtonPressed", "practiceFinished", "practiceFailed", "secondsLater"]
 
     def __init__(self):
         pass
@@ -66,7 +67,7 @@ class iSpyRobotInteractionStates():
     CHILD_TURN="chidlTURN"
     class Triggers():
         CHILD_TURN_DONE="childTurnDone"
-        ROBOT_TURN_DONE="RobotTurnDone"
+        ROBOT_TURN_DONE="robotTurnDone"
 
 class TapGameCommand(): # pylint: disable=too-few-public-methods
     """

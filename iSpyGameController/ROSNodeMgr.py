@@ -48,7 +48,8 @@ ROBOT_EXPERT_ROLE = 3
 SEND_PRONOUNCIATION_ACCURACY_TO_UNITY = 10
 SEND_TASKS_TO_UNITY = 20
 GAME_FINISHED = 99
-VALID_ISPY_COMMANDS = [RESET, SHOW_PRONOUNCIATION_PANEL, SHOW_PRONOUNCIATION_PANEL, SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, SEND_TASKS_TO_UNITY, GAME_FINISHED]
+ROBOT_VIRTUAL_ACTIONS = 30
+VALID_ISPY_COMMANDS = [ ROBOT_VIRTUAL_ACTIONS, RESET, SHOW_PRONOUNCIATION_PANEL, SHOW_PRONOUNCIATION_PANEL, SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, SEND_TASKS_TO_UNITY, GAME_FINISHED]
 
 
 
@@ -141,14 +142,15 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             msg.command = command
             if len(args) > 0:
                 if command == SEND_PRONOUNCIATION_ACCURACY_TO_UNITY:
-                    
-
-                    
                     msg.properties = json.dumps(args[0])
 
                 elif command == SEND_TASKS_TO_UNITY:
                     converted_result = json.dumps(args[0])
                     msg.properties = converted_result
+
+                elif command == ROBOT_VIRTUAL_ACTIONS:
+                    robot_action = json.dumps(args[0])
+                    msg.properties = robot_action
 
             # send message to tablet game
             if self.game_commander is None:

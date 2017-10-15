@@ -15,7 +15,7 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     # Look Ats
     LOOK_AT_TABLET = 'LOOK_AT_TABLET'
     LOOK_CENTER= 'LOOK_CENTER'
-
+    WIN_SPEECH = "WIN_SPEECH"
     
 
     #Pronunciation Actions the robot can do 
@@ -24,6 +24,8 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     #Reaction Actions the robot can do after its results are revealed
     REACT_ROBOT_CORRECT = 'REACT_ROBOT_CORRECT'
     REACT_CHILD_CORRECT = 'REACT_CHILD_CORRECT'
+
+    
 
     # virtual actions on the app
     VIRTUALLY_CLICK_CORRECT_OBJ = "CLICK_CORRECT_OBJ" # click correct obj

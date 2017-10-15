@@ -81,25 +81,42 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			self.role_behavior_mapping = RobotRolesBehaviorsMap()
 
+		def turn_taking(self):
+			# check whether it is robot's turn or child's turn in the game play
+			if self.state == ris.ROBOT_TURN:
+				# then, next turn is child's 
+				self.robotTurnDone()
+		
+			if self.state == ris.CHILD_TURN:
+				# then, next turn is robot's
+				self.childTurnDone()
+				
 
-		def test(self):
-			print("current state: "+self.state)
-			self.Robot_Turn_Done()
-			print("after child turn done")
-			print("current state: "+self.state)
+			print("TURN TAKING: Current Turn = "+self.state)
 
-		def respond(self):
+			# robot's response 
+			self.get_turn_taking_action()
+
+		def get_general_robot_response(self,response_type):
+			'''
+			get general robot's responsee (not related to robot's role swtiching)
+			examples: encouragement, celerbration, empathy, happiness
+			'''
+			pass
+
+		def get_turn_taking_action(self):
 			'''
 			check the current interaction FSM to decide whether the robot should respond
 			then, use agent model to decide how the robot should respond if it needs to respond
 			'''
+			print("Turn Taking Action...")
 			physical_action = ""
 			virtual_action = ""
 
 			if self.state == ris.ROBOT_TURN:
 				# choose an action for robot
-				robot_role = self.get_role()
-				actions = self.get_behaviors(robot_role)
+				robot_role = self._get_role()
+				actions = self._get_behaviors(robot_role)
 				physical_action = actions['physical'] 
 				virtual_action = actions['virtual']
 
@@ -108,38 +125,39 @@ class iSpyGameFSM: # pylint: disable=no-member
 				pass
 
 			if physical_action:
-				self.perform_robot_physical_action(physical_action)
+				self._perform_robot_physical_action(physical_action)
 			if virtual_action:
-				self.perform_robot_virtual_action(virtual_action)
+				self._perform_robot_virtual_action(virtual_action)
 
-		def get_behaviors(self,role):
+		def _get_behaviors(self,role):
 			'''
 			Get corresponding virtual and physical actions for a given input robot's role
 			'''
 			return self.role_behavior_mapping.get_actions(role)
 			
 
-		def perform_robot_physical_action(self,action):
+		def _perform_robot_physical_action(self,action):
 			'''
 			send the physical action message via ROS to the robot
 			'''
-			##MAGGIE TODO: send the physical action to Jibo via ROSNodeMgr
 			#self.ros_node_mgr.send_robot_cmd(Rob)
+			#print("physical action is: "+action)
+			#self.ros_node_mgr.send_robot_cmd(self, action)
 			pass
 
-		def perform_robot_virtual_action(self,action):
+		def _perform_robot_virtual_action(self,action):
 			'''
 			send the virtual action message via ROS to the tablet 
 			'''
-			##MAGGIE TODO: send the virtual action to ispy game here via ROSNodeMgr
-			#self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,action)
+			print("perform robot virtual action")
+			print(action)
+			self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,action)
 			
 
-		def get_role(self):
+		def _get_role(self):
 			'''
 			get the most approriate role from agent model
 			'''
-			##MAGGIE TODO: at this point, just make the role equal to robot_expert_role
 			role = self.agent_model.get_next_robot_role()
 			return role
 
@@ -194,10 +212,12 @@ class iSpyGameFSM: # pylint: disable=no-member
 				{'trigger': gs.Triggers.TOPLEFT_BUTTON_PRESSED, 'source': gs.EXPLORATION_MODE, 'dest': gs.MISSION_MODE},
 				{'trigger': gs.Triggers.TOPLEFT_BUTTON_PRESSED, 'source': gs.MISSION_MODE, 'dest': gs.EXPLORATION_MODE},
 				{'trigger': gs.Triggers.OBJECT_CLICKED, 'source': gs.MISSION_MODE, 'dest': gs.PRONUNCIATION_PANEL},
-				{'trigger': gs.Triggers.CLOSE_BUTTON_PRESSED, 'source': gs.PRONUNCIATION_PANEL, 'dest': gs.MISSION_MODE},
+				{'trigger': gs.Triggers.TARGET_OBJECT_COLLECTED , 'source': gs.PRONUNCIATION_RESULT, 'dest': gs.MISSION_MODE},
 				{'trigger': gs.Triggers.SAY_BUTTON_PRESSED, 'source': gs.PRONUNCIATION_PANEL, 'dest': gs.PRONUNCIATION_RESULT},
 				{'trigger': gs.Triggers.PRACTICE_FAILED, 'source': gs.PRONUNCIATION_RESULT, 'dest': gs.PRONUNCIATION_PANEL},
-				{'trigger': gs.Triggers.CLOSE_BUTTON_PRESSED, 'source':gs.PRONUNCIATION_RESULT , 'dest': gs.MISSION_MODE},
+				{'trigger': gs.Triggers.PRONUNCIATION_PANEL_CLOSED, 'source':gs.PRONUNCIATION_RESULT , 'dest': gs.MISSION_MODE},
+				{'trigger': gs.Triggers.PRONUNCIATION_PANEL_CLOSED, 'source':gs.PRONUNCIATION_PANEL , 'dest': gs.MISSION_MODE},
+				{'trigger': gs.Triggers.PRONUNCIATION_PANEL_CLOSED, 'source':gs.MISSION_MODE , 'dest': gs.MISSION_MODE},
 				{'trigger': gs.Triggers.PRACTICE_FINISHED, 'source':gs.PRONUNCIATION_RESULT , 'dest': gs.MISSION_MODE},
 				{'trigger': gs.Triggers.OBJECT_CLICKED, 'source': gs.EXPLORATION_MODE, 'dest':gs.WORD_DISPLAY },
 				{'trigger': gs.Triggers.N_SECONDS_LATER, 'source': gs.WORD_DISPLAY, 'dest': gs.EXPLORATION_MODE}
@@ -253,7 +273,6 @@ class iSpyGameFSM: # pylint: disable=no-member
 		self.tapped_and_pronounced.append((self.origText, time.time() - self.time_tapped))
 		print (self.tapped_and_pronounced)
 
-	
 
 	def onWordDisplay(self):
 		'''callback function when entering word display'''
@@ -266,9 +285,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		Rospy Callback for when we get log messages
 		"""
 		print ("---------------------------------------------------------------")
-		rospy.loginfo(rospy.get_caller_id() + "I heard " + transition_msg.data)
 		print("I heard " + transition_msg.data)
-
 		if transition_msg.data in gs.Triggers.triggers:
 			if transition_msg.data == gs.Triggers.TOPLEFT_BUTTON_PRESSED:
 				# If the player is switching from mission to explore mode
@@ -293,12 +310,12 @@ class iSpyGameFSM: # pylint: disable=no-member
 							self.ros_node_mgr.send_ispy_cmd(GAME_FINISHED)
 						else:
 							self.ros_node_mgr.send_ispy_cmd(SEND_TASKS_TO_UNITY, task)
+							self.interaction.get_turn_taking_action()
 
 					time_in_explore_mode = time.time() - self.explore_time_start
 					print("Time spent in explore mode is %s seconds" %time_in_explore_mode)
 
-					# Check how the robot's should respond (physically and virtually through ispy game)
-					self.interaction.respond()
+					
 
 			# Starts keeping track of time in explore mode when the game starts
 			elif transition_msg.data == gs.Triggers.START_BUTTON_PRESSED:
@@ -320,11 +337,16 @@ class iSpyGameFSM: # pylint: disable=no-member
 					self.explore_tapped_list.append((self.origText, self.time_tapped))
 					print (self.explore_tapped_list)
 
-			elif transition_msg.data == gs.Triggers.CLOSE_BUTTON_PRESSED:
+			elif transition_msg.data == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
 				# If closing the pronunciation panel, append to the tapped and cancelled list
 				if self.state == gs.PRONUNCIATION_PANEL:
 					self.tapped_and_cancelled.append((self.origText , time.time() - self.time_tapped))
 					print (self.tapped_and_cancelled)
+
+			elif transition_msg.data == gs.Triggers.TARGET_OBJECT_COLLECTED:
+				# one of the target objects is successfully collected. give the turn to the other player now
+				print("target object collecged!!!!")
+				#self.interaction.turn_taking()
 
 
 			# If the message is in gs.Triggers, then allow the trigger
@@ -458,10 +480,4 @@ class iSpyGameFSM: # pylint: disable=no-member
 	
 
 
-# if __name__ == '__main__':
-# 	control = iSpyGameFSM()
-# 	print ("FSM Started!")
-# 	#thread.start_new_thread(control.start_ispy_transition_listener, ())
-# 	thread.start_new_thread(control.ros_node_mgr.start_log_listener, ())
-# 	#control.start_ispy_action_listener()
 

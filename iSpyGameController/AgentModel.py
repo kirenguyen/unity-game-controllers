@@ -3,7 +3,8 @@ This Module handles aspects of the agent architecture's decision-making and game
 """
 # pylint: disable=import-error
 import random
-
+from .RobotBehaviorList import RobotRoles
+from .RobotBehaviorList import RobotRolesBehaviorsMap
 
 
 
@@ -17,7 +18,7 @@ class AgentModel():
 
     def __init__(self):
 
-        self.role_space=[RobotRoles.CUR_EXPERT]
+        self.role_space=[ RobotRoles.CUR_EXPERT]
         self.role_history=[]
         RobotRolesBehaviorsMap()
 

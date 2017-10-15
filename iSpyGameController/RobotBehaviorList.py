@@ -5,6 +5,7 @@ Robot Behaviors
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error, invalid-name
 from unity_game_msgs.msg import iSpyCommand
+from enum import Enum
 
 class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     """
@@ -45,7 +46,7 @@ class RobotRolesBehaviorsMap:
         self.mapping.update({RobotRoles.CUR_EXPERT:{'physical':RobotBehaviors.LOOK_AT_TABLET, 'virtual': RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ}})
 
     def get_actions(self,role):
-        if isinstance(role, RobotRoles) && role in self.mapping.keys():
+        if isinstance(role, RobotRoles) and role in self.mapping.keys():
             # if the role is an instance of robotRoles
             # return a sequence of specific actions that the robot needs to execute for a given role
             return self.mapping[role]

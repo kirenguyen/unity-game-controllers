@@ -42,13 +42,6 @@ else:
 #Recording Time Constant
 RECORD_TIME_MS = 3500
 
-#set up ros topics for ispy game
-ROS_TO_ISPY_GAME_TOPIC = 'ispy_cmd_topic'
-ISPY_GAME_TO_ROS_ACTION_TOPIC = 'ispy_action_topic'
-ISPY_GAME_TO_ROS_TRANSITION_TOPIC = 'ispy_transition_state_topic'
-ISPY_GAME_TO_ROS_LOG_TOPIC = 'ispy_log_topic'
-ROS_TO_ANDROID_MIC_TOPIC = 'android_audio'
-
 # COMMAND CONSTANTS
 RESET = 0
 SHOW_PRONOUNCIATION_PANEL = 1
@@ -58,6 +51,8 @@ SEND_PRONOUNCIATION_ACCURACY_TO_UNITY = 10
 SEND_TASKS_TO_UNITY = 20
 GAME_FINISHED = 99
 VALID_ISPY_COMMANDS = [RESET, SHOW_PRONOUNCIATION_PANEL, SHOW_PRONOUNCIATION_PANEL, SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, SEND_TASKS_TO_UNITY, GAME_FINISHED]
+
+
 
 
 
@@ -98,6 +93,9 @@ class iSpyGameFSM: # pylint: disable=no-member
 			check the current interaction FSM to decide whether the robot should respond
 			then, use agent model to decide how the robot should respond if it needs to respond
 			'''
+			physical_action = ""
+			virtual_action = ""
+
 			if self.state == ris.ROBOT_TURN:
 				# choose an action for robot
 				robot_role = self.get_role()
@@ -111,16 +109,17 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			if physical_action:
 				self.perform_robot_physical_action(physical_action)
-			if virtual_actions:
+			if virtual_action:
 				self.perform_robot_virtual_action(virtual_action)
 
 		def get_behaviors(self,role):
-            '''
-            Get corresponding virtual and physical actions for a given input robot's role
-            '''
-            return self.role_behavior_mapping.get_actions(role)
+			'''
+			Get corresponding virtual and physical actions for a given input robot's role
+			'''
+			return self.role_behavior_mapping.get_actions(role)
+			
 
-		def perform_physical_action(self,action):
+		def perform_robot_physical_action(self,action):
 			'''
 			send the physical action message via ROS to the robot
 			'''
@@ -128,12 +127,12 @@ class iSpyGameFSM: # pylint: disable=no-member
 			#self.ros_node_mgr.send_robot_cmd(Rob)
 			pass
 
-		def perform_virtual_action(self,action):
+		def perform_robot_virtual_action(self,action):
 			'''
 			send the virtual action message via ROS to the tablet 
 			'''
 			##MAGGIE TODO: send the virtual action to ispy game here via ROSNodeMgr
-			self.ros_node_mgr.send_game_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,action)
+			#self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,action)
 			
 
 		def get_role(self):
@@ -141,7 +140,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 			get the most approriate role from agent model
 			'''
 			##MAGGIE TODO: at this point, just make the role equal to robot_expert_role
-			self.role = self.agent_model.get_next_robot_role()
+			role = self.agent_model.get_next_robot_role()
+			return role
 
 	def __init__(self):
 
@@ -160,7 +160,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		self.game_commander = None
 
 		# Bool telling if the cmd message was heard from Unity
-		self.message_received = False
+		self.ros_node_mgr.message_received = False
 
 		self.task_controller = iSpyTaskController()
 
@@ -290,9 +290,9 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 						# If there are no more available quests, you won the game
 						if task == None:
-							self.send_ispy_cmd(GAME_FINISHED)
+							self.ros_node_mgr.send_ispy_cmd(GAME_FINISHED)
 						else:
-							self.send_ispy_cmd(SEND_TASKS_TO_UNITY, task)
+							self.ros_node_mgr.send_ispy_cmd(SEND_TASKS_TO_UNITY, task)
 
 					time_in_explore_mode = time.time() - self.explore_time_start
 					print("Time spent in explore mode is %s seconds" %time_in_explore_mode)
@@ -336,7 +336,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		print(log_msg.data)
 		# If the the message was "messageReceived", that means that the publishing loop can stop
 		if log_msg.data == "messageReceived":
-			self.message_received = True
+			self.ros_node_mgr.message_received = True
 
 
 	#################################################################################################
@@ -437,107 +437,17 @@ class iSpyGameFSM: # pylint: disable=no-member
 			results_params["letters"] = letters
 			results_params["passed"] = passed
 
-			self.send_ispy_cmd(SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, results_params)
+			self.ros_node_mgr.send_ispy_cmd(SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, results_params)
 			self.recorder.has_recorded = 0
 			
 
-	def start_ispy_action_listener(self):
-		"""
-		Start up the ispy action Subscriber node
-		"""
-
-		rospy.init_node('ispy_ROS_receiver', anonymous = True)
-		rospy.Subscriber(ISPY_GAME_TO_ROS_ACTION_TOPIC, iSpyAction, self.on_ispy_action_received)	
-
-		rospy.spin()
-
-	def start_ispy_transition_listener(self):
-		"""
-		Start up the ispy state Subscriber node
-		"""
-		time.sleep(.2)
-		rospy.Subscriber(ISPY_GAME_TO_ROS_TRANSITION_TOPIC, String, self.on_ispy_state_info_received)	
-
-		rospy.spin()
-
-	def start_ispy_log_listener(self):
-		rospy.Subscriber(ISPY_GAME_TO_ROS_LOG_TOPIC, String, self.on_ispy_log_received)
-
-	def start_ispy_cmd_publisher(self):
-		"""
-		Starts up the ispy command publisher node,
-		which allows iSpy controller sends cmd messages over ROS to the unity game
-		"""
-		print('Pub Node started')
-		self.game_commander = rospy.Publisher(ROS_TO_ISPY_GAME_TOPIC, iSpyCommand, queue_size=10)
-		rate = rospy.Rate(10)  # spin at 10 Hz
-		rate.sleep()  # sleep to wait for subscribers
-		# rospy.spin()
+	
 
 
-	def send_ispy_cmd(self, command, *args):
-		"""
-		send a iSpyCommand to unity game
-		Args are optional parameters.
-		"""
-		msg = iSpyCommand()
-		# add header
-		msg.header = Header()
-		msg.header.stamp = rospy.Time.now()
-
-		# Bool for if the word is pronounced completely correctly
-		# Used to reuse the origText variable to try pronouncing again
-		perfect_word = True
-
-		#TODO: may need to convert args to json before passing it to msg.params
-		#if command is SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, then convert accuracy result to JSOn message first
-		#use function in Util.py
-
-		if command in VALID_ISPY_COMMANDS:
-			# fill in command and any params:
-			msg.command = command
-			if len(args) > 0:
-				if command == SEND_PRONOUNCIATION_ACCURACY_TO_UNITY:
-					# Checks each letter and if one letter is False then the word is not perfectly said
-					passed = args[0]["passed"]
-					for i in passed:
-						if i == '0':
-							perfect_word = False
-							break
-
-					# If the word was pronounced perfectly then reset origText
-					if perfect_word:
-						if self.task_controller.isTarget(self.origText):
-							self.task_controller.update_target_list(self.origText)
-
-						self.origText = ""
-
-					
-					msg.properties = json.dumps(args[0])
-
-				elif command == SEND_TASKS_TO_UNITY:
-					converted_result = json.dumps(args[0])
-					msg.properties = converted_result
-
-			# send message to tablet game
-			if self.game_commander is None:
-				self.start_ispy_cmd_publisher()
-
-			# Keep sending the message until hearing that it was received
-			while self.message_received == False:
-				self.game_commander.publish(msg)
-				time.sleep(.15)
-
-			self.message_received = False
-			rospy.loginfo(msg)
-
-		else:
-			print ("Not a valid command")
-
-if __name__ == '__main__':
-	control = iSpyGameFSM()
-	print ("FSM Started!")
-	thread.start_new_thread(control.start_ispy_transition_listener, ())
-	thread.start_new_thread(control.start_ispy_log_listener, ())
-	control.start_ispy_action_listener()
+# if __name__ == '__main__':
+# 	control = iSpyGameFSM()
+# 	print ("FSM Started!")
+# 	#thread.start_new_thread(control.start_ispy_transition_listener, ())
+# 	thread.start_new_thread(control.ros_node_mgr.start_log_listener, ())
+# 	#control.start_ispy_action_listener()
 

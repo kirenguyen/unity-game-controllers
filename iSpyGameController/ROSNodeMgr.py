@@ -2,9 +2,10 @@
 This is the main class that manages the creation / parsing of ROS Node Communication
 """
 # -*- coding: utf-8 -*-
-# pylint: disable=import-error, invalid-name
+# pylint: disable=import-error, invalid-names
 
 import time
+import json
 from GameUtils import GlobalSettings
 from .JiboBehaviors import JiboBehaviors
 from .TegaBehaviors import TegaBehaviors
@@ -18,17 +19,38 @@ if GlobalSettings.USE_ROS:
     from r1d1_msgs.msg import TegaAction
     from r1d1_msgs.msg import Vec3
     from jibo_msgs.msg import JiboAction
+    from std_msgs.msg import String
 else:
     TapGameLog = GlobalSettings.iSpyAction  # Mock object, used for testing in non-ROS environments
     TapGameCommand = GlobalSettings.iSpyCommand
     TegaAction = GlobalSettings.TegaAction
     JiboAction = GlobalSettings.JiboAction
 
-ROSCORE_TO_ISPY_GAME_TOPIC = '/ispy_game_from_ros'
-ISPY_GAME_TO_ROSCORE_TOPIC = '/ispy_game_to_ros'
+#ROSCORE_TO_ISPY_GAME_TOPIC = '/ispy_game_from_ros'
+#ISPY_GAME_TO_ROSCORE_TOPIC = '/ispy_game_to_ros'
+
+#set up ros topics for ispy game
+ROS_TO_ISPY_GAME_TOPIC = 'ispy_cmd_topic'
+ISPY_GAME_TO_ROS_ACTION_TOPIC = 'ispy_action_topic'
+ISPY_GAME_TO_ROS_TRANSITION_TOPIC = 'ispy_transition_state_topic'
+ISPY_GAME_TO_ROS_LOG_TOPIC = 'ispy_log_topic'
+ROS_TO_ANDROID_MIC_TOPIC = 'android_audio'
+
 
 ROSCORE_TO_JIBO_TOPIC = '/jibo'
 ROSCORE_TO_TEGA_TOPIC = '/tega'
+
+# COMMAND CONSTANTS
+RESET = 0
+SHOW_PRONOUNCIATION_PANEL = 1
+SHOW_OBJECT_DESCR_PANEL = 2
+ROBOT_EXPERT_ROLE = 3
+SEND_PRONOUNCIATION_ACCURACY_TO_UNITY = 10
+SEND_TASKS_TO_UNITY = 20
+GAME_FINISHED = 99
+VALID_ISPY_COMMANDS = [RESET, SHOW_PRONOUNCIATION_PANEL, SHOW_PRONOUNCIATION_PANEL, SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, SEND_TASKS_TO_UNITY, GAME_FINISHED]
+
+
 
 class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
     """
@@ -40,36 +62,21 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
     robot_commander = None
     log_listener = None
 
+    message_received = None 
+
 
 
     def __init__(self):
         pass
 
-
+    # check...
     def init_ros_node(self): #pylint: disable=no-self-use
         """
         Start up the game connection ROS node
         """
-        rospy.init_node('FSM_Listener_Controller', anonymous=True)
-
-    def start_log_listener(self, on_log_callback):
-        """
-        Start up the Game Log Subscriber node
-        """
-        print('Sub Node started')
-        self.log_listener = rospy.Subscriber(ISPY_GAME_TO_ROSCORE_TOPIC, iSpyAction,
-                                             on_log_callback)
-
-    def start_cmd_publisher(self):
-        """
-        Starts up the command publisher node
-        """
-        print('GameCmd Pub Node started')
-        self.game_commander = rospy.Publisher(ROSCORE_TO_ISPY_GAME_TOPIC,
-                                              iSpyCommand, queue_size=10)
-        rate = rospy.Rate(10)  # spin at 10 Hz
-        rate.sleep()  # sleep to wait for subscribers
-        # rospy.spin()
+        print("rospy init node")
+        rospy.init_node('ispy_ROS_receiver', anonymous = True)
+        
 
     def start_robot_publisher(self):
         """
@@ -88,28 +95,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         rate = rospy.Rate(10)  # spin at 10 Hz
         rate.sleep()  # sleep to wait for subscribers
 
-    def send_game_cmd(self, command, *args):
-        """
-        send a TapGameCommand to game
-        Args are optional parameters
-        """
 
-        # send message to tablet game
-        if self.game_commander is None:
-            self.start_cmd_publisher()
-            time.sleep(.5)
-
-        msg = iSpyCommand()
-        # add header
-        msg.header = Header()
-        msg.header.stamp = rospy.Time.now()
-
-        # fill in command and any params:
-        msg.command = command
-        if len(args) > 0:
-            msg.params = args[0]
-        self.game_commander.publish(msg)
-        rospy.loginfo(msg)
 
     def send_robot_cmd(self, command, *args):
         """
@@ -130,3 +116,99 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         # add header
         self.robot_commander.publish(msg)  # would be nice to guarantee message performance here
         rospy.loginfo(msg)
+
+    ## for iSpy FSM ################
+    def send_ispy_cmd(self, command, *args):
+        """
+        send a iSpyCommand to unity game
+        Args are optional parameters.
+        """
+        msg = iSpyCommand()
+        # add header
+        msg.header = Header()
+        msg.header.stamp = rospy.Time.now()
+
+        # Bool for if the word is pronounced completely correctly
+        # Used to reuse the origText variable to try pronouncing again
+        perfect_word = True
+
+        #TODO: may need to convert args to json before passing it to msg.params
+        #if command is SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, then convert accuracy result to JSOn message first
+        #use function in Util.py
+
+        if command in VALID_ISPY_COMMANDS:
+            # fill in command and any params:
+            msg.command = command
+            if len(args) > 0:
+                if command == SEND_PRONOUNCIATION_ACCURACY_TO_UNITY:
+                    # Checks each letter and if one letter is False then the word is not perfectly said
+                    passed = args[0]["passed"]
+                    for i in passed:
+                        if i == '0':
+                            perfect_word = False
+                            break
+
+                    # If the word was pronounced perfectly then reset origText
+                    if perfect_word:
+                        if self.task_controller.isTarget(self.origText):
+                            self.task_controller.update_target_list(self.origText)
+
+                        self.origText = ""
+
+                    
+                    msg.properties = json.dumps(args[0])
+
+                elif command == SEND_TASKS_TO_UNITY:
+                    converted_result = json.dumps(args[0])
+                    msg.properties = converted_result
+
+            # send message to tablet game
+            if self.game_commander is None:
+                self.start_ispy_cmd_publisher()
+
+            # Keep sending the message until hearing that it was received
+            while self.message_received == False:
+                self.game_commander.publish(msg)
+                time.sleep(.15)
+
+            self.message_received = False
+            rospy.loginfo(msg)
+
+        else:
+            print ("Not a valid command")
+
+
+    def start_ispy_action_listener(self,on_ispy_action_received):
+        """
+        Start up the ispy action Subscriber node
+        """
+        self.ispy_to_ros__action_subs = rospy.Subscriber(ISPY_GAME_TO_ROS_ACTION_TOPIC, iSpyAction, on_ispy_action_received)   
+        print("action listener")
+        rospy.spin()
+
+    def start_ispy_transition_listener(self,on_ispy_state_info_received):
+        """
+        Start up the ispy state Subscriber node
+        """
+        time.sleep(.2)
+        self.ispy_to_ros_trans_subs = rospy.Subscriber(ISPY_GAME_TO_ROS_TRANSITION_TOPIC, String, on_ispy_state_info_received)   
+        print("transition listener")
+        rospy.spin()
+        #rospy.spin()
+
+    def start_ispy_log_listener(self,on_ispy_log_received):
+        self.ispy_to_ros_log_subs = rospy.Subscriber(ISPY_GAME_TO_ROS_LOG_TOPIC, String, on_ispy_log_received)
+        print("log listener")
+        rospy.spin()
+    
+    def start_ispy_cmd_publisher(self):
+        """
+        Starts up the ispy command publisher node,
+        which allows iSpy controller sends cmd messages over ROS to the unity game
+        """
+        print('Pub Node started')
+        self.game_commander = rospy.Publisher(ROS_TO_ISPY_GAME_TOPIC, iSpyCommand, queue_size=10)
+        rate = rospy.Rate(10)  # spin at 10 Hz
+        rate.sleep()  # sleep to wait for subscribers
+        # rospy.spin()
+

@@ -16,7 +16,12 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     LOOK_AT_TABLET = 'LOOK_AT_TABLET'
     LOOK_CENTER= 'LOOK_CENTER'
     WIN_SPEECH = "WIN_SPEECH"
-    
+
+    ROBOT_TURN_SPEECH="ROBOT_TURN_SPEECH"
+    REACT_CHILD_ANSWER_CORRECT="REACT_CHILD_ANSWER_CORRECT"
+
+    WIN_MOTION="WIN_MOTION"
+    EYE_FIDGET="EYE_FIDGET"
 
     #Pronunciation Actions the robot can do 
     PRONOUNCE_CORRECT = 'PRONOUNCE_CORRECT'
@@ -25,7 +30,7 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     REACT_ROBOT_CORRECT = 'REACT_ROBOT_CORRECT'
     REACT_CHILD_CORRECT = 'REACT_CHILD_CORRECT'
 
-    
+
 
     # virtual actions on the app
     VIRTUALLY_CLICK_CORRECT_OBJ = "CLICK_CORRECT_OBJ" # click correct obj
@@ -45,7 +50,9 @@ class RobotRolesBehaviorsMap:
     '''  
     def __init__(self):
         self.mapping = {}
-        self.mapping.update({RobotRoles.CUR_EXPERT:{'physical':RobotBehaviors.LOOK_AT_TABLET, 'virtual': RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ}})
+        self.mapping.update({RobotRoles.CUR_EXPERT:{
+            'physical':[RobotBehaviors.LOOK_AT_TABLET,RobotBehaviors.ROBOT_TURN_SPEECH,RobotBehaviors.PRONOUNCE_CORRECT, RobotBehaviors.WIN_SPEECH], 
+            'virtual': RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ}})
 
     def get_actions(self,role):
         if isinstance(role, RobotRoles) and role in self.mapping.keys():

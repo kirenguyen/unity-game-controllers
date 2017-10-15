@@ -103,7 +103,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         send a command to the robot (action space or "cosmetic")
         This function maps actions from the ActionSpace into actual ROS Msgs
         """
-
+        print("robot cmd: "+command)
         if self.robot_commander is None:
             self.start_robot_publisher()
             time.sleep(.5)

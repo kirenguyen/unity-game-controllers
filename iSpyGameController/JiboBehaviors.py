@@ -48,10 +48,17 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.motion = JiboAction.DEFAULT
 
         elif command == RobotBehaviors.WIN_SPEECH:
-            msg.do_motion = False
+            msg.do_motion = True
             msg.do_tts = True
             msg.do_lookat = False
             msg.tts_text = "I win I win I win I win I win"
+            msg.motion = JiboAction.DEFAULT
+
+        elif command == RobotBehaviors.ROBOT_TURN_SPEECH:
+            msg.do_motion = False
+            msg.do_tts = True
+            msg.do_lookat = False
+            msg.tts_text = "It is my turn now"
 
         # elif command == RobotBehaviors.RING_ANSWER_CORRECT:
         #     msg.do_motion = True
@@ -88,11 +95,11 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
         #     msg.do_sound_playback = False
         #     msg.tts_text = "I dont know this one"
 
-        # elif command == RobotBehaviors.REACT_ANSWER_CORRECT:
-        #     msg.do_motion = True
-        #     msg.do_tts = False
-        #     msg.do_lookat = False
-        #     msg.motion = "Misc/Eye_to_Happy_01.keys"
+        elif command == RobotBehaviors.REACT_CHILD_ANSWER_CORRECT:
+            msg.do_motion = True
+            msg.do_tts = False
+            msg.do_lookat = False
+            msg.motion = "Misc/Eye_to_Happy_01.keys"
 
         # elif command == RobotBehaviors.REACT_ANSWER_WRONG:
         #     msg.do_motion = False
@@ -116,11 +123,11 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
         #     msg.do_sound_playback = True
         #     msg.audio_filename = "SSA_laugh.m4a"
 
-        # elif command == RobotBehaviors.WIN_MOTION:
-        #     msg.do_motion = True
-        #     msg.do_tts = False
-        #     msg.do_lookat = False
-        #     msg.motion = JiboAction.HAPPY_GO_LUCKY_DANCE
+        elif command == RobotBehaviors.WIN_MOTION:
+            msg.do_motion = True
+            msg.do_tts = False
+            msg.do_lookat = False
+            msg.motion = JiboAction.HAPPY_GO_LUCKY_DANCE
 
         # elif command == RobotBehaviors.WIN_SPEECH:
         #     msg.do_motion = False
@@ -140,11 +147,11 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
         #     msg.do_lookat = False
         #     msg.tts_text = "I lost. Oh well. I'll beat you next time"
 
-        # elif command == RobotBehaviors.EYE_FIDGET:
-        #     msg.do_motion = True
-        #     msg.do_tts = False
-        #     msg.do_lookat = False
-        #     msg.motion = JiboAction.EYE_FIDGET
+        elif command == RobotBehaviors.EYE_FIDGET:
+            msg.do_motion = True
+            msg.do_tts = False
+            msg.do_lookat = False
+            msg.motion = JiboAction.EYE_FIDGET
 
         # elif command == RobotBehaviors.REACT_TO_BEAT:
         #     msg.do_motion = True

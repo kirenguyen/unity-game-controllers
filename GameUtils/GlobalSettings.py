@@ -64,7 +64,7 @@ class iSpyGameStates(): # pylint: disable=too-few-public-methods
 
 class iSpyRobotInteractionStates():
     ROBOT_TURN="robotTURN"
-    CHILD_TURN="chidlTURN"
+    CHILD_TURN="childTURN"
     class Triggers():
         CHILD_TURN_DONE="childTurnDone"
         ROBOT_TURN_DONE="robotTurnDone"

@@ -73,7 +73,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 				{'trigger': ris.Triggers.ROBOT_TURN_DONE, 'source': ris.ROBOT_TURN, 'dest': ris.CHILD_TURN},
 			]
 			self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
-									 initial=ris.ROBOT_TURN)
+									 initial=ris.CHILD_TURN)
 
 			self.ros_node_mgr = ros_node_mgr
 
@@ -85,14 +85,13 @@ class iSpyGameFSM: # pylint: disable=no-member
 			# check whether it is robot's turn or child's turn in the game play
 			if self.state == ris.ROBOT_TURN:
 				# then, next turn is child's 
-				self.robotTurnDone()
+				getattr(self, ris.Triggers.ROBOT_TURN_DONE)() # convert the variabel to string, which is the name of the called function
 		
-			if self.state == ris.CHILD_TURN:
+			elif self.state == ris.CHILD_TURN:
 				# then, next turn is robot's
-				self.childTurnDone()
-				
-
-			print("TURN TAKING: Current Turn = "+self.state)
+				getattr(self, ris.Triggers.CHILD_TURN_DONE)()
+	
+			print("==========TURN TAKING===============: Current Turn = "+self.state)
 
 			# robot's response 
 			self.get_turn_taking_action()
@@ -109,12 +108,13 @@ class iSpyGameFSM: # pylint: disable=no-member
 			check the current interaction FSM to decide whether the robot should respond
 			then, use agent model to decide how the robot should respond if it needs to respond
 			'''
-			print("Turn Taking Action...")
+			
 			physical_action = ""
 			virtual_action = ""
 
 			if self.state == ris.ROBOT_TURN:
 				# choose an action for robot
+				print("Turn Taking Action...ROBOTS TURN")
 				robot_role = self._get_role()
 				actions = self._get_behaviors(robot_role)
 				physical_action = actions['physical'] 
@@ -122,11 +122,12 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			elif self.state == ris.CHILD_TURN:
 				# no need to respond at this point 
-				pass
+				print("Turn Taking Action...CHILD TURN")
 
 			if physical_action:
 				self._perform_robot_physical_action(physical_action)
 			if virtual_action:
+				time.sleep(5) 
 				self._perform_robot_virtual_action(virtual_action)
 
 		def _get_behaviors(self,role):
@@ -346,7 +347,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 			elif transition_msg.data == gs.Triggers.TARGET_OBJECT_COLLECTED:
 				# one of the target objects is successfully collected. give the turn to the other player now
 				print("target object collecged!!!!")
-				#self.interaction.turn_taking()
+				self.interaction.turn_taking()
 
 
 			# If the message is in gs.Triggers, then allow the trigger
@@ -366,8 +367,9 @@ class iSpyGameFSM: # pylint: disable=no-member
 		"""
 		Rospy callback for when we get ispy action from the unity game over ROS
 		"""
+
 		print("ispy action msg")
-		print(ispy_action_msg)
+		#print(ispy_action_msg)
 		
 		def isScalingUp(boolean):			
 			if boolean:

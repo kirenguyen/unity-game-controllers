@@ -56,35 +56,47 @@ class ChildRobotInteractionFSM:
 			self.get_turn_taking_action()
 
 		
-		def react(self,gameState):
+		def react(self,gameStateTrigger):
 			'''
 			react to ispy game state change
 			'''
 			## TEMPORARY: some code is badly written.needs modifications later
-			if gameState == gs.Triggers.TARGET_OBJECT_COLLECTED:
+			if gameStateTrigger == gs.Triggers.TARGET_OBJECT_COLLECTED:
 				if self.state == ris.ROBOT_TURN:
 					# robot just collected an object. celebrate
 					self._perform_robot_physical_action(self.physical_actions)
-					time.sleep(2)
+					time.sleep(1)
 					self.ros_node_mgr.send_robot_cmd(RobotBehaviors.WIN_MOTION)
 				elif self.state == ris.CHILD_TURN:
 					self.ros_node_mgr.send_robot_cmd(RobotBehaviors.REACT_CHILD_ANSWER_CORRECT)
-			elif gameState == gs.Triggers.OBJECT_CLICKED:
+					time.sleep(0.4)
+					self.ros_node_mgr.send_robot_cmd(RobotBehaviors.RING_ANSWER_CORRECT)
+			
+			elif gameStateTrigger  == gs.Triggers.OBJECT_CLICKED:
 				if self.state == ris.ROBOT_TURN:
 					#robot's turn, pronounce the word
 					self.ros_node_mgr.send_robot_cmd(RobotBehaviors.EYE_FIDGET)
+					self.ros_node_mgr.send_robot_cmd(RobotBehaviors.RING_ANSWER_CORRECT)
 				elif self.state == ris.CHILD_TURN:
 					self.ros_node_mgr.send_robot_cmd(RobotBehaviors.EYE_FIDGET)
-			elif gameState == gs.Triggers.SAY_BUTTON_PRESSED:
+			
+			
+			elif gameStateTrigger  == gs.Triggers.SAY_BUTTON_PRESSED:
 				if self.state == ris.ROBOT_TURN:
 					self._perform_robot_physical_action(self.physical_actions)
 
-		def get_general_robot_response(self,response_type):
+			
+			elif gameStateTrigger  == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
+				if self.state == ris.CHILD_TURN:
+					self.ros_node_mgr.send_robot_cmd(RobotBehaviors.REACT_CHILD_ANSWER_WRONG)
+					self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LOOK_CENTER)
+
+		def send_robot_action(self,action_name):
 			'''
 			get general robot's responsee (not related to robot's role swtiching)
 			examples: encouragement, celerbration, empathy, happiness
 			'''
-			pass
+			self.ros_node_mgr.send_robot_cmd(action_name)
 
 		def get_turn_taking_action(self):
 			'''
@@ -148,8 +160,14 @@ class ChildRobotInteractionFSM:
 			'''
 			print("perform robot virtual action")
 			print(action)
+			#get_game_object_for_clicking()
 			self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,action)
 			
+		def get_game_object_for_clicking():
+			'''
+			select a game object in the ispy game for jibo to click and pronounce
+			'''
+			pass
 
 		def _get_role(self):
 			'''

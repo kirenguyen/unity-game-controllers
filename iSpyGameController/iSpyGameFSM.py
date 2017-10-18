@@ -133,6 +133,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		self.override_FSM_transition_callback()
 
+		
 
 
 	def override_FSM_transition_callback(self):
@@ -191,6 +192,10 @@ class iSpyGameFSM: # pylint: disable=no-member
 		print("I heard " + transition_msg.data)
 		if transition_msg.data in gs.Triggers.triggers:
 			if transition_msg.data == gs.Triggers.TOPLEFT_BUTTON_PRESSED:
+				# robot celebrate 
+				self.interaction.send_robot_action(RobotBehaviors.REACT_GAME_START)
+				self.interaction.send_robot_action(RobotBehaviors.REACT_GAME_START2)
+				
 				# If the player is switching from mission to explore mode
 				if self.state == gs.MISSION_MODE:
 					# Incremement how many times entered explore mode
@@ -212,17 +217,15 @@ class iSpyGameFSM: # pylint: disable=no-member
 						if task == None:
 							self.ros_node_mgr.send_ispy_cmd(GAME_FINISHED)
 						else:
+
 							self.ros_node_mgr.send_ispy_cmd(SEND_TASKS_TO_UNITY, task)
 							self.interaction.get_turn_taking_action()
 
-					time_in_explore_mode = time.time() - self.explore_time_start
-					print("Time spent in explore mode is %s seconds" %time_in_explore_mode)
 
-					
+					#time_in_explore_mode = time.time() - self.explore_time_start
+					#print("Time spent in explore mode is %s seconds" %time_in_explore_mode)
 
-			# Starts keeping track of time in explore mode when the game starts
-			elif transition_msg.data == gs.Triggers.START_BUTTON_PRESSED:
-				self.explore_time_start = time.time()
+
 
 			elif transition_msg.data == gs.Triggers.OBJECT_CLICKED:
 				time.sleep(.1)
@@ -242,18 +245,22 @@ class iSpyGameFSM: # pylint: disable=no-member
 					print (self.explore_tapped_list)
 
 			elif transition_msg.data == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
-				# If closing the pronunciation panel, append to the tapped and cancelled list
+				# If the user closes the pronunciation panel, append to the tapped and cancelled list
 				if self.state == gs.PRONUNCIATION_PANEL:
 					self.tapped_and_cancelled.append((self.origText , time.time() - self.time_tapped))
 					print (self.tapped_and_cancelled)
+				elif self.state == gs.PRONUNCIATION_RESULT:
+					self.interaction.react(gs.Triggers.PRONUNCIATION_PANEL_CLOSED)
 
 			elif transition_msg.data == gs.Triggers.TARGET_OBJECT_COLLECTED:
 				# one of the target objects is successfully collected. give the turn to the other player now
 				self.interaction.react(gs.Triggers.TARGET_OBJECT_COLLECTED)
 				self.interaction.turn_taking()
-				
+
 			elif transition_msg.data == gs.Triggers.SAY_BUTTON_PRESSED:
 				self.interaction.react(gs.Triggers.SAY_BUTTON_PRESSED)
+
+
 
 
 			# If the message is in gs.Triggers, then allow the trigger
@@ -306,7 +313,6 @@ class iSpyGameFSM: # pylint: disable=no-member
 				self.recorder.start_recording(self.origText, RECORD_TIME_MS) #TODO: Update 'test' to actual word
 			elif stage == "speakingEnd":
 				self.recorder.stop_recording()
-
 	
 		
 		def msg_evaluator(ispy_action_msg):

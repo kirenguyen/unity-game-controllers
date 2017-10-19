@@ -23,7 +23,7 @@ class ChildRobotInteractionFSM:
 		'''
 		child robot interaction FSM for robot's role switching project
 		'''
-		def __init__(self,ros_node_mgr):
+		def __init__(self,ros_node_mgr,task_controller):
 			
 			self.states = [ ris.ROBOT_TURN, ris.CHILD_TURN ]
 			self.transitions = [
@@ -34,6 +34,8 @@ class ChildRobotInteractionFSM:
 									 initial=ris.CHILD_TURN)
 
 			self.ros_node_mgr = ros_node_mgr
+
+			self.task_controller = task_controller
 
 			self.agent_model = AgentModel()
 
@@ -150,6 +152,8 @@ class ChildRobotInteractionFSM:
 				#'physical':[RobotBehaviors.LOOK_AT_TABLET,RobotBehaviors.ROBOT_TURN_SPEECH,
 				#RobotBehaviors.PRONOUNCE_CORRECT, RobotBehaviors.WIN_SPEECH], 
 				if action == RobotBehaviors.PRONOUNCE_CORRECT:
+					if not self.robot_clickedObj:
+						self.robot_clickedObj = "cat"
 					self.ros_node_mgr.send_robot_cmd(action,"cat")
 				else:
 					self.ros_node_mgr.send_robot_cmd(action)
@@ -160,14 +164,10 @@ class ChildRobotInteractionFSM:
 			'''
 			print("perform robot virtual action")
 			print(action)
-			#get_game_object_for_clicking()
-			self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,action)
+			self.robot_clickedObj = self.get_game_object_for_clicking()
+
+			self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":action,"clicked_object":self.robot_clickedObj})
 			
-		def get_game_object_for_clicking():
-			'''
-			select a game object in the ispy game for jibo to click and pronounce
-			'''
-			pass
 
 		def _get_role(self):
 			'''
@@ -175,3 +175,9 @@ class ChildRobotInteractionFSM:
 			'''
 			role = self.agent_model.get_next_robot_role()
 			return role
+
+		def get_game_object_for_clicking(self):
+			'''
+			get game obejct for the robot to click during robot's turn
+			'''
+			return self.task_controller.get_obj_for_robot(True)

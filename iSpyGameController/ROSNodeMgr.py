@@ -149,6 +149,8 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                     msg.properties = converted_result
 
                 elif command == ROBOT_VIRTUAL_ACTIONS:
+                    print("robot's virtual behavior message: ")
+                    print(args[0])
                     robot_action = json.dumps(args[0])
                     msg.properties = robot_action
 

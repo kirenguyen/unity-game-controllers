@@ -69,7 +69,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		self.ros_node_mgr = ROSNodeMgr()
 		self.ros_node_mgr.init_ros_node()
 
-		self.interaction = ChildRobotInteractionFSM(self.ros_node_mgr)
+		
 
 		# Keeps track of the word the child is supposed to say
 		self.origText = ""
@@ -86,6 +86,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 		self.task_controller = iSpyTaskController()
 
 		self.results_handler = PronunciationUtils()
+
+		self.interaction = ChildRobotInteractionFSM(self.ros_node_mgr,self.task_controller)
 
 
 		# Times entered explore or mission mode not including on game start

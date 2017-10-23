@@ -137,6 +137,24 @@ class iSpyTaskController():
 			self.task_in_progress = False
 
 		print (self.target_list)
+
+	def get_random_target_obj(self):
+		'''
+		randomly select an object on the target list to return
+		'''
+		ran_index = random.randint(0, len(self.target_list)-1)
+		return self.target_list[ran_index]
+
+	def get_obj_for_robot(self,correct):
+		if correct == True:
+			# return a correct target object for now
+			ran_index = random.randint(0, len(self.target_list)-1)
+			return self.target_list[ran_index]
+		else:
+			# return a wrong object
+			return "cat"
+
+
 		
 
 

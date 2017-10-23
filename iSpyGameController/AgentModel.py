@@ -23,12 +23,10 @@ class AgentModel():
         RobotRolesBehaviorsMap()
 
     def get_behaviors(self,role):
-            '''
-            Get corresponding virtual and physical actions for a given input robot's role
-            '''
-            ##MAGGIE TODO: return physical action (sent to Jibo) and virtual action (sent as a ispyGameCommand to the unity game)
-            ##MAGGIE TODO: may need to create new custom ROS messages for the commnands in iSpyGameCommands 
-            return (self.perform_physical_action(), self.perform_virtual_action())
+        '''
+        Get corresponding virtual and physical actions for a given input robot's role
+        '''
+        return (self.perform_physical_action(), self.perform_virtual_action())
 
     def get_next_robot_role(self):
         """

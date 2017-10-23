@@ -46,9 +46,24 @@ class RobotRoles(Enum):
     contains a list of social roles that are avaiable to robot to perform
     '''
     CUR_EXPERT = 1
-    #CUR_NOVICE = 2
-    #NCUR_EXPERT = 3
-    #NCUR_NOVICE = 4
+    CUR_NOVICE = 2
+    NCUR_EXPERT = 3
+    NCUR_NOVICE = 4
+
+class RobotActionSequence:
+    TURN_STARTED = "turnStarted"
+    SCREEN_MOVED = "screenMoved"
+    OBJECT_FOUND = "objectFound"
+    OBJECT_CLICKED = "objectClicked"
+    OBJECT_PRONOUNCED = "objectPronounced"
+    RESULTS_RETURNED = "ResultsReturned"
+    TURN_FINISHED = "TurnFinished"
+    WRONG_OBJECT_FAIL ="WRONG_OBJECT_FAIL"
+
+    class Triggers:
+        NEXT = "Next"
+        RESET = "Reset"
+            
 
 class RobotRolesBehaviorsMap:
     '''
@@ -56,14 +71,62 @@ class RobotRolesBehaviorsMap:
     '''  
     def __init__(self):
         self.mapping = {}
-        self.mapping.update({RobotRoles.CUR_EXPERT:{
-            'physical':[RobotBehaviors.LOOK_AT_TABLET,RobotBehaviors.ROBOT_TURN_SPEECH,RobotBehaviors.PRONOUNCE_CORRECT, RobotBehaviors.WIN_SPEECH], 
-            'virtual': RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ}})
-
+        self.expert_role()
+        self.robot_response()
+        
     def get_actions(self,role):
-        if isinstance(role, RobotRoles) and role in self.mapping.keys():
+        print("get actions...")
+        print(self.mapping.keys())
+        print(role)
+        if role in self.mapping.keys():
+            print("get actions!!!")
             # if the role is an instance of robotRoles
             # return a sequence of specific actions that the robot needs to execute for a given role
             return self.mapping[role]
         else:
             return []
+
+    def expert_role(self):
+        '''
+        expert role for robot's turn
+        '''
+        self.mapping.update({
+            RobotRoles.CUR_EXPERT:{
+            'physical':{
+                RobotActionSequence.TURN_STARTED: [ RobotBehaviors.LOOK_AT_TABLET, RobotBehaviors.ROBOT_TURN_SPEECH ],
+                RobotActionSequence.SCREEN_MOVED: [],
+                RobotActionSequence.OBJECT_FOUND: [],
+                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.EYE_FIDGET,RobotBehaviors.RING_ANSWER_CORRECT], 
+                RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.PRONOUNCE_CORRECT],
+                RobotActionSequence.RESULTS_RETURNED: [RobotBehaviors.WIN_SPEECH],
+                RobotActionSequence.TURN_FINISHED:[]
+                }, 
+            'virtual':
+                RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ
+                
+            }
+        })
+
+
+    def robot_response(self):
+        '''
+        robot's response to child during child's turn
+        '''
+        self.mapping.update({
+            "Response":{
+            'physical':{
+                RobotActionSequence.TURN_STARTED: [  ],
+                RobotActionSequence.SCREEN_MOVED: [],
+                RobotActionSequence.OBJECT_FOUND: [],
+                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.EYE_FIDGET], 
+                RobotActionSequence.OBJECT_PRONOUNCED: [],
+                RobotActionSequence.RESULTS_RETURNED: [],
+                RobotActionSequence.TURN_FINISHED:[RobotBehaviors.REACT_CHILD_ANSWER_CORRECT, RobotBehaviors.RING_ANSWER_CORRECT],
+                RobotActionSequence.WRONG_OBJECT_FAIL: [RobotBehaviors.REACT_CHILD_ANSWER_WRONG, RobotBehaviors.LOOK_CENTER]
+                }, 
+            'virtual':
+                RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ
+                
+            }
+        })
+

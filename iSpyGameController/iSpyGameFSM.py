@@ -195,9 +195,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 		if transition_msg.data in gs.Triggers.triggers:
 			if transition_msg.data == gs.Triggers.TOPLEFT_BUTTON_PRESSED:
 				# robot celebrate 
-				self.interaction.send_robot_action(RobotBehaviors.REACT_GAME_START)
-				self.interaction.send_robot_action(RobotBehaviors.REACT_GAME_START2)
-				
+				self.interaction.react(gs.Triggers.TOPLEFT_BUTTON_PRESSED)
+
 				# If the player is switching from mission to explore mode
 				if self.state == gs.MISSION_MODE:
 					# Incremement how many times entered explore mode
@@ -221,7 +220,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 						else:
 
 							self.ros_node_mgr.send_ispy_cmd(SEND_TASKS_TO_UNITY, task)
-							self.interaction.get_turn_taking_action()
+							self.interaction.get_turn_taking_actions()
 
 
 					#time_in_explore_mode = time.time() - self.explore_time_start

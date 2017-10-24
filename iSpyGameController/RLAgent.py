@@ -1,5 +1,6 @@
 import numpy as np 
 import random
+from .iSpyRLEnv import POSSIBLE_ACTIONS
 
 class Agent(object):
 	'''
@@ -14,33 +15,59 @@ class Agent(object):
 
 
 class QLearningAgent(Agent):
-    def __init__(self,  learning_rate =0.01, epsilon =0.1, value=0,**kwargs):
+    def __init__(self,  learning_rate =0.1, epsilon =0.5, value=0,**kwargs):
         super(QLearningAgent, self).__init__(**kwargs)
         self.learning_rate = learning_rate
         self.epsilon = epsilon
         self.value = value
 
-        self.value_table = np.full((self.num_states, self.num_actions), self.value) # q table
-
+        self.value_table = np.full((self.num_states, self.num_actions), self.value,dtype=float) # q table
     
-    # update q function with sample <s, a, r, s'>
+    
+
+    # RL: update q function with sample <s, a, r, s'>
     def learn(self, state, action, reward, next_state):
+        print("..............agent.learn().....")
+        print("value table")
+        print(self.value_table)
+       
         current_q = self.value_table[state][action]
+        print("state-action: "+str(state)+"|"+str(action))
+        print("current q: "+str(current_q))
         # using Bellman Optimality Equation to update q function
         new_q = reward + self.discount_factor * max(self.value_table[next_state])
+        print("discount factor part: "+str(self.discount_factor * max(self.value_table[next_state])))
+        print("new q: "+str(new_q))
         self.value_table[state][action] += self.learning_rate * (new_q - current_q)
+
+    
 
     # get action for the state according to the q function table
     # agent pick action of epsilon-greedy policy
     def get_action(self, state):
+        print(".........agent.get_action()....")
         if np.random.rand() < self.epsilon:
             # take random action
-            action = np.random.choice(self.actions)
+            action_enum = np.random.choice(list(POSSIBLE_ACTIONS))
+            action = action_enum.value
+
         else:
             # take action according to the q function table
             state_action = self.value_table[state]
-            action = self.arg_max(state_action)
+            print("state action...")
+            print(state_action)
+            #action = self.arg_max(state_action)
+            max_indices = np.where(state_action == state_action.max())[0]
+
+            if len(max_indices) > 1:
+                action = max_indices[random.randint(0, len(max_indices)-1) ]
+            else:
+                action = max_indices[0]
+
+            print("chosen actions...!!!!.")
+            print(max_indices)
         return action
+
 
     @staticmethod
     def arg_max(state_action):

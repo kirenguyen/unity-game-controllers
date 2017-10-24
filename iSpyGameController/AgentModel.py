@@ -6,14 +6,16 @@ import random
 from .RobotBehaviorList import RobotRoles
 from .RobotBehaviorList import RobotRolesBehaviorsMap
 
-
+# reinforcement learning modules
+from .RLAgent import *
+from .iSpyRLEnv import *
 
 
 
 
 class AgentModel():
     """
-    This class implements a simple rule-based agent that chooses what to do each round
+    This class implements a simple reinforcement learning agent that chooses what to do each round
     """
 
     def __init__(self):
@@ -22,19 +24,32 @@ class AgentModel():
         self.role_history=[]
         RobotRolesBehaviorsMap()
 
-    def get_behaviors(self,role):
-        '''
-        Get corresponding virtual and physical actions for a given input robot's role
-        '''
-        return (self.perform_physical_action(), self.perform_virtual_action())
+        # set up reinforcement learning here
+        self.rl_env = iSpyEnvironment()
+
+        all_states = self.rl_env.get_all_states()
+        num_states = sum([len(i) for i in all_states[:,]])
+
+        self.rl_agent = QLearningAgent(num_states=num_states,num_actions=len(POSSIBLE_ACTIONS))
 
     def get_next_robot_role(self):
         """
         Returns one of the actions from the ActionSpace
         """
-
-        next_action = random.choice(self.role_space)
+        # get the next action using a rl model
+        current_state = self.rl_env.observe_cur_state()
+        next_action = self.rl_agent.get_action(current_state)
+        
         return next_action
+       
+    def onRewardReceived(self):
+        '''
+        after robot performs the action, child's new current state and rewards are received
+        '''
+        # perform action by updating rl's current state, getting reward and updating its q function
+        prev_state, reward, cur_state= self.rl_env.perform_action(action)
+        # the agent learns and updates its q value
+        agent.learn(prev_state,action,reward,cur_state)
 
 
 

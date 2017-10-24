@@ -7,6 +7,7 @@ from .RobotBehaviorList import RobotBehaviors
 from .RobotBehaviorList import RobotRoles
 from .RobotBehaviorList import RobotRolesBehaviorsMap
 from .RobotBehaviorList import RobotActionSequence as ras
+from .ChildStates import ChildStates
 
 # from GameUtils import Curriculum
 from GameUtils import GlobalSettings
@@ -19,6 +20,9 @@ if GlobalSettings.USE_ROS:
 	from std_msgs.msg import String
 	from unity_game_msgs.msg import iSpyCommand
 	from unity_game_msgs.msg import iSpyAction
+
+import random
+
 
 class ChildRobotInteractionFSM:
 		'''
@@ -71,7 +75,7 @@ class ChildRobotInteractionFSM:
 
 			self.robot_response = self.role_behavior_mapping.get_actions("Response")
 
-			
+			self.child_states = ChildStates()
 
 		def turn_taking(self):
 			# check whether it is robot's turn or child's turn in the game play
@@ -86,6 +90,8 @@ class ChildRobotInteractionFSM:
 			print("==========TURN TAKING===============: Current Turn = "+self.state)
 
 			
+			# update the number of available objects for child's learning states
+			self.child_states.set_num_available_objs(self.task_controller.get_num_available_target_objs())
 			# robot's response 
 			self.get_turn_taking_actions()
 
@@ -100,7 +106,8 @@ class ChildRobotInteractionFSM:
 					self._perform_robot_physical_action(self.physical_actions[ras.TURN_FINISHED])
 				elif self.state == ris.CHILD_TURN:
 					self._perform_robot_physical_action(self.robot_response["physical"][ras.TURN_FINISHED])
-			
+					# the child finds the correct object
+					self.child_states.update_child_turn_result(True)
 
 			elif gameStateTrigger  == gs.Triggers.OBJECT_CLICKED:
 				if self.state == ris.ROBOT_TURN:
@@ -118,9 +125,12 @@ class ChildRobotInteractionFSM:
 			elif gameStateTrigger  == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
 				if self.state == ris.CHILD_TURN:
 					self._perform_robot_physical_action(self.robot_response["physical"][ras.WRONG_OBJECT_FAIL])
+					# the child finds the correct object
+					self.child_states.update_child_turn_result(False)
 
 			elif gameStateTrigger == gs.Triggers.TOPLEFT_BUTTON_PRESSED:
 				pass
+
 				#self.interaction.send_robot_action(RobotBehaviors.REACT_GAME_START)
 				#self.interaction.send_robot_action(RobotBehaviors.REACT_GAME_START2)
 				
@@ -131,6 +141,7 @@ class ChildRobotInteractionFSM:
 			check the current interaction FSM to decide whether the robot should respond
 			then, use agent model to decide how the robot should respond if it needs to respond
 			'''
+
 
 			physical_actions = {}
 			virtual_action = ""
@@ -184,16 +195,15 @@ class ChildRobotInteractionFSM:
 			'''
 			send the virtual action message via ROS to the tablet 
 			'''
-			print("perform robot virtual action")
-			print(action)
 			self.robot_clickedObj = self.get_game_object_for_clicking()
-
+			
 			self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":action,"clicked_object":self.robot_clickedObj})
 			
-
 
 		def get_game_object_for_clicking(self):
 			'''
 			get game obejct for the robot to click during robot's turn
 			'''
-			return self.task_controller.get_obj_for_robot(True)
+			correct = True if random.randint(0, 2) == 0 else False
+			
+			return self.task_controller.get_obj_for_robot(correct)

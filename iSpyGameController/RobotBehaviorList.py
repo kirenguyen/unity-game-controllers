@@ -107,7 +107,27 @@ class RobotRolesBehaviorsMap:
             }
         })
 
-
+    def novice_role(self):
+        '''
+        novice role for robot's turn
+        '''
+        self.mapping.update({
+            RobotRoles.CUR_EXPERT:{
+            'physical':{
+                RobotActionSequence.TURN_STARTED: [ RobotBehaviors.LOOK_AT_TABLET, RobotBehaviors.ROBOT_TURN_SPEECH ],
+                RobotActionSequence.SCREEN_MOVED: [],
+                RobotActionSequence.OBJECT_FOUND: [],
+                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.EYE_FIDGET,RobotBehaviors.RING_ANSWER_CORRECT], 
+                RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.PRONOUNCE_CORRECT],
+                RobotActionSequence.RESULTS_RETURNED: [RobotBehaviors.WIN_SPEECH],
+                RobotActionSequence.TURN_FINISHED:[]
+                }, 
+            'virtual':
+                RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ
+                
+            }
+        })
+    
     def robot_response(self):
         '''
         robot's response to child during child's turn
@@ -129,4 +149,5 @@ class RobotRolesBehaviorsMap:
                 
             }
         })
+
 

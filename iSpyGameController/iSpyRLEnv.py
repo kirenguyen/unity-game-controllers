@@ -1,15 +1,16 @@
 import numpy as np
 from enum import Enum
+import random
 
 
 REWARDS=[]
 
 
 class POSSIBLE_ACTIONS(Enum):
-	CUR_EXPERT = 1
-	CUR_NOVICE = 2
-	NCUR_EXPERT = 3
-	NCUR_NOVICE = 4
+	CUR_EXPERT = 0
+	CUR_NOVICE = 1
+	NCUR_EXPERT = 2
+	NCUR_NOVICE = 3
 
 
 
@@ -40,8 +41,9 @@ class iSpyEnvironment():
 		perform the action generated from agent.py's learning algorithm
 		'''
 		print('perform action')
+		print("current state: "+str(self.cur_state))
 		prev_state = self.cur_state
-
+		
 		# update RL's state after the action is performed 
 		self.update_state_after_action()
 
@@ -53,6 +55,8 @@ class iSpyEnvironment():
 
 
 	def get_all_states(self):
+		print("get all states")
+		print(self.all_states)
 		return self.all_states
 
 	def update_state_after_action(self):
@@ -80,15 +84,14 @@ class iSpyEnvironment():
 		'''
 		get current learning level of the child
 		'''
-		# dummy number 
-		return 1
+		return random.randint(0, 2)
 
 	def _get_cur_exploration_level(self):
 		'''
 		get current learning level of the child
 		'''
 		# dummy number
-		return 2
+		return random.randint(0,2)
 
 	def _get_child_learning_reward(self):
 		'''

@@ -171,8 +171,15 @@ class ChildRobotInteractionFSM:
 			'''
 			Get corresponding virtual and physical actions for a given input robot's role
 			'''
-			role = self.agent_model.get_next_robot_role()
-			return self.role_behavior_mapping.get_actions(role)
+			# ==== overwrite role =====
+			#role = self.agent_model.get_next_robot_role()
+			role = RobotRoles.CUR_EXPERT
+			print("!!!!!!!!!")
+			print(role)
+			test=self.role_behavior_mapping.get_actions(role)
+			print(test)
+			print("done....")
+			return test
 			
 
 		def _perform_robot_physical_action(self,actions):

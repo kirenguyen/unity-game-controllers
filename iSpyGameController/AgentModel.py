@@ -40,6 +40,8 @@ class AgentModel():
         current_state = self.rl_env.observe_cur_state()
         next_action = self.rl_agent.get_action(current_state)
         
+        ##TODO: check next_action correctness...
+        
         return next_action
        
     def onRewardReceived(self):

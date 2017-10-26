@@ -75,8 +75,9 @@ class RobotRolesBehaviorsMap:
         self.robot_response()
         
     def get_actions(self,role):
-        print("get actions...")
+        print("get actions...mapping keys..")
         print(self.mapping.keys())
+        print("role..")
         print(role)
         if role in self.mapping.keys():
             print("get actions!!!")

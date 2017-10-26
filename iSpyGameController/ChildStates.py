@@ -26,7 +26,8 @@ class ChildStates:
 			# the child fails to find a correct target object 
 			self.current_num_trials += 1
 		else:
-			self.correct_rate_arr.append(float(self.current_num_trials / self.num_available_target_objs))
+			pass
+			#self.correct_rate_arr.append(float(self.current_num_trials / self.num_available_target_objs))
 
 
 

@@ -22,11 +22,12 @@ from GameUtils.PronunciationUtils.PronunciationUtils import PronunciationUtils
 
 
 from .ROSNodeMgr import ROSNodeMgr
-from .StudentModel import StudentModel
-from .RobotBehaviorList import RobotBehaviors
-from .RobotBehaviorList import RobotRoles
-from .RobotBehaviorList import RobotRolesBehaviorsMap
-from .ChildRobotInteractionFSM import ChildRobotInteractionFSM
+#from .StudentModel import StudentModel
+from .RobotBehaviorList.RobotBehaviorList import RobotBehaviors
+from .RobotBehaviorList.RobotBehaviorList import RobotRoles
+from .RobotBehaviorList.RobotBehaviorList import RobotRolesBehaviorsMap
+
+from .RoleSwitchingPrj.ChildRobotInteractionFSM import ChildRobotInteractionFSM
 from .GameModeFSMs import AlwaysMissionModeFSM,CompleteModeFSM
 
 # from StudentModel import StudentModel

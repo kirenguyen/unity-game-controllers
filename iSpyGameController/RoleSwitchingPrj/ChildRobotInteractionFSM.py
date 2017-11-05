@@ -2,11 +2,11 @@ import time
 
 from transitions import Machine
 from .AgentModel import AgentModel
-from .StudentModel import StudentModel
-from .RobotBehaviorList import RobotBehaviors
-from .RobotBehaviorList import RobotRoles
-from .RobotBehaviorList import RobotRolesBehaviorsMap
-from .RobotBehaviorList import RobotActionSequence as ras
+
+from ..RobotBehaviorList.RobotBehaviorList import RobotBehaviors
+from ..RobotBehaviorList.RobotBehaviorList import RobotRoles
+from ..RobotBehaviorList.RobotBehaviorList import RobotRolesBehaviorsMap
+from ..RobotBehaviorList.RobotBehaviorList import RobotActionSequence as ras
 from .ChildStates import ChildStates
 
 # from GameUtils import Curriculum
@@ -27,6 +27,8 @@ import random
 class ChildRobotInteractionFSM:
 		'''
 		child robot interaction FSM for robot's role switching project
+		It communicates with iSpyGameFSM, reinforcemnet learning agent model of the robot, robot's behaviors
+		and ChildStates
 		'''
 
 		def __init__(self,ros_node_mgr,task_controller):
@@ -44,6 +46,8 @@ class ChildRobotInteractionFSM:
 
 			self.task_controller = task_controller
 
+			self.child_states = ChildStates()
+
 			self.agent_model = AgentModel()
 
 			self.role_behavior_mapping = RobotRolesBehaviorsMap()
@@ -55,19 +59,28 @@ class ChildRobotInteractionFSM:
 
 			self.robot_response = self.role_behavior_mapping.get_actions("Response")
 
-			self.child_states = ChildStates()
+			
 
 		def turn_taking(self):
 			# check whether it is robot's turn or child's turn in the game play
 			if self.state == ris.ROBOT_TURN:
+				# stop tracking the previous turn's rewards
+				rewards = self.child_states.stop_tracking_rewards(self.state)
+
 				# then, next turn is child's 
 				getattr(self, ris.Triggers.ROBOT_TURN_DONE)() # convert the variabel to string, which is the name of the called function
-		
+				self.child_states.start_tracking_rewards(self.state)
+
 			elif self.state == ris.CHILD_TURN:
+
+				rewards = self.child_states.stop_tracking_rewards(self.state)
+				self.agent_model.onRewardsReceived(rewards) # update the RL model 
 				# then, next turn is robot's
 				getattr(self, ris.Triggers.CHILD_TURN_DONE)()
+				# start tracking rewards (engagement) for the robot's role during child's turn
+				self.child_states.start_tracking_rewards(self.state)
 	
-			print("==========TURN TAKING===============: Current Turn = "+self.state)
+			print("==========TURN TAKING===============: "+self.state)
 
 			
 			# update the number of available objects for child's learning states
@@ -111,8 +124,6 @@ class ChildRobotInteractionFSM:
 			elif gameStateTrigger == gs.Triggers.TOPLEFT_BUTTON_PRESSED:
 				pass
 
-				#self.interaction.send_robot_action(RobotBehaviors.REACT_GAME_START)
-				#self.interaction.send_robot_action(RobotBehaviors.REACT_GAME_START2)
 				
 					
 
@@ -128,9 +139,9 @@ class ChildRobotInteractionFSM:
 
 			if self.state == ris.ROBOT_TURN:
 				# choose an action for robot
-				print("Turn Taking Action...ROBOTS TURN")
-		
+				
 				actions = self._get_behaviors()
+				
 				physical_actions = actions['physical'] 
 				virtual_action = actions['virtual']
 
@@ -142,7 +153,7 @@ class ChildRobotInteractionFSM:
 				self.physical_actions = physical_actions
 				self._perform_robot_physical_action(self.physical_actions[ras.TURN_STARTED])
 			if virtual_action:
-				time.sleep(1) 
+				time.sleep(0.3) 
 				self._perform_robot_virtual_action(virtual_action)
 
 
@@ -151,15 +162,11 @@ class ChildRobotInteractionFSM:
 			'''
 			Get corresponding virtual and physical actions for a given input robot's role
 			'''
-			# ==== overwrite role =====
-			#role = self.agent_model.get_next_robot_role()
-			role = RobotRoles.CUR_EXPERT
-			print("!!!!!!!!!")
+			
+			role = self.agent_model.get_next_robot_role()
+			print("Robot's Role: ")
 			print(role)
-			test=self.role_behavior_mapping.get_actions(role)
-			print(test)
-			print("done....")
-			return test
+			return self.role_behavior_mapping.get_actions(role)
 			
 
 		def _perform_robot_physical_action(self,actions):
@@ -182,15 +189,16 @@ class ChildRobotInteractionFSM:
 			'''
 			send the virtual action message via ROS to the tablet 
 			'''
-			self.robot_clickedObj = self.get_game_object_for_clicking()
+			print("virtual action!!!")
+			print(action)
+			print("===========")
+
+			if action == RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ:
+				self.robot_clickedObj = self.task_controller.get_obj_for_robot(True)
+			elif action == RobotBehaviors.VIRTUALLY_CLICK_WRONG_OBJ:
+				self.robot_clickedObj = self.task_controller.get_obj_for_robot(False)
 			
 			self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":action,"clicked_object":self.robot_clickedObj})
 			
 
-		def get_game_object_for_clicking(self):
-			'''
-			get game obejct for the robot to click during robot's turn
-			'''
-			correct = True if random.randint(0, 2) == 0 else False
-			
-			return self.task_controller.get_obj_for_robot(correct)
+		

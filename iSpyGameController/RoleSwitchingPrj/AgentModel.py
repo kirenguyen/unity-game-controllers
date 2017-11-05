@@ -3,12 +3,12 @@ This Module handles aspects of the agent architecture's decision-making and game
 """
 # pylint: disable=import-error
 import random
-from .RobotBehaviorList import RobotRoles
-from .RobotBehaviorList import RobotRolesBehaviorsMap
+from ..RobotBehaviorList.RobotBehaviorList import RobotRoles
+from ..RobotBehaviorList.RobotBehaviorList import RobotRolesBehaviorsMap
 
 # reinforcement learning modules
 from .RLAgent import *
-from .iSpyRLEnv import *
+from .RLiSpyEnvironment import *
 
 
 
@@ -20,17 +20,22 @@ class AgentModel():
 
     def __init__(self):
 
-        self.role_space=[ RobotRoles.CUR_EXPERT]
+        self.role_space= list(RobotRoles)
+        
         self.role_history=[]
         RobotRolesBehaviorsMap()
+
 
         # set up reinforcement learning here
         self.rl_env = iSpyEnvironment()
 
+
         all_states = self.rl_env.get_all_states()
         num_states = sum([len(i) for i in all_states[:,]])
 
-        self.rl_agent = QLearningAgent(num_states=num_states,num_actions=len(POSSIBLE_ACTIONS))
+        self.rl_agent = QLearningAgent(num_states=num_states,num_actions=len(list(RobotRoles)))
+
+        self.current_action = ""
 
     def get_next_robot_role(self):
         """
@@ -39,20 +44,18 @@ class AgentModel():
         # get the next action using a rl model
         current_state = self.rl_env.observe_cur_state()
         next_action = self.rl_agent.get_action(current_state)
-        
-        ##TODO: check next_action correctness...
-        
-        return next_action
+        self.current_action = next_action # update RL's current action here
+
+        return RobotRoles(next_action)
        
-    def onRewardReceived(self):
+    def onRewardsReceived(self,rewards):
         '''
-        after robot performs the action, child's new current state and rewards are received
+        after robot performs the action, child's rewards are received from ChildStates
+        let the agent learn based on RL model's new current state and received rewards.
         '''
         # perform action by updating rl's current state, getting reward and updating its q function
-        prev_state, reward, cur_state= self.rl_env.perform_action(action)
+        prev_state, cur_state= self.rl_env.perform_action(self.current_action)
         # the agent learns and updates its q value
-        agent.learn(prev_state,action,reward,cur_state)
-
-
-
+        if self.current_action != "":
+            self.rl_agent.learn(prev_state,self.current_action,rewards,cur_state) 
 

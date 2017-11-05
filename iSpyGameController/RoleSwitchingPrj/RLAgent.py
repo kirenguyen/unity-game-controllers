@@ -1,6 +1,8 @@
 import numpy as np 
 import random
-from .iSpyRLEnv import POSSIBLE_ACTIONS
+
+from ..RobotBehaviorList.RobotBehaviorList import RobotRoles
+
 
 class Agent(object):
 	'''
@@ -30,7 +32,10 @@ class QLearningAgent(Agent):
         print("..............agent.learn().....")
         print("value table")
         print(self.value_table)
-       
+        print("state: ")
+        print(state)
+        print("action..")
+        print(action)
         current_q = self.value_table[state][action]
         print("state-action: "+str(state)+"|"+str(action))
         print("current q: "+str(current_q))
@@ -48,7 +53,7 @@ class QLearningAgent(Agent):
         print(".........agent.get_action()....")
         if np.random.rand() < self.epsilon:
             # take random action
-            action_enum = np.random.choice(list(POSSIBLE_ACTIONS))
+            action_enum = np.random.choice(list(RobotRoles))
             action = action_enum.value
 
         else:

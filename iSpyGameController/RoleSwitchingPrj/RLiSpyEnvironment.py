@@ -6,20 +6,12 @@ import random
 REWARDS=[]
 
 
-class POSSIBLE_ACTIONS(Enum):
-	CUR_EXPERT = 0
-	CUR_NOVICE = 1
-	NCUR_EXPERT = 2
-	NCUR_NOVICE = 3
-
-
-
 class iSpyEnvironment():
 	'''
 	class for modeling the child's states in the iSpy game for robot's behavior policy
 	'''
 	def __init__(self):
-		self.possible_actions = POSSIBLE_ACTIONS
+		#self.possible_actions = POSSIBLE_ACTIONS
 		self.rewards = REWARDS
 
 		# current state the agent is in
@@ -48,9 +40,9 @@ class iSpyEnvironment():
 		self.update_state_after_action()
 
 		# calculate the reward for the performed action
-		total_reward = self.get_reward(self.cur_state,action) 
+		# total_reward = self.get_reward(self.cur_state,action) 
 
-		return prev_state, total_reward, self.cur_state
+		return prev_state, self.cur_state
 
 
 
@@ -70,15 +62,15 @@ class iSpyEnvironment():
 		self.cur_state = self.all_states[learning_level,exploration_level]
 
 	
-	def get_reward(self,state,action):
-		'''
-		get rewards for the robot's action by observing the child's performance/behavior right after the robot's action
-		'''
-		learning_reward = self._get_child_learning_reward()
-		affect_reward =  self._get_child_affect_reward()
-		total_reward = learning_reward + affect_reward
+	# def get_reward(self,state,action):
+	# 	'''
+	# 	get rewards for the robot's action by observing the child's performance/behavior right after the robot's action
+	# 	'''
+	# 	learning_reward = self._get_child_learning_reward()
+	# 	affect_reward =  self._get_child_affect_reward()
+	# 	total_reward = learning_reward + affect_reward
 
-		return total_reward
+	# 	return total_reward
 
 	def _get_cur_learning_level(self):
 		'''
@@ -93,18 +85,18 @@ class iSpyEnvironment():
 		# dummy number
 		return random.randint(0,2)
 
-	def _get_child_learning_reward(self):
-		'''
-		get rewards from child's learning change after robot's action
-		'''
+	# def _get_child_learning_reward(self):
+	# 	'''
+	# 	get rewards from child's learning change after robot's action
+	# 	'''
 
-		# dummy number 
-		return 30
+	# 	# dummy number 
+	# 	return 30
 
-	def _get_child_affect_reward(self):
+	# def _get_child_affect_reward(self):
 
-		# dummy number
-		return 30
+	# 	# dummy number
+	# 	return 30
 
 	def _generate_rl_states(self):
 		'''

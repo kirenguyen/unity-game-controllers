@@ -40,15 +40,16 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
 
     # virtual actions on the app
     VIRTUALLY_CLICK_CORRECT_OBJ = "CLICK_CORRECT_OBJ" # click correct obj
+    VIRTUALLY_CLICK_WRONG_OBJ = "CLICK_WRONG_OBJ"
 
 class RobotRoles(Enum):
     '''
     contains a list of social roles that are avaiable to robot to perform
     '''
-    CUR_EXPERT = 1
-    CUR_NOVICE = 2
-    NCUR_EXPERT = 3
-    NCUR_NOVICE = 4
+    COMPLETE_EXPERT = 0
+    COMPLETE_NOVICE = 1
+    #SEMI_EXPERT = 2
+    #SEMI_NOVICE = 3
 
 class RobotActionSequence:
     TURN_STARTED = "turnStarted"
@@ -71,28 +72,24 @@ class RobotRolesBehaviorsMap:
     '''  
     def __init__(self):
         self.mapping = {}
-        self.expert_role()
+        self.complete_expert_role()
+        self.complete_novice_role()
         self.robot_response()
         
     def get_actions(self,role):
-        print("get actions...mapping keys..")
-        print(self.mapping.keys())
-        print("role..")
-        print(role)
         if role in self.mapping.keys():
-            print("get actions!!!")
             # if the role is an instance of robotRoles
             # return a sequence of specific actions that the robot needs to execute for a given role
             return self.mapping[role]
         else:
             return []
 
-    def expert_role(self):
+    def complete_expert_role(self):
         '''
         expert role for robot's turn
         '''
         self.mapping.update({
-            RobotRoles.CUR_EXPERT:{
+            RobotRoles.COMPLETE_EXPERT:{
             'physical':{
                 RobotActionSequence.TURN_STARTED: [ RobotBehaviors.LOOK_AT_TABLET, RobotBehaviors.ROBOT_TURN_SPEECH ],
                 RobotActionSequence.SCREEN_MOVED: [],
@@ -108,12 +105,12 @@ class RobotRolesBehaviorsMap:
             }
         })
 
-    def novice_role(self):
+    def complete_novice_role(self):
         '''
         novice role for robot's turn
         '''
         self.mapping.update({
-            RobotRoles.CUR_EXPERT:{
+            RobotRoles.COMPLETE_NOVICE:{
             'physical':{
                 RobotActionSequence.TURN_STARTED: [ RobotBehaviors.LOOK_AT_TABLET, RobotBehaviors.ROBOT_TURN_SPEECH ],
                 RobotActionSequence.SCREEN_MOVED: [],
@@ -124,7 +121,7 @@ class RobotRolesBehaviorsMap:
                 RobotActionSequence.TURN_FINISHED:[]
                 }, 
             'virtual':
-                RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ
+                RobotBehaviors.VIRTUALLY_CLICK_WRONG_OBJ
                 
             }
         })

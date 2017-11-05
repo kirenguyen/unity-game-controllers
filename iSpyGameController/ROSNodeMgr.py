@@ -7,8 +7,8 @@ This is the main class that manages the creation / parsing of ROS Node Communica
 import time
 import json
 from GameUtils import GlobalSettings
-from .JiboBehaviors import JiboBehaviors
-from .TegaBehaviors import TegaBehaviors
+from .RobotBehaviorList.JiboBehaviors import JiboBehaviors
+from .RobotBehaviorList.TegaBehaviors import TegaBehaviors
 
 
 if GlobalSettings.USE_ROS:

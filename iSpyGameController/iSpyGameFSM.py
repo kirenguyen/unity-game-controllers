@@ -27,6 +27,7 @@ from .RobotBehaviorList import RobotBehaviors
 from .RobotBehaviorList import RobotRoles
 from .RobotBehaviorList import RobotRolesBehaviorsMap
 from .ChildRobotInteractionFSM import ChildRobotInteractionFSM
+from .GameModeFSMs import AlwaysMissionModeFSM,CompleteModeFSM
 
 # from StudentModel import StudentModel
 
@@ -106,32 +107,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 		# List of tuples of what was tapped and how long it took to hit the cancel button
 		self.tapped_and_cancelled = []
 
-		# self.student_model = StudentModel()
-		#
-		# self.log_listener = None
-		#
-
-		self.states = [gs.GAME_START, gs.EXPLORATION_MODE,gs.MISSION_MODE,gs.PRONUNCIATION_PANEL,gs.PRONUNCIATION_RESULT,gs.WORD_DISPLAY]
-		self.transitions = [
-				{'trigger': gs.Triggers.START_BUTTON_PRESSED, 'source': gs.GAME_START, 'dest': gs.EXPLORATION_MODE},
-				{'trigger': gs.Triggers.TOPLEFT_BUTTON_PRESSED, 'source': gs.EXPLORATION_MODE, 'dest': gs.MISSION_MODE},
-				{'trigger': gs.Triggers.TOPLEFT_BUTTON_PRESSED, 'source': gs.MISSION_MODE, 'dest': gs.EXPLORATION_MODE},
-				{'trigger': gs.Triggers.OBJECT_CLICKED, 'source': gs.MISSION_MODE, 'dest': gs.PRONUNCIATION_PANEL},
-				{'trigger': gs.Triggers.TARGET_OBJECT_COLLECTED , 'source': gs.PRONUNCIATION_RESULT, 'dest': gs.MISSION_MODE},
-				{'trigger': gs.Triggers.SAY_BUTTON_PRESSED, 'source': gs.PRONUNCIATION_PANEL, 'dest': gs.PRONUNCIATION_RESULT},
-				{'trigger': gs.Triggers.PRACTICE_FAILED, 'source': gs.PRONUNCIATION_RESULT, 'dest': gs.PRONUNCIATION_PANEL},
-				{'trigger': gs.Triggers.PRONUNCIATION_PANEL_CLOSED, 'source':gs.PRONUNCIATION_RESULT , 'dest': gs.MISSION_MODE},
-				{'trigger': gs.Triggers.PRONUNCIATION_PANEL_CLOSED, 'source':gs.PRONUNCIATION_PANEL , 'dest': gs.MISSION_MODE},
-				{'trigger': gs.Triggers.PRONUNCIATION_PANEL_CLOSED, 'source':gs.MISSION_MODE , 'dest': gs.MISSION_MODE},
-				{'trigger': gs.Triggers.PRACTICE_FINISHED, 'source':gs.PRONUNCIATION_RESULT , 'dest': gs.MISSION_MODE},
-				{'trigger': gs.Triggers.OBJECT_CLICKED, 'source': gs.EXPLORATION_MODE, 'dest':gs.WORD_DISPLAY },
-				{'trigger': gs.Triggers.N_SECONDS_LATER, 'source': gs.WORD_DISPLAY, 'dest': gs.EXPLORATION_MODE}
-				
-		]
-		
-		self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
-									 initial=gs.GAME_START)
-
+		# choose which game FSM to call
+		self.FSM = CompleteModeFSM()
 
 		self.override_FSM_transition_callback()
 
@@ -145,7 +122,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		'''
 		state_list = [gs.EXPLORATION_MODE,gs.MISSION_MODE,gs.PRONUNCIATION_PANEL, gs.PRONUNCIATION_RESULT, gs.WORD_DISPLAY]
 		func_list = ['onExplorationMode','onMissionMode','onPronunciationPanel','onPronunciationResult','onWordDisplay']
-		prefix='self.state_machine.on_enter_'
+		prefix='self.FSM.state_machine.on_enter_'
 		for istate in state_list:
 			func = func_list[state_list.index(istate)]
 			pcode = prefix + istate + '(self.' + func + ')'
@@ -198,13 +175,13 @@ class iSpyGameFSM: # pylint: disable=no-member
 				self.interaction.react(gs.Triggers.TOPLEFT_BUTTON_PRESSED)
 
 				# If the player is switching from mission to explore mode
-				if self.state == gs.MISSION_MODE:
+				if self.FSM.get_state() == gs.MISSION_MODE:
 					# Incremement how many times entered explore mode
 					self.entered_explore_mode += 1
 					# Start keeping track of how long in explore mode
 					self.explore_time_start = time.time()
 
-				if self.state == gs.EXPLORATION_MODE:
+				if self.FSM.get_state() == gs.EXPLORATION_MODE:
 					# If the player is switching from explore to mission mode
 					# Print how long the player was in explore mode
 					self.entered_mission_mode += 1
@@ -234,23 +211,23 @@ class iSpyGameFSM: # pylint: disable=no-member
 				# Keep track of when the object was clicked
 				self.time_tapped = time.time()
 
-				if self.state == gs.MISSION_MODE:
+				if self.FSM.get_state() == gs.MISSION_MODE:
 					# If coming from missioin mode, append to mission mode list
 					self.mission_tapped_list.append((self.origText, self.time_tapped - self.mission_time_start))
 					print(self.mission_tapped_list)
 					self.interaction.react(gs.Triggers.OBJECT_CLICKED)
 
-				elif self.state == gs.EXPLORATION_MODE:
+				elif self.FSM.get_state() == gs.EXPLORATION_MODE:
 					# If coming from explore mode, append to explore mode list
 					self.explore_tapped_list.append((self.origText, self.time_tapped))
 					print (self.explore_tapped_list)
 
 			elif transition_msg.data == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
 				# If the user closes the pronunciation panel, append to the tapped and cancelled list
-				if self.state == gs.PRONUNCIATION_PANEL:
+				if self.FSM.get_state() == gs.PRONUNCIATION_PANEL:
 					self.tapped_and_cancelled.append((self.origText , time.time() - self.time_tapped))
 					print (self.tapped_and_cancelled)
-				elif self.state == gs.PRONUNCIATION_RESULT:
+				elif self.FSM.get_state() == gs.PRONUNCIATION_RESULT:
 					self.interaction.react(gs.Triggers.PRONUNCIATION_PANEL_CLOSED)
 
 			elif transition_msg.data == gs.Triggers.TARGET_OBJECT_COLLECTED:
@@ -265,7 +242,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 
 			# If the message is in gs.Triggers, then allow the trigger
-			getattr(self, transition_msg.data)()
+			self.FSM.start_trigger(transition_msg.data)
 
 	#################################################################################################
 

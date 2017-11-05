@@ -28,26 +28,6 @@ class ChildRobotInteractionFSM:
 		'''
 		child robot interaction FSM for robot's role switching project
 		'''
-		# class RobotActionSequence:
-		# 	'''
-		# 	robot action sequence for handling robot's actions for a given turn
-		# 	'''
-		# 	def __init__(self):
-		# 		self.states =  [ras.TURN_STARTED, ras.SCREEN_MOVED, ras.OBJECT_FOUND, ras.OBJECT_CLICKED, 
-		# 			ras.OBJECT_PRONOUNCED, ras.RESULTS_RETURNED, ras.TURN_FINISHED ]
-		# 		self.transitions = [
-		# 		 	{'trigger': ras.Triggers.NEXT, 'source': ras.TURN_STARTED, 'dest': ras.SCREEN_MOVED },
-		# 		 	{'trigger': ras.Triggers.NEXT, 'source': ras.SCREEN_MOVED, 'dest': ras.OBJECT_FOUND},
-		# 			{'trigger': ras.Triggers.NEXT, 'source': ras.OBJECT_FOUND, 'dest': ras.OBJECT_CLICKED },
-		# 		 	{'trigger': ras.Triggers.NEXT, 'source': ras.OBJECT_CLICKED, 'dest': ras.OBJECT_PRONOUNCED},
-		# 		 	{'trigger': ras.Triggers.NEXT, 'source': ras.OBJECT_PRONOUNCED, 'dest':  ras.RESULTS_RETURNED },
-		# 		 	{'trigger': ras.Triggers.NEXT, 'source':  ras.RESULTS_RETURNED, 'dest': ras.TURN_FINISHED},
-		# 		 	{'trigger': ras.Triggers.RESET, 'source':  ras.TURN_FINISHED, 'dest':ras.TURN_STARTED},
-		# 		]
-		# 		self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
-		# 							 initial=ras.TURN_STARTED)
-		# 	def next(self):
-		# 		getattr(self, ras.Triggers.NEXT)()
 
 		def __init__(self,ros_node_mgr,task_controller):
 			

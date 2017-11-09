@@ -28,7 +28,7 @@ from .RobotBehaviorList.RobotBehaviorList import RobotRoles
 from .RobotBehaviorList.RobotBehaviorList import RobotRolesBehaviorsMap
 
 from .RoleSwitchingPrj.ChildRobotInteractionFSM import ChildRobotInteractionFSM
-from .GameModeFSMs import AlwaysMissionModeFSM,CompleteModeFSM
+from .GameModeFSMs import AlwaysMissionModeFSM,CompleteModeFSM,AlwaysExploreModeFSM
 
 # from StudentModel import StudentModel
 
@@ -110,7 +110,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 		self.tapped_and_cancelled = []
 
 		# choose which game FSM to call
-		self.FSM = CompleteModeFSM() #AlwaysMissionModeFSM(self.ros_node_mgr)#CompleteModeFSM() #AlwaysMissionModeFSM()# 
+		# AlwaysMissionModeFSM(self.ros_node_mgr) # CompleteModeFSM() # AlwaysExploreModeFSM()
+		self.FSM = AlwaysExploreModeFSM(self.ros_node_mgr) 
 
 		self.override_FSM_transition_callback()
 

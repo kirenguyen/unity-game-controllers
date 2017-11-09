@@ -89,11 +89,22 @@ class AlwaysExploreModeFSM(BaseGameFSM):
 	'''
 	the game only has explore modes
 	'''
-	def __init__(self):
+	def __init__(self, ros_node_mgr):
 		self.states = [gs.GAME_START, gs.EXPLORATION_MODE,gs.MISSION_MODE,gs.PRONUNCIATION_PANEL,gs.PRONUNCIATION_RESULT,gs.WORD_DISPLAY]
 		self.transitions = [
-				
+				{'trigger': gs.Triggers.START_BUTTON_PRESSED, 'source': gs.GAME_START, 'dest': gs.EXPLORATION_MODE},
+				{'trigger': gs.Triggers.TOPLEFT_BUTTON_PRESSED, 'source': gs.EXPLORATION_MODE, 'dest': gs.EXPLORATION_MODE},
+				{'trigger': gs.Triggers.OBJECT_CLICKED, 'source': gs.EXPLORATION_MODE, 'dest':gs.WORD_DISPLAY },
+				{'trigger': gs.Triggers.N_SECONDS_LATER, 'source': gs.WORD_DISPLAY, 'dest': gs.EXPLORATION_MODE}
 		]
 		
 		self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
 									 initial=gs.GAME_START)
+		self.ros_node_mgr = ros_node_mgr
+
+	def start_trigger(self,trigger_string):
+		if trigger_string == gs.Triggers.START_BUTTON_PRESSED:
+			print("send ROS commands to disable task button...")
+			results_params = {"buttonName":"TaskButton"}
+			self.ros_node_mgr.send_ispy_cmd(BUTTON_DISABLED,results_params)
+		getattr(self, trigger_string)()

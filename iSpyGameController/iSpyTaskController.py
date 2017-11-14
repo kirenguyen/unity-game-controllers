@@ -11,6 +11,8 @@ class iSpyTaskController():
 		# List that will hold the names of the target objects
 		self.target_list = []
 
+		self.nontarget_list = []
+
 		self.available_quests = []
 
 		self.task_in_progress = False
@@ -93,6 +95,8 @@ class iSpyTaskController():
 		for key in self.object_dict:
 			if task_attribute in self.object_dict[key][category_index]:
 				self.target_list.append(key)
+			else:
+				self.nontarget_list.append(key)
 
 		self.task_in_progress = True
 
@@ -138,6 +142,13 @@ class iSpyTaskController():
 
 		print (self.target_list)
 
+
+
+	'''
+	the following functions are for child robot interaction
+	they are called by ChildRobotInteractionFSM.py
+	'''
+
 	def get_random_target_obj(self):
 		'''
 		randomly select an object on the target list to return
@@ -145,14 +156,31 @@ class iSpyTaskController():
 		ran_index = random.randint(0, len(self.target_list)-1)
 		return self.target_list[ran_index]
 
+	def get_a_nontarget_object(self):
+		'''
+		return a nontarget object
+		'''
+		ran_index = random.randint(0, len(self.nontarget_list)-1)
+		return self.nontarget_list[ran_index]
+			
+
+	
 	def get_obj_for_robot(self,correct):
+		'''
+		return an object for robot to spy and pronounce
+		'''
 		if correct == True:
 			# return a correct target object for now
 			ran_index = random.randint(0, len(self.target_list)-1)
 			return self.target_list[ran_index]
 		else:
-			# return a wrong object
-			return "cat"
+			return self.get_a_nontarget_object()
+
+	def get_num_available_target_objs(self):
+		'''
+		return the number of available target objects 
+		'''
+		return len(self.target_list)
 
 
 		

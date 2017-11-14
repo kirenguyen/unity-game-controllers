@@ -22,11 +22,13 @@ from GameUtils.PronunciationUtils.PronunciationUtils import PronunciationUtils
 
 
 from .ROSNodeMgr import ROSNodeMgr
-from .StudentModel import StudentModel
-from .RobotBehaviorList import RobotBehaviors
-from .RobotBehaviorList import RobotRoles
-from .RobotBehaviorList import RobotRolesBehaviorsMap
-from .ChildRobotInteractionFSM import ChildRobotInteractionFSM
+#from .StudentModel import StudentModel
+from .RobotBehaviorList.RobotBehaviorList import RobotBehaviors
+from .RobotBehaviorList.RobotBehaviorList import RobotRoles
+from .RobotBehaviorList.RobotBehaviorList import RobotRolesBehaviorsMap
+
+from .RoleSwitchingPrj.ChildRobotInteractionFSM import ChildRobotInteractionFSM
+from .GameModeFSMs import AlwaysMissionModeFSM,CompleteModeFSM,AlwaysExploreModeFSM
 
 # from StudentModel import StudentModel
 
@@ -51,7 +53,8 @@ ROBOT_EXPERT_ROLE = 3
 SEND_PRONOUNCIATION_ACCURACY_TO_UNITY = 10
 SEND_TASKS_TO_UNITY = 20
 GAME_FINISHED = 99
-VALID_ISPY_COMMANDS = [RESET, SHOW_PRONOUNCIATION_PANEL, SHOW_PRONOUNCIATION_PANEL, SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, SEND_TASKS_TO_UNITY, GAME_FINISHED]
+BUTTON_DISABLED=31
+VALID_ISPY_COMMANDS = [RESET, SHOW_PRONOUNCIATION_PANEL, SHOW_PRONOUNCIATION_PANEL, SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, SEND_TASKS_TO_UNITY, GAME_FINISHED,BUTTON_DISABLED]
 
 
 
@@ -106,32 +109,9 @@ class iSpyGameFSM: # pylint: disable=no-member
 		# List of tuples of what was tapped and how long it took to hit the cancel button
 		self.tapped_and_cancelled = []
 
-		# self.student_model = StudentModel()
-		#
-		# self.log_listener = None
-		#
-
-		self.states = [gs.GAME_START, gs.EXPLORATION_MODE,gs.MISSION_MODE,gs.PRONUNCIATION_PANEL,gs.PRONUNCIATION_RESULT,gs.WORD_DISPLAY]
-		self.transitions = [
-				{'trigger': gs.Triggers.START_BUTTON_PRESSED, 'source': gs.GAME_START, 'dest': gs.EXPLORATION_MODE},
-				{'trigger': gs.Triggers.TOPLEFT_BUTTON_PRESSED, 'source': gs.EXPLORATION_MODE, 'dest': gs.MISSION_MODE},
-				{'trigger': gs.Triggers.TOPLEFT_BUTTON_PRESSED, 'source': gs.MISSION_MODE, 'dest': gs.EXPLORATION_MODE},
-				{'trigger': gs.Triggers.OBJECT_CLICKED, 'source': gs.MISSION_MODE, 'dest': gs.PRONUNCIATION_PANEL},
-				{'trigger': gs.Triggers.TARGET_OBJECT_COLLECTED , 'source': gs.PRONUNCIATION_RESULT, 'dest': gs.MISSION_MODE},
-				{'trigger': gs.Triggers.SAY_BUTTON_PRESSED, 'source': gs.PRONUNCIATION_PANEL, 'dest': gs.PRONUNCIATION_RESULT},
-				{'trigger': gs.Triggers.PRACTICE_FAILED, 'source': gs.PRONUNCIATION_RESULT, 'dest': gs.PRONUNCIATION_PANEL},
-				{'trigger': gs.Triggers.PRONUNCIATION_PANEL_CLOSED, 'source':gs.PRONUNCIATION_RESULT , 'dest': gs.MISSION_MODE},
-				{'trigger': gs.Triggers.PRONUNCIATION_PANEL_CLOSED, 'source':gs.PRONUNCIATION_PANEL , 'dest': gs.MISSION_MODE},
-				{'trigger': gs.Triggers.PRONUNCIATION_PANEL_CLOSED, 'source':gs.MISSION_MODE , 'dest': gs.MISSION_MODE},
-				{'trigger': gs.Triggers.PRACTICE_FINISHED, 'source':gs.PRONUNCIATION_RESULT , 'dest': gs.MISSION_MODE},
-				{'trigger': gs.Triggers.OBJECT_CLICKED, 'source': gs.EXPLORATION_MODE, 'dest':gs.WORD_DISPLAY },
-				{'trigger': gs.Triggers.N_SECONDS_LATER, 'source': gs.WORD_DISPLAY, 'dest': gs.EXPLORATION_MODE}
-				
-		]
-		
-		self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
-									 initial=gs.GAME_START)
-
+		# choose which game FSM to call
+		# AlwaysMissionModeFSM(self.ros_node_mgr) # CompleteModeFSM() # AlwaysExploreModeFSM(self.ros_node_mgr)
+		self.FSM = CompleteModeFSM()
 
 		self.override_FSM_transition_callback()
 
@@ -145,7 +125,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		'''
 		state_list = [gs.EXPLORATION_MODE,gs.MISSION_MODE,gs.PRONUNCIATION_PANEL, gs.PRONUNCIATION_RESULT, gs.WORD_DISPLAY]
 		func_list = ['onExplorationMode','onMissionMode','onPronunciationPanel','onPronunciationResult','onWordDisplay']
-		prefix='self.state_machine.on_enter_'
+		prefix='self.FSM.state_machine.on_enter_'
 		for istate in state_list:
 			func = func_list[state_list.index(istate)]
 			pcode = prefix + istate + '(self.' + func + ')'
@@ -163,8 +143,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 	def onMissionMode(self):
 		'''callback function when entering mission mode '''
 		self.mission_time_start = time.time()
-
 		print ("Entered mission mode %s times" %self.entered_mission_mode)
+		self._run_game_task()
 
 	def onPronunciationPanel(self):
 		'''callback function when entering pronunciation panel'''
@@ -197,60 +177,33 @@ class iSpyGameFSM: # pylint: disable=no-member
 				# robot celebrate 
 				self.interaction.react(gs.Triggers.TOPLEFT_BUTTON_PRESSED)
 
+
 				# If the player is switching from mission to explore mode
-				if self.state == gs.MISSION_MODE:
+				if self.FSM.get_state() == gs.MISSION_MODE:
 					# Incremement how many times entered explore mode
 					self.entered_explore_mode += 1
 					# Start keeping track of how long in explore mode
 					self.explore_time_start = time.time()
 
-				if self.state == gs.EXPLORATION_MODE:
+
+				if self.FSM.get_state() == gs.EXPLORATION_MODE:
 					# If the player is switching from explore to mission mode
 					# Print how long the player was in explore mode
 					self.entered_mission_mode += 1
-
-					# When entering mission mode from exploration mode, get a random task
-					# and send it to Unity
-					if self.task_controller.task_in_progress == False:
-						task = self.task_controller.get_random_task()
-
-						# If there are no more available quests, you won the game
-						if task == None:
-							self.ros_node_mgr.send_ispy_cmd(GAME_FINISHED)
-						else:
-
-							self.ros_node_mgr.send_ispy_cmd(SEND_TASKS_TO_UNITY, task)
-							self.interaction.get_turn_taking_actions()
-
-
-					#time_in_explore_mode = time.time() - self.explore_time_start
-					#print("Time spent in explore mode is %s seconds" %time_in_explore_mode)
-
+					#self._run_game_task()
 
 
 			elif transition_msg.data == gs.Triggers.OBJECT_CLICKED:
 				time.sleep(.1)
-
-				# Keep track of when the object was clicked
-				self.time_tapped = time.time()
-
-				if self.state == gs.MISSION_MODE:
-					# If coming from missioin mode, append to mission mode list
-					self.mission_tapped_list.append((self.origText, self.time_tapped - self.mission_time_start))
-					print(self.mission_tapped_list)
-					self.interaction.react(gs.Triggers.OBJECT_CLICKED)
-
-				elif self.state == gs.EXPLORATION_MODE:
-					# If coming from explore mode, append to explore mode list
-					self.explore_tapped_list.append((self.origText, self.time_tapped))
-					print (self.explore_tapped_list)
+				self._on_obj_clicked()
+				
 
 			elif transition_msg.data == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
 				# If the user closes the pronunciation panel, append to the tapped and cancelled list
-				if self.state == gs.PRONUNCIATION_PANEL:
+				if self.FSM.get_state() == gs.PRONUNCIATION_PANEL:
 					self.tapped_and_cancelled.append((self.origText , time.time() - self.time_tapped))
 					print (self.tapped_and_cancelled)
-				elif self.state == gs.PRONUNCIATION_RESULT:
+				elif self.FSM.get_state() == gs.PRONUNCIATION_RESULT:
 					self.interaction.react(gs.Triggers.PRONUNCIATION_PANEL_CLOSED)
 
 			elif transition_msg.data == gs.Triggers.TARGET_OBJECT_COLLECTED:
@@ -262,10 +215,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 				self.interaction.react(gs.Triggers.SAY_BUTTON_PRESSED)
 
 
-
-
 			# If the message is in gs.Triggers, then allow the trigger
-			getattr(self, transition_msg.data)()
+			self.FSM.start_trigger(transition_msg.data)
 
 	#################################################################################################
 
@@ -392,6 +343,34 @@ class iSpyGameFSM: # pylint: disable=no-member
 			self.recorder.has_recorded = 0
 			
 
+	def _run_game_task(self):
+		# When entering mission mode from exploration mode, get a random task
+		# and send it to Unity
+		if self.task_controller.task_in_progress == False:
+			task = self.task_controller.get_random_task()
+
+			# If there are no more available quests, you won the game
+			if task == None:
+				self.ros_node_mgr.send_ispy_cmd(GAME_FINISHED)
+			else:
+				self.ros_node_mgr.send_ispy_cmd(SEND_TASKS_TO_UNITY, task)
+				self.interaction.get_turn_taking_actions()
+
+
+	def _on_obj_clicked(self):
+		# Keep track of when the object was clicked
+		self.time_tapped = time.time()
+
+		if self.FSM.get_state() == gs.MISSION_MODE:
+			# If coming from missioin mode, append to mission mode list
+			self.mission_tapped_list.append((self.origText, self.time_tapped - self.mission_time_start))
+			print(self.mission_tapped_list)
+			self.interaction.react(gs.Triggers.OBJECT_CLICKED)
+
+		elif self.FSM.get_state() == gs.EXPLORATION_MODE:
+			# If coming from explore mode, append to explore mode list
+			self.explore_tapped_list.append((self.origText, self.time_tapped))
+			print (self.explore_tapped_list)
 	
 
 

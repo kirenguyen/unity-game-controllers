@@ -85,6 +85,20 @@ class TapGameCommand(): # pylint: disable=too-few-public-methods
     def __init__(self):
         pass
 
+class iSpyGameCommand():
+    #Recording Time Constant
+    RECORD_TIME_MS = 3500
+
+    # COMMAND CONSTANTS
+    RESET = 0
+    SHOW_PRONOUNCIATION_PANEL = 1
+    SHOW_OBJECT_DESCR_PANEL = 2
+    ROBOT_EXPERT_ROLE = 3
+    SEND_PRONOUNCIATION_ACCURACY_TO_UNITY = 10
+    SEND_TASKS_TO_UNITY = 20
+    GAME_FINISHED = 99
+    BUTTON_DISABLED=31
+
 
 class TegaAction(): # pylint: disable=too-few-public-methods
     """

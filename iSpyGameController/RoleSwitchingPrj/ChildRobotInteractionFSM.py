@@ -153,7 +153,7 @@ class ChildRobotInteractionFSM:
 				self.physical_actions = physical_actions
 				self._perform_robot_physical_action(self.physical_actions[ras.TURN_STARTED])
 			if virtual_action:
-				time.sleep(0.3) 
+				#time.sleep(0.3) 
 				self._perform_robot_virtual_action(virtual_action)
 
 

@@ -104,12 +104,6 @@ class RobotRoles(Enum):
     COMPETENT = 1
     NOVICE = 2
 
-    """
-    COMPLETE_EXPERT = 0
-    COMPLETE_NOVICE = 1
-    #SEMI_EXPERT = 2
-    #SEMI_NOVICE = 3
-    """
 
 class RobotActionSequence:
 
@@ -147,7 +141,10 @@ class RobotRolesBehaviorsMap:
         self.mapping = {}
 
         self.expert_role()
+        self.competent_role()
+        self.novice_role()
         self.robot_response()
+
         """
         self.complete_expert_role()
         self.complete_novice_role()
@@ -159,6 +156,7 @@ class RobotRolesBehaviorsMap:
             # return a sequence of specific actions that the robot needs to execute for a given role
             return self.mapping[role]
         else:
+            print("ERROR: Cannot find a set of actions for the chosen role: "+role)
             return []
 
     def expert_role(self):
@@ -249,47 +247,47 @@ class RobotRolesBehaviorsMap:
 
 
 
-    def complete_expert_role(self):
-        '''
-        expert role for robot's turn
-        '''
-        self.mapping.update({
-            RobotRoles.COMPLETE_EXPERT:{
-            'physical':{
-                RobotActionSequence.TURN_STARTED: [ RobotBehaviors.LOOK_AT_TABLET, RobotBehaviors.ROBOT_TURN_SPEECH ],
-                RobotActionSequence.SCREEN_MOVED: [],
-                RobotActionSequence.OBJECT_FOUND: [],
-                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.EYE_FIDGET,RobotBehaviors.RING_ANSWER_CORRECT], 
-                RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.PRONOUNCE_CORRECT],
-                RobotActionSequence.RESULTS_RETURNED: [RobotBehaviors.WIN_SPEECH],
-                RobotActionSequence.TURN_FINISHED:[]
-                }, 
-            'virtual':
-                RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ
+    # def complete_expert_role(self):
+    #     '''
+    #     expert role for robot's turn
+    #     '''
+    #     self.mapping.update({
+    #         RobotRoles.COMPLETE_EXPERT:{
+    #         'physical':{
+    #             RobotActionSequence.TURN_STARTED: [ RobotBehaviors.LOOK_AT_TABLET, RobotBehaviors.ROBOT_TURN_SPEECH ],
+    #             RobotActionSequence.SCREEN_MOVED: [],
+    #             RobotActionSequence.OBJECT_FOUND: [],
+    #             RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.EYE_FIDGET,RobotBehaviors.RING_ANSWER_CORRECT], 
+    #             RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.PRONOUNCE_CORRECT],
+    #             RobotActionSequence.RESULTS_RETURNED: [RobotBehaviors.WIN_SPEECH],
+    #             RobotActionSequence.TURN_FINISHED:[]
+    #             }, 
+    #         'virtual':
+    #             RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ
                 
-            }
-        })
+    #         }
+    #     })
 
-    def complete_novice_role(self):
-        '''
-        novice role for robot's turn
-        '''
-        self.mapping.update({
-            RobotRoles.COMPLETE_NOVICE:{
-            'physical':{
-                RobotActionSequence.TURN_STARTED: [ RobotBehaviors.LOOK_AT_TABLET, RobotBehaviors.ROBOT_TURN_SPEECH ],
-                RobotActionSequence.SCREEN_MOVED: [],
-                RobotActionSequence.OBJECT_FOUND: [],
-                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.EYE_FIDGET,RobotBehaviors.RING_ANSWER_CORRECT], 
-                RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.PRONOUNCE_CORRECT],
-                RobotActionSequence.RESULTS_RETURNED: [RobotBehaviors.WIN_SPEECH],
-                RobotActionSequence.TURN_FINISHED:[]
-                }, 
-            'virtual':
-                RobotBehaviors.VIRTUALLY_CLICK_WRONG_OBJ
+    # def complete_novice_role(self):
+    #     '''
+    #     novice role for robot's turn
+    #     '''
+    #     self.mapping.update({
+    #         RobotRoles.COMPLETE_NOVICE:{
+    #         'physical':{
+    #             RobotActionSequence.TURN_STARTED: [ RobotBehaviors.LOOK_AT_TABLET, RobotBehaviors.ROBOT_TURN_SPEECH ],
+    #             RobotActionSequence.SCREEN_MOVED: [],
+    #             RobotActionSequence.OBJECT_FOUND: [],
+    #             RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.EYE_FIDGET,RobotBehaviors.RING_ANSWER_CORRECT], 
+    #             RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.PRONOUNCE_CORRECT],
+    #             RobotActionSequence.RESULTS_RETURNED: [RobotBehaviors.WIN_SPEECH],
+    #             RobotActionSequence.TURN_FINISHED:[]
+    #             }, 
+    #         'virtual':
+    #             RobotBehaviors.VIRTUALLY_CLICK_WRONG_OBJ
                 
-            }
-        })
+    #         }
+    #     })
 
     """
     

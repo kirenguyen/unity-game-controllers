@@ -111,7 +111,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		# choose which game FSM to call
 		# AlwaysMissionModeFSM(self.ros_node_mgr) # CompleteModeFSM() # AlwaysExploreModeFSM(self.ros_node_mgr)
-		self.FSM = CompleteModeFSM()
+		self.FSM = AlwaysMissionModeFSM(self.ros_node_mgr)
 
 		self.override_FSM_transition_callback()
 

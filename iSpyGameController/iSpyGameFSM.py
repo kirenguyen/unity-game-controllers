@@ -205,6 +205,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 					print (self.tapped_and_cancelled)
 				elif self.FSM.get_state() == gs.PRONUNCIATION_RESULT:
 					self.interaction.react(gs.Triggers.PRONUNCIATION_PANEL_CLOSED)
+					self.interaction.turn_taking()
 
 			elif transition_msg.data == gs.Triggers.TARGET_OBJECT_COLLECTED:
 				# one of the target objects is successfully collected. give the turn to the other player now
@@ -213,7 +214,6 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			elif transition_msg.data == gs.Triggers.SAY_BUTTON_PRESSED:
 				self.interaction.react(gs.Triggers.SAY_BUTTON_PRESSED)
-
 
 			# If the message is in gs.Triggers, then allow the trigger
 			self.FSM.start_trigger(transition_msg.data)

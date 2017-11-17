@@ -86,12 +86,12 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         """
         print('Robot Pub Node started')
 
-        if GlobalSettings.USE_TEGA:
-            msg_type = TegaAction
-            msg_topic = ROSCORE_TO_TEGA_TOPIC
-        else:
-            msg_type = JiboAction
-            msg_topic = ROSCORE_TO_JIBO_TOPIC
+        #if GlobalSettings.USE_TEGA:
+        msg_type = TegaAction
+        msg_topic = ROSCORE_TO_TEGA_TOPIC
+        #else:
+        #    msg_type = JiboAction
+        #    msg_topic = ROSCORE_TO_JIBO_TOPIC
 
         self.robot_commander = rospy.Publisher(msg_topic, msg_type, queue_size=10)
         rate = rospy.Rate(10)  # spin at 10 Hz
@@ -110,10 +110,10 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             time.sleep(.5)
 
         # choose which platform
-        if GlobalSettings.USE_TEGA:
-            msg = TegaBehaviors.get_msg_from_behavior(command, args)
-        else:
-            msg = JiboBehaviors.get_msg_from_behavior(command, args)
+        #if GlobalSettings.USE_TEGA:
+        msg = TegaBehaviors.get_msg_from_behavior(command, args)
+        #else:
+        #    msg = JiboBehaviors.get_msg_from_behavior(command, args)
 
         # add header
         self.robot_commander.publish(msg)  # would be nice to guarantee message performance here

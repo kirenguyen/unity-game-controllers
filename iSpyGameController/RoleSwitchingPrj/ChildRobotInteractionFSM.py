@@ -142,7 +142,7 @@ class ChildRobotInteractionFSM:
 				
 				actions = self._get_behaviors()
 				
-				physical_actions = actions['physical'] 
+				physical_actions = actions['physical']
 				virtual_action = actions['virtual']
 
 			elif self.state == ris.CHILD_TURN:
@@ -177,7 +177,7 @@ class ChildRobotInteractionFSM:
 			print("perform robot physical action runs..")
 			for action in actions:
 				# if the action is to pronounce a word, then specify a word to pronounce
-				if action == RobotBehaviors.PRONOUNCE_CORRECT:
+				if action == RobotBehaviors.ROBOT_SAY_WORD:
 					if not self.robot_clickedObj:
 						self.robot_clickedObj = "cat"
 					self.ros_node_mgr.send_robot_cmd(action,self.robot_clickedObj)

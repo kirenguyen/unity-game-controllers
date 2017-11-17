@@ -20,7 +20,7 @@ class AgentModel():
 
     def __init__(self):
 
-        self.role_space= [RobotRoles.EXPERT] #list(RobotRoles)
+        self.role_space= list(RobotRoles)
         
         self.role_history=[]
         RobotRolesBehaviorsMap()

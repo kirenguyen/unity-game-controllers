@@ -4,6 +4,9 @@ import random
 
 from GameUtils import GlobalSettings
 
+# number of words that need to be retrieved in order to complete the task
+NUM_WORDS_THRESHOLD =4
+
 class iSpyTaskController():
 	"""docstring for iSpyTaskController"""
 
@@ -16,6 +19,9 @@ class iSpyTaskController():
 		self.available_quests = []
 
 		self.task_in_progress = False
+
+		# number of words that have been retrieved
+		self.num_finished_words = 0
 
 		self.load_task_list()
 		self.load_object_list()
@@ -137,10 +143,12 @@ class iSpyTaskController():
 		""" Updates the list of targets when one is found """
 		self.target_list.remove(object_name)
 
-		if len(self.target_list) == 0:
+		self.num_finished_words = self.num_finished_words + 1
+
+		if self.num_finished_words == NUM_WORDS_THRESHOLD:
 			self.task_in_progress = False
 
-		print (self.target_list)
+		
 
 
 

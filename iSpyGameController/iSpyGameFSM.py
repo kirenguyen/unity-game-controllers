@@ -111,7 +111,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		# choose which game FSM to call
 		# AlwaysMissionModeFSM(self.ros_node_mgr) # CompleteModeFSM() # AlwaysExploreModeFSM(self.ros_node_mgr)
-		self.FSM = CompleteModeFSM()
+		self.FSM = AlwaysMissionModeFSM(self.ros_node_mgr)
 
 		self.override_FSM_transition_callback()
 
@@ -190,7 +190,6 @@ class iSpyGameFSM: # pylint: disable=no-member
 					# If the player is switching from explore to mission mode
 					# Print how long the player was in explore mode
 					self.entered_mission_mode += 1
-					#self._run_game_task()
 
 
 			elif transition_msg.data == gs.Triggers.OBJECT_CLICKED:
@@ -298,6 +297,14 @@ class iSpyGameFSM: # pylint: disable=no-member
 		# Evaluates the action message
 		msg_evaluator(ispy_action_msg)
 
+		self._speechace_analysis()
+
+		
+			
+	def _speechace_analysis(self):
+		'''
+		speech ace analysis
+		'''
 		# If given a word to evaluate and done recording send the information to speechace
 		if self.origText and self.recorder.has_recorded % 2 == 0 and self.recorder.has_recorded != 0:
 			# If you couldn't find the android audio topic, automatically pass
@@ -341,12 +348,14 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			self.ros_node_mgr.send_ispy_cmd(SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, results_params)
 			self.recorder.has_recorded = 0
-			
-
+	
+	
 	def _run_game_task(self):
 		# When entering mission mode from exploration mode, get a random task
 		# and send it to Unity
+		print("!!!!!! _run game task...")
 		if self.task_controller.task_in_progress == False:
+			print("get a random task!!!")
 			task = self.task_controller.get_random_task()
 
 			# If there are no more available quests, you won the game

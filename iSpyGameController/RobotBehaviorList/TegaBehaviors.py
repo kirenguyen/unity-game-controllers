@@ -34,6 +34,96 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
         msg.header = Header()
         msg.header.stamp = rospy.Time.now()
 
+
+
+        ## Look at Commands
+        if command == RobotBehaviors.LOOK_AT_TABLET:
+            lookat_pos = Vec3()
+            lookat_pos.x = 0
+            lookat_pos.y = -10
+            lookat_pos.z = 20
+            msg.do_look_at = True
+            msg.look_at = lookat_pos
+
+        if command == RobotBehaviors.LOOK_CENTER:
+            lookat_pos = Vec3()
+            lookat_pos.x = 0
+            lookat_pos.y = 10
+            lookat_pos.z = 40
+            msg.do_look_at = True
+            msg.look_at = lookat_pos
+
+        if command == RobotBehaviors.LOOK_LEFT_RIGHT:
+            lookat_pos = Vec3()
+            lookat_pos.x = 0
+            lookat_pos.y = -10
+            lookat_pos.z = 20
+            msg.do_look_at = True
+            msg.look_at = lookat_pos
+
+        if command == RobotBehaviors.LOOK_DOWN_CENTER:
+            lookat_pos = Vec3()
+            lookat_pos.x = 0
+            lookat_pos.y = -10
+            lookat_pos.z = 20
+            msg.do_look_at = True
+            msg.look_at = lookat_pos
+
+
+        ## Positive Commands
+        if command == RobotBehaviors.ROBOT_EXCITED:
+            msg.motion = TegaAction.MOTION_EXCITED
+
+        if command == RobotBehaviors.ROBOT_INTERESTED:
+            msg.motion = TegaAction.MOTION_INTERESTED
+
+        if command == RobotBehaviors.ROBOT_YES:
+            msg.motion = TegaAction.MOTION_YES
+
+        if command == RobotBehaviors.ROBOT_HAPPY_DANCE:
+            msg.motion = TegaAction.MOTION_HAPPY_DANCE
+
+        if command == RobotBehaviors.ROBOT_CURIOUS:
+            msg.motion = TegaAction.MOTION_POSE_FORWARD
+
+        if command == RobotBehaviors.ROBOT_ATTENTION:
+            msg.motion = TegaAction.MOTION_SHIMMY
+
+        if command == RobotBehaviors.ROBOT_CELEBRATION:
+            msg.motion = TegaAction.MOTION_CIRCLING
+
+        if command == RobotBehaviors.ROBOT_ENCOURAGING:
+            msg.motion = TegaAction.MOTION_PERKUP
+
+        if command == RobotBehaviors.ROBOT_WINK:
+            msg.motion = TegaAction.MOTION_NOD
+
+        if command == RobotBehaviors.ROBOT_THINKING:
+            msg.motion = TegaAction.MOTION_THINKING
+
+
+        ## Negative Commands
+        if command == RobotBehaviors.ROBOT_SAD:
+            msg.motion = TegaAction.MOTION_SAD
+
+        if command == RobotBehaviors.ROBOT_UNSURE:
+            msg.motion = TegaAction.MOTION_PUZZLED
+
+        if command == RobotBehaviors.ROBOT_COMFORT:
+            msg.motion = TegaAction.MOTION_FLAT_AGREEMENT 
+
+        if command == RobotBehaviors.ROBOT_ASK_HELP:
+            msg.motion = TegaAction.MOTION_POSE_FORWARD
+
+        if command == RobotBehaviors.ROBOT_DISAPPOINTED:
+            msg.motion = TegaAction.MOTION_FRUSTRATED 
+
+        ## Speech 
+
+        return msg
+
+        """
+
         if command == RobotBehaviors.LOOK_AT_TABLET:
             lookat_pos = Vec3()
             lookat_pos.x = 0
@@ -94,3 +184,4 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.wav_filename = "vocab_games/effects/puzzled1.wav"
 
         return msg
+        """

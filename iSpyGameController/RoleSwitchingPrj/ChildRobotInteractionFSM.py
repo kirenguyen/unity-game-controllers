@@ -57,7 +57,9 @@ class ChildRobotInteractionFSM:
 			# robot's virtual actions on the tablet
 			self.virtual_action = ""
 
-			self.robot_response = self.role_behavior_mapping.get_actions("Response")
+			self.robot_response = self.role_behavior_mapping.get_robot_general_responses()
+
+			self.role = ""
 
 			
 
@@ -94,66 +96,39 @@ class ChildRobotInteractionFSM:
 			react to ispy game state change
 			'''
 			if gameStateTrigger == gs.Triggers.TARGET_OBJECT_COLLECTED:
-				if self.state == ris.ROBOT_TURN:
-					# robot just collected an object. celebrate
-					self._perform_robot_physical_action(self.physical_actions[ras.TURN_FINISHED])
-				elif self.state == ris.CHILD_TURN:
-					self._perform_robot_physical_action(self.robot_response["physical"][ras.TURN_FINISHED])
+				self._perform_robot_physical_action(self.physical_actions[ras.TURN_FINISHED])
+				if self.state == ris.CHILD_TURN:
 					# the child finds the correct object
 					self.child_states.update_child_turn_result(True)
 
 			elif gameStateTrigger  == gs.Triggers.OBJECT_CLICKED:
-				if self.state == ris.ROBOT_TURN:
-					#robot's turn, pronounce the word
-					self._perform_robot_physical_action(self.physical_actions[ras.OBJECT_CLICKED])
-				elif self.state == ris.CHILD_TURN:
-					self._perform_robot_physical_action(self.robot_response["physical"][ras.OBJECT_CLICKED])
-			
-			
+				self._perform_robot_physical_action(self.physical_actions[ras.OBJECT_CLICKED])
+				
 			elif gameStateTrigger  == gs.Triggers.SAY_BUTTON_PRESSED:
-				if self.state == ris.ROBOT_TURN:
-					self._perform_robot_physical_action(self.physical_actions[ras.OBJECT_PRONOUNCED])
+				self._perform_robot_physical_action(self.physical_actions[ras.OBJECT_PRONOUNCED])
 
-			
 			elif gameStateTrigger  == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
 				if self.state == ris.CHILD_TURN:
-					self._perform_robot_physical_action(self.robot_response["physical"][ras.WRONG_OBJECT_FAIL])
 					# the child finds the correct object
 					self.child_states.update_child_turn_result(False)
 
-			elif gameStateTrigger == gs.Triggers.TOPLEFT_BUTTON_PRESSED:
-				pass
 
-				
-					
 
 		def get_turn_taking_actions(self):
 			'''
 			check the current interaction FSM to decide whether the robot should respond
 			then, use agent model to decide how the robot should respond if it needs to respond
 			'''
+		
+			actions = self._get_behaviors()
 
-
-			physical_actions = {}
-			virtual_action = ""
-
-			if self.state == ris.ROBOT_TURN:
-				# choose an action for robot
-				
-				actions = self._get_behaviors()
-				
-				physical_actions = actions['physical'] 
-				virtual_action = actions['virtual']
-
-			elif self.state == ris.CHILD_TURN:
-				# no need to respond at this point 
-				print("Turn Taking Action...CHILD TURN")
+			physical_actions = actions['physical']
+			virtual_action = actions['virtual']
 
 			if physical_actions:
 				self.physical_actions = physical_actions
 				self._perform_robot_physical_action(self.physical_actions[ras.TURN_STARTED])
-			if virtual_action:
-				#time.sleep(0.3) 
+			if virtual_action: 
 				self._perform_robot_virtual_action(virtual_action)
 
 
@@ -162,11 +137,13 @@ class ChildRobotInteractionFSM:
 			'''
 			Get corresponding virtual and physical actions for a given input robot's role
 			'''
-			
-			role = self.agent_model.get_next_robot_role()
-			print("Robot's Role: ")
-			print(role)
-			return self.role_behavior_mapping.get_actions(role)
+			robot_turn = False
+			if self.state == ris.ROBOT_TURN:
+				self.role = self.agent_model.get_next_robot_role()
+				robot_turn = True
+				print("Robot's Role: ")
+				print(self.role)
+			return self.role_behavior_mapping.get_actions(self.role,robot_turn)
 			
 
 		def _perform_robot_physical_action(self,actions):
@@ -177,7 +154,7 @@ class ChildRobotInteractionFSM:
 			print("perform robot physical action runs..")
 			for action in actions:
 				# if the action is to pronounce a word, then specify a word to pronounce
-				if action == RobotBehaviors.PRONOUNCE_CORRECT:
+				if action == RobotBehaviors.ROBOT_SAY_WORD:
 					if not self.robot_clickedObj:
 						self.robot_clickedObj = "cat"
 					self.ros_node_mgr.send_robot_cmd(action,self.robot_clickedObj)
@@ -189,15 +166,18 @@ class ChildRobotInteractionFSM:
 			'''
 			send the virtual action message via ROS to the tablet 
 			'''
-			print("virtual action!!!")
+			print("!!!!!virtual action!!!")
 			print(action)
 			print("===========")
 
 			if action == RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ:
 				self.robot_clickedObj = self.task_controller.get_obj_for_robot(True)
+				print("true object: "+self.robot_clickedObj)
 			elif action == RobotBehaviors.VIRTUALLY_CLICK_WRONG_OBJ:
 				self.robot_clickedObj = self.task_controller.get_obj_for_robot(False)
+				print("false object: "+self.robot_clickedObj)
 			
+
 			self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":action,"clicked_object":self.robot_clickedObj})
 			
 

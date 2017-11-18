@@ -107,13 +107,13 @@ class RobotRoles(Enum):
 
 class RobotActionSequence:
 
-    TURN_STARTED = "turnStarted" 
+    TURN_STARTED = "turnStarted" #
     SCREEN_MOVED = "screenMoved"
     OBJECT_FOUND = "objectFound"
-    OBJECT_CLICKED = "objectClicked"
-    OBJECT_PRONOUNCED = "objectPronounced" 
+    OBJECT_CLICKED = "objectClicked" #
+    OBJECT_PRONOUNCED = "objectPronounced" #
     RESULTS_RETURNED = "ResultsReturned" 
-    TURN_FINISHED = "TurnFinished" 
+    TURN_FINISHED = "TurnFinished" #
     PRONOUNCE_CORRECT = "PronounceCorrect"
     WRONG_OBJECT_FAIL ="WRONG_OBJECT_FAIL" 
 
@@ -151,14 +151,14 @@ class RobotRolesBehaviorsMap:
 
         self.backup_behaviors =  {'physical':{
                 RobotActionSequence.TURN_FINISHED: [RobotBehaviors.LOOK_AT_TABLET],
-                RobotActionSequence.TURN_STARTED: [RobotBehaviors.LOOK_AT_TABLET],
-                RobotActionSequence.SCREEN_MOVED: [],
-                RobotActionSequence.OBJECT_CLICKED: [], 
-                RobotActionSequence.OBJECT_FOUND: [],
-                RobotActionSequence.OBJECT_PRONOUNCED: [], 
-                RobotActionSequence.PRONOUNCE_CORRECT: [],
-                RobotActionSequence.RESULTS_RETURNED:[],
-                RobotActionSequence.WRONG_OBJECT_FAIL: [],
+                RobotActionSequence.TURN_STARTED: [RobotBehaviors.ROBOT_EXCITED],
+                RobotActionSequence.SCREEN_MOVED: [], 
+                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_UNSURE], 
+                RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_YES], # Nothing
+                RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.ROBOT_ATTENTION], 
+                RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_CELEBRATION],
+                RobotActionSequence.RESULTS_RETURNED:[], # Nothing
+                RobotActionSequence.WRONG_OBJECT_FAIL: [RobotBehaviors.ROBOT_SAD],
             },
             'virtual': ""
             }
@@ -189,15 +189,15 @@ class RobotRolesBehaviorsMap:
         self.robot_turn_mapping.update({
             RobotRoles.EXPERT:{
             'physical':{
-                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.LOOK_AT_TABLET, RobotBehaviors.ROBOT_EXCITED],
-                RobotActionSequence.TURN_STARTED: [RobotBehaviors.LOOK_AT_TABLET, RobotBehaviors.ROBOT_ATTENTION],
+                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_ENCOURAGING, RobotBehaviors.ROBOT_ENCOURAGING_SPEECH],
+                RobotActionSequence.TURN_STARTED: [RobotBehaviors.ROBOT_INTERESTED, RobotBehaviors.LOOK_AT_TABLET],
                 RobotActionSequence.SCREEN_MOVED: [],
-                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_CURIOUS], 
-                RobotActionSequence.OBJECT_FOUND: [],
+                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_CURIOUS], # Always correct
+                RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_CURIOUS], # Always correct
                 RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.ROBOT_SAY_WORD], 
-                RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_EXPLANATION_SPEECH],
-                RobotActionSequence.RESULTS_RETURNED:[],
-                RobotActionSequence.WRONG_OBJECT_FAIL: [],
+                RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_CELEBRATION],
+                RobotActionSequence.RESULTS_RETURNED:[], # Nothing
+                RobotActionSequence.WRONG_OBJECT_FAIL: [], # Nothing
             },
             'virtual': RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ
             }
@@ -206,15 +206,15 @@ class RobotRolesBehaviorsMap:
         self.child_turn_mapping.update({
             RobotRoles.EXPERT:{
             'physical':{
-                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.LOOK_AT_TABLET],
-                RobotActionSequence.TURN_STARTED: [RobotBehaviors.LOOK_AT_TABLET],
+                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_EXCITED],
+                RobotActionSequence.TURN_STARTED: [RobotBehaviors.ROBOT_ATTENTION],
                 RobotActionSequence.SCREEN_MOVED: [],
-                RobotActionSequence.OBJECT_CLICKED: [], 
-                RobotActionSequence.OBJECT_FOUND: [],
-                RobotActionSequence.OBJECT_PRONOUNCED: [], 
-                RobotActionSequence.PRONOUNCE_CORRECT: [],
-                RobotActionSequence.RESULTS_RETURNED:[],
-                RobotActionSequence.WRONG_OBJECT_FAIL: [],
+                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_UNSURE], # Incorrect object
+                RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_YES], # Correct Object
+                RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.ROBOT_ATTENTION], 
+                RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_HAPPY_DANCE],
+                RobotActionSequence.RESULTS_RETURNED:[], # Nothing
+                RobotActionSequence.WRONG_OBJECT_FAIL: [RobotBehaviors.ROBOT_SAD, RobotBehaviors.ROBOT_COMFORT],
             },
             'virtual': ""
             }
@@ -229,32 +229,32 @@ class RobotRolesBehaviorsMap:
         self.robot_turn_mapping.update({
             RobotRoles.COMPETENT:{
             'physical':{
-                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_TURN_SPEECH, RobotBehaviors.LOOK_AT_TABLET, RobotBehaviors.ROBOT_EXCITED],
-                RobotActionSequence.TURN_STARTED: [RobotBehaviors.ROBOT_THINKING, RobotBehaviors.LOOK_AT_TABLET],
+                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_CURIOUS],
+                RobotActionSequence.TURN_STARTED: [RobotBehaviors.ROBOT_EXCITED, RobotBehaviors.LOOK_AT_TABLET],
                 RobotActionSequence.SCREEN_MOVED: [],
-                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_UNCERTAIN_SPEECH], 
-                RobotActionSequence.OBJECT_FOUND: [],
+                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_UNSURE], # Incorrect
+                RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_THINKING], # Correct object 
                 RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.ROBOT_SAY_WORD], 
-                RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_HAPPY_DANCE, RobotBehaviors.ROBOT_HAPPY_SPEECH],
-                RobotActionSequence.RESULTS_RETURNED:[],
-                RobotActionSequence.WRONG_OBJECT_FAIL: [RobotBehaviors.ROBOT_SURPRISED_SPEECH, RobotBehaviors.ROBOT_DISAPPOINTED, RobotBehaviors.ROBOT_CONFIDENCE_SPEECH]
+                RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_HAPPY_DANCE],
+                RobotActionSequence.RESULTS_RETURNED:[], # Nothing
+                RobotActionSequence.WRONG_OBJECT_FAIL: [RobotBehaviors.ROBOT_SAD, RobotBehaviors.ROBOT_CONFIDENCE_SPEECH]
             },
             'virtual': RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ
             }
         })
 
         self.child_turn_mapping.update({
-            RobotRoles.EXPERT:{
+            RobotRoles.COMPETENT:{
             'physical':{
-                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.LOOK_AT_TABLET],
-                RobotActionSequence.TURN_STARTED: [RobotBehaviors.LOOK_AT_TABLET],
+                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_ENCOURAGING],
+                RobotActionSequence.TURN_STARTED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_INTERESTED],
                 RobotActionSequence.SCREEN_MOVED: [],
-                RobotActionSequence.OBJECT_CLICKED: [], 
-                RobotActionSequence.OBJECT_FOUND: [],
-                RobotActionSequence.OBJECT_PRONOUNCED: [], 
-                RobotActionSequence.PRONOUNCE_CORRECT: [],
-                RobotActionSequence.RESULTS_RETURNED:[],
-                RobotActionSequence.WRONG_OBJECT_FAIL: [],
+                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_UNCERTAIN_SPEECH], # Incorrect object
+                RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_THINKING], # Correct object
+                RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.ROBOT_ATTENTION], 
+                RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_CELEBRATION],
+                RobotActionSequence.RESULTS_RETURNED:[], # Nothing
+                RobotActionSequence.WRONG_OBJECT_FAIL: [RobotBehaviors.ROBOT_COMFORT],
             },
             'virtual': ""
             }
@@ -268,32 +268,32 @@ class RobotRolesBehaviorsMap:
         self.robot_turn_mapping.update({
             RobotRoles.NOVICE:{
             'physical':{
-                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_TURN_SPEECH, RobotBehaviors.LOOK_AT_TABLET, RobotBehaviors.ROBOT_EXCITED],
-                RobotActionSequence.TURN_STARTED: [RobotBehaviors.LOOK_LEFT_RIGHT],
+                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_CURIOUS],
+                RobotActionSequence.TURN_STARTED: [RobotBehaviors.ROBOT_EXCITED, RobotBehaviors.LOOK_AT_TABLET],
                 RobotActionSequence.SCREEN_MOVED: [],
-                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_UNSURE, RobotBehaviors.ROBOT_UNCERTAIN_SPEECH], 
-                RobotActionSequence.OBJECT_FOUND: [],
+                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_UNSURE], # Incorrect Object
+                RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_UNSURE],  # Correct Object
                 RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.ROBOT_SAY_WORD], 
-                RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_EXPLANATION_SPEECH],
-                RobotActionSequence.RESULTS_RETURNED:[],
-                RobotActionSequence.WRONG_OBJECT_FAIL: [RobotBehaviors.ROBOT_SAD, RobotBehaviors.ROBOT_ASK_HELP, RobotBehaviors.ROBOT_CONFIDENCE_SPEECH]
+                RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_HAPPY_DANCE],
+                RobotActionSequence.RESULTS_RETURNED:[], # Nothing
+                RobotActionSequence.WRONG_OBJECT_FAIL: [RobotBehaviors.ROBOT_ASK_HELP]
             },
             'virtual': RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ
             }
         })
 
         self.child_turn_mapping.update({
-            RobotRoles.EXPERT:{
+            RobotRoles.NOVICE:{
             'physical':{
-                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.LOOK_AT_TABLET],
-                RobotActionSequence.TURN_STARTED: [RobotBehaviors.LOOK_AT_TABLET],
+                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_WINK],
+                RobotActionSequence.TURN_STARTED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_INTERESTED],
                 RobotActionSequence.SCREEN_MOVED: [],
-                RobotActionSequence.OBJECT_CLICKED: [], 
-                RobotActionSequence.OBJECT_FOUND: [],
-                RobotActionSequence.OBJECT_PRONOUNCED: [], 
-                RobotActionSequence.PRONOUNCE_CORRECT: [],
-                RobotActionSequence.RESULTS_RETURNED:[],
-                RobotActionSequence.WRONG_OBJECT_FAIL: [],
+                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.LOOK_AT_TABLET], # Incorrect Object
+                RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.LOOK_AT_TABLET], # Correct Object
+                RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.ROBOT_ATTENTION], 
+                RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_HAPPY_DANCE, RobotBehaviors.ROBOT_THANKYOU_SPEECH],
+                RobotActionSequence.RESULTS_RETURNED:[], # Nothing
+                RobotActionSequence.WRONG_OBJECT_FAIL: [RobotBehaviors.ROBOT_COMFORT],
             },
             'virtual': ""
             }

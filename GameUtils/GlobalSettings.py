@@ -48,6 +48,8 @@ class iSpyGameStates(): # pylint: disable=too-few-public-methods
     WORD_DISPLAY = "wordDISPLAY"
 
     class Triggers():
+        SCREEN_MOVED = 'screenMoved'
+
         START_BUTTON_PRESSED = "startButtonPressed"
         TOPLEFT_BUTTON_PRESSED = "topLeftButtonPressed"
         OBJECT_CLICKED = "objectClicked"

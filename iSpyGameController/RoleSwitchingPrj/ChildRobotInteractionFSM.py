@@ -91,26 +91,49 @@ class ChildRobotInteractionFSM:
 			self.get_turn_taking_actions()
 
 		
-		def react(self,gameStateTrigger):
+		def react(self,gameStateTrigger, command=0):
 			'''
 			react to ispy game state change
 			'''
 			if gameStateTrigger == gs.Triggers.TARGET_OBJECT_COLLECTED:
+				self._perform_robot_physical_action(self.physical_actions[ras.PRONOUNCE_CORRECT])
 				self._perform_robot_physical_action(self.physical_actions[ras.TURN_FINISHED])
 				if self.state == ris.CHILD_TURN:
 					# the child finds the correct object
 					self.child_states.update_child_turn_result(True)
 
 			elif gameStateTrigger  == gs.Triggers.OBJECT_CLICKED:
-				self._perform_robot_physical_action(self.physical_actions[ras.OBJECT_CLICKED])
+				if self.state == ris.ROBOT_TURN:
+					if random.random() < 0.75:
+						self._perform_robot_physical_action(self.physical_actions[ras.OBJECT_FOUND])
+					else:
+						self._perform_robot_physical_action(self.physical_actions[ras.OBJECT_CLICKED])
+				if self.state == ris.CHILD_TURN:
+					# Check to see if the object is incorrect
+					# If correct, given assertion 
+					if command == 0:
+						self._perform_robot_physical_action(self.physical_actions[ras.OBJECT_FOUND])
+					# If incorrect, show doubt 
+					else:
+						self._perform_robot_physical_action(self.physical_actions[ras.OBJECT_CLICKED])
 				
 			elif gameStateTrigger  == gs.Triggers.SAY_BUTTON_PRESSED:
 				self._perform_robot_physical_action(self.physical_actions[ras.OBJECT_PRONOUNCED])
+
+				# Check to see if it is incorrect
+				# If correct, will be within target_object_collected -> Happy emotion
+				# If incorrect, not target_object -> Sad emotion 
+				if command == 1:
+					self._perform_robot_physical_action(self.physical_actions[ras.WRONG_OBJECT_FAIL])
 
 			elif gameStateTrigger  == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
 				if self.state == ris.CHILD_TURN:
 					# the child finds the correct object
 					self.child_states.update_child_turn_result(False)
+
+			elif gameStateTrigger == gs.Triggers.SCREEN_MOVED:
+				self._perform_robot_physical_action(self.physical_actions[ras.SCREEN_MOVED])
+
 
 
 

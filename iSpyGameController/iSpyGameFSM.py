@@ -297,6 +297,14 @@ class iSpyGameFSM: # pylint: disable=no-member
 		# Evaluates the action message
 		msg_evaluator(ispy_action_msg)
 
+		self._speechace_analysis()
+
+		
+			
+	def _speechace_analysis(self):
+		'''
+		speech ace analysis
+		'''
 		# If given a word to evaluate and done recording send the information to speechace
 		if self.origText and self.recorder.has_recorded % 2 == 0 and self.recorder.has_recorded != 0:
 			# If you couldn't find the android audio topic, automatically pass
@@ -340,8 +348,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			self.ros_node_mgr.send_ispy_cmd(SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, results_params)
 			self.recorder.has_recorded = 0
-			
-
+	
+	
 	def _run_game_task(self):
 		# When entering mission mode from exploration mode, get a random task
 		# and send it to Unity

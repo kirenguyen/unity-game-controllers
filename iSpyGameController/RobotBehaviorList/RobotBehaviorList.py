@@ -138,32 +138,55 @@ class RobotRolesBehaviorsMap:
     mapping between robot's social role and robot's specific behaviors
     '''  
     def __init__(self):
-        self.mapping = {}
+        # robot's actions during its turn
+        self.robot_turn_mapping = {}
+        # robot's actions during child's turn
+        self.child_turn_mapping = {}
 
-        self.expert_role()
-        self.competent_role()
-        self.novice_role()
-        self.robot_response()
+        self._expert_role()
+        self._competent_role()
+        self._novice_role()
+        self._robot_general_responses()
+
+
+        self.backup_behaviors =  {'physical':{
+                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.LOOK_AT_TABLET],
+                RobotActionSequence.TURN_STARTED: [RobotBehaviors.LOOK_AT_TABLET],
+                RobotActionSequence.SCREEN_MOVED: [],
+                RobotActionSequence.OBJECT_CLICKED: [], 
+                RobotActionSequence.OBJECT_FOUND: [],
+                RobotActionSequence.OBJECT_PRONOUNCED: [], 
+                RobotActionSequence.PRONOUNCE_CORRECT: [],
+                RobotActionSequence.RESULTS_RETURNED:[],
+                RobotActionSequence.WRONG_OBJECT_FAIL: [],
+            },
+            'virtual': ""
+            }
+
 
         """
         self.complete_expert_role()
         self.complete_novice_role()
         """
         
-    def get_actions(self,role):
-        if role in self.mapping.keys():
+    def get_actions(self,role,robot_turn):
+        print("role is: ")
+        print(role)
+        if robot_turn == True:
+            print("robot turn mapping")
             # if the role is an instance of robotRoles
             # return a sequence of specific actions that the robot needs to execute for a given role
-            return self.mapping[role]
+            return self.robot_turn_mapping[role] if role in self.robot_turn_mapping.keys() else self.backup_behaviors
         else:
-            print("ERROR: Cannot find a set of actions for the chosen role: "+role)
-            return []
+            print("child turn mapping")
+            return self.child_turn_mapping[role] if role in self.child_turn_mapping.keys() else self.backup_behaviors
 
-    def expert_role(self):
+
+    def _expert_role(self):
         '''
         expert role for robot's turn
         '''
-        self.mapping.update({
+        self.robot_turn_mapping.update({
             RobotRoles.EXPERT:{
             'physical':{
                 RobotActionSequence.TURN_FINISHED: [RobotBehaviors.LOOK_AT_TABLET, RobotBehaviors.ROBOT_EXCITED],
@@ -180,12 +203,30 @@ class RobotRolesBehaviorsMap:
             }
         })
 
+        self.child_turn_mapping.update({
+            RobotRoles.EXPERT:{
+            'physical':{
+                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.LOOK_AT_TABLET],
+                RobotActionSequence.TURN_STARTED: [RobotBehaviors.LOOK_AT_TABLET],
+                RobotActionSequence.SCREEN_MOVED: [],
+                RobotActionSequence.OBJECT_CLICKED: [], 
+                RobotActionSequence.OBJECT_FOUND: [],
+                RobotActionSequence.OBJECT_PRONOUNCED: [], 
+                RobotActionSequence.PRONOUNCE_CORRECT: [],
+                RobotActionSequence.RESULTS_RETURNED:[],
+                RobotActionSequence.WRONG_OBJECT_FAIL: [],
+            },
+            'virtual': ""
+            }
+        })
 
-    def competent_role(self):
+
+
+    def _competent_role(self):
         '''
         competent role for robot's turn 
         '''
-        self.mapping.update({
+        self.robot_turn_mapping.update({
             RobotRoles.COMPETENT:{
             'physical':{
                 RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_TURN_SPEECH, RobotBehaviors.LOOK_AT_TABLET, RobotBehaviors.ROBOT_EXCITED],
@@ -202,12 +243,29 @@ class RobotRolesBehaviorsMap:
             }
         })
 
+        self.child_turn_mapping.update({
+            RobotRoles.EXPERT:{
+            'physical':{
+                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.LOOK_AT_TABLET],
+                RobotActionSequence.TURN_STARTED: [RobotBehaviors.LOOK_AT_TABLET],
+                RobotActionSequence.SCREEN_MOVED: [],
+                RobotActionSequence.OBJECT_CLICKED: [], 
+                RobotActionSequence.OBJECT_FOUND: [],
+                RobotActionSequence.OBJECT_PRONOUNCED: [], 
+                RobotActionSequence.PRONOUNCE_CORRECT: [],
+                RobotActionSequence.RESULTS_RETURNED:[],
+                RobotActionSequence.WRONG_OBJECT_FAIL: [],
+            },
+            'virtual': ""
+            }
+        })
 
-    def novice_role(self):
+
+    def _novice_role(self):
         '''
         novice role for robot's turn
         '''
-        self.mapping.update({
+        self.robot_turn_mapping.update({
             RobotRoles.NOVICE:{
             'physical':{
                 RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_TURN_SPEECH, RobotBehaviors.LOOK_AT_TABLET, RobotBehaviors.ROBOT_EXCITED],
@@ -224,12 +282,28 @@ class RobotRolesBehaviorsMap:
             }
         })
 
-    def robot_response(self):
+        self.child_turn_mapping.update({
+            RobotRoles.EXPERT:{
+            'physical':{
+                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.LOOK_AT_TABLET],
+                RobotActionSequence.TURN_STARTED: [RobotBehaviors.LOOK_AT_TABLET],
+                RobotActionSequence.SCREEN_MOVED: [],
+                RobotActionSequence.OBJECT_CLICKED: [], 
+                RobotActionSequence.OBJECT_FOUND: [],
+                RobotActionSequence.OBJECT_PRONOUNCED: [], 
+                RobotActionSequence.PRONOUNCE_CORRECT: [],
+                RobotActionSequence.RESULTS_RETURNED:[],
+                RobotActionSequence.WRONG_OBJECT_FAIL: [],
+            },
+            'virtual': ""
+            }
+        })
+
+    def _robot_general_responses(self):
         '''
         novice robot's response to child during child's turn
         '''
-        self.mapping.update({
-            'Response':{
+        self.general_responses = {
             'physical':{
                 RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_CHILD_TURN_SPEECH, RobotBehaviors.ROBOT_ASK_HELP_SPEECH],
                 RobotActionSequence.TURN_STARTED: [RobotBehaviors.LOOK_AT_TABLET],
@@ -242,9 +316,10 @@ class RobotRolesBehaviorsMap:
                 RobotActionSequence.WRONG_OBJECT_FAIL: [RobotBehaviors.ROBOT_COMFORT_SPEECH]
             },
             'virtual': RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ
-            }
-        })
-
+        }
+        
+    def get_robot_general_responses(self):
+        return self.general_responses
 
 
     # def complete_expert_role(self):

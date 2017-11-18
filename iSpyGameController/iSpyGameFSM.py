@@ -190,7 +190,6 @@ class iSpyGameFSM: # pylint: disable=no-member
 					# If the player is switching from explore to mission mode
 					# Print how long the player was in explore mode
 					self.entered_mission_mode += 1
-					#self._run_game_task()
 
 
 			elif transition_msg.data == gs.Triggers.OBJECT_CLICKED:
@@ -346,7 +345,9 @@ class iSpyGameFSM: # pylint: disable=no-member
 	def _run_game_task(self):
 		# When entering mission mode from exploration mode, get a random task
 		# and send it to Unity
+		print("!!!!!! _run game task...")
 		if self.task_controller.task_in_progress == False:
+			print("get a random task!!!")
 			task = self.task_controller.get_random_task()
 
 			# If there are no more available quests, you won the game

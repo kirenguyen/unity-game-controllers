@@ -48,7 +48,7 @@ class iSpyGameStates(): # pylint: disable=too-few-public-methods
     WORD_DISPLAY = "wordDISPLAY"
 
     class Triggers():
-        SCREEN_MOVED = 'screenMoved'
+        SCREEN_MOVED = "screenMoved"
 
         START_BUTTON_PRESSED = "startButtonPressed"
         TOPLEFT_BUTTON_PRESSED = "topLeftButtonPressed"
@@ -59,7 +59,7 @@ class iSpyGameStates(): # pylint: disable=too-few-public-methods
         PRACTICE_FINISHED = "practiceFinished"
         PRACTICE_FAILED = "practiceFailed"
         N_SECONDS_LATER = "secondsLater"
-        triggers = ["startButtonPressed","targetObjectCollected","pronunciationPanelClosed","topLeftButtonPressed","objectClicked","sayButtonPressed", "closeButtonPressed", "practiceFinished", "practiceFailed", "secondsLater"]
+        triggers = ["screenMoved", "startButtonPressed","targetObjectCollected","pronunciationPanelClosed","topLeftButtonPressed","objectClicked","sayButtonPressed", "closeButtonPressed", "practiceFinished", "practiceFailed", "secondsLater"]
 
     def __init__(self):
         pass

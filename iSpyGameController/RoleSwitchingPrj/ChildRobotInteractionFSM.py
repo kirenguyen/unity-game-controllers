@@ -123,7 +123,8 @@ class ChildRobotInteractionFSM:
 				# Check to see if it is incorrect
 				# If correct, will be within target_object_collected -> Happy emotion
 				# If incorrect, not target_object -> Sad emotion 
-				if command == 1:
+				if command == 1 and random.random() < 0.75:
+					time.sleep(2)
 					self._perform_robot_physical_action(self.physical_actions[ras.WRONG_OBJECT_FAIL])
 
 			elif gameStateTrigger  == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:

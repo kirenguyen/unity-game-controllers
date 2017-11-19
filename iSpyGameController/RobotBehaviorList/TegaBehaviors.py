@@ -53,6 +53,7 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_look_at = True
             msg.look_at = lookat_pos
 
+        """
         if command == RobotBehaviors.LOOK_LEFT_RIGHT:
             lookat_pos = Vec3()
             lookat_pos.x = 0
@@ -68,6 +69,7 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             lookat_pos.z = 20
             msg.do_look_at = True
             msg.look_at = lookat_pos
+        """
 
 
         ## Positive Commands

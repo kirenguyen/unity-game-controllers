@@ -199,6 +199,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			elif transition_msg.data == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
 				# If the user closes the pronunciation panel, append to the tapped and cancelled list
+
 				if self.FSM.get_state() == gs.PRONUNCIATION_PANEL:
 					self.tapped_and_cancelled.append((self.origText , time.time() - self.time_tapped))
 					print (self.tapped_and_cancelled)
@@ -208,14 +209,23 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			elif transition_msg.data == gs.Triggers.TARGET_OBJECT_COLLECTED:
 				# one of the target objects is successfully collected. give the turn to the other player now
+				
 				self.interaction.react(gs.Triggers.TARGET_OBJECT_COLLECTED)
 				self.interaction.turn_taking()
 
 			elif transition_msg.data == gs.Triggers.SAY_BUTTON_PRESSED:
-				self.interaction.react(gs.Triggers.SAY_BUTTON_PRESSED)
+				if self.task_controller.isTarget(self.origText):
+					self.interaction.react(gs.Triggers.SAY_BUTTON_PRESSED)
+				else:
+					self.interaction.react(gs.Triggers.SAY_BUTTON_PRESSED, 1)
+
+			elif transition_msg.data == gs.Triggers.SCREEN_MOVED:
+				self.interaction.react(gs.Triggers.SCREEN_MOVED)
 
 			# If the message is in gs.Triggers, then allow the trigger
-			self.FSM.start_trigger(transition_msg.data)
+
+			if transition_msg.data != gs.Triggers.SCREEN_MOVED:
+				self.FSM.start_trigger(transition_msg.data)
 
 	#################################################################################################
 
@@ -374,7 +384,11 @@ class iSpyGameFSM: # pylint: disable=no-member
 			# If coming from missioin mode, append to mission mode list
 			self.mission_tapped_list.append((self.origText, self.time_tapped - self.mission_time_start))
 			print(self.mission_tapped_list)
-			self.interaction.react(gs.Triggers.OBJECT_CLICKED)
+
+			if self.task_controller.isTarget(self.origText):
+				self.interaction.react(gs.Triggers.OBJECT_CLICKED)
+			else:
+				self.interaction.react(gs.Triggers.OBJECT_CLICKED, 1)
 
 		elif self.FSM.get_state() == gs.EXPLORATION_MODE:
 			# If coming from explore mode, append to explore mode list

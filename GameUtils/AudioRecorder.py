@@ -221,7 +221,7 @@ class AudioRecorder:
         self.buffered_audio_data = []  # Resets audio data
         self.start_recording_time = time.time()
 
-        if GlobalSettings.USE_USB_MIC:
+        if GlobalSettings.USE_USB_MIC and robots_turn != GlobalSettings.iSpyRobotInteractionStates.ROBOT_TURN:
             if self.valid_recording:
                 self.record_usb_audio(recording_length_ms)
             else: 

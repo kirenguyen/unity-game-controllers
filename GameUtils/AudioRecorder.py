@@ -211,7 +211,7 @@ class AudioRecorder:
             return
 
 
-    def start_recording(self, expected_text, recording_length_ms):
+    def start_recording(self, expected_text, recording_length_ms, robots_turn):
         """
         Starts a new thread that records the microphones audio.
         """
@@ -226,7 +226,9 @@ class AudioRecorder:
                 self.record_usb_audio(recording_length_ms)
             else: 
                 time.sleep((recording_length_ms / 1000) + 2) #if configured to use USB Mic, but it doesn't exist, then just sleep
-
+        elif robots_turn == GlobalSettings.iSpyRobotInteractionStates.ROBOT_TURN:
+            print("Sleeping for robots turn!")
+            time.sleep((recording_length_ms / 1000) + 2)
         else: #try to use streaming audio from Android device
             thread.start_new_thread(self.record_android_audio, (self.buffered_audio_data,))
             time.sleep(.1)

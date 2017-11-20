@@ -271,7 +271,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		def speakingStage(stage):
 			if stage == "speakingStart":
-				self.recorder.start_recording(self.origText, RECORD_TIME_MS) #TODO: Update 'test' to actual word
+				print(self.interaction.state)
+				self.recorder.start_recording(self.origText, RECORD_TIME_MS, self.interaction.state) #TODO: Update 'test' to actual word
 			elif stage == "speakingEnd":
 				self.recorder.stop_recording()
 	

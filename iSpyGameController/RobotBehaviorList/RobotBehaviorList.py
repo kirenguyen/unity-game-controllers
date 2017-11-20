@@ -191,7 +191,7 @@ class RobotRolesBehaviorsMap:
             'physical':{
                 RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_ENCOURAGING, RobotBehaviors.ROBOT_ENCOURAGING_SPEECH],
                 RobotActionSequence.TURN_STARTED: [RobotBehaviors.ROBOT_INTERESTED, RobotBehaviors.LOOK_AT_TABLET],
-                RobotActionSequence.SCREEN_MOVED: [],
+                RobotActionSequence.SCREEN_MOVED: [], # Nothing
                 RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_CURIOUS], # Always correct
                 RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_CURIOUS], # Always correct
                 RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_SAY_WORD], 
@@ -208,7 +208,7 @@ class RobotRolesBehaviorsMap:
             'physical':{
                 RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_EXCITED],
                 RobotActionSequence.TURN_STARTED: [RobotBehaviors.ROBOT_ATTENTION],
-                RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.ROBOT_COMFORT],
+                RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.ROBOT_COMFORT, RobotBehaviors.LOOK_CENTER],
                 RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_UNSURE], # Incorrect object
                 RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_YES], # Correct Object
                 RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_ATTENTION], 
@@ -231,7 +231,7 @@ class RobotRolesBehaviorsMap:
             'physical':{
                 RobotActionSequence.TURN_FINISHED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_CURIOUS],
                 RobotActionSequence.TURN_STARTED: [RobotBehaviors.ROBOT_EXCITED, RobotBehaviors.LOOK_AT_TABLET],
-                RobotActionSequence.SCREEN_MOVED: [],
+                RobotActionSequence.SCREEN_MOVED: [], # Nothing
                 RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_THINKING], # Incorrect
                 RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_THINKING], # Correct object 
                 RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.ROBOT_SAY_WORD], 
@@ -248,7 +248,7 @@ class RobotRolesBehaviorsMap:
             'physical':{
                 RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_ENCOURAGING],
                 RobotActionSequence.TURN_STARTED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_EXCITED],
-                RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.ROBOT_COMFORT],
+                RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.ROBOT_COMFORT, RobotBehaviors.LOOK_CENTER],
                 RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_UNCERTAIN_SPEECH], # Incorrect object
                 RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_THINKING], # Correct object
                 RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_ATTENTION], 
@@ -270,7 +270,7 @@ class RobotRolesBehaviorsMap:
             'physical':{
                 RobotActionSequence.TURN_FINISHED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_CURIOUS],
                 RobotActionSequence.TURN_STARTED: [RobotBehaviors.ROBOT_EXCITED, RobotBehaviors.LOOK_AT_TABLET],
-                RobotActionSequence.SCREEN_MOVED: [],
+                RobotActionSequence.SCREEN_MOVED: [], # Nothing
                 RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_UNSURE], # Incorrect Object
                 RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_UNSURE],  # Correct Object
                 RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.ROBOT_SAY_WORD], 
@@ -287,13 +287,13 @@ class RobotRolesBehaviorsMap:
             'physical':{
                 RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_WINK],
                 RobotActionSequence.TURN_STARTED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_INTERESTED],
-                RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.ROBOT_COMFORT],
+                RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.ROBOT_COMFORT, RobotBehaviors.LOOK_CENTER],
                 RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.LOOK_AT_TABLET], # Incorrect Object
                 RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.LOOK_AT_TABLET, RobotBehaviors.LOOK_CENTER], # Correct Object
                 RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_ATTENTION], 
                 RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_HAPPY_DANCE, RobotBehaviors.ROBOT_THANKYOU_SPEECH],
                 RobotActionSequence.RESULTS_RETURNED:[], # Nothing
-                RobotActionSequence.WRONG_OBJECT_FAIL: [RobotBehaviors.ROBOT_COMFORT],
+                RobotActionSequence.WRONG_OBJECT_FAIL: [RobotBehaviors.ROBOT_SAD],
             },
             'virtual': ""
             }

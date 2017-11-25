@@ -96,3 +96,6 @@ ENV/
 *.wav
 
 .DS_Store
+
+# captured videos
+scripts/videos

@@ -109,7 +109,15 @@
 9. `E/Unity: UnauthorizedAccessException: Access to the path`. if this issue exists, then do the following:
 	* Make sure in the Unity setting (`Edit/Project Settings/Player`): change th permission from `internal` to `external (sd card)`
 	
+### 6. Video Recording For Role-Switching Study
+1. install `ffmpeg` 
+	* for Ubuntu 14.04:  `sudo apt-add-repository ppa:mc3man/trusty-media`
+	* for Ubuntu 16.04: `sudo apt-add-repository ppa:jonathonf/ffmpeg-3`
+	* `sudo apt-get update`
+	* `sudo apt-get install ffmpeg`
 
+2. install fonts 
+	* `sudo apt-get install ttf-dejavu`
 
 
 

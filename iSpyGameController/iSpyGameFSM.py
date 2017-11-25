@@ -27,6 +27,8 @@ from .RobotBehaviorList.RobotBehaviorList import RobotBehaviors
 from .RobotBehaviorList.RobotBehaviorList import RobotRoles
 from .RobotBehaviorList.RobotBehaviorList import RobotRolesBehaviorsMap
 
+from .AffdexAnalysis.node_AffdexResponse import AffdexAnalysis
+
 from .RoleSwitchingPrj.ChildRobotInteractionFSM import ChildRobotInteractionFSM
 from .GameModeFSMs import AlwaysMissionModeFSM,CompleteModeFSM,AlwaysExploreModeFSM
 
@@ -111,7 +113,9 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		# choose which game FSM to call
 		# AlwaysMissionModeFSM(self.ros_node_mgr) # CompleteModeFSM() # AlwaysExploreModeFSM(self.ros_node_mgr)
-		self.FSM = CompleteModeFSM()
+		self.FSM = AlwaysMissionModeFSM(self.ros_node_mgr)
+
+		self.affdexAnalysis = AffdexAnalysis(self.ros_node_mgr)
 
 		self.override_FSM_transition_callback()
 
@@ -190,7 +194,6 @@ class iSpyGameFSM: # pylint: disable=no-member
 					# If the player is switching from explore to mission mode
 					# Print how long the player was in explore mode
 					self.entered_mission_mode += 1
-					#self._run_game_task()
 
 
 			elif transition_msg.data == gs.Triggers.OBJECT_CLICKED:
@@ -200,6 +203,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			elif transition_msg.data == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
 				# If the user closes the pronunciation panel, append to the tapped and cancelled list
+
 				if self.FSM.get_state() == gs.PRONUNCIATION_PANEL:
 					self.tapped_and_cancelled.append((self.origText , time.time() - self.time_tapped))
 					print (self.tapped_and_cancelled)
@@ -209,14 +213,23 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			elif transition_msg.data == gs.Triggers.TARGET_OBJECT_COLLECTED:
 				# one of the target objects is successfully collected. give the turn to the other player now
+				
 				self.interaction.react(gs.Triggers.TARGET_OBJECT_COLLECTED)
 				self.interaction.turn_taking()
 
 			elif transition_msg.data == gs.Triggers.SAY_BUTTON_PRESSED:
-				self.interaction.react(gs.Triggers.SAY_BUTTON_PRESSED)
+				if self.task_controller.isTarget(self.origText):
+					self.interaction.react(gs.Triggers.SAY_BUTTON_PRESSED)
+				else:
+					self.interaction.react(gs.Triggers.SAY_BUTTON_PRESSED, 1)
+
+			elif transition_msg.data == gs.Triggers.SCREEN_MOVED:
+				self.interaction.react(gs.Triggers.SCREEN_MOVED)
 
 			# If the message is in gs.Triggers, then allow the trigger
-			self.FSM.start_trigger(transition_msg.data)
+
+			if transition_msg.data != gs.Triggers.SCREEN_MOVED:
+				self.FSM.start_trigger(transition_msg.data)
 
 	#################################################################################################
 
@@ -262,7 +275,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		def speakingStage(stage):
 			if stage == "speakingStart":
-				self.recorder.start_recording(self.origText, RECORD_TIME_MS) #TODO: Update 'test' to actual word
+				print(self.interaction.state)
+				self.recorder.start_recording(self.origText, RECORD_TIME_MS, self.interaction.state) #TODO: Update 'test' to actual word
 			elif stage == "speakingEnd":
 				self.recorder.stop_recording()
 	
@@ -298,6 +312,14 @@ class iSpyGameFSM: # pylint: disable=no-member
 		# Evaluates the action message
 		msg_evaluator(ispy_action_msg)
 
+		self._speechace_analysis()
+
+		
+			
+	def _speechace_analysis(self):
+		'''
+		speech ace analysis
+		'''
 		# If given a word to evaluate and done recording send the information to speechace
 		if self.origText and self.recorder.has_recorded % 2 == 0 and self.recorder.has_recorded != 0:
 			# If you couldn't find the android audio topic, automatically pass
@@ -341,12 +363,14 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			self.ros_node_mgr.send_ispy_cmd(SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, results_params)
 			self.recorder.has_recorded = 0
-			
-
+	
+	
 	def _run_game_task(self):
 		# When entering mission mode from exploration mode, get a random task
 		# and send it to Unity
+		print("!!!!!! _run game task...")
 		if self.task_controller.task_in_progress == False:
+			print("get a random task!!!")
 			task = self.task_controller.get_random_task()
 
 			# If there are no more available quests, you won the game
@@ -365,7 +389,11 @@ class iSpyGameFSM: # pylint: disable=no-member
 			# If coming from missioin mode, append to mission mode list
 			self.mission_tapped_list.append((self.origText, self.time_tapped - self.mission_time_start))
 			print(self.mission_tapped_list)
-			self.interaction.react(gs.Triggers.OBJECT_CLICKED)
+
+			if self.task_controller.isTarget(self.origText):
+				self.interaction.react(gs.Triggers.OBJECT_CLICKED)
+			else:
+				self.interaction.react(gs.Triggers.OBJECT_CLICKED, 1)
 
 		elif self.FSM.get_state() == gs.EXPLORATION_MODE:
 			# If coming from explore mode, append to explore mode list

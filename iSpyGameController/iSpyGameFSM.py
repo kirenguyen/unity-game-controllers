@@ -27,6 +27,8 @@ from .RobotBehaviorList.RobotBehaviorList import RobotBehaviors
 from .RobotBehaviorList.RobotBehaviorList import RobotRoles
 from .RobotBehaviorList.RobotBehaviorList import RobotRolesBehaviorsMap
 
+from .AffdexAnalysis.node_AffdexResponse import AffdexAnalysis
+
 from .RoleSwitchingPrj.ChildRobotInteractionFSM import ChildRobotInteractionFSM
 from .GameModeFSMs import AlwaysMissionModeFSM,CompleteModeFSM,AlwaysExploreModeFSM
 
@@ -112,6 +114,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 		# choose which game FSM to call
 		# AlwaysMissionModeFSM(self.ros_node_mgr) # CompleteModeFSM() # AlwaysExploreModeFSM(self.ros_node_mgr)
 		self.FSM = AlwaysMissionModeFSM(self.ros_node_mgr)
+
+		self.affdexAnalysis = AffdexAnalysis(self.ros_node_mgr)
 
 		self.override_FSM_transition_callback()
 

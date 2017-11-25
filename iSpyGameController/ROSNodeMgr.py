@@ -10,6 +10,9 @@ from GameUtils import GlobalSettings
 from .RobotBehaviorList.JiboBehaviors import JiboBehaviors
 from .RobotBehaviorList.TegaBehaviors import TegaBehaviors
 
+from affdex_msgs.msg import AffdexFrameInfo # please download affdex ros msg from PRG's git. if you don't have access to this repo, just ask Huili
+from affdex_msgs.msg import Vec2 # please download affdex ros msg from PRG's git
+
 
 if GlobalSettings.USE_ROS:
     import rospy
@@ -207,3 +210,10 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         rate.sleep()  # sleep to wait for subscribers
         # rospy.spin()
 
+
+    def start_affdex_listener(self,on_affdex_data_received):
+        '''
+        start affdex listener, which receives affdex data 
+        '''
+        print('affdex listener starts..')
+        sub_affdex = rospy.Subscriber('affdex_data', AffdexFrameInfo, on_affdex_data_received) # affdex data

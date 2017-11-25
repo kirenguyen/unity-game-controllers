@@ -23,6 +23,8 @@ class iSpyTaskController():
 		# number of words that have been retrieved
 		self.num_finished_words = 0
 
+		self.current_task_index = 0
+
 		self.load_task_list()
 		self.load_object_list()
 
@@ -80,7 +82,7 @@ class iSpyTaskController():
 					self.object_dict[row[0]] = (row[1], row[2], row[3], row[4], row[5], row[6])
 
 
-	def get_random_task(self):
+	def get_next_task(self):
 		""" Gets a random task number from the list of available quests and returns the task and the targets"""
 
 		# If there are no more available quests, you won the game and return None
@@ -89,6 +91,7 @@ class iSpyTaskController():
 
 		# Gets a random index from the list of available quests, and used the value as the key in the task_dict
 		index = random.randint(0, len(self.available_quests)-1)
+
 		task, task_category, task_attribute = self.task_dict[self.available_quests[index]]
 
 		# Delete the quest after it is chosen
@@ -105,6 +108,7 @@ class iSpyTaskController():
 				self.nontarget_list.append(key)
 
 		self.task_in_progress = True
+
 
 		task_message = self.get_task_message(str(len(self.target_list)),task_category,task_attribute)
 		return {"task": task_message, "task_vocab": task_attribute, "list" : self.target_list}
@@ -147,8 +151,17 @@ class iSpyTaskController():
 
 		if self.num_finished_words == NUM_WORDS_THRESHOLD:
 			self.task_in_progress = False
+			self._reset_for_new_task()
 
-		
+
+	def _reset_for_new_task(self):
+		'''
+		reset target list, nontarget list 
+		clear data of the last finished task for the new task
+		'''
+		self.target_list = []
+		self.nontarget_list = []
+		self.num_finished_words = 0
 
 
 

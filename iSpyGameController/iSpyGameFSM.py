@@ -368,15 +368,17 @@ class iSpyGameFSM: # pylint: disable=no-member
 	def _run_game_task(self):
 		# When entering mission mode from exploration mode, get a random task
 		# and send it to Unity
-		print("!!!!!! _run game task...")
 		if self.task_controller.task_in_progress == False:
-			print("get a random task!!!")
-			task = self.task_controller.get_random_task()
+			print("!!!!get next task!!!!!!")
+			task = self.task_controller.get_next_task()
 
 			# If there are no more available quests, you won the game
 			if task == None:
+				print("!!! next task is none!!!")
 				self.ros_node_mgr.send_ispy_cmd(GAME_FINISHED)
 			else:
+				print("!!! get next task. which is...")
+				print(task)
 				self.ros_node_mgr.send_ispy_cmd(SEND_TASKS_TO_UNITY, task)
 				self.interaction.get_turn_taking_actions()
 

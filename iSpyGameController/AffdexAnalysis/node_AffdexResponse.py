@@ -40,13 +40,14 @@ class AffdexAnalysis:
 
 
 	def add_file_heading(self,data):
+		print("affdex recording starts")
 		heading = "frame_number, elapsed_time (sec), timestamp"
 		emotion_heading = ','.join([ "emotion-"+str(i) for i in range(1,len(data.emotions)+1,1)])
 		expression_heading = ','.join([ "expression-"+str(i) for i in range(1,len(data.expressions)+1,1)])
 		measurement_heading = ','.join([ "measurement-"+str(i) for i in range(1,len(data.measurements)+1,1)])
 
 		self.file.write(','.join([heading,emotion_heading,expression_heading,measurement_heading]))
-		print(len(','.join([heading,emotion_heading,expression_heading,measurement_heading]).split(",")))
+	
 
 	def on_affdex_data_received(self,data):
 		''''
@@ -72,8 +73,7 @@ class AffdexAnalysis:
 
 
 
-		print("elapsed time")
-		print(elapsed_time)
+		
 			
 		emotions_str = ','.join([str(i) for i in data.emotions])	
 		expressions_str = ','.join([str(i) for i in data.expressions])
@@ -81,8 +81,6 @@ class AffdexAnalysis:
 		
 		line = ','.join([str(self.frame_number), str(elapsed_time), timestamp,emotions_str,expressions_str,measurements_str]) 
 
-		print("line...")
-		print(len(line.split(',')))
-
+		
 		self.file.write(line+'\n')
 		

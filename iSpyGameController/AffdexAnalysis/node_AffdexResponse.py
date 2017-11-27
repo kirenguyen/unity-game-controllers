@@ -32,7 +32,7 @@ class AffdexAnalysis:
 		self.csv_file_prefix = "scripts/affdex_data/affdex-csv-file"
 		self.start_time = '-'.join([str(i) for i in time.localtime()])
 		self.csv_file_name = self.csv_file_prefix+"-"+self.start_time+".csv"
-		self.file = open(self.csv_file_name, 'w')
+		#self.file = open(self.csv_file_name, 'w')
 
 		self.first_line = True
 		self.start_time = ""

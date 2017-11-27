@@ -62,47 +62,20 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     VIRTUALLY_CLICK_CORRECT_OBJ = "CLICK_CORRECT_OBJ" # click correct obj
 
 
-    """
-    # Look Ats
-    LOOK_AT_TABLET = 'LOOK_AT_TABLET'
-    LOOK_CENTER= 'LOOK_CENTER'
-    WIN_SPEECH = "WIN_SPEECH"
+    ## Tega Speech for Curiosity Assessment
+    GENERAL_CURIOSITY_SPEECH = "GENERAL_CURIOSITY_SPEECH"
+    BASED_ON_PROMPTS_SPEECH = "BASED_ON_PROMPTS_SPEECH"
 
-    ROBOT_TURN_SPEECH="ROBOT_TURN_SPEECH"
-    REACT_CHILD_ANSWER_CORRECT="REACT_CHILD_ANSWER_CORRECT"
-    REACT_CHILD_ANSWER_WRONG="REACT_CHILD_ANSWER_WRONG"
-    REACT_GAME_START ="REACT_GAME_START"
-    REACT_GAME_START2="REACT_GAME_START2"
-
-    WIN_MOTION="WIN_MOTION"
-    EYE_FIDGET="EYE_FIDGET"
-
-    RING_ANSWER_CORRECT="RING_ANSWER_CORRECT"
-
-
-    #Pronunciation Actions the robot can do 
-    PRONOUNCE_CORRECT = 'PRONOUNCE_CORRECT'
-
-    #Reaction Actions the robot can do after its results are revealed
-    REACT_ROBOT_CORRECT = 'REACT_ROBOT_CORRECT'
-    REACT_CHILD_CORRECT = 'REACT_CHILD_CORRECT'
-
-
-
-    # virtual actions on the app
-    VIRTUALLY_CLICK_CORRECT_OBJ = "CLICK_CORRECT_OBJ" # click correct obj
-    VIRTUALLY_CLICK_WRONG_OBJ = "CLICK_WRONG_OBJ"
-
-    """
+    
 
 class RobotRoles(Enum):
     '''
     contains a list of social roles that are avaiable to robot to perform
     '''
-
-    EXPERT = 0
-    COMPETENT = 1
-    NOVICE = 2
+    CURIOUS = 0
+    #EXPERT = 0
+    #COMPETENT = 1
+    #NOVICE = 2
 
 
 class RobotActionSequence:
@@ -143,14 +116,15 @@ class RobotRolesBehaviorsMap:
         # robot's actions during child's turn
         self.child_turn_mapping = {}
 
-        self._expert_role()
-        self._competent_role()
-        self._novice_role()
+        #self._expert_role()
+        self._curious_role()
+        #self._competent_role()
+        #self._novice_role()
         self._robot_general_responses()
 
 
         self.backup_behaviors =  {'physical':{
-                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.LOOK_CENTER],
+                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.GENERAL_CURIOSITY_SPEECH],
                 RobotActionSequence.TURN_STARTED: [RobotBehaviors.ROBOT_EXCITED],
                 RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.ROBOT_COMFORT, RobotBehaviors.LOOK_CENTER], 
                 RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_UNSURE], 
@@ -292,6 +266,44 @@ class RobotRolesBehaviorsMap:
                 RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.LOOK_AT_TABLET, RobotBehaviors.LOOK_CENTER], # Correct Object
                 RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_ATTENTION], 
                 RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_HAPPY_DANCE, RobotBehaviors.ROBOT_THANKYOU_SPEECH],
+                RobotActionSequence.RESULTS_RETURNED:[], # Nothing
+                RobotActionSequence.WRONG_OBJECT_FAIL: [RobotBehaviors.ROBOT_SAD],
+            },
+            'virtual': ""
+            }
+        })
+
+    def _curious_role(self):
+        '''
+        expert role for robot's turn
+        '''
+        self.robot_turn_mapping.update({
+            RobotRoles.CURIOUS:{
+            'physical':{
+                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.GENERAL_CURIOSITY_SPEECH],
+                RobotActionSequence.TURN_STARTED: [RobotBehaviors.GENERAL_CURIOSITY_SPEECH],
+                RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.GENERAL_CURIOSITY_SPEECH], # Nothing
+                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_CURIOUS], # Always correct
+                RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_CURIOUS], # Always correct
+                RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_SAY_WORD], 
+                RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_CELEBRATION,RobotBehaviors.GENERAL_CURIOSITY_SPEECH],
+                RobotActionSequence.RESULTS_RETURNED:[], # Nothing
+                RobotActionSequence.WRONG_OBJECT_FAIL: [], # Nothing
+            },
+            'virtual': RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ
+            }
+        })
+
+        self.child_turn_mapping.update({
+            RobotRoles.CURIOUS:{
+            'physical':{
+                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.GENERAL_CURIOSITY_SPEECH],
+                RobotActionSequence.TURN_STARTED: [RobotBehaviors.GENERAL_CURIOSITY_SPEECH],
+                RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.GENERAL_CURIOSITY_SPEECH],
+                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.GENERAL_CURIOSITY_SPEECH], # Incorrect object
+                RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_YES], # Correct Object
+                RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_ATTENTION], 
+                RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_HAPPY_DANCE],
                 RobotActionSequence.RESULTS_RETURNED:[], # Nothing
                 RobotActionSequence.WRONG_OBJECT_FAIL: [RobotBehaviors.ROBOT_SAD],
             },

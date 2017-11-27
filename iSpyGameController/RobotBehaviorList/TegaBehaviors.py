@@ -8,6 +8,7 @@ Robot Behaviors
 from .RobotBehaviorList import RobotBehaviors
 from random import randint
 from GameUtils import GlobalSettings
+import random
 
 if GlobalSettings.USE_ROS:
     import rospy
@@ -21,6 +22,12 @@ else:
     TapGameLog = GlobalSettings.TapGameLog  # Mock object, used for testing in non-ROS environments
     TapGameCommand = GlobalSettings.TapGameCommand
     TegaAction = GlobalSettings.TegaAction
+
+
+
+GENERAL_CURIOSITY_SPEECH=["a.mp3","b.mp3","c.mp3","d.mp3","e.mp3","f.mp3","g.mp3"]
+BASED_ON_PROMPTS=["vehicle.mp3","delighted.mp3","crimson.mp3","azure.mp3","soar.mp3","aquatic.mp3","gigantic.mp3","minuscule.mp3","recreational.mp3","garment.mp3"]
+BASED_ON_OBJECTS=["a.1.mp3","b.1.mp3","c.1.mp3"]
 
 
 class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
@@ -120,9 +127,27 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
         if command == RobotBehaviors.ROBOT_DISAPPOINTED:
             msg.motion = TegaAction.MOTION_FRUSTRATED 
 
-        ## Speech 
+        ## Tega Speech for Curiosity Assessment
+
+        # General Curiosity Speech
+        if command == RobotBehaviors.GENERAL_CURIOSITY_SPEECH:
+            # the default path in Tega is "contentroot/robots/tega/01/speech", 
+            # so no need to add this prefix in the path here. make sure all audios are under this prefix path
+            PATH = "TegaAudio/generalcuriosity/"
+            speech_file_name = PATH + random.choice(GENERAL_CURIOSITY_SPEECH)
+            msg.wav_filename = speech_file_name
+            msg.enqueue = True
+
+        if command == RobotBehaviors.BASED_ON_PROMPTS_SPEECH:
+            PATH = "TegaAudio/basedonprompts/"
+            vocab_word =args[0][0].lower()
+            speech_file_name = PATH + vocab_word + ".mp3"
+            speech_file_name = speech_file_name
+            msg.enqueue = True
 
         return msg
+
+
 
         """
 

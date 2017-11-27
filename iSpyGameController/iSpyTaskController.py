@@ -102,8 +102,10 @@ class iSpyTaskController():
 		
 
 		# If the item has the attribute that matches the quest, add it to the list
+		#print("task attribute: "+task_attribute)
 		for key in self.object_dict:
-			
+			#print("key:"+key)
+			#print(self.object_dict[key][category_index])
 			if task_attribute in self.object_dict[key][category_index]:
 				self.target_list.append(key)
 			else:
@@ -146,12 +148,14 @@ class iSpyTaskController():
 			return 7
 		elif category == "action":
 			return 8
-		elif category == "size":
+		elif category == "aquatic":
 			return 9
-		elif category == "activity":
+		elif category == "size":
 			return 10
-		elif category == "cloth":
+		elif category == "activity":
 			return 11
+		elif category == "cloth":
+			return 12
 
 	def isTarget(self, object_name):
 		""" Returns whether or not the object is a target """

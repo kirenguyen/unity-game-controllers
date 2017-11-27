@@ -61,6 +61,8 @@ class ChildRobotInteractionFSM:
 
 			self.role = ""
 
+			self.robot_clickedObj=""
+
 			
 
 		def turn_taking(self):

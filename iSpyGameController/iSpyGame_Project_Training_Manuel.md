@@ -43,8 +43,15 @@
 
 4. Learn how to use rosbridge and send ROS messages via ROS Bridge back and forth between Unity code and Python code
 	* Download and install [rosbridge](http://wiki.ros.org/rosbridge_server) 
+
+5. Install all dependencies for iSpy 
+	* First install pip3 if necessary. `sudo apt install python3-pip`
+	* Install all python dependencies in `unity-game-controllers/requirements.txt`
+	* Use `sudo apt-get install python-pyaudio python3-pyaudio` to install pyaudio
+	* May need to upgrade `pip` before installing the dependencies. use `pip3 install --upgrade pip`
+	* Use `pip3` to isntall
 	
-5. Try to run iSpy game on your machine
+6. Try to run iSpy game on your machine
 	* run ```roscore```
 	* run command ```roslaunch rosbridge_server rosbridge_websocket.launch```
 	* run ```unity-game-controllers``` using ```python3 -m xxx```
@@ -52,10 +59,10 @@
 	* Open Unity and run the game
 		* the ROS ip address should match the ros ip address roscore is running on
 
-6. Download the iSpy game to an Anroid tablet in PRG
+7. Download the iSpy game to an Anroid tablet in PRG
 	* Run the app on the tablet to see if everything works well
 
-7. Demo what you have done to Huili
+8. Demo what you have done to Huili
 
 ### 3. Git commands
 1. Learn to use the following commands

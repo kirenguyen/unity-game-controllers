@@ -9,3 +9,6 @@ pronouncing
 weighted-levenshtein
 pandas
 spacy
+pyyaml
+rospkg
+catkin_pkg

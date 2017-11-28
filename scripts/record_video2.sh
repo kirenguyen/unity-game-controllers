@@ -1,5 +1,5 @@
-ffmpeg -y -f video4linux2 -s 640x480 -r 30 -i "/dev/video0" \
-    -ac 2   -vf drawtext="fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf: \
-text='%{frame_num}  %{localtime}  %{pts}': fontcolor=white: fontsize=24: box=1: boxcolor=black@0.5: \
-boxborderw=5: x=(w-text_w)/2: y=0" \
-  videos/p000_1_vid2_2017-11-21-22-54-30.mp4
+ffmpeg -y -f avfoundation -s 640x480 -r 30 -i "2:1" \
+	-vf "drawbox=y=0: color=black@1.0: width=iw:height=40: t=20, \
+  drawtext=fontfile=/Library/Fonts/Arial.ttf:  \
+	text='%{frame_num}  %{localtime}  %{pts}': fontcolor=white: x=7: y=15: box=1: boxcolor=black@1.0" \
+  videos/p01_huili_vid2_2017-11-28-12-27-50.mp4

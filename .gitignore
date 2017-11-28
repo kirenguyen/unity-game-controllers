@@ -99,3 +99,4 @@ ENV/
 
 # captured videos
 scripts/videos
+scripts/affdex_data

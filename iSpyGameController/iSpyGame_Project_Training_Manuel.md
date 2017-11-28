@@ -95,15 +95,9 @@
 
 6. git status shown in the command prompt
 	* add the following to your `./bashrc`
-	* ```# Get the Git branch
-parse_git_branch() { 
-  git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/' 
-} ```
+	* ```parse_git_branch() { git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/' } ```
 
-```# Custom bash prompt 
-# Includes custom character for the prompt, path, and Git branch name.
-# Source: kirsle.net/wizards/ps1.html
-export PS1="\n\[$(tput bold)\]\[$(tput setaf 5)\]➜ \[$(tput setaf 6)\]\w\[$(tput setaf 3)\]\$(parse_git_branch) \[$(tput sgr0)\]"```
+	* ```export PS1="\n\[$(tput bold)\]\[$(tput setaf 5)\]➜ \[$(tput setaf 6)\]\w\[$(tput setaf 3)\]\$(parse_git_branch) \[$(tput sgr0)\]"```
 
 
 ### 4. How iSpy Game, Unity Controller and Robot communicate with each other via ROS?

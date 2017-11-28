@@ -25,8 +25,15 @@ class iSpyTaskController():
 
 		self.current_task_index = 0
 
+		# vocab word in the prompts
+		self.vocab_word = ""
+
+
 		self.load_task_list()
 		self.load_object_list()
+
+	def get_vocab_word(self):
+		return self.vocab_word
 
 	def load_task_list(self):
 		""" Loads the task_list csv file into a 2d array """
@@ -39,16 +46,18 @@ class iSpyTaskController():
 		# {task_number: (task, category, attribute)}
 		# Ex:
 		# {1: ("What objects are related to weather?", object_type, weather)}
-		# 
+		
 		with open(dir_path + '/../GameUtils/task_list3.csv','r') as csvfile:
 			spamreader = csv.reader(csvfile, delimiter=',')
 			for row in spamreader:
 				if row[0] != "":
-					self.task_dict[int(row[0])] = (row[1], row[2], row[3],row[4])
+					self.task_dict[int(row[0])] = (row[1], row[2], row[3],row[4]) # 2: category 3: vocab word 4: audio file name
+					
 
 		# Fill the available quests list with the ID of all the quests
 		for i in self.task_dict:
 			self.available_quests.append(i)
+
 
 	def load_object_list(self):
 		""" Loads the object_list csv file into a 2d array """
@@ -82,6 +91,7 @@ class iSpyTaskController():
 					self.object_dict[row[0]] = (row[1], row[2], row[3], row[4], row[5], row[6],row[7],row[8],row[9],row[10],row[11],row[12],row[13])
 
 
+
 	def get_next_task(self):
 		""" Gets a random task number from the list of available quests and returns the task and the targets"""
 
@@ -94,6 +104,8 @@ class iSpyTaskController():
 
 		task, task_category, task_attribute, prompt_audio_name = self.task_dict[self.available_quests[index]]
 
+		self.vocab_word = task_attribute
+		
 		# Delete the quest after it is chosen
 		del self.available_quests[index]
 

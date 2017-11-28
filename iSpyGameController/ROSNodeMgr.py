@@ -120,7 +120,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
 
         # add header
         self.robot_commander.publish(msg)  # would be nice to guarantee message performance here
-        rospy.loginfo(msg)
+        #rospy.loginfo(msg)
 
     ## for iSpy FSM ################
     def send_ispy_cmd(self, command, *args):
@@ -170,7 +170,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 time.sleep(.15)
 
             self.message_received = False
-            rospy.loginfo(msg)
+            #rospy.loginfo(msg)
 
         else:
             print ("Not a valid command")

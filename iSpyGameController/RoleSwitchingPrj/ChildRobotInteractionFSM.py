@@ -181,14 +181,16 @@ class ChildRobotInteractionFSM:
 			for action in actions:
 				# if the action is to pronounce a word, then specify a word to pronounce
 				input_data = ""
+				
+				
 				if action == RobotBehaviors.ROBOT_SAY_WORD:
 					if not self.robot_clickedObj:
-						self.robot_clickedObj = "cat"
+						input_data = "cat"
 					input_data = self.robot_clickedObj
-
-				elif action == RobotBehaviors.BASED_ON_OBJECTS:
-					input_data = "" # the word in the current's prompt
-				self.ros_node_mgr.send_robot_cmd(action,input_data)		
+				elif action == RobotBehaviors.BASED_ON_PROMPTS_SPEECH:
+					input_data = self.task_controller.get_vocab_word()
+				
+				self.ros_node_mgr.send_robot_cmd(action,input_data)
 				time.sleep(1)
 
 		def _perform_robot_virtual_action(self,action):

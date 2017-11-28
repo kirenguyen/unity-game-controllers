@@ -10,6 +10,9 @@
 	* How rosbridge works
 4. Create a short Python script that is able to publish a ROS message
 	* Take a screenshot and show it to me
+
+5. add the following to your `./bashrc` for ROS IP
+	* `export ROS_IP=$(/sbin/ip -o -4 addr list eth0 | awk '{print $4}' | cut -d/ -f1)`
  
 ### 1. CITI Training
 
@@ -89,6 +92,19 @@
 
 5. ```git branch``` 
 	* print the branch you are in 
+
+6. git status shown in the command prompt
+	* add the following to your `./bashrc`
+	* ```# Get the Git branch
+parse_git_branch() { 
+  git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/' 
+} ```
+
+```# Custom bash prompt 
+# Includes custom character for the prompt, path, and Git branch name.
+# Source: kirsle.net/wizards/ps1.html
+export PS1="\n\[$(tput bold)\]\[$(tput setaf 5)\]➜ \[$(tput setaf 6)\]\w\[$(tput setaf 3)\]\$(parse_git_branch) \[$(tput sgr0)\]"```
+
 
 ### 4. How iSpy Game, Unity Controller and Robot communicate with each other via ROS?
 

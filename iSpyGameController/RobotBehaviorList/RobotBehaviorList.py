@@ -279,11 +279,28 @@ class RobotRolesBehaviorsMap:
         '''
         expert role for robot's turn
         '''
+        # self.robot_turn_mapping.update({
+        #     RobotRoles.CURIOUS:{
+        #     'physical':{
+        #         RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_EXCITED],
+        #         RobotActionSequence.TURN_STARTED: [RobotBehaviors.ROBOT_EXCITED, RobotBehaviors.LOOK_AT_TABLET],
+        #         RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.BASED_ON_PROMPTS_SPEECH, RobotBehaviors.GENERAL_CURIOSITY_SPEECH], # Nothing
+        #         RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_CURIOUS, RobotBehaviors.TRY_PRONOUNCE], # Always correct
+        #         RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_CURIOUS], # Always correct
+        #         RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_SAY_WORD], 
+        #         RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_CELEBRATION],
+        #         RobotActionSequence.RESULTS_RETURNED:[], # Nothing
+        #         RobotActionSequence.WRONG_OBJECT_FAIL: [], # Nothing
+        #     },
+        #     'virtual': RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ
+        #     }
+        # })
+
         self.robot_turn_mapping.update({
             RobotRoles.CURIOUS:{
             'physical':{
-                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_EXCITED],
-                RobotActionSequence.TURN_STARTED: [RobotBehaviors.ROBOT_EXCITED, RobotBehaviors.LOOK_AT_TABLET],
+                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.BASED_ON_PROMPTS_SPEECH],
+                RobotActionSequence.TURN_STARTED: [RobotBehaviors.BASED_ON_PROMPTS_SPEECH, RobotBehaviors.LOOK_AT_TABLET],
                 RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.BASED_ON_PROMPTS_SPEECH, RobotBehaviors.GENERAL_CURIOSITY_SPEECH], # Nothing
                 RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_CURIOUS, RobotBehaviors.TRY_PRONOUNCE], # Always correct
                 RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_CURIOUS], # Always correct

@@ -2,9 +2,9 @@
 # killall vlc
 #kill $(ps aux | grep 'vlc' | awk '{print $2}')
 # killall camera resources
-p=`lsof | grep "/dev/video" | awk '{print $2}'`
-kill -9 $p
-sleep 0.5s
+#p=`lsof | grep "/dev/video" | awk '{print $2}'`
+#kill -9 $p
+#sleep 0.5s
 
 
 # 1. get device indices
@@ -12,7 +12,7 @@ echo "video list"
 #echo `ffmpeg -sources 2>&1`
 #VIDEO_LIST=`ffmpeg -sources 2>&1 | grep "/dev/video" | grep "C930e" | awk '{print $1}'`
 AUDIO_LIST=`arecord -l | grep "C930e" | awk '{print $2}' | tr -d :` 
-VIDEO_LIST=`ffmpeg -sources 2>&1  | grep "/dev/video" | awk '{print $1}'`
+VIDEO_LIST=`ffmpeg -sources 2>&1  | grep "/dev/video*[VMware Virtual USB Video Device]" | awk '{print $1}'`
 
 echo $VIDEO_LIST
 
@@ -26,10 +26,10 @@ echo $VIDEO_LIST
 
   VIDEO1="\"${VIDEO_LIST:0:11}\""
   VIDEO2="\"${VIDEO_LIST:12:11}\""
-  #AUDIO1="${AUDIO_LIST:0:1}"
-  #AUDIO2="${AUDIO_LIST:2:1}"
+  AUDIO1="${AUDIO_LIST:0:1}"
+  AUDIO2="${AUDIO_LIST:2:1}"
   echo "VIDEO1: $VIDEO1    VIDEO2: $VIDEO2"
-  #echo "AUDIO1: $AUDIO1    AUDIO2: $AUDIO2"
+  echo "AUDIO1: $AUDIO1    AUDIO2: $AUDIO2"
 # else
 #   echo ">>>Logitech C930e devices not found. Check devices below.<<<"
 #   echo ">>>If two webcams are connected, run the following command to reset.<<<";echo

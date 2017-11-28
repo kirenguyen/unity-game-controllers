@@ -180,12 +180,15 @@ class ChildRobotInteractionFSM:
 			print("perform robot physical action runs..")
 			for action in actions:
 				# if the action is to pronounce a word, then specify a word to pronounce
+				input_data = ""
 				if action == RobotBehaviors.ROBOT_SAY_WORD:
 					if not self.robot_clickedObj:
 						self.robot_clickedObj = "cat"
-					self.ros_node_mgr.send_robot_cmd(action,self.robot_clickedObj)
-				else:
-					self.ros_node_mgr.send_robot_cmd(action)
+					input_data = self.robot_clickedObj
+
+				elif action == RobotBehaviors.BASED_ON_OBJECTS:
+					input_data = "" # the word in the current's prompt
+				self.ros_node_mgr.send_robot_cmd(action,input_data)		
 				time.sleep(1)
 
 		def _perform_robot_virtual_action(self,action):

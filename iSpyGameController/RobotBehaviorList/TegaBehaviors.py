@@ -25,9 +25,12 @@ else:
 
 
 
-GENERAL_CURIOSITY_SPEECH=["a.mp3","b.mp3","c.mp3","d.mp3","e.mp3","f.mp3","g.mp3"]
+GENERAL_CURIOSITY_SPEECH=["a.mp3","b.mp3","d.mp3","e.mp3","f.mp3"]
 BASED_ON_PROMPTS=["vehicle.mp3","delighted.mp3","crimson.mp3","azure.mp3","soar.mp3","aquatic.mp3","gigantic.mp3","minuscule.mp3","recreational.mp3","garment.mp3"]
 BASED_ON_OBJECTS=["a.1.mp3","b.1.mp3","c.1.mp3"]
+BASED_ON_OBJECTS_TEMPLATES=["b - template.mp3", "c-template.mp3"]
+OBJECTS=["baby.mp3","bicylce.mp3", "baby.mp3", "bicycle.mp3", "bird.mp3", "boat.mp3", "bucket.mp3" , "bus.mp3" , "car.mp3" , "castle.mp3" , "cat.mp3" , "cloud.mp3" , "coconut.mp3" , "deer.mp3" , "digging.mp3" , "dog.mp3" , "dolphine.mp3" , "door.mp3" , "dress.mp3" , "duck.mp3" , "eating.mp3" , "father.mp3" , "fish.mp3" , "fishing.mp3" , "flower.mp3" , "forest.mp3" , "frog.mp3" , "giraffe.mp3" ,"goat.mp3","grandma.mp3","grandpa.mp3","hat.mp3","horse.mp3","jumping.mp3","lion.mp3","mailbox.mp3","mother.mp3" ,"mountain.mp3","mouse.mp3","pants.mp3" ,"plane.mp3" ,"rabbit.mp3","rooster.mp3" ,"running.mp3","seal.mp3","seashell.mp3" , "sheep.mp3" , "shirt.mp3" , "sun.mp3" , "tractor.mp3" , "train.mp3", "waving.mp3", "window.mp3"]
+
 
 
 class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
@@ -138,14 +141,41 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.wav_filename = speech_file_name
             msg.enqueue = True
 
+        # Based on prompts speech
         if command == RobotBehaviors.BASED_ON_PROMPTS_SPEECH:
             PATH = "TegaAudio/basedonprompts/"
             vocab_word =args[0][0].lower()
             speech_file_name = PATH + vocab_word + ".mp3"
-            speech_file_name = speech_file_name
+            msg.wav_filename = speech_file_name
             msg.enqueue = True
 
+	# Before pronunciation
+        if command == RobotBehaviors.TRY_PRONOUNCE:
+            PATH = "TegaAudio/generalcuriosity/"
+            speech_file_name = PATH + "c.mp3"
+            msg.wav_filename = speech_file_name
+            msg.enqueue = True
+
+	# Based on objects
+        if command == RobotBehaviors.BASED_ON_OBJECTS:
+            PATH = "TegaAudio/basedonobjects/"
+            speech_file_name = PATH + random.choice(BASED_ON_OBJECTS_TEMPLATES)
+            msg.wav_filename = speech_file_name
+            msg.enqueue = True
+
+	# Random objects
+        if command == RobotBehaviors.OBJECTS:
+            PATH = "TegaAudio/objects/"
+            speech_file_name = PATH + random.choice(OBJECTS)
+            msg.wav_filename = speech_file_name
+            msg.enqueue = True
+        
+
         return msg
+
+	
+
+	
 
 
 

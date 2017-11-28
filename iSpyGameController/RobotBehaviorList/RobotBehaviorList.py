@@ -66,7 +66,9 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     GENERAL_CURIOSITY_SPEECH = "GENERAL_CURIOSITY_SPEECH"
     BASED_ON_PROMPTS_SPEECH = "BASED_ON_PROMPTS_SPEECH"
 
-    
+    TRY_PRONOUNCE = "TRY_PRONOUNCE"
+    BASED_ON_OBJECTS = "BASED_ON_OBJECTS"
+    OBJECTS = "OBJECTS"
 
 class RobotRoles(Enum):
     '''
@@ -280,13 +282,13 @@ class RobotRolesBehaviorsMap:
         self.robot_turn_mapping.update({
             RobotRoles.CURIOUS:{
             'physical':{
-                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.GENERAL_CURIOSITY_SPEECH],
-                RobotActionSequence.TURN_STARTED: [RobotBehaviors.GENERAL_CURIOSITY_SPEECH],
-                RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.GENERAL_CURIOSITY_SPEECH], # Nothing
-                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_CURIOUS], # Always correct
+                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_EXCITED],
+                RobotActionSequence.TURN_STARTED: [RobotBehaviors.ROBOT_EXCITED, RobotBehaviors.LOOK_AT_TABLET],
+                RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.BASED_ON_PROMPTS_SPEECH, RobotBehaviors.GENERAL_CURIOSITY_SPEECH], # Nothing
+                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_CURIOUS, RobotBehaviors.TRY_PRONOUNCE], # Always correct
                 RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_CURIOUS], # Always correct
                 RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_SAY_WORD], 
-                RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_CELEBRATION,RobotBehaviors.GENERAL_CURIOSITY_SPEECH],
+                RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_CELEBRATION],
                 RobotActionSequence.RESULTS_RETURNED:[], # Nothing
                 RobotActionSequence.WRONG_OBJECT_FAIL: [], # Nothing
             },
@@ -297,9 +299,9 @@ class RobotRolesBehaviorsMap:
         self.child_turn_mapping.update({
             RobotRoles.CURIOUS:{
             'physical':{
-                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.GENERAL_CURIOSITY_SPEECH],
-                RobotActionSequence.TURN_STARTED: [RobotBehaviors.GENERAL_CURIOSITY_SPEECH],
-                RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.GENERAL_CURIOSITY_SPEECH],
+                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_WINK],
+                RobotActionSequence.TURN_STARTED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_INTERESTED],
+                RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.BASED_ON_PROMPTS_SPEECH, RobotBehaviors.GENERAL_CURIOSITY_SPEECH],
                 RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.GENERAL_CURIOSITY_SPEECH], # Incorrect object
                 RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_YES], # Correct Object
                 RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_ATTENTION], 

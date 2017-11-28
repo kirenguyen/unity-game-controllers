@@ -3,8 +3,7 @@
 1,,vehicle,vehicle,a.wav,can you spy vehicles 
 2,,emotion,delighted,b.wav,can you spy people who look delighted
 3,,color,crimson,c.wav,can you spy objects in crimson
-4,,color,azue,d.wav,can you spy objects in azure
-5,,action,soar,e.wav,can you spy objects that soars
+4,,color,azure,d.wav,can you spy objects in azure
 ,,aquatic,aquatic,f.wav,can you spy aquatic animals
 6,,size,gigantic,g.wav,can you spy objects that look gigantic
 7,,size,minuscule,h.wav,can you spy objects that are minuscule

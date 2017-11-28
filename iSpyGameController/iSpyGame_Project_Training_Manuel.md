@@ -99,6 +99,10 @@
 
 	* ```export PS1="\n\[$(tput bold)\]\[$(tput setaf 5)\]➜ \[$(tput setaf 6)\]\w\[$(tput setaf 3)\]\$(parse_git_branch) \[$(tput sgr0)\]"```
 
+7. `git push` fails to push a new commit due to a large file that has already been deleted
+	* `git filter-branch --index-filter 'git rm -r --cached --ignore-unmatch <file/dir>' HEAD`
+	* (more info can be found here)[https://stackoverflow.com/questions/19573031/cant-push-to-github-because-of-large-file-which-i-already-deleted]
+
 
 ### 4. How iSpy Game, Unity Controller and Robot communicate with each other via ROS?
 

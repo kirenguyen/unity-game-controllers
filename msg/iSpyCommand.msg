@@ -24,3 +24,5 @@ int8 GAME_FINISHED = 99 #let Unity know when all of the tasks have been complete
 int8 ROBOT_VIRTUAL_ACTIONS = 30 #send commands to let Unity game performs out robot's virtual interaction with the tablet on the screen (our robots do not have arms)
 
 int8 BUTTON_DISABLED = 31 #send commands to disable any buttons on the screen
+
+int8 TASK_COMPLETED = 32 # send commands to notify the game the task is complete

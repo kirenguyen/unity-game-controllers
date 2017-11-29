@@ -56,6 +56,7 @@ SEND_PRONOUNCIATION_ACCURACY_TO_UNITY = 10
 SEND_TASKS_TO_UNITY = 20
 GAME_FINISHED = 99
 BUTTON_DISABLED=31
+TASK_COMPLETED = 32
 VALID_ISPY_COMMANDS = [RESET, SHOW_PRONOUNCIATION_PANEL, SHOW_PRONOUNCIATION_PANEL, SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, SEND_TASKS_TO_UNITY, GAME_FINISHED,BUTTON_DISABLED]
 
 
@@ -363,6 +364,11 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			self.ros_node_mgr.send_ispy_cmd(SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, results_params)
 			self.recorder.has_recorded = 0
+			if not self.task_controller.task_in_progress:
+				print("task is no longer in progress")
+				# let the game knows the task is completed
+				time.sleep(0.5)
+				self.ros_node_mgr.send_ispy_cmd(TASK_COMPLETED)
 	
 	
 	def _run_game_task(self):

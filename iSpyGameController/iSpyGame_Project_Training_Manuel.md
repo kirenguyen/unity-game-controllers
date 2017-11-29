@@ -140,6 +140,13 @@
 2. install fonts 
 	* `sudo apt-get install ttf-dejavu`
 
+### 7. Deploy audios to Tega
+	* put all audios to tega phone's sd card.
+	* create a different folder and put the audios under the following directory: `contentroot/robots/tega/01/speech`
+	* the way to play those audio files is shown in `TegaBehaviors.py`
+	* lipsync the audio files: `https://sites.google.com/site/personalrobotsgroupmit/r1d1/toolbox/dragonbot-lipsync`
+
+
 
 
 

@@ -129,8 +129,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         send a iSpyCommand to unity game
         Args are optional parameters.
         """
-        if command == 32:
-            print("send ispy cmd!!!. task complete")
+        print("==================send ispy cmd")
         msg = iSpyCommand()
         # add header
         msg.header = Header()
@@ -149,6 +148,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             msg.command = command
             if len(args) > 0:
                 if command == SEND_PRONOUNCIATION_ACCURACY_TO_UNITY:
+                    print("============ send pronunciation accuracy")
                     msg.properties = json.dumps(args[0])
 
                 elif command == SEND_TASKS_TO_UNITY:
@@ -170,10 +170,14 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             if self.game_commander is None:
                 self.start_ispy_cmd_publisher()
 
+            counter = 0
             # Keep sending the message until hearing that it was received
             while self.message_received == False:
+
+                print("==========send game command:"+str(counter))
                 self.game_commander.publish(msg)
-                time.sleep(.15)
+                time.sleep(.9)
+                counter = counter + 1
 
             self.message_received = False
             #rospy.loginfo(msg)

@@ -148,7 +148,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             msg.command = command
             if len(args) > 0:
                 if command == SEND_PRONOUNCIATION_ACCURACY_TO_UNITY:
-                    print("============ send pronunciation accuracy")
+                    print("============ send")
                     msg.properties = json.dumps(args[0])
 
                 elif command == SEND_TASKS_TO_UNITY:
@@ -176,7 +176,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
 
                 print("==========send game command:"+str(counter))
                 self.game_commander.publish(msg)
-                time.sleep(.9)
+                time.sleep(.5)
                 counter = counter + 1
 
             self.message_received = False

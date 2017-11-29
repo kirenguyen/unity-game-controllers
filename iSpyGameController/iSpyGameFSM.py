@@ -247,7 +247,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		Rospy callback for when we get ispy action from the unity game over ROS
 		"""
 
-		print("ispy action msg")
+		print("==================ispy action msg")
 		#print(ispy_action_msg)
 		
 		def isScalingUp(boolean):			

@@ -7,10 +7,15 @@ Robot Behaviors
 from unity_game_msgs.msg import iSpyCommand
 from enum import Enum
 
+
+
+
 class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     """
     A Class definition for "cosmetic" robot behavior strings, which get translated by the ROSNodeMgr
     """
+
+   
 
     # Look Ats
     LOOK_AT_TABLET = 'LOOK_AT_TABLET'
@@ -65,10 +70,12 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     ## Tega Speech for Curiosity Assessment
     GENERAL_CURIOSITY_SPEECH = "GENERAL_CURIOSITY_SPEECH"
     BASED_ON_PROMPTS_SPEECH = "BASED_ON_PROMPTS_SPEECH"
-
     TRY_PRONOUNCE = "TRY_PRONOUNCE"
     BASED_ON_OBJECTS = "BASED_ON_OBJECTS"
     OBJECTS = "OBJECTS"
+
+     ### robot's actions that can be optional, and are not necessary to play every single time
+    OPTIONAL_ACTIONS = [GENERAL_CURIOSITY_SPEECH]
 
 class RobotRoles(Enum):
     '''
@@ -279,28 +286,11 @@ class RobotRolesBehaviorsMap:
         '''
         expert role for robot's turn
         '''
-        # self.robot_turn_mapping.update({
-        #     RobotRoles.CURIOUS:{
-        #     'physical':{
-        #         RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_EXCITED],
-        #         RobotActionSequence.TURN_STARTED: [RobotBehaviors.ROBOT_EXCITED, RobotBehaviors.LOOK_AT_TABLET],
-        #         RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.BASED_ON_PROMPTS_SPEECH, RobotBehaviors.GENERAL_CURIOSITY_SPEECH], # Nothing
-        #         RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_CURIOUS, RobotBehaviors.TRY_PRONOUNCE], # Always correct
-        #         RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_CURIOUS], # Always correct
-        #         RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_SAY_WORD], 
-        #         RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_CELEBRATION],
-        #         RobotActionSequence.RESULTS_RETURNED:[], # Nothing
-        #         RobotActionSequence.WRONG_OBJECT_FAIL: [], # Nothing
-        #     },
-        #     'virtual': RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ
-        #     }
-        # })
-
         self.robot_turn_mapping.update({
             RobotRoles.CURIOUS:{
             'physical':{
-                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.BASED_ON_PROMPTS_SPEECH],
-                RobotActionSequence.TURN_STARTED: [RobotBehaviors.BASED_ON_PROMPTS_SPEECH, RobotBehaviors.LOOK_AT_TABLET],
+                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_EXCITED],
+                RobotActionSequence.TURN_STARTED: [RobotBehaviors.ROBOT_EXCITED, RobotBehaviors.LOOK_AT_TABLET],
                 RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.BASED_ON_PROMPTS_SPEECH, RobotBehaviors.GENERAL_CURIOSITY_SPEECH], # Nothing
                 RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_CURIOUS, RobotBehaviors.TRY_PRONOUNCE], # Always correct
                 RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_CURIOUS], # Always correct
@@ -312,6 +302,7 @@ class RobotRolesBehaviorsMap:
             'virtual': RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ
             }
         })
+
 
         self.child_turn_mapping.update({
             RobotRoles.CURIOUS:{
@@ -353,72 +344,5 @@ class RobotRolesBehaviorsMap:
         return self.general_responses
 
 
-    # def complete_expert_role(self):
-    #     '''
-    #     expert role for robot's turn
-    #     '''
-    #     self.mapping.update({
-    #         RobotRoles.COMPLETE_EXPERT:{
-    #         'physical':{
-    #             RobotActionSequence.TURN_STARTED: [ RobotBehaviors.LOOK_AT_TABLET, RobotBehaviors.ROBOT_TURN_SPEECH ],
-    #             RobotActionSequence.SCREEN_MOVED: [],
-    #             RobotActionSequence.OBJECT_FOUND: [],
-    #             RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.EYE_FIDGET,RobotBehaviors.RING_ANSWER_CORRECT], 
-    #             RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.PRONOUNCE_CORRECT],
-    #             RobotActionSequence.RESULTS_RETURNED: [RobotBehaviors.WIN_SPEECH],
-    #             RobotActionSequence.TURN_FINISHED:[]
-    #             }, 
-    #         'virtual':
-    #             RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ
-                
-    #         }
-    #     })
-
-    # def complete_novice_role(self):
-    #     '''
-    #     novice role for robot's turn
-    #     '''
-    #     self.mapping.update({
-    #         RobotRoles.COMPLETE_NOVICE:{
-    #         'physical':{
-    #             RobotActionSequence.TURN_STARTED: [ RobotBehaviors.LOOK_AT_TABLET, RobotBehaviors.ROBOT_TURN_SPEECH ],
-    #             RobotActionSequence.SCREEN_MOVED: [],
-    #             RobotActionSequence.OBJECT_FOUND: [],
-    #             RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.EYE_FIDGET,RobotBehaviors.RING_ANSWER_CORRECT], 
-    #             RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.PRONOUNCE_CORRECT],
-    #             RobotActionSequence.RESULTS_RETURNED: [RobotBehaviors.WIN_SPEECH],
-    #             RobotActionSequence.TURN_FINISHED:[]
-    #             }, 
-    #         'virtual':
-    #             RobotBehaviors.VIRTUALLY_CLICK_WRONG_OBJ
-                
-    #         }
-    #     })
-
-    """
-    
-    def robot_response(self):
-        '''
-        robot's response to child during child's turn
-        '''
-        self.mapping.update({
-            "Response":{
-            'physical':{
-                RobotActionSequence.TURN_STARTED: [  ],
-                RobotActionSequence.SCREEN_MOVED: [],
-                RobotActionSequence.OBJECT_FOUND: [],
-                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.EYE_FIDGET], 
-                RobotActionSequence.OBJECT_PRONOUNCED: [],
-                RobotActionSequence.RESULTS_RETURNED: [],
-                RobotActionSequence.TURN_FINISHED:[RobotBehaviors.REACT_CHILD_ANSWER_CORRECT, RobotBehaviors.RING_ANSWER_CORRECT],
-                RobotActionSequence.WRONG_OBJECT_FAIL: [RobotBehaviors.REACT_CHILD_ANSWER_WRONG, RobotBehaviors.LOOK_CENTER]
-                }, 
-            'virtual':
-                RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ
-                
-            }
-        })
-
-    """
 
 

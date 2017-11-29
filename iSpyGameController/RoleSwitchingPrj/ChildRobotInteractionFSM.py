@@ -189,9 +189,20 @@ class ChildRobotInteractionFSM:
 					input_data = self.robot_clickedObj
 				elif action == RobotBehaviors.BASED_ON_PROMPTS_SPEECH:
 					input_data = self.task_controller.get_vocab_word()
-				
-				self.ros_node_mgr.send_robot_cmd(action,input_data)
-				time.sleep(1)
+
+				if action in RobotBehaviors.OPTIONAL_ACTIONS:
+					print("========== action in robot behaviors optional actions")
+					# if the action is in this array, then randomly decide whether to execute the action or not
+					print(random.uniform(0, 1))
+					if random.uniform(0, 1) >= 0.3:
+						print("========== action executed...")
+						self.ros_node_mgr.send_robot_cmd(action,input_data)
+						time.sleep(1)
+					else:
+						print("========not executed")
+				else:
+					self.ros_node_mgr.send_robot_cmd(action,input_data)
+					time.sleep(1)
 
 		def _perform_robot_virtual_action(self,action):
 			'''

@@ -17,7 +17,7 @@ dolphin,dolphin,animal,mammal:carnivore,water:large,azure,mammal:carnivore,,,,aq
 door,door,inanimate,inanimate,yellow,,,,,,,,,
 dress,dress,inanimate,inanimate:apparel,yellow,,,,,,,,,garment
 duck,duck,animal,omnivore,2legs:small:water,,omnivore,,,,aquatic,,,
-eating,eating,action,,,,,,,,,,,
+eating,eating,action,,,,,,delighted,,,,,
 father,father,human,households:relatives,,,,,,,,,,
 fish,fish,animal,omnivore,water:small,crimson,omnivore,,,,aquatic,minuscule,,
 fishing,fishing,action,hobby,,crimson,,,delighted,,,,recreational ,
@@ -47,6 +47,6 @@ sheep,sheep,animal,mammal:herbivore,4legs:large:farm,,mammal:herbivore,,,,,,,
 shirt,shirt,inanimate,inanimate:apparel,red,,,,,,,,,garment
 sun,sun,inanimate,inanimate,large,,,,,,,,,
 tractor,tractor,vehicle,vehicle:automobile,4wheels:road,crimson,,vehicle,,,,gigantic,,
-train,train,vehicle,vehicle:automobile:public,,,,vehicle,,,,,,
+train,train,vehicle,vehicle:automobile:public,,,,vehicle,,,,gigantic,,
 waving,waving,action,hobby,,,,,delighted,,,,,
 window,window,inanimate,inanimate,purple,azure,,,,,,,,

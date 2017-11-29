@@ -47,7 +47,7 @@ class iSpyTaskController():
 		# Ex:
 		# {1: ("What objects are related to weather?", object_type, weather)}
 		
-		with open(dir_path + '/../GameUtils/task_list3.csv','r') as csvfile:
+		with open(dir_path + '/../GameUtils/task_list_testing.csv','r') as csvfile:
 			spamreader = csv.reader(csvfile, delimiter=',')
 			for row in spamreader:
 				if row[0] != "":
@@ -105,7 +105,7 @@ class iSpyTaskController():
 		task, task_category, task_attribute, prompt_audio_name = self.task_dict[self.available_quests[index]]
 
 		self.vocab_word = task_attribute
-		
+
 		# Delete the quest after it is chosen
 		del self.available_quests[index]
 

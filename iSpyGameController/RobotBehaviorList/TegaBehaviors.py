@@ -141,6 +141,7 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             speech_file_name = PATH + random.choice(GENERAL_CURIOSITY_SPEECH)
             msg.wav_filename = speech_file_name
             msg.enqueue = True
+            print(speech_file_name)
 
         # Based on prompts speech
         if command == RobotBehaviors.BASED_ON_PROMPTS_SPEECH:

@@ -291,7 +291,7 @@ class RobotRolesBehaviorsMap:
             'physical':{
                 RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_EXCITED],
                 RobotActionSequence.TURN_STARTED: [RobotBehaviors.ROBOT_EXCITED, RobotBehaviors.LOOK_AT_TABLET],
-                RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.BASED_ON_PROMPTS_SPEECH, RobotBehaviors.GENERAL_CURIOSITY_SPEECH], # Nothing
+                RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.ROBOT_CURIOUS, RobotBehaviors.GENERAL_CURIOSITY_SPEECH], # not working
                 RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_CURIOUS, RobotBehaviors.TRY_PRONOUNCE], # Always correct
                 RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_CURIOUS], # Always correct
                 RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_SAY_WORD], 
@@ -309,8 +309,8 @@ class RobotRolesBehaviorsMap:
             'physical':{
                 RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_WINK],
                 RobotActionSequence.TURN_STARTED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_INTERESTED],
-                RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.BASED_ON_PROMPTS_SPEECH, RobotBehaviors.GENERAL_CURIOSITY_SPEECH],
-                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.GENERAL_CURIOSITY_SPEECH], # Incorrect object
+                RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.ROBOT_CURIOUS, RobotBehaviors.BASED_ON_PROMPTS_SPEECH],
+                RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_CURIOUS], # Incorrect object
                 RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_YES], # Correct Object
                 RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_ATTENTION], 
                 RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_HAPPY_DANCE],

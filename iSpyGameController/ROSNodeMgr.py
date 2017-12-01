@@ -54,7 +54,8 @@ GAME_FINISHED = 99
 ROBOT_VIRTUAL_ACTIONS = 30
 BUTTON_DISABLED=31
 TASK_COMPLETED=32
-VALID_ISPY_COMMANDS = [ TASK_COMPLETED,ROBOT_VIRTUAL_ACTIONS, RESET, SHOW_PRONOUNCIATION_PANEL, SHOW_PRONOUNCIATION_PANEL, SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, SEND_TASKS_TO_UNITY, GAME_FINISHED,BUTTON_DISABLED]
+WHOSE_TURN = 33
+VALID_ISPY_COMMANDS = [  WHOSE_TURN,TASK_COMPLETED,ROBOT_VIRTUAL_ACTIONS, RESET, SHOW_PRONOUNCIATION_PANEL, SHOW_PRONOUNCIATION_PANEL, SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, SEND_TASKS_TO_UNITY, GAME_FINISHED,BUTTON_DISABLED]
 
 
 
@@ -108,7 +109,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         send a command to the robot (action space or "cosmetic")
         This function maps actions from the ActionSpace into actual ROS Msgs
         """
-        print("robot cmd: "+command)
+        
         if self.robot_commander is None:
             self.start_robot_publisher()
             time.sleep(.5)
@@ -129,7 +130,6 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         send a iSpyCommand to unity game
         Args are optional parameters.
         """
-        print("==================send ispy cmd")
         msg = iSpyCommand()
         # add header
         msg.header = Header()
@@ -148,7 +148,6 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             msg.command = command
             if len(args) > 0:
                 if command == SEND_PRONOUNCIATION_ACCURACY_TO_UNITY:
-                    print("============ send")
                     msg.properties = json.dumps(args[0])
 
                 elif command == SEND_TASKS_TO_UNITY:
@@ -156,30 +155,36 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                     msg.properties = converted_result
 
                 elif command == ROBOT_VIRTUAL_ACTIONS:
-                    print("robot's virtual behavior message: ")
-                    print(args[0])
+                    
                     robot_action = json.dumps(args[0])
                     msg.properties = robot_action
                 elif command == BUTTON_DISABLED:
                     msg.properties = json.dumps(args[0])
 
-                
-
+                elif command == WHOSE_TURN:
+                    print("**** whose turn")
+                    msg.properties = json.dumps(args[0])
 
             # send message to tablet game
             if self.game_commander is None:
                 self.start_ispy_cmd_publisher()
 
-            counter = 0
-            # Keep sending the message until hearing that it was received
-            while self.message_received == False:
 
-                print("==========send game command:"+str(counter))
+            if command == SEND_TASKS_TO_UNITY:
+                print("*** send task to unity")
+                counter = 0
+                self.message_received = False
+                # Keep sending the message until hearing that it was received
+                while self.message_received == False:
+                    print("***send ros: "+str(counter)+"**"+str(command))
+                    
+                    self.game_commander.publish(msg)
+                    time.sleep(0.5)
+                    counter = counter + 1
+            else:
                 self.game_commander.publish(msg)
-                time.sleep(.5)
-                counter = counter + 1
-
             self.message_received = False
+
             #rospy.loginfo(msg)
 
         else:

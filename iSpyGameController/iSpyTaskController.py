@@ -177,14 +177,18 @@ class iSpyTaskController():
 
 	def update_target_list(self, object_name):
 		""" Updates the list of targets when one is found """
+		
 		self.target_list.remove(object_name)
 
 		self.num_finished_words = self.num_finished_words + 1
 
 		if self.num_finished_words == NUM_WORDS_THRESHOLD:
+			print("**update target list: task in progress false")
 			self.task_in_progress = False
 			self._reset_for_new_task()
 
+	def get_current_answer_size(self):
+		pass
 
 	def _reset_for_new_task(self):
 		'''
@@ -222,6 +226,7 @@ class iSpyTaskController():
 		'''
 		return an object for robot to spy and pronounce
 		'''
+		
 		if correct == True:
 			# return a correct target object for now
 			ran_index = random.randint(0, len(self.target_list)-1)

@@ -143,6 +143,7 @@ class ChildRobotInteractionFSM:
 					self.child_states.update_child_turn_result(False)
 
 			elif gameStateTrigger == gs.Triggers.SCREEN_MOVED:
+				print("!!!!screen moved!!!")
 				self._perform_robot_physical_action(self.physical_actions[ras.SCREEN_MOVED])
 
 
@@ -153,11 +154,14 @@ class ChildRobotInteractionFSM:
 			check the current interaction FSM to decide whether the robot should respond
 			then, use agent model to decide how the robot should respond if it needs to respond
 			'''
-		
+			print("*********************************8get turn taking actions")
 			actions = self._get_behaviors()
 
 			physical_actions = actions['physical']
 			virtual_action = actions['virtual']
+
+			print(physical_actions)
+			print("******************************************")
 
 			if physical_actions:
 				self.physical_actions = physical_actions
@@ -213,10 +217,11 @@ class ChildRobotInteractionFSM:
 					
 					# if the action is in this array, then randomly decide whether to execute the action or not
 					
-					if random.uniform(0, 1) >= 0.3:
-						
+					if random.uniform(0, 1) >= 0.25:
 						self.ros_node_mgr.send_robot_cmd(action,input_data)
 						time.sleep(1)
+					else:
+						print("not saying the optional speech")
 					
 				else:
 					self.ros_node_mgr.send_robot_cmd(action,input_data)

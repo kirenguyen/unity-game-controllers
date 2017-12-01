@@ -75,7 +75,7 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     OBJECTS = "OBJECTS"
 
      ### robot's actions that can be optional, and are not necessary to play every single time
-    OPTIONAL_ACTIONS = [GENERAL_CURIOSITY_SPEECH]
+    OPTIONAL_ACTIONS = [GENERAL_CURIOSITY_SPEECH,BASED_ON_PROMPTS_SPEECH]
 
 class RobotRoles(Enum):
     '''
@@ -290,8 +290,8 @@ class RobotRolesBehaviorsMap:
             RobotRoles.CURIOUS:{
             'physical':{
                 RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_EXCITED],
-                RobotActionSequence.TURN_STARTED: [RobotBehaviors.ROBOT_EXCITED, RobotBehaviors.LOOK_AT_TABLET],
-                RobotActionSequence.SCREEN_MOVED: [RobotBehaviors.ROBOT_CURIOUS, RobotBehaviors.GENERAL_CURIOSITY_SPEECH], # not working
+                RobotActionSequence.TURN_STARTED: [ RobotBehaviors.LOOK_AT_TABLET],
+                RobotActionSequence.SCREEN_MOVED: [ RobotBehaviors.ROBOT_CURIOUS, RobotBehaviors.GENERAL_CURIOSITY_SPEECH], # not working
                 RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_CURIOUS, RobotBehaviors.TRY_PRONOUNCE], # Always correct
                 RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.ROBOT_CURIOUS], # Always correct
                 RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_SAY_WORD], 

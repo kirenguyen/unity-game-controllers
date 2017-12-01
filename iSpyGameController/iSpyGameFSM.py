@@ -232,6 +232,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 					self.interaction.react(gs.Triggers.SAY_BUTTON_PRESSED, 1)
 
 			elif transition_msg.data == gs.Triggers.SCREEN_MOVED:
+				print("**************screen moved here")
 				self.interaction.react(gs.Triggers.SCREEN_MOVED)
 
 			# If the message is in gs.Triggers, then allow the trigger

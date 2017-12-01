@@ -33,7 +33,7 @@ horse,horse,animal,mammal:herbivore,4legs:farm:large,,mammal:herbivore,,,,,,,
 jumping,jumping,action,cardio,,,,,delighted,,,,recreational ,
 lion,lion,animal,mammal:carnivore,4legs:large,,mammal:carnivore,,,,,gigantic,,
 mailbox,mailbox,inanimate,inanimate,blue:large,azure,,,,,,,,
-mother,mother,human,households:relatives,,crimson,,,,,,,,
+mother,mother,human,households:relatives,,,,,,,,,,
 mountain,mountain,landscape,landscape,,,,,,,,gigantic,,
 mouse,mouse,animal,mammal:omnivore,4legs:small:city,,mammal:omnivore,,,,,minuscule,,
 pants,pants,inanimate,inanimate:apparel,blue,azure,,,,,,,,garment

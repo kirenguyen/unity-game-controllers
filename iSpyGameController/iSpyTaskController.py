@@ -47,7 +47,7 @@ class iSpyTaskController():
 		# Ex:
 		# {1: ("What objects are related to weather?", object_type, weather)}
 		
-		with open(dir_path + '/../GameUtils/task_list3.csv','r') as csvfile:
+		with open(dir_path + '/../GameUtils/task_list4.csv','r') as csvfile:
 			spamreader = csv.reader(csvfile, delimiter=',')
 			for row in spamreader:
 				if row[0] != "":

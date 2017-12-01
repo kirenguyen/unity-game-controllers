@@ -162,7 +162,6 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                     msg.properties = json.dumps(args[0])
 
                 elif command == WHOSE_TURN:
-                    print("**** whose turn")
                     msg.properties = json.dumps(args[0])
 
             # send message to tablet game
@@ -171,7 +170,6 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
 
 
             if command == SEND_TASKS_TO_UNITY:
-                print("*** send task to unity")
                 counter = 0
                 self.message_received = False
                 # Keep sending the message until hearing that it was received

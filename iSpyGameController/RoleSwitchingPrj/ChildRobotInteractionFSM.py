@@ -63,9 +63,13 @@ class ChildRobotInteractionFSM:
 
 			self.robot_clickedObj=""
 
+		def reset_turn_taking(self):
 
+			self.state = ris.CHILD_TURN
+			print("reset turn taking: "+self.state)
 
 		def turn_taking(self):
+			print("=========== turn taking ()")
 			if self.task_controller.task_in_progress:
 				# check whether it is robot's turn or child's turn in the game play
 				if self.state == ris.ROBOT_TURN:
@@ -87,7 +91,7 @@ class ChildRobotInteractionFSM:
 	
 				print("==========TURN TAKING===============: "+self.state)
 				# send the turn info (child/robot) to tablet via ROS
-				
+
 				self.ros_node_mgr.send_ispy_cmd(iSpyCommand.WHOSE_TURN, {"whose_turn":self.state})
 
 			
@@ -162,7 +166,19 @@ class ChildRobotInteractionFSM:
 				self._perform_robot_virtual_action(virtual_action)
 
 
+		def get_robot_general_response(self):
+			print("***get robot general behaviors")
+			
+			actions = self.role_behavior_mapping.get_actions("",False)
+			physical_actions = actions['physical']
+			virtual_action = actions['virtual']
 
+			if physical_actions:
+				self.physical_actions = physical_actions
+				self._perform_robot_physical_action(self.physical_actions[ras.TURN_STARTED])
+			if virtual_action: 
+				self._perform_robot_virtual_action(virtual_action)
+		
 		def _get_behaviors(self):
 			'''
 			Get corresponding virtual and physical actions for a given input robot's role

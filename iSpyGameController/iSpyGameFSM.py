@@ -239,7 +239,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 			if transition_msg.data != gs.Triggers.SCREEN_MOVED:
 				self.FSM.start_trigger(transition_msg.data)
 
-			self.task_controller.get_current_answer_size()
+			
 
 	#################################################################################################
 
@@ -392,7 +392,10 @@ class iSpyGameFSM: # pylint: disable=no-member
 				self.ros_node_mgr.send_ispy_cmd(GAME_FINISHED)
 			else:
 				self.ros_node_mgr.send_ispy_cmd(SEND_TASKS_TO_UNITY, task)
-				self.interaction.get_turn_taking_actions()
+				print("****run game task. get turn taking actions")
+				#self.interaction.get_turn_taking_actions()
+				self.interaction.reset_turn_taking()
+				self.interaction.get_robot_general_response()
 
 
 	def _on_obj_clicked(self):

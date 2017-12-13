@@ -65,6 +65,8 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
 
     # virtual actions on the app
     VIRTUALLY_CLICK_CORRECT_OBJ = "CLICK_CORRECT_OBJ" # click correct obj
+    VIRTUALLY_CLICK_WRONG_OBJ = "CLICK_WRONG_OBJ"
+    VIRTUALLY_EXPLORE = "EXPLORING"
 
 
     ## Tega Speech for Curiosity Assessment
@@ -164,6 +166,10 @@ class RobotRolesBehaviorsMap:
             print("child turn mapping")
             return self.child_turn_mapping[role] if role in self.child_turn_mapping.keys() else self.backup_behaviors
 
+    def _get_virtual_behaviors(self):
+        # get virtual behaviors for different robot roles
+        virtual_behaviors = RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ
+        return virtual_behaviors
 
     def _expert_role(self):
         '''
@@ -242,6 +248,7 @@ class RobotRolesBehaviorsMap:
             'virtual': ""
             }
         })
+
 
 
     def _novice_role(self):

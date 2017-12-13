@@ -66,10 +66,9 @@ class ChildRobotInteractionFSM:
 		def reset_turn_taking(self):
 
 			self.state = ris.CHILD_TURN
-			print("reset turn taking: "+self.state)
-
+			
 		def turn_taking(self):
-			print("=========== turn taking ()")
+			
 			if self.task_controller.task_in_progress:
 				# check whether it is robot's turn or child's turn in the game play
 				if self.state == ris.ROBOT_TURN:
@@ -143,8 +142,12 @@ class ChildRobotInteractionFSM:
 					self.child_states.update_child_turn_result(False)
 
 			elif gameStateTrigger == gs.Triggers.SCREEN_MOVED:
-				print("!!!!screen moved!!!")
+				print("+=======screen moved....")
 				self._perform_robot_physical_action(self.physical_actions[ras.SCREEN_MOVED])
+				# wait until all physical actions in SCREEN_MOVED is done, then perform robot's virtual move for finding an object
+				time.sleep(3)
+				print("perform robot virual action...: "+self.virtual_action)
+				self._perform_robot_virtual_action(self.virtual_action)
 
 
 
@@ -154,24 +157,23 @@ class ChildRobotInteractionFSM:
 			check the current interaction FSM to decide whether the robot should respond
 			then, use agent model to decide how the robot should respond if it needs to respond
 			'''
-			print("*********************************8get turn taking actions")
+			
 			actions = self._get_behaviors()
 
 			physical_actions = actions['physical']
-			virtual_action = actions['virtual']
+			self.virtual_action = actions['virtual']
 
-			print(physical_actions)
-			print("******************************************")
+			
 
 			if physical_actions:
 				self.physical_actions = physical_actions
 				self._perform_robot_physical_action(self.physical_actions[ras.TURN_STARTED])
-			if virtual_action: 
-				self._perform_robot_virtual_action(virtual_action)
+				# wait until robot's actions for TURN_STARTED to complete. the robot first explores the scene
+				time.sleep(3)
+				self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_EXPLORE)
 
 
 		def get_robot_general_response(self):
-			print("***get robot general behaviors")
 			
 			actions = self.role_behavior_mapping.get_actions("",False)
 			physical_actions = actions['physical']
@@ -183,6 +185,7 @@ class ChildRobotInteractionFSM:
 			if virtual_action: 
 				self._perform_robot_virtual_action(virtual_action)
 		
+
 		def _get_behaviors(self):
 			'''
 			Get corresponding virtual and physical actions for a given input robot's role
@@ -231,7 +234,7 @@ class ChildRobotInteractionFSM:
 			'''
 			send the virtual action message via ROS to the tablet 
 			'''
-			
+			print("======perform robot virtual action==: "+action)
 
 			if action == RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ:
 				self.robot_clickedObj = self.task_controller.get_obj_for_robot(True)
@@ -240,7 +243,6 @@ class ChildRobotInteractionFSM:
 				self.robot_clickedObj = self.task_controller.get_obj_for_robot(False)
 				
 			
-
 			self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":action,"clicked_object":self.robot_clickedObj})
 			
 

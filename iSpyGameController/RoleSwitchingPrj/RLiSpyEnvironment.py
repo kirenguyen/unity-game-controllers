@@ -32,8 +32,7 @@ class iSpyEnvironment():
 		'''
 		perform the action generated from agent.py's learning algorithm
 		'''
-		print('perform action')
-		print("current state: "+str(self.cur_state))
+		
 		prev_state = self.cur_state
 		
 		# update RL's state after the action is performed 
@@ -47,8 +46,7 @@ class iSpyEnvironment():
 
 
 	def get_all_states(self):
-		print("get all states")
-		print(self.all_states)
+		
 		return self.all_states
 
 	def update_state_after_action(self):
@@ -111,10 +109,9 @@ class iSpyEnvironment():
 			total_num_states *=value
 			matrix_shape  = matrix_shape+ (value,)
 
-		print("total # states: "+ str(total_num_states))
+		
 		states_matrix = np.arange(total_num_states).reshape(matrix_shape)
-		print("states matrix")
-		print(states_matrix)
+		
 		return states_matrix
 
 

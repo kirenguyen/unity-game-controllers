@@ -140,48 +140,51 @@ class iSpyGameFSM: # pylint: disable=no-member
 	def onExplorationMode(self):
 		'''callback function when exploration mode just starts'''
 		if self.entered_explore_mode > 0:
-			print ("Entered explore mode %s times" %self.entered_explore_mode)
+			pass
+			##print ("Entered explore mode %s times" %self.entered_explore_mode)
 		else:
-			print ("Entered explore mode")
+			pass
+			#print ("Entered explore mode")
 		
 
 	def onMissionMode(self):
 		'''callback function when entering mission mode '''
 		self.mission_time_start = time.time()
-		print ("Entered mission mode %s times" %self.entered_mission_mode)
-		self._run_game_task()
+		#print ("Entered mission mode %s times" %self.entered_mission_mode)
+		pass
 
 	def onPronunciationPanel(self):
 		'''callback function when entering pronunciation panel'''
-		print ("Entered pronunciation panel")
-
+		#print ("Entered pronunciation panel")
+		pass
 	def onPronunciationResult(self):
 		'''callback function when entering pronunciation result mode'''
 		#TODO: obtain scores from speech class
 		#TODO: Visualize word accuracy
 		#TODO: check whether the user pronounces the word accurately and whether the word is a target
-		print ("Entered pronunciation result")
+		#print ("Entered pronunciation result")
 		self.tapped_and_pronounced.append((self.origText, time.time() - self.time_tapped))
-		print (self.tapped_and_pronounced)
+		#print (self.tapped_and_pronounced)
 
 
 	def onWordDisplay(self):
 		'''callback function when entering word display'''
 		#TODO: show word bubbles for the clicked object
 		#TODO: set a timer variable. If the elapsed time > 5 secs, then the bubble disappear
-		print ("Entered dialogue panel")
+		#print ("Entered dialogue panel")
+		pass
 
 	def on_ispy_state_info_received(self,transition_msg):
 		"""
 		Rospy Callback for when we get log messages
 		"""
-		print ("---------------------------------------------------------------")
-		print("I heard " + transition_msg.data)
+		# print ("---------------------------------------------------------------")
+		# print("I heard " + transition_msg.data)
 		if transition_msg.data in gs.Triggers.triggers:
 			if transition_msg.data == gs.Triggers.TOPLEFT_BUTTON_PRESSED:
 				# robot celebrate 
 				self.interaction.react(gs.Triggers.TOPLEFT_BUTTON_PRESSED)
-
+				self._run_game_task()
 
 				# If the player is switching from mission to explore mode
 				if self.FSM.get_state() == gs.MISSION_MODE:
@@ -197,6 +200,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 					self.entered_mission_mode += 1
 
 
+
 			elif transition_msg.data == gs.Triggers.OBJECT_CLICKED:
 				time.sleep(.1)
 				self._on_obj_clicked()
@@ -207,7 +211,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 				if self.FSM.get_state() == gs.PRONUNCIATION_PANEL:
 					self.tapped_and_cancelled.append((self.origText , time.time() - self.time_tapped))
-					print (self.tapped_and_cancelled)
+			
 				elif self.FSM.get_state() == gs.PRONUNCIATION_RESULT:
 					self.interaction.react(gs.Triggers.PRONUNCIATION_PANEL_CLOSED)
 					self.interaction.turn_taking()
@@ -216,8 +220,11 @@ class iSpyGameFSM: # pylint: disable=no-member
 				# one of the target objects is successfully collected. give the turn to the other player now
 				
 				self.interaction.react(gs.Triggers.TARGET_OBJECT_COLLECTED)
-				self.interaction.turn_taking()
 
+				if not self.task_controller.task_in_progress:
+					# let the game knows the task is completed
+					self.ros_node_mgr.send_ispy_cmd(TASK_COMPLETED)
+				
 			elif transition_msg.data == gs.Triggers.SAY_BUTTON_PRESSED:
 				if self.task_controller.isTarget(self.origText):
 					self.interaction.react(gs.Triggers.SAY_BUTTON_PRESSED)
@@ -225,6 +232,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 					self.interaction.react(gs.Triggers.SAY_BUTTON_PRESSED, 1)
 
 			elif transition_msg.data == gs.Triggers.SCREEN_MOVED:
+				print("**************screen moved here")
 				self.interaction.react(gs.Triggers.SCREEN_MOVED)
 
 			# If the message is in gs.Triggers, then allow the trigger
@@ -232,10 +240,12 @@ class iSpyGameFSM: # pylint: disable=no-member
 			if transition_msg.data != gs.Triggers.SCREEN_MOVED:
 				self.FSM.start_trigger(transition_msg.data)
 
+			
+
 	#################################################################################################
 
 	def on_ispy_log_received(self, log_msg):
-		print(log_msg.data)
+		
 		# If the the message was "messageReceived", that means that the publishing loop can stop
 		if log_msg.data == "messageReceived":
 			self.ros_node_mgr.message_received = True
@@ -247,8 +257,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 		Rospy callback for when we get ispy action from the unity game over ROS
 		"""
 
-		print("==================ispy action msg")
-		#print(ispy_action_msg)
+		
+
 		
 		def isScalingUp(boolean):			
 			if boolean:
@@ -321,6 +331,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		'''
 		speech ace analysis
 		'''
+		
 		# If given a word to evaluate and done recording send the information to speechace
 		if self.origText and self.recorder.has_recorded % 2 == 0 and self.recorder.has_recorded != 0:
 			# If you couldn't find the android audio topic, automatically pass
@@ -337,9 +348,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 				if word_score_list:
 					for word in word_score_list:
 						letters, passed = self.results_handler.process_speechace_word_results(word)
-					print ("Message to Unity")
-					print (letters)
-					print (passed)
+					
 
 				else:
 					letters = list(self.origText)
@@ -364,29 +373,30 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			self.ros_node_mgr.send_ispy_cmd(SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, results_params)
 			self.recorder.has_recorded = 0
-			if not self.task_controller.task_in_progress:
-				print("task is no longer in progress")
-				# let the game knows the task is completed
-				time.sleep(0.5)
-				self.ros_node_mgr.send_ispy_cmd(TASK_COMPLETED)
+			# if not self.task_controller.task_in_progress:
+			# 	print("task is no longer in progress")
+			# 	# let the game knows the task is completed
+			# 	time.sleep(0.5)
+			# 	self.ros_node_mgr.send_ispy_cmd(TASK_COMPLETED)
 	
 	
 	def _run_game_task(self):
 		# When entering mission mode from exploration mode, get a random task
 		# and send it to Unity
 		if self.task_controller.task_in_progress == False:
-			print("!!!!get next task!!!!!!")
+		
 			task = self.task_controller.get_next_task()
 
 			# If there are no more available quests, you won the game
 			if task == None:
-				print("!!! next task is none!!!")
+			
 				self.ros_node_mgr.send_ispy_cmd(GAME_FINISHED)
 			else:
-				print("!!! get next task. which is...")
-				print(task)
 				self.ros_node_mgr.send_ispy_cmd(SEND_TASKS_TO_UNITY, task)
-				self.interaction.get_turn_taking_actions()
+				print("****run game task. get turn taking actions")
+				#self.interaction.get_turn_taking_actions()
+				self.interaction.reset_turn_taking()
+				self.interaction.get_robot_general_response()
 
 
 	def _on_obj_clicked(self):
@@ -396,7 +406,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		if self.FSM.get_state() == gs.MISSION_MODE:
 			# If coming from missioin mode, append to mission mode list
 			self.mission_tapped_list.append((self.origText, self.time_tapped - self.mission_time_start))
-			print(self.mission_tapped_list)
+		
 
 			if self.task_controller.isTarget(self.origText):
 				self.interaction.react(gs.Triggers.OBJECT_CLICKED)
@@ -406,7 +416,6 @@ class iSpyGameFSM: # pylint: disable=no-member
 		elif self.FSM.get_state() == gs.EXPLORATION_MODE:
 			# If coming from explore mode, append to explore mode list
 			self.explore_tapped_list.append((self.origText, self.time_tapped))
-			print (self.explore_tapped_list)
 	
 
 

@@ -26,3 +26,5 @@ int8 ROBOT_VIRTUAL_ACTIONS = 30 #send commands to let Unity game performs out ro
 int8 BUTTON_DISABLED = 31 #send commands to disable any buttons on the screen
 
 int8 TASK_COMPLETED = 32 # send commands to notify the game the task is complete
+
+int8 WHOSE_TURN = 33 # either robot or child's turn

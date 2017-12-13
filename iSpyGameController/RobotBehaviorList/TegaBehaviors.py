@@ -32,6 +32,7 @@ BASED_ON_OBJECTS_TEMPLATES=["b-template.mp3", "c-template.mp3"]
 OBJECTS=["baby.mp3","bicylce.mp3", "baby.mp3", "bicycle.mp3", "bird.mp3", "boat.mp3", "bucket.mp3" , "bus.mp3" , "car.mp3" , "castle.mp3" , "cat.mp3" , "cloud.mp3" , "coconut.mp3" , "deer.mp3" , "digging.mp3" , "dog.mp3" , "dolphine.mp3" , "door.mp3" , "dress.mp3" , "duck.mp3" , "eating.mp3" , "father.mp3" , "fish.mp3" , "fishing.mp3" , "flower.mp3" , "forest.mp3" , "frog.mp3" , "giraffe.mp3" ,"goat.mp3","grandma.mp3","grandpa.mp3","hat.mp3","horse.mp3","jumping.mp3","lion.mp3","mailbox.mp3","mother.mp3" ,"mountain.mp3","mouse.mp3","pants.mp3" ,"plane.mp3" ,"rabbit.mp3","rooster.mp3" ,"running.mp3","seal.mp3","seashell.mp3" , "sheep.mp3" , "shirt.mp3" , "sun.mp3" , "tractor.mp3" , "train.mp3", "waving.mp3", "window.mp3"]
 
 
+OPTIONAL_ACTIONS = []
 
 class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     """
@@ -140,6 +141,7 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             speech_file_name = PATH + random.choice(GENERAL_CURIOSITY_SPEECH)
             msg.wav_filename = speech_file_name
             msg.enqueue = True
+            print(speech_file_name)
 
         # Based on prompts speech
         if command == RobotBehaviors.BASED_ON_PROMPTS_SPEECH:

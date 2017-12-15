@@ -40,7 +40,7 @@ class CompleteModeFSM(BaseGameFSM):
 				
 		]
 		
-		self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
+		self.state_machine = Machine(self, states=self.states, transitions=self.transitions, ignore_invalid_triggers=True,
 									 initial=gs.GAME_START)
 
 
@@ -71,7 +71,7 @@ class AlwaysMissionModeFSM(BaseGameFSM):
 		
 		]
 		
-		self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
+		self.state_machine = Machine(self, states=self.states, transitions=self.transitions, ignore_invalid_triggers=True,
 									 initial=gs.GAME_START)
 		self.ros_node_mgr = ros_node_mgr
 
@@ -99,7 +99,7 @@ class AlwaysExploreModeFSM(BaseGameFSM):
 				{'trigger': gs.Triggers.N_SECONDS_LATER, 'source': gs.WORD_DISPLAY, 'dest': gs.EXPLORATION_MODE}
 		]
 		
-		self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
+		self.state_machine = Machine(self, states=self.states, transitions=self.transitions, ignore_invalid_triggers=True,
 									 initial=gs.GAME_START)
 		self.ros_node_mgr = ros_node_mgr
 

@@ -1,4 +1,5 @@
 import time
+import json
 
 from transitions import Machine
 from .AgentModel import AgentModel
@@ -63,6 +64,43 @@ class ChildRobotInteractionFSM:
 
 			self.robot_clickedObj=""
 
+
+			self.ros_node_mgr.start_tega_state_listener(self.on_tega_state_received)
+
+			self.ros_node_mgr.start_tega_asr(self.on_tega_new_asr_result)
+
+			self.tega_is_playing_sound = False
+
+			# load tega speech json file
+			# parse tega_speech.json
+			tega_speech_file = open("iSpyGameController/res/tega_speech.json")
+			self.tega_speech_dict = json.loads(tega_speech_file.read())
+
+
+		def on_tega_state_received(self,data):
+			## call back function when a tega state message is received from Tega phone.
+			# this function should be called multiple times per second
+			# robot is in motion or playing sound or not
+			self.tega_is_playing_sound = data.is_playing_sound
+
+        		
+		def on_tega_new_asr_result(self,data):
+			# callback function when new asr results are received from Tega
+			print("new asr results...")
+			
+			self.asr_input = unicode(data.transcription.lower().strip(), "utf-8")
+			self.asr_input_confidence = data.confidence
+
+			print("\n#####Tega Heard: {0}\n".format(self.asr_input))
+
+        	# if all(word in SETTINGS.STOPWORDS_SINGLE for word in self.asr_input):
+        	# 	print "speech filtered per STOPWORDS_SINGLE"
+        	# 	return
+        	# elif any(word in self.asr_input for word in SETTINGS.STOPWORDS):
+        	# 	print "speech filtered per STOPWORDS"
+        	# 	return
+        	
+
 		def reset_turn_taking(self):
 
 			self.state = ris.CHILD_TURN
@@ -105,8 +143,8 @@ class ChildRobotInteractionFSM:
 			react to ispy game state change
 			'''
 			if gameStateTrigger == gs.Triggers.TARGET_OBJECT_COLLECTED:
-				self._perform_robot_physical_action(self.physical_actions[ras.PRONOUNCE_CORRECT])
-				self._perform_robot_physical_action(self.physical_actions[ras.TURN_FINISHED])
+				self._perform_robot_physical_action(ras.PRONOUNCE_CORRECT)
+				self._perform_robot_physical_action(ras.TURN_FINISHED)
 				if self.state == ris.CHILD_TURN:
 					# the child finds the correct object
 					self.child_states.update_child_turn_result(True)
@@ -114,27 +152,33 @@ class ChildRobotInteractionFSM:
 			elif gameStateTrigger  == gs.Triggers.OBJECT_CLICKED:
 				if self.state == ris.ROBOT_TURN:
 					if random.random() < 0.75:
-						self._perform_robot_physical_action(self.physical_actions[ras.OBJECT_FOUND])
+						print("===== object found")
+						self._perform_robot_physical_action(ras.OBJECT_FOUND)
 					else:
-						self._perform_robot_physical_action(self.physical_actions[ras.OBJECT_CLICKED])
+						print("===== object clicked")
+						self._perform_robot_physical_action(ras.OBJECT_CLICKED)
+
+					self._wait_until() # wait until robot is done speaking. then click and pronounce the word
+					self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_CLICK_SAY_BUTTON)
+
 				if self.state == ris.CHILD_TURN:
 					# Check to see if the object is incorrect
 					# If correct, given assertion 
 					if command == 0:
-						self._perform_robot_physical_action(self.physical_actions[ras.OBJECT_FOUND])
+						self._perform_robot_physical_action(ras.OBJECT_FOUND)
 					# If incorrect, show doubt 
 					else:
-						self._perform_robot_physical_action(self.physical_actions[ras.OBJECT_CLICKED])
+						self._perform_robot_physical_action(ras.OBJECT_CLICKED)
 				
 			elif gameStateTrigger  == gs.Triggers.SAY_BUTTON_PRESSED:
-				self._perform_robot_physical_action(self.physical_actions[ras.OBJECT_PRONOUNCED])
+				self._perform_robot_physical_action(ras.OBJECT_PRONOUNCED)
 
 				# Check to see if it is incorrect
 				# If correct, will be within target_object_collected -> Happy emotion
 				# If incorrect, not target_object -> Sad emotion 
 				if command == 1 and random.random() < 0.75:
 					time.sleep(2)
-					self._perform_robot_physical_action(self.physical_actions[ras.WRONG_OBJECT_FAIL])
+					self._perform_robot_physical_action(ras.WRONG_OBJECT_FAIL)
 
 			elif gameStateTrigger  == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
 				if self.state == ris.CHILD_TURN:
@@ -142,15 +186,20 @@ class ChildRobotInteractionFSM:
 					self.child_states.update_child_turn_result(False)
 
 			elif gameStateTrigger == gs.Triggers.SCREEN_MOVED:
-				print("+=======screen moved....")
-				self._perform_robot_physical_action(self.physical_actions[ras.SCREEN_MOVED])
+				self._perform_robot_physical_action(ras.SCREEN_MOVED)
 				# wait until all physical actions in SCREEN_MOVED is done, then perform robot's virtual move for finding an object
-				time.sleep(3)
-				print("perform robot virual action...: "+self.virtual_action)
+				time.sleep(1)
+				self._wait_until()
 				self._perform_robot_virtual_action(self.virtual_action)
 
-
-
+		def _wait_until(self):
+			'''
+			wait until tega is done speaking
+			'''
+			while self.tega_is_playing_sound==True:
+					continue
+					if self.tega_is_playing_sound==False:
+						break
 
 		def get_turn_taking_actions(self):
 			'''
@@ -167,7 +216,7 @@ class ChildRobotInteractionFSM:
 
 			if physical_actions:
 				self.physical_actions = physical_actions
-				self._perform_robot_physical_action(self.physical_actions[ras.TURN_STARTED])
+				self._perform_robot_physical_action(ras.TURN_STARTED)
 				# wait until robot's actions for TURN_STARTED to complete. the robot first explores the scene
 				time.sleep(3)
 				self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_EXPLORE)
@@ -181,7 +230,7 @@ class ChildRobotInteractionFSM:
 
 			if physical_actions:
 				self.physical_actions = physical_actions
-				self._perform_robot_physical_action(self.physical_actions[ras.TURN_STARTED])
+				self._perform_robot_physical_action(ras.TURN_STARTED)
 			if virtual_action: 
 				self._perform_robot_virtual_action(virtual_action)
 		
@@ -197,17 +246,45 @@ class ChildRobotInteractionFSM:
 				
 			return self.role_behavior_mapping.get_actions(self.role,robot_turn)
 			
+		def _get_tega_speech(self,action_type):
+			'''
+			get tega speech audios based on current action type, robot's role
+			'''
 
-		def _perform_robot_physical_action(self,actions):
+			if isinstance(self.role,str):
+				return []
+			else:
+				speech_audio_path = '/'.join(['general',self.role.name.lower(), self.state.replace('TURN','')])
+				try:
+					all_audio_arrs= self.tega_speech_dict[speech_audio_path]
+					speech_audios = [ 'roleswitching18/'+speech_audio_path+"/"+i+'.wav' for i in all_audio_arrs if action_type in i]
+					
+					return [random.choice(speech_audios)]
+				except:
+					print("ERROR: Couldn't find audio files in tega speech json files")
+					return []
+		
+				
+
+		def _perform_robot_physical_action(self,action_type):
 			'''
 			send the physical action message via ROS to the robot
 			'''
 
-			
+			actions = self.physical_actions[action_type]
+
+			speech_actions = self._get_tega_speech(action_type)
+
+			# send physical moition commands
 			for action in actions:
 				# if the action is to pronounce a word, then specify a word to pronounce
+
+				while self.tega_is_playing_sound==True:
+					continue
+					if self.tega_is_playing_sound==False:
+						break
+
 				input_data = ""
-				
 				
 				if action == RobotBehaviors.ROBOT_SAY_WORD:
 					if not self.robot_clickedObj:
@@ -219,22 +296,26 @@ class ChildRobotInteractionFSM:
 				if action in RobotBehaviors.OPTIONAL_ACTIONS:
 					
 					# if the action is in this array, then randomly decide whether to execute the action or not
-					
 					if random.uniform(0, 1) >= 0.25:
 						self.ros_node_mgr.send_robot_cmd(action,input_data)
 						time.sleep(1)
-					else:
-						print("not saying the optional speech")
 					
 				else:
 					self.ros_node_mgr.send_robot_cmd(action,input_data)
 					time.sleep(1)
 
+			# send speech commands
+			for speech_file in speech_actions:
+				while self.tega_is_playing_sound==True:
+					continue
+					if self.tega_is_playing_sound==False:
+						break
+				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH,speech_file)
+
 		def _perform_robot_virtual_action(self,action):
 			'''
 			send the virtual action message via ROS to the tablet 
 			'''
-			print("======perform robot virtual action==: "+action)
 
 			if action == RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ:
 				self.robot_clickedObj = self.task_controller.get_obj_for_robot(True)

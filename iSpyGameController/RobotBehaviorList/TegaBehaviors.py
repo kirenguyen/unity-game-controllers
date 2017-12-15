@@ -131,6 +131,13 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
         if command == RobotBehaviors.ROBOT_DISAPPOINTED:
             msg.motion = TegaAction.MOTION_FRUSTRATED 
 
+
+        # Tega speech commands
+        if command == RobotBehaviors.ROBOT_CUSTOM_SPEECH:
+            msg.wav_filename = args[0][0]
+            msg.enqueue = True
+            print(msg.wav_filename)
+
         ## Tega Speech for Curiosity Assessment
 
         # General Curiosity Speech
@@ -176,7 +183,7 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.enqueue = True
 
         if command == RobotBehaviors.ROBOT_SAY_WORD:
-            PATH = "TegaAudio/objects/"
+            PATH = "roleswitching18/object_words/"
             object_word =args[0][0].lower()
             speech_file_name = PATH + object_word + ".mp3"
             msg.wav_filename = speech_file_name

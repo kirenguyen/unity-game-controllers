@@ -1,0 +1,103 @@
+{
+	"general/expert/child":[
+		"object_clicked_1",
+		"object_clicked_2",
+
+		"object_found_1",
+		"object_found_2",
+		"objec_found_3",
+
+		"wrong_object_fail_1",
+		"wrong_object_fail_2",
+		"wrong_object_fail_3",
+
+		"pronounce_correct_1",
+		"pronounce_correct_2",
+
+		"turn_switching_1",
+		"turn_switching_2",
+
+		"turn_starting_1",
+		"turn_starting_2",
+		"turn_starting_3"
+	],
+
+
+	"general/expert/robot":[
+		"object_clicked_1",
+		"object_clicked_2",
+
+		"object_found_1",
+		"object_found_2",
+		"objec_found_3",
+	
+	
+		"turn_switching_1",
+		"turn_switching_2",
+		"turn_switching_3",
+
+		"turn_starting_1",
+		"turn_starting_2",
+
+		"screen_moving_1",
+		"screen_moving_2",
+		"screen_moving_3"
+	],
+
+	"general/novice/child":[
+		
+		"object_clicked_2",
+
+		"object_found_1",
+		"object_found_2",
+		"objec_found_3",
+
+		"wrong_object_fail_1",
+		"wrong_object_fail_2",
+		"wrong_object_fail_3",
+
+		"pronounce_correct_1",
+		"pronounce_correct_2",
+		"pronounce_correct_3",
+
+		"turn_switching_1",
+		"turn_switching_2",
+		"turn_switching_3",
+
+		"turn_starting_1",
+		"turn_starting_2",
+		"turn_starting_3",
+
+		"screen_moving_1",
+		"screen_moving_2"
+		
+	],
+
+	"general/novice/robot":[
+		"object_clicked_3",
+		"object_clicked_4",
+
+		"object_found_1",
+		"object_found_2",
+		"objec_found_3",
+	
+		"turn_switching_1",
+		"turn_switching_2",
+		"turn_switching_3",
+
+		"turn_starting_1",
+		"turn_starting_2",
+		"turn_starting_3",
+		"turn_starting_4",
+
+		"screen_moving_2",
+		"screen_moving_3",
+
+		"pronounce_correct_2",
+
+		"wrong_object_fail_1",
+		"wrong_object_fail_2",
+		"wrong_object_fail_3"
+	]
+
+}

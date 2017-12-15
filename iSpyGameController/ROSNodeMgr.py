@@ -20,6 +20,7 @@ if GlobalSettings.USE_ROS:
     from unity_game_msgs.msg import iSpyCommand
     from unity_game_msgs.msg import iSpyAction
     from r1d1_msgs.msg import TegaAction
+    from r1d1_msgs.msg import TegaState
     from r1d1_msgs.msg import Vec3
     from jibo_msgs.msg import JiboAction
     from std_msgs.msg import String
@@ -28,6 +29,8 @@ else:
     TapGameCommand = GlobalSettings.iSpyCommand
     TegaAction = GlobalSettings.TegaAction
     JiboAction = GlobalSettings.JiboAction
+
+#from asr_google_cloud.msg import AsrResult
 
 #ROSCORE_TO_ISPY_GAME_TOPIC = '/ispy_game_from_ros'
 #ISPY_GAME_TO_ROSCORE_TOPIC = '/ispy_game_to_ros'
@@ -223,6 +226,9 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         rate.sleep()  # sleep to wait for subscribers
         # rospy.spin()
 
+    def start_tega_state_listener(self,on_tega_state_received):
+        print('start tega state listener')
+        sub_affdex = rospy.Subscriber('tega_state',TegaState,on_tega_state_received)
 
     def start_affdex_listener(self,on_affdex_data_received):
         '''
@@ -230,3 +236,11 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         '''
         print('affdex listener starts..')
         sub_affdex = rospy.Subscriber('affdex_data', AffdexFrameInfo, on_affdex_data_received) # affdex data
+
+
+    def start_tega_asr(self, on_tega_new_asr_result):
+        pass
+        # self.sub_asr_result = rospy.Subscriber('asr_result', AsrResult, on_tega_new_asr_result)
+        # self.pub_asr_start = rospy.Publisher('asr_start', String, queue_size=1)
+        # sleep(1)
+        # self.pub_asr_start.publish("start")

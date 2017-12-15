@@ -9,13 +9,10 @@ from enum import Enum
 
 
 
-
 class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     """
     A Class definition for "cosmetic" robot behavior strings, which get translated by the ROSNodeMgr
     """
-
-   
 
     # Look Ats
     LOOK_AT_TABLET = 'LOOK_AT_TABLET'
@@ -34,6 +31,8 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     ROBOT_ENCOURAGING = 'ROBOT_ENCOURAGING'
     ROBOT_WINK = 'ROBOT_WINK'
     ROBOT_THINKING = 'ROBOT_THINKING'
+
+    ROBOT_SAY_WORD = 'ROBOT_SAY_WORD'
     
     # Negative Emotions
     ROBOT_SAD = 'ROBOT_SAD'
@@ -42,9 +41,28 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     ROBOT_ASK_HELP = 'ROBOT_ASK_HELP'
     ROBOT_DISAPPOINTED = 'ROBOT_DISAPPOINTED'
 
+ 
+
+    # virtual actions on the app
+    VIRTUALLY_CLICK_CORRECT_OBJ = "CLICK_CORRECT_OBJ" # click correct obj
+    VIRTUALLY_CLICK_WRONG_OBJ = "CLICK_WRONG_OBJ"
+    VIRTUALLY_EXPLORE = "EXPLORING"
+    VIRTUALLY_CLICK_SAY_BUTTON = "CLICK_SAY_BUTTON"
+
+    ## Tega Speech for Curiosity Assessment
+    GENERAL_CURIOSITY_SPEECH = "GENERAL_CURIOSITY_SPEECH"
+    BASED_ON_PROMPTS_SPEECH = "BASED_ON_PROMPTS_SPEECH"
+    TRY_PRONOUNCE = "TRY_PRONOUNCE"
+    BASED_ON_OBJECTS = "BASED_ON_OBJECTS"
+    OBJECTS = "OBJECTS"
+
+
+    ROBOT_CUSTOM_SPEECH = "ROBOT_CUSTOM_SPEECH"
+
     # Speech
     # Game explanation speech 
-    ROBOT_SAY_WORD = 'ROBOT_SAY_WORD'
+
+  
     ROBOT_EXPLANATION_SPEECH = ''
 
     # Emotion speech
@@ -63,19 +81,6 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     ROBOT_CHILD_TURN_SPEECH = ''
     ROBOT_TURN_SPEECH = ''
 
-    # virtual actions on the app
-    VIRTUALLY_CLICK_CORRECT_OBJ = "CLICK_CORRECT_OBJ" # click correct obj
-    VIRTUALLY_CLICK_WRONG_OBJ = "CLICK_WRONG_OBJ"
-    VIRTUALLY_EXPLORE = "EXPLORING"
-
-
-    ## Tega Speech for Curiosity Assessment
-    GENERAL_CURIOSITY_SPEECH = "GENERAL_CURIOSITY_SPEECH"
-    BASED_ON_PROMPTS_SPEECH = "BASED_ON_PROMPTS_SPEECH"
-    TRY_PRONOUNCE = "TRY_PRONOUNCE"
-    BASED_ON_OBJECTS = "BASED_ON_OBJECTS"
-    OBJECTS = "OBJECTS"
-
      ### robot's actions that can be optional, and are not necessary to play every single time
     OPTIONAL_ACTIONS = [GENERAL_CURIOSITY_SPEECH,BASED_ON_PROMPTS_SPEECH]
 
@@ -83,40 +88,28 @@ class RobotRoles(Enum):
     '''
     contains a list of social roles that are avaiable to robot to perform
     '''
-    CURIOUS = 0
-    #EXPERT = 0
+    EXPERT = 0
     #COMPETENT = 1
-    #NOVICE = 2
+    NOVICE = 1
 
 
 class RobotActionSequence:
 
-    TURN_STARTED = "turnStarted" #
-    SCREEN_MOVED = "screenMoved"
-    OBJECT_FOUND = "objectFound"
-    OBJECT_CLICKED = "objectClicked" #
-    OBJECT_PRONOUNCED = "objectPronounced" #
-    RESULTS_RETURNED = "ResultsReturned" 
-    TURN_FINISHED = "TurnFinished" #
-    PRONOUNCE_CORRECT = "PronounceCorrect"
-    WRONG_OBJECT_FAIL ="WRONG_OBJECT_FAIL" 
+    TURN_STARTED = "turn_starting" #
+    SCREEN_MOVED = "screen_moving"
+    OBJECT_FOUND = "object_found"
+    OBJECT_CLICKED = "object_clicked" #
+    OBJECT_PRONOUNCED = "object_pronounced" #
+    RESULTS_RETURNED = "results_returned" 
+    TURN_FINISHED = "turn_switching" #
+    PRONOUNCE_CORRECT = "pronounce_correct"
+    WRONG_OBJECT_FAIL ="wrong_object_fail" 
 
     class Triggers:
         NEXT = "Next"
         RESET = "Reset"
 
-    """
-    TURN_STARTED = "turnStarted"
-    SCREEN_MOVED = "screenMoved"
-    OBJECT_FOUND = "objectFound"
-    OBJECT_CLICKED = "objectClicked"
-    OBJECT_PRONOUNCED = "objectPronounced"
-    RESULTS_RETURNED = "ResultsReturned"
-    TURN_FINISHED = "TurnFinished"
-    WRONG_OBJECT_FAIL ="WRONG_OBJECT_FAIL"
-    """
             
-
 class RobotRolesBehaviorsMap:
     '''
     mapping between robot's social role and robot's specific behaviors
@@ -127,10 +120,10 @@ class RobotRolesBehaviorsMap:
         # robot's actions during child's turn
         self.child_turn_mapping = {}
 
-        #self._expert_role()
-        self._curious_role()
+        self._expert_role()
+        #self._curious_role()
         #self._competent_role()
-        #self._novice_role()
+        self._novice_role()
         self._robot_general_responses()
 
 

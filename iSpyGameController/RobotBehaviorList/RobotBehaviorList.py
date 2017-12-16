@@ -48,6 +48,7 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     VIRTUALLY_CLICK_WRONG_OBJ = "CLICK_WRONG_OBJ"
     VIRTUALLY_EXPLORE = "EXPLORING"
     VIRTUALLY_CLICK_SAY_BUTTON = "CLICK_SAY_BUTTON"
+    VIRTUALLY_HELP_CHILD = "HELP_CHILD"
 
     ## Tega Speech for Curiosity Assessment
     GENERAL_CURIOSITY_SPEECH = "GENERAL_CURIOSITY_SPEECH"
@@ -243,7 +244,7 @@ class RobotRolesBehaviorsMap:
                 RobotActionSequence.RESULTS_RETURNED:[], # Nothing
                 RobotActionSequence.WRONG_OBJECT_FAIL: [RobotBehaviors.ROBOT_ASK_HELP]
             },
-            'virtual': RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ
+            'virtual': RobotBehaviors.VIRTUALLY_CLICK_WRONG_OBJ
             }
         })
 

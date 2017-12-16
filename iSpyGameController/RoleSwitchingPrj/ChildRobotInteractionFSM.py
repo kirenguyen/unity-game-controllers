@@ -1,7 +1,8 @@
 import time
 import json
 
-from transitions import Machine
+#from transitions import Machine
+from transitions.extensions import HierarchicalMachine as Machine
 from .AgentModel import AgentModel
 
 from ..RobotBehaviorList.RobotBehaviorList import RobotBehaviors
@@ -26,6 +27,8 @@ import random
 
 ROOT_TEGA_SPEECH_FOLDER = 'roleswitching18/'
 
+
+
 class ChildRobotInteractionFSM:
 		'''
 		child robot interaction FSM for robot's role switching project
@@ -34,11 +37,12 @@ class ChildRobotInteractionFSM:
 		'''
 
 		def __init__(self,ros_node_mgr,task_controller):
-			
-			self.states = [ ris.ROBOT_TURN, ris.CHILD_TURN ]
+			# use hierachical FSM here
+			self.states = [ ris.ROBOT_TURN, {'name':ris.CHILD_TURN,'children':[ris.ROBOT_HELP]} ]
 			self.transitions = [
 				{'trigger': ris.Triggers.CHILD_TURN_DONE, 'source': ris.CHILD_TURN, 'dest': ris.ROBOT_TURN },
 				{'trigger': ris.Triggers.ROBOT_TURN_DONE, 'source': ris.ROBOT_TURN, 'dest': ris.CHILD_TURN},
+				{'trigger': ris.Triggers.ROBOT_HELP_TRIGGER,'source':ris.CHILD_TURN,'dest':ris.CHILD_TURN+'_'+ris.ROBOT_HELP}
 			]
 
 			self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
@@ -65,7 +69,6 @@ class ChildRobotInteractionFSM:
 
 			self.robot_clickedObj=""
 
-
 			self.ros_node_mgr.start_tega_state_listener(self.on_tega_state_received)
 
 			self.ros_node_mgr.start_tega_asr(self.on_tega_new_asr_result)
@@ -78,6 +81,8 @@ class ChildRobotInteractionFSM:
 			tega_speech_file = open("iSpyGameController/res/tega_speech.json")
 			self.tega_speech_dict = json.loads(tega_speech_file.read())
 
+
+
 		def on_no_ispy_action_alert(self,attempt):
 			'''
 			callback function when no ispy action within a time period is detected
@@ -85,19 +90,21 @@ class ChildRobotInteractionFSM:
 			called by iSpyDataTracking 
 			attempt: first alert, second alert
 			'''	
+			
+			if self.state != ris.CHILD_TURN: return
 			print("!!!!!game controller ....no ispy action "+str(attempt))
-
 			# the robot verbally encourages the child
 			path=ROOT_TEGA_SPEECH_FOLDER + 'general/speech/'
 
-			speech_file = random.choice([ path+i for i in self.tega_speech_dict["general/speech"] if 'no_ispy_action_alert'+str(attempt)+'_response' in i])
+			speech_file = random.choice([ path+i+".wav" for i in self.tega_speech_dict["general/speech"] if 'no_ispy_action_alert'+str(attempt)+'_response' in i])
 			self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH,speech_file)
 
 			if attempt == 2: # first alert
 				# robot intervenes (robot spies an object for the child)
-				pass
+				# select an object and then find it for the child
+				self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ)
+				getattr(self, ROBOT_HELP_TRIGGER)() 
 				
-
 		def on_tega_state_received(self,data):
 			## call back function when a tega state message is received from Tega phone.
 			# this function should be called multiple times per second
@@ -131,7 +138,7 @@ class ChildRobotInteractionFSM:
 			
 			if self.task_controller.task_in_progress:
 				# check whether it is robot's turn or child's turn in the game play
-				if self.state == ris.ROBOT_TURN:
+				if ris.ROBOT_TURN in self.state:
 					# stop tracking the previous turn's rewards
 					rewards = self.child_states.stop_tracking_rewards(self.state)
 
@@ -139,7 +146,7 @@ class ChildRobotInteractionFSM:
 					getattr(self, ris.Triggers.ROBOT_TURN_DONE)() # convert the variabel to string, which is the name of the called function
 					self.child_states.start_tracking_rewards(self.state)
 
-				elif self.state == ris.CHILD_TURN:
+				elif ris.CHILD_TURN in self.state:
 
 					rewards = self.child_states.stop_tracking_rewards(self.state)
 					self.agent_model.onRewardsReceived(rewards) # update the RL model 
@@ -172,7 +179,7 @@ class ChildRobotInteractionFSM:
 					self.child_states.update_child_turn_result(True)
 
 			elif gameStateTrigger  == gs.Triggers.OBJECT_CLICKED:
-				if self.state == ris.ROBOT_TURN:
+				if self.state == ris.ROBOT_TURN or self.state == ris.CHILD_TURN+'_'+ROBOT_HELP:
 					if random.random() < 0.75:
 						print("===== object found")
 						self._perform_robot_physical_action(ras.OBJECT_FOUND)

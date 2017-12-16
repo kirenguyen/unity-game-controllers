@@ -21,7 +21,7 @@ class iSpyDataTracking:
 		'''
 		receive iSpy interaction log data from iSpyGameFSM
 		'''
-		print("on ispy action received")
+		
 		self.stop_thread_flag  = True # set stop thread to be true to stop elapsed time counting thread 
 
 		#Removes object position from ispy_action_msg
@@ -65,7 +65,6 @@ class iSpyDataTracking:
 				
 			#print("=====Thread signing off")
 		if self.child_robot_FSM.state == ris.CHILD_TURN: 
-			print("child turn!!!")
 			time.sleep(1)
 			self.stop_thread_flag = False
 			t = threading.Thread(target=elapsed_time_alert, args=(lambda: self.stop_thread_flag,))

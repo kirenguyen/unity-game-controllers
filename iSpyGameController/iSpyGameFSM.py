@@ -266,10 +266,6 @@ class iSpyGameFSM: # pylint: disable=no-member
 		"""
 		Rospy callback for when we get ispy action from the unity game over ROS
 		"""
-
-		
-		print('on ispy action received...')
-
 		
 		self.iSpyDataTracking.on_ispy_action_received(ispy_action_msg)
 
@@ -314,12 +310,9 @@ class iSpyGameFSM: # pylint: disable=no-member
 		'''
 		speech ace analysis
 		'''
-		print("speech ace ")
-		print(self.origText)
 
 		# If given a word to evaluate and done recording send the information to speechace
 		if self.origText and self.recorder.has_recorded % 2 == 0 and self.recorder.has_recorded != 0:
-			print("yay!!!")
 			# If you couldn't find the android audio topic, automatically pass
 			# instead of using the last audio recording
 			if not self.recorder.valid_recording:
@@ -371,6 +364,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 	def _run_game_task(self):
 		# When entering mission mode from exploration mode, get a random task
 		# and send it to Unity
+
+		print("run game task")
 		if self.task_controller.task_in_progress == False:
 		
 			task = self.task_controller.get_next_task()
@@ -384,9 +379,9 @@ class iSpyGameFSM: # pylint: disable=no-member
 				self.interaction.reset_turn_taking()
 				self.interaction.get_robot_general_response()
 				
-				if self.interaction.state == ris.CHILD_TURN:
-					time.sleep(3)
-					self.iSpyDataTracking.on_start_tracking_child_interact()
+				
+				time.sleep(3)
+				self.iSpyDataTracking.on_start_tracking_child_interact()
 
 
 	def _on_obj_clicked(self):

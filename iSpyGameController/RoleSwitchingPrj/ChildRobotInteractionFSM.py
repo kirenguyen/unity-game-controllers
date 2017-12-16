@@ -24,6 +24,7 @@ if GlobalSettings.USE_ROS:
 
 import random
 
+ROOT_TEGA_SPEECH_FOLDER = 'roleswitching18/'
 
 class ChildRobotInteractionFSM:
 		'''
@@ -71,11 +72,31 @@ class ChildRobotInteractionFSM:
 
 			self.tega_is_playing_sound = False
 
+
 			# load tega speech json file
 			# parse tega_speech.json
 			tega_speech_file = open("iSpyGameController/res/tega_speech.json")
 			self.tega_speech_dict = json.loads(tega_speech_file.read())
 
+		def on_no_ispy_action_alert(self,attempt):
+			'''
+			callback function when no ispy action within a time period is detected
+			when the child is not interacting with the tablet, the robot will try to encourage the child
+			called by iSpyDataTracking 
+			attempt: first alert, second alert
+			'''	
+			print("!!!!!game controller ....no ispy action "+str(attempt))
+
+			# the robot verbally encourages the child
+			path=ROOT_TEGA_SPEECH_FOLDER + 'general/speech/'
+
+			speech_file = random.choice([ path+i for i in self.tega_speech_dict["general/speech"] if 'no_ispy_action_alert'+str(attempt)+'_response' in i])
+			self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH,speech_file)
+
+			if attempt == 2: # first alert
+				# robot intervenes (robot spies an object for the child)
+				pass
+				
 
 		def on_tega_state_received(self,data):
 			## call back function when a tega state message is received from Tega phone.
@@ -99,7 +120,8 @@ class ChildRobotInteractionFSM:
         	# elif any(word in self.asr_input for word in SETTINGS.STOPWORDS):
         	# 	print "speech filtered per STOPWORDS"
         	# 	return
-        	
+
+
 
 		def reset_turn_taking(self):
 
@@ -187,10 +209,12 @@ class ChildRobotInteractionFSM:
 
 			elif gameStateTrigger == gs.Triggers.SCREEN_MOVED:
 				self._perform_robot_physical_action(ras.SCREEN_MOVED)
-				# wait until all physical actions in SCREEN_MOVED is done, then perform robot's virtual move for finding an object
-				time.sleep(1)
-				self._wait_until()
-				self._perform_robot_virtual_action(self.virtual_action)
+
+				if self.state == ris.ROBOT_TURN:
+					# wait until all physical actions in SCREEN_MOVED is done, then perform robot's virtual move for finding an object
+					time.sleep(1)
+					self._wait_until()
+					self._perform_robot_virtual_action(self.virtual_action)
 
 		def _wait_until(self):
 			'''
@@ -219,7 +243,7 @@ class ChildRobotInteractionFSM:
 				self._perform_robot_physical_action(ras.TURN_STARTED)
 				# wait until robot's actions for TURN_STARTED to complete. the robot first explores the scene
 				time.sleep(3)
-				self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_EXPLORE)
+				if self.state == ris.ROBOT_TURN: self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_EXPLORE)
 
 
 		def get_robot_general_response(self):
@@ -257,7 +281,7 @@ class ChildRobotInteractionFSM:
 				speech_audio_path = '/'.join(['general',self.role.name.lower(), self.state.replace('TURN','')])
 				try:
 					all_audio_arrs= self.tega_speech_dict[speech_audio_path]
-					speech_audios = [ 'roleswitching18/'+speech_audio_path+"/"+i+'.wav' for i in all_audio_arrs if action_type in i]
+					speech_audios = [ ROOT_TEGA_SPEECH_FOLDER+speech_audio_path+"/"+i+'.wav' for i in all_audio_arrs if action_type in i]
 					
 					return [random.choice(speech_audios)]
 				except:

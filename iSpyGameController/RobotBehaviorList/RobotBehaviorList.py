@@ -59,28 +59,12 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
 
     ROBOT_CUSTOM_SPEECH = "ROBOT_CUSTOM_SPEECH"
 
-    # Speech
-    # Game explanation speech 
 
-  
-    ROBOT_EXPLANATION_SPEECH = ''
+    ROBOT_CHILD_TURN_SPEECH =""
+    ROBOT_ASK_HELP_SPEECH = ""
+    ROBOT_COMFORT_SPEECH =""
 
-    # Emotion speech
-    ROBOT_ENCOURAGING_SPEECH = ''
-    ROBOT_ATTENTION_SPEECH = ''
-    ROBOT_COMFORT_SPEECH = ''
-    ROBOT_UNCERTAIN_SPEECH = ''
-    ROBOT_ASK_HELP_SPEECH = ''
-    ROBOT_CONFIDENCE_SPEECH = ''
-    ROBOT_HAPPY_SPEECH = ''
-    ROBOT_SURPRISED_SPEECH = ''
-    ROBOT_CONFIRM_SPEECH = ''
-    ROBOT_THANKYOU_SPEECH = ''
-
-    # Turn speech
-    ROBOT_CHILD_TURN_SPEECH = ''
-    ROBOT_TURN_SPEECH = ''
-
+    
      ### robot's actions that can be optional, and are not necessary to play every single time
     OPTIONAL_ACTIONS = [GENERAL_CURIOSITY_SPEECH,BASED_ON_PROMPTS_SPEECH]
 
@@ -127,6 +111,8 @@ class RobotRolesBehaviorsMap:
         self._robot_general_responses()
 
 
+
+
         self.backup_behaviors =  {'physical':{
                 RobotActionSequence.TURN_FINISHED: [RobotBehaviors.GENERAL_CURIOSITY_SPEECH],
                 RobotActionSequence.TURN_STARTED: [RobotBehaviors.ROBOT_EXCITED],
@@ -142,10 +128,6 @@ class RobotRolesBehaviorsMap:
             }
 
 
-        """
-        self.complete_expert_role()
-        self.complete_novice_role()
-        """
         
     def get_actions(self,role,robot_turn):
         print("role is: ")
@@ -171,7 +153,7 @@ class RobotRolesBehaviorsMap:
         self.robot_turn_mapping.update({
             RobotRoles.EXPERT:{
             'physical':{
-                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_ENCOURAGING, RobotBehaviors.ROBOT_ENCOURAGING_SPEECH],
+                RobotActionSequence.TURN_FINISHED: [RobotBehaviors.ROBOT_ENCOURAGING],
                 RobotActionSequence.TURN_STARTED: [RobotBehaviors.ROBOT_INTERESTED, RobotBehaviors.LOOK_AT_TABLET],
                 RobotActionSequence.SCREEN_MOVED: [], # Nothing
                 RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.ROBOT_CURIOUS], # Always correct
@@ -274,7 +256,7 @@ class RobotRolesBehaviorsMap:
                 RobotActionSequence.OBJECT_CLICKED: [RobotBehaviors.LOOK_AT_TABLET], # Incorrect Object
                 RobotActionSequence.OBJECT_FOUND: [RobotBehaviors.LOOK_AT_TABLET, RobotBehaviors.LOOK_CENTER], # Correct Object
                 RobotActionSequence.OBJECT_PRONOUNCED: [RobotBehaviors.LOOK_CENTER, RobotBehaviors.ROBOT_ATTENTION], 
-                RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_HAPPY_DANCE, RobotBehaviors.ROBOT_THANKYOU_SPEECH],
+                RobotActionSequence.PRONOUNCE_CORRECT: [RobotBehaviors.ROBOT_HAPPY_DANCE],
                 RobotActionSequence.RESULTS_RETURNED:[], # Nothing
                 RobotActionSequence.WRONG_OBJECT_FAIL: [RobotBehaviors.ROBOT_SAD],
             },

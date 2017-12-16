@@ -98,6 +98,14 @@
 		"wrong_object_fail_1",
 		"wrong_object_fail_2",
 		"wrong_object_fail_3"
+	],
+
+	"general/speech":[
+		"no_ispy_action_alert1_response_1",
+		"no_ispy_action_alert1_response_2",
+
+		"no_ispy_action_alert2_response_1",
+		"no_ispy_action_alert2_response_2"
 	]
 
 }

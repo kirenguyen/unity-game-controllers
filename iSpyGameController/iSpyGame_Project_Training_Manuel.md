@@ -146,6 +146,8 @@
 	* the way to play those audio files is shown in `TegaBehaviors.py`
 	* lipsync the audio files: `https://sites.google.com/site/personalrobotsgroupmit/r1d1/toolbox/dragonbot-lipsync`
 
+	* download `HandShaker` in Mac's app store for file transfer on Android devices. This app is a better alternative for `AndroidFileTransfer`
+
 
 
 

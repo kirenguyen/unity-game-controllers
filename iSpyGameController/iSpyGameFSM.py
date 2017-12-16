@@ -13,6 +13,8 @@ import _thread as thread
 # pylint: disable=import-error
 from transitions import Machine
 
+
+
 # from GameUtils import Curriculum
 from GameUtils import GlobalSettings
 from GameUtils.GlobalSettings import iSpyGameStates as gs
@@ -22,6 +24,7 @@ from GameUtils.PronunciationUtils.PronunciationUtils import PronunciationUtils
 
 
 from .ROSNodeMgr import ROSNodeMgr
+from .iSpyDataTracking import iSpyDataTracking
 #from .StudentModel import StudentModel
 from .RobotBehaviorList.RobotBehaviorList import RobotBehaviors
 from .RobotBehaviorList.RobotBehaviorList import RobotRoles
@@ -30,6 +33,7 @@ from .RobotBehaviorList.RobotBehaviorList import RobotRolesBehaviorsMap
 from .AffdexAnalysis.node_AffdexResponse import AffdexAnalysis
 
 from .RoleSwitchingPrj.ChildRobotInteractionFSM import ChildRobotInteractionFSM
+
 from .GameModeFSMs import AlwaysMissionModeFSM,CompleteModeFSM,AlwaysExploreModeFSM
 
 # from StudentModel import StudentModel
@@ -93,8 +97,11 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		self.results_handler = PronunciationUtils()
 
+		
+
 		self.interaction = ChildRobotInteractionFSM(self.ros_node_mgr,self.task_controller)
 
+		self.iSpyDataTracking = iSpyDataTracking(self.interaction)
 
 		# Times entered explore or mission mode not including on game start
 		self.entered_explore_mode = 0
@@ -117,6 +124,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 		self.FSM = AlwaysMissionModeFSM(self.ros_node_mgr)
 
 		self.affdexAnalysis = AffdexAnalysis(self.ros_node_mgr)
+
+
 
 		self.override_FSM_transition_callback()
 
@@ -178,8 +187,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		"""
 		Rospy Callback for when we get log messages
 		"""
-		# print ("---------------------------------------------------------------")
-		# print("I heard " + transition_msg.data)
+		
 		if transition_msg.data in gs.Triggers.triggers:
 			if transition_msg.data == gs.Triggers.TOPLEFT_BUTTON_PRESSED:
 				# robot celebrate 
@@ -192,7 +200,6 @@ class iSpyGameFSM: # pylint: disable=no-member
 					self.entered_explore_mode += 1
 					# Start keeping track of how long in explore mode
 					self.explore_time_start = time.time()
-
 
 				if self.FSM.get_state() == gs.EXPLORATION_MODE:
 					# If the player is switching from explore to mission mode
@@ -215,6 +222,10 @@ class iSpyGameFSM: # pylint: disable=no-member
 				elif self.FSM.get_state() == gs.PRONUNCIATION_RESULT:
 					self.interaction.react(gs.Triggers.PRONUNCIATION_PANEL_CLOSED)
 					self.interaction.turn_taking()
+					if self.interaction.state == ris.CHILD_TURN:
+						time.sleep(3)
+						self.iSpyDataTracking.on_start_tracking_child_interact()
+				
 
 			elif transition_msg.data == gs.Triggers.TARGET_OBJECT_COLLECTED:
 				# one of the target objects is successfully collected. give the turn to the other player now
@@ -232,7 +243,6 @@ class iSpyGameFSM: # pylint: disable=no-member
 					self.interaction.react(gs.Triggers.SAY_BUTTON_PRESSED, 1)
 
 			elif transition_msg.data == gs.Triggers.SCREEN_MOVED:
-				print("**************screen moved here")
 				self.interaction.react(gs.Triggers.SCREEN_MOVED)
 
 			# If the message is in gs.Triggers, then allow the trigger
@@ -258,31 +268,10 @@ class iSpyGameFSM: # pylint: disable=no-member
 		"""
 
 		
+		print('on ispy action received...')
 
 		
-		def isScalingUp(boolean):			
-			if boolean:
-				print ("Fine at this point")
-		def isScalingDown(boolean):
-			if boolean:
-				print ("Fine at this point")
-		def pointerClick(boolean):
-			if boolean:
-				print ("Fine at this point")
-		def pointerPosition(coord_list):
-			pass
-			# if coord_list:
-			# 	print ("Fine at this point")
-		def isDragging(boolean):
-			if boolean:
-				print ("Fine at this point")
-		def clickedObjectName(object_name):
-			if object_name:	
-				self.origText = object_name		#Sets origText to the object clicked
-
-		def onPinch(boolean):
-			if boolean:
-				print ("Fine at this point")
+		self.iSpyDataTracking.on_ispy_action_received(ispy_action_msg)
 
 		def speakingStage(stage):
 			if stage == "speakingStart":
@@ -296,25 +285,16 @@ class iSpyGameFSM: # pylint: disable=no-member
 			"""Calls the respective functions for each part of the action msg
 			"""
 
-			isScalingUp(ispy_action_msg.isScalingUp)
-			isScalingDown(ispy_action_msg.isScalingDown)
-			pointerClick(ispy_action_msg.pointerClick)
-			pointerPosition(ispy_action_msg.pointerPosition)
-			isDragging(ispy_action_msg.isDragging)
-			onPinch(ispy_action_msg.onPinch)
-
 			#Removes object position from ispy_action_msg
 			object_name = ""
 			for letter in ispy_action_msg.clickedObjectName:
 				if letter == "-":
 					break
 				object_name += letter
-
-			clickedObjectName(object_name)
+			if object_name: self.origText = object_name
 
 			#Initializes a new audio recorder object if one hasn't been created
-			if self.recorder == None:
-				self.recorder = AudioRecorder()
+			if self.recorder == None: self.recorder = AudioRecorder()
 	
 			# print (ispy_action_msg.speakingStage)
 			speakingStage(ispy_action_msg.speakingStage)
@@ -325,15 +305,21 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		self._speechace_analysis()
 
+		if self.interaction.state == ris.CHILD_TURN: self.iSpyDataTracking.on_start_tracking_child_interact() # start tracking the elapsed time of child's lack of tablet interaction
+
+
 		
 			
 	def _speechace_analysis(self):
 		'''
 		speech ace analysis
 		'''
-		
+		print("speech ace ")
+		print(self.origText)
+
 		# If given a word to evaluate and done recording send the information to speechace
 		if self.origText and self.recorder.has_recorded % 2 == 0 and self.recorder.has_recorded != 0:
+			print("yay!!!")
 			# If you couldn't find the android audio topic, automatically pass
 			# instead of using the last audio recording
 			if not self.recorder.valid_recording:
@@ -371,6 +357,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 					self.task_controller.update_target_list(self.origText)
 					self.origText = ""
 
+			
+			print(results_params)
 			self.ros_node_mgr.send_ispy_cmd(SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, results_params)
 			self.recorder.has_recorded = 0
 			# if not self.task_controller.task_in_progress:
@@ -393,10 +381,12 @@ class iSpyGameFSM: # pylint: disable=no-member
 				self.ros_node_mgr.send_ispy_cmd(GAME_FINISHED)
 			else:
 				self.ros_node_mgr.send_ispy_cmd(SEND_TASKS_TO_UNITY, task)
-				print("****run game task. get turn taking actions")
-				#self.interaction.get_turn_taking_actions()
 				self.interaction.reset_turn_taking()
 				self.interaction.get_robot_general_response()
+				
+				if self.interaction.state == ris.CHILD_TURN:
+					time.sleep(3)
+					self.iSpyDataTracking.on_start_tracking_child_interact()
 
 
 	def _on_obj_clicked(self):
@@ -419,4 +409,5 @@ class iSpyGameFSM: # pylint: disable=no-member
 	
 
 
+	
 

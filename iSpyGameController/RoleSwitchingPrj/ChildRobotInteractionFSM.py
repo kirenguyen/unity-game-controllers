@@ -65,7 +65,7 @@ class ChildRobotInteractionFSM:
 			# robot's virtual actions on the tablet
 			self.virtual_action = ""
 
-			self.robot_response = self.role_behavior_mapping.get_robot_general_responses()
+			#self.robot_response = self.role_behavior_mapping.get_robot_general_responses()
 
 			self.role = ""
 
@@ -107,8 +107,22 @@ class ChildRobotInteractionFSM:
 				# robot intervenes (robot spies an object for the child)
 				# select an object and then find it for the child
 				self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ)
-				getattr(self, ris.Triggers.ROBOT_HELP_TRIGGER)() 
+			
+				action = RobotBehaviors.ROBOT_OFFER_HELP
+
+				question_query_path = '/'.join([self.role.name.lower(), self.state.replace('TURN',''), action])
+				print("question query!!")
+				print(question_query_path)
+
+				question_query = self.question_answer_dict[question_query_path]
+				question_speech_file = ROOT_TEGA_SPEECH_FOLDER + "questions/" +question_query['question'][0]+".wav"
+					
+				print(question_speech_file)
+				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, question_speech_file)
 				
+				getattr(self, ris.Triggers.ROBOT_HELP_TRIGGER)()
+
+
 		def on_tega_state_received(self,data):
 			## call back function when a tega state message is received from Tega phone.
 			# this function should be called multiple times per second
@@ -139,6 +153,8 @@ class ChildRobotInteractionFSM:
 			self.state = ris.CHILD_TURN
 			
 		def turn_taking(self):
+
+			print("turn taking...")
 			
 			if self.task_controller.task_in_progress:
 				# check whether it is robot's turn or child's turn in the game play
@@ -164,7 +180,6 @@ class ChildRobotInteractionFSM:
 
 				self.ros_node_mgr.send_ispy_cmd(iSpyCommand.WHOSE_TURN, {"whose_turn":self.state})
 
-			
 				# update the number of available objects for child's learning states
 				self.child_states.set_num_available_objs(self.task_controller.get_num_available_target_objs())
 				# robot's response 
@@ -173,33 +188,29 @@ class ChildRobotInteractionFSM:
 
 
 		
-		def react(self,gameStateTrigger, command=0):
+		def react(self,gameStateTrigger, clicked_right_obj=False):
 			'''
 			react to ispy game state change
 			'''
 			if gameStateTrigger == gs.Triggers.TARGET_OBJECT_COLLECTED:
-				self._perform_robot_physical_action(ras.PRONOUNCE_CORRECT)
-				self._perform_robot_physical_action(ras.TURN_FINISHED)
-				if self.state == ris.CHILD_TURN or self.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
-					# the child finds the correct object
-					self.child_states.update_child_turn_result(True)
+				pass
 
 			elif gameStateTrigger  == gs.Triggers.OBJECT_CLICKED:
 				if self.state == ris.ROBOT_TURN or self.state == ris.CHILD_TURN+'_'+ris.ROBOT_HELP:
-					if random.random() < 0.75:
+					#if random.random() < 0.75:
 						
-						self._perform_robot_physical_action(ras.OBJECT_FOUND)
-					else:
+					self._perform_robot_physical_action(ras.OBJECT_FOUND)
+					# else:
 						
-						self._perform_robot_physical_action(ras.OBJECT_CLICKED)
+					# 	self._perform_robot_physical_action(ras.OBJECT_CLICKED)
 
 					self._wait_until() # wait until robot is done speaking. then click and pronounce the word
 					self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_CLICK_SAY_BUTTON)
 
-				if self.state == ris.CHILD_TURN or self.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
+				if (self.state == ris.CHILD_TURN or self.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP) and self.role == RobotRoles.EXPERT:
 					# Check to see if the object is incorrect
 					# If correct, given assertion 
-					if command == 0:
+					if clicked_right_obj == True:
 						self._perform_robot_physical_action(ras.OBJECT_FOUND)
 					# If incorrect, show doubt 
 					else:
@@ -208,17 +219,27 @@ class ChildRobotInteractionFSM:
 			elif gameStateTrigger  == gs.Triggers.SAY_BUTTON_PRESSED:
 				self._perform_robot_physical_action(ras.OBJECT_PRONOUNCED)
 
+				
+
+			elif gameStateTrigger  == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
 				# Check to see if it is incorrect
 				# If correct, will be within target_object_collected -> Happy emotion
 				# If incorrect, not target_object -> Sad emotion 
-				if command == 1 and random.random() < 0.75:
-					time.sleep(2)
+				if clicked_right_obj == False:
 					self._perform_robot_physical_action(ras.WRONG_OBJECT_FAIL)
+					self._perform_robot_physical_action(ras.TURN_FINISHED)
+					if self.state == ris.CHILD_TURN or self.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
+						# the child finds the correct object
+						self.child_states.update_child_turn_result(False)
 
-			elif gameStateTrigger  == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
-				if self.state == ris.CHILD_TURN or self.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
-					# the child finds the correct object
-					self.child_states.update_child_turn_result(False)
+				elif clicked_right_obj == True:
+					self._perform_robot_physical_action(ras.PRONOUNCE_CORRECT)
+					self._perform_robot_physical_action(ras.TURN_FINISHED)
+					if self.state == ris.CHILD_TURN or self.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
+						# the child finds the correct object
+						self.child_states.update_child_turn_result(True)
+
+					
 
 			elif gameStateTrigger == gs.Triggers.SCREEN_MOVED:
 				self._perform_robot_physical_action(ras.SCREEN_MOVED)
@@ -228,6 +249,7 @@ class ChildRobotInteractionFSM:
 					time.sleep(1)
 					self._wait_until()
 					self._perform_robot_virtual_action(self.virtual_action)
+
 
 		def _wait_until(self):
 			'''
@@ -349,25 +371,28 @@ class ChildRobotInteractionFSM:
 				
 				actions = self.physical_actions[action_type]['question']
 				for action in actions:
-					action = self.role_behavior_mapping.get_action_name(action)
+					ran = random.random() 
+					print("random: "+str(ran))
+					if (action == RobotBehaviors.ROBOT_ASK_HELP and ran <0.2) or action != RobotBehaviors.ROBOT_ASK_HELP:
+						action = self.role_behavior_mapping.get_action_name(action)
 
-					question_query_path = '/'.join([self.role.name.lower(), self.state.replace('TURN',''), action])
-					print("question query!!")
-					print(question_query_path)
+						question_query_path = '/'.join([self.role.name.lower(), self.state.replace('TURN',''), action])
+						print("question query!!")
+						print(question_query_path)
 
-					question_query = self.question_answer_dict[question_query_path]
-					question_speech_file = question_query_path + "/" +question_query['question'][0]+".wav"
+						question_query = self.question_answer_dict[question_query_path]
+						question_speech_file = ROOT_TEGA_SPEECH_FOLDER + "questions/" +question_query['question'][0]+".wav"
 					
-					print(question_speech_file)
-					self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, question_speech_file)
-					print("action: "+RobotBehaviors.ROBOT_ASK_HELP)
-					print(action)
-					if action == RobotBehaviors.ROBOT_ASK_HELP:
-						# robot asks the child to help find an object
-						# send a ros command to enable child's interaction with the tablet
-						self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":RobotBehaviors.ROBOT_ASK_HELP,"clicked_object":""})
-						getattr(self, ris.Triggers.CHILD_HELP_TRIGGER)()
-						print("current state: "+self.state)
+						print(question_speech_file)
+						self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, question_speech_file)
+						print("action: "+action)
+						
+						if action == RobotBehaviors.ROBOT_ASK_HELP:
+							# robot asks the child to help find an object
+							# send a ros command to enable child's interaction with the tablet
+							self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":RobotBehaviors.ROBOT_ASK_HELP,"clicked_object":""})
+							getattr(self, ris.Triggers.CHILD_HELP_TRIGGER)()
+							print("current state: "+self.state)
 			
 
 		def _perform_robot_virtual_action(self,action):

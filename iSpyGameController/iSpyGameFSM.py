@@ -12,6 +12,7 @@ import _thread as thread
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error
 from transitions import Machine
+import threading
 
 
 
@@ -154,7 +155,9 @@ class iSpyGameFSM: # pylint: disable=no-member
 		else:
 			pass
 			#print ("Entered explore mode")
-		
+	
+	def onWordDisplay(self):
+		pass
 
 	def onMissionMode(self):
 		'''callback function when entering mission mode '''
@@ -176,17 +179,12 @@ class iSpyGameFSM: # pylint: disable=no-member
 		#print (self.tapped_and_pronounced)
 
 
-	def onWordDisplay(self):
-		'''callback function when entering word display'''
-		#TODO: show word bubbles for the clicked object
-		#TODO: set a timer variable. If the elapsed time > 5 secs, then the bubble disappear
-		#print ("Entered dialogue panel")
-		pass
-
 	def on_ispy_state_info_received(self,transition_msg):
 		"""
 		Rospy Callback for when we get log messages
 		"""
+
+		
 		
 		if transition_msg.data in gs.Triggers.triggers:
 			if transition_msg.data == gs.Triggers.TOPLEFT_BUTTON_PRESSED:
@@ -211,6 +209,12 @@ class iSpyGameFSM: # pylint: disable=no-member
 			elif transition_msg.data == gs.Triggers.OBJECT_CLICKED:
 				time.sleep(.1)
 				self._on_obj_clicked()
+
+				# print("threading count:")
+				# print(threading.active_count())
+				self.iSpyDataTracking.on_stop_tracking_child_interaction()
+				# print("after killing")
+				# print(threading.active_count())
 				
 
 			elif transition_msg.data == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
@@ -222,9 +226,10 @@ class iSpyGameFSM: # pylint: disable=no-member
 				elif self.FSM.get_state() == gs.PRONUNCIATION_RESULT:
 					self.interaction.react(gs.Triggers.PRONUNCIATION_PANEL_CLOSED)
 					self.interaction.turn_taking()
-					if self.interaction.state == ris.CHILD_TURN:
+					if self.interaction.state == ris.CHILD_TURN: # when a new turn is child's, then start tracking the child's interaction
+						print("start tracking child interaction....")
 						time.sleep(3)
-						self.iSpyDataTracking.on_start_tracking_child_interact()
+						self.iSpyDataTracking.on_start_tracking_child_interaction()
 				
 
 			elif transition_msg.data == gs.Triggers.TARGET_OBJECT_COLLECTED:
@@ -238,9 +243,9 @@ class iSpyGameFSM: # pylint: disable=no-member
 				
 			elif transition_msg.data == gs.Triggers.SAY_BUTTON_PRESSED:
 				if self.task_controller.isTarget(self.origText):
-					self.interaction.react(gs.Triggers.SAY_BUTTON_PRESSED)
+					self.interaction.react(gs.Triggers.SAY_BUTTON_PRESSED, True)
 				else:
-					self.interaction.react(gs.Triggers.SAY_BUTTON_PRESSED, 1)
+					self.interaction.react(gs.Triggers.SAY_BUTTON_PRESSED, False)
 
 			elif transition_msg.data == gs.Triggers.SCREEN_MOVED:
 				self.interaction.react(gs.Triggers.SCREEN_MOVED)
@@ -301,7 +306,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		self._speechace_analysis()
 
-		if self.interaction.state == ris.CHILD_TURN: self.iSpyDataTracking.on_start_tracking_child_interact() # start tracking the elapsed time of child's lack of tablet interaction
+		if self.interaction.state == ris.CHILD_TURN: self.iSpyDataTracking.on_start_tracking_child_interaction() # start tracking the elapsed time of child's lack of tablet interaction
 
 
 		
@@ -381,7 +386,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 				
 				
 				time.sleep(3)
-				self.iSpyDataTracking.on_start_tracking_child_interact()
+				self.iSpyDataTracking.on_start_tracking_child_interaction()
 
 
 	def _on_obj_clicked(self):

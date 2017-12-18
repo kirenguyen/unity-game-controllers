@@ -37,12 +37,11 @@ class iSpyDataTracking:
 
 		self.ispy_action_log_csv.write(','.join(map(str,[elapsedTime,str(datetime.now()), isScalingUpDown, data.pointerClick,data.isDragging,data.onPinch,object_name,data.speakingStage ])))
 	
-	def on_start_tracking_child_interact(self):
+	def on_start_tracking_child_interaction(self):
 		'''
 		callback function on tracking child's engagment with the tablet. 
 		called by ChildRobotInteraction
 		'''
-
 
 		# start a new thread to keep track of elapsed time
 		def elapsed_time_alert(stop):
@@ -52,18 +51,15 @@ class iSpyDataTracking:
 			while True:
 				delta_time = datetime.now() - start_time
 				if stop():
-					#print("************threading..  Exiting loop.")
 					break
 				if delta_time.total_seconds() > 20:
 					self.child_robot_FSM.on_no_ispy_action_alert(2)
 					break
-				elif delta_time.total_seconds() > 8 and alerted_once == False :
+				elif delta_time.total_seconds() > 10 and alerted_once == False :
 					# 10 secs have passed without receiving any tablet interaction input from the cihld
 					self.child_robot_FSM.on_no_ispy_action_alert(1)
-					alerted_once = True
-					
+					alerted_once = True		
 				
-			#print("=====Thread signing off")
 		if self.child_robot_FSM.state == ris.CHILD_TURN: 
 			time.sleep(1)
 			self.stop_thread_flag = False
@@ -72,7 +68,8 @@ class iSpyDataTracking:
 		else:
 			self.stop_thread_flag = True
 		
-
+	def on_stop_tracking_child_interaction(self):
+		self.stop_thread_flag = True
 
 	def on_ispy_child_learning_received(self,data):
 		pass

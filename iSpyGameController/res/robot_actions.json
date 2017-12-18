@@ -269,7 +269,13 @@
         "WRONG_OBJECT_FAIL":{
           "general": [
           ]
+        },
+        "SCREEN_MOVED": {
+          "general": [
+            "ROBOT_COMFORT"
+          ]
         }
+
       },
       "virtual":[]
 
@@ -278,17 +284,17 @@
       "physical":{
         "TURN_FINISHED": {
           "general": [
-            "ROBOT_childTURN_SPEECH", 
-            "ROBOT_ASK_HELP_SPEECH"
+            "GENERAL_CURIOSITY_SPEECH"
           ]
         },
         "TURN_STARTED": {
           "general": [
-            "LOOK_AT_TABLET"
+            "ROBOT_EXCITED"
           ]
         },
         "SCREEN_MOVED": {
           "general": [
+            "ROBOT_COMFORT"
           ]
         },
         "OBJECT_CLICKED": {
@@ -298,7 +304,7 @@
         },
         "OBJECT_FOUND": {
           "general": [
-            "LOOK_AT_TABLET"
+            "ROBOT_YES"
           ]
         },
         "OBJECT_PRONOUNCED":{
@@ -308,7 +314,7 @@
         },
         "PRONOUNCE_CORRECT":{
           "general": [
-            "ROBOT_CELEBRATION", 
+            "ROBOT_YES", 
             "ROBOT_HAPPY_DANCE"
           ]
         },
@@ -319,7 +325,7 @@
         },
         "WRONG_OBJECT_FAIL":{
           "general": [
-            "ROBOT_COMFORT_SPEECH"
+            "ROBOT_SAD"
           ]
         }
       },

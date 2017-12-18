@@ -33,6 +33,8 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     ROBOT_WINK = 'ROBOT_WINK'
     ROBOT_THINKING = 'ROBOT_THINKING'
 
+    ROBOT_OFFER_HELP = "ROBOT_OFFER_HELP"
+
     ROBOT_SAY_WORD = 'ROBOT_SAY_WORD'
     
     # Negative Emotions
@@ -131,10 +133,7 @@ class RobotRolesBehaviorsMap:
         try:
             role = role.name
         except:
-            role = role
-        print("role...")
-        print(type(role))
-        print(role)
+            role = "BACKUP"
         return self.robot_actions_dict[role][robot_turn][physical_virtual]
         
   

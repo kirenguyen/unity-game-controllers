@@ -1,103 +1,103 @@
 {
 	"general/expert/child":[
-		"object_clicked_1",
-		"object_clicked_2",
+		"OBJECT_CLICKED_1",
+		"OBJECT_CLICKED_2",
 
-		"object_found_1",
-		"object_found_2",
-		"objec_found_3",
+		"OBJECT_FOUND_1",
+		"OBJECT_FOUND_2",
+		"OBJECT_FOUND_3",
 
-		"wrong_object_fail_1",
-		"wrong_object_fail_2",
-		"wrong_object_fail_3",
+		"WRONG_OBJECT_FAIL_1",
+		"WRONG_OBJECT_FAIL_2",
+		"WRONG_OBJECT_FAIL_3",
 
-		"pronounce_correct_1",
-		"pronounce_correct_2",
+		"PRONOUNCE_CORRECT_1",
+		"PRONOUNCE_CORRECT_2",
 
-		"turn_switching_1",
-		"turn_switching_2",
+		"TURN_FINISHED_1",
+		"TURN_FINISHED_2",
 
-		"turn_starting_1",
-		"turn_starting_2",
-		"turn_starting_3"
+		"TURN_STARTED_1",
+		"TURN_STARTED_2",
+		"TURN_STARTED_3"
 	],
 
 
 	"general/expert/robot":[
-		"object_clicked_1",
-		"object_clicked_2",
+		"OBJECT_CLICKED_1",
+		"OBJECT_CLICKED_2",
 
-		"object_found_1",
-		"object_found_2",
-		"objec_found_3",
+		"OBJECT_FOUND_1",
+		"OBJECT_FOUND_2",
+		"OBJECT_FOUND_3",
 	
 	
-		"turn_switching_1",
-		"turn_switching_2",
-		"turn_switching_3",
+		"TURN_FINISHED_1",
+		"TURN_FINISHED_2",
+		"TURN_FINISHED_3",
 
-		"turn_starting_1",
-		"turn_starting_2",
+		"TURN_STARTED_1",
+		"TURN_STARTED_2",
 
-		"screen_moving_1",
-		"screen_moving_2",
-		"screen_moving_3"
+		"SCREEN_MOVED_1",
+		"SCREEN_MOVED_2",
+		"SCREEN_MOVED_3"
 	],
 
 	"general/novice/child":[
 		
-		"object_clicked_2",
+		"OBJECT_CLICKED_2",
 
-		"object_found_1",
-		"object_found_2",
-		"objec_found_3",
+		"OBJECT_FOUND_1",
+		"OBJECT_FOUND_2",
+		"OBJECT_FOUND_3",
 
-		"wrong_object_fail_1",
-		"wrong_object_fail_2",
-		"wrong_object_fail_3",
+		"WRONG_OBJECT_FAIL_1",
+		"WRONG_OBJECT_FAIL_2",
+		"WRONG_OBJECT_FAIL_3",
 
-		"pronounce_correct_1",
-		"pronounce_correct_2",
-		"pronounce_correct_3",
+		"PRONOUNCE_CORRECT_1",
+		"PRONOUNCE_CORRECT_2",
+		"PRONOUNCE_CORRECT_3",
 
-		"turn_switching_1",
-		"turn_switching_2",
-		"turn_switching_3",
+		"TURN_FINISHED_1",
+		"TURN_FINISHED_2",
+		"TURN_FINISHED_3",
 
-		"turn_starting_1",
-		"turn_starting_2",
-		"turn_starting_3",
+		"TURN_STARTED_1",
+		"TURN_STARTED_2",
+		"TURN_STARTED_3",
 
-		"screen_moving_1",
-		"screen_moving_2"
+		"SCREEN_MOVED_1",
+		"SCREEN_MOVED_2"
 		
 	],
 
 	"general/novice/robot":[
-		"object_clicked_3",
-		"object_clicked_4",
+		"OBJECT_CLICKED_3",
+		"OBJECT_CLICKED_4",
 
-		"object_found_1",
-		"object_found_2",
-		"objec_found_3",
+		"OBJECT_FOUND_1",
+		"OBJECT_FOUND_2",
+		"OBJECT_FOUND_3",
 	
-		"turn_switching_1",
-		"turn_switching_2",
-		"turn_switching_3",
+		"TURN_FINISHED_1",
+		"TURN_FINISHED_2",
+		"TURN_FINISHED_3",
 
-		"turn_starting_1",
-		"turn_starting_2",
-		"turn_starting_3",
-		"turn_starting_4",
+		"TURN_STARTED_1",
+		"TURN_STARTED_2",
+		"TURN_STARTED_3",
+		"TURN_STARTED_4",
 
-		"screen_moving_2",
-		"screen_moving_3",
+		"SCREEN_MOVED_2",
+		"SCREEN_MOVED_3",
 
-		"pronounce_correct_2",
+		"PRONOUNCE_CORRECT_2",
 
-		"wrong_object_fail_1",
-		"wrong_object_fail_2",
-		"wrong_object_fail_3"
+		"WRONG_OBJECT_FAIL_1",
+		"WRONG_OBJECT_FAIL_2",
+		"WRONG_OBJECT_FAIL_3"
 	],
 
 	"general/speech":[

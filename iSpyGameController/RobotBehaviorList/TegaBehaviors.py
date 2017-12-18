@@ -64,25 +64,6 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_look_at = True
             msg.look_at = lookat_pos
 
-        """
-        if command == RobotBehaviors.LOOK_LEFT_RIGHT:
-            lookat_pos = Vec3()
-            lookat_pos.x = 0
-            lookat_pos.y = -10
-            lookat_pos.z = 20
-            msg.do_look_at = True
-            msg.look_at = lookat_pos
-
-        if command == RobotBehaviors.LOOK_DOWN_CENTER:
-            lookat_pos = Vec3()
-            lookat_pos.x = 0
-            lookat_pos.y = -10
-            lookat_pos.z = 20
-            msg.do_look_at = True
-            msg.look_at = lookat_pos
-        """
-
-
         ## Positive Commands
         if command == RobotBehaviors.ROBOT_EXCITED:
             msg.motion = TegaAction.MOTION_EXCITED
@@ -134,11 +115,11 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
 
         # Tega speech commands
         if command == RobotBehaviors.ROBOT_CUSTOM_SPEECH:
-            msg.wav_filename = args[0][0]
+            msg.wav_filename = args[0][0].lower()
             msg.enqueue = True
-            print(msg.wav_filename)
+            print(msg.wav_filename) 
 
-        ## Tega Speech for Curiosity Assessment
+        ### ============= Tega Speech for Curiosity Assessment =====================
 
         # General Curiosity Speech
         if command == RobotBehaviors.GENERAL_CURIOSITY_SPEECH:

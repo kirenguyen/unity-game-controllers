@@ -48,18 +48,18 @@ class iSpyGameStates(): # pylint: disable=too-few-public-methods
     WORD_DISPLAY = "wordDISPLAY"
 
     class Triggers():
-        SCREEN_MOVED = "screenMoved"
+        SCREEN_MOVED = "SCREEN_MOVED"
 
-        START_BUTTON_PRESSED = "startButtonPressed"
-        TOPLEFT_BUTTON_PRESSED = "topLeftButtonPressed"
-        OBJECT_CLICKED = "objectClicked"
-        SAY_BUTTON_PRESSED = "sayButtonPressed"
-        TARGET_OBJECT_COLLECTED = "targetObjectCollected"
-        PRONUNCIATION_PANEL_CLOSED = "pronunciationPanelClosed"
-        PRACTICE_FINISHED = "practiceFinished"
-        PRACTICE_FAILED = "practiceFailed"
-        N_SECONDS_LATER = "secondsLater"
-        triggers = ["screenMoved", "startButtonPressed","targetObjectCollected","pronunciationPanelClosed","topLeftButtonPressed","objectClicked","sayButtonPressed", "closeButtonPressed", "practiceFinished", "practiceFailed", "secondsLater"]
+        START_BUTTON_PRESSED = "START_BUTTON_PRESSED"
+        TOPLEFT_BUTTON_PRESSED = "TOPLEFT_BUTTON_PRESSED"
+        OBJECT_CLICKED = "OBJECT_CLICKED"
+        SAY_BUTTON_PRESSED = "SAY_BUTTON_PRESSED"
+        TARGET_OBJECT_COLLECTED = "TARGET_OBJECT_COLLECTED"
+        PRONUNCIATION_PANEL_CLOSED = "PRONUNCIATION_PANEL_CLOSED"
+        PRACTICE_FINISHED = "PRACTICE_FINISHED"
+        PRACTICE_FAILED = "PRACTICE_FAILED"
+        N_SECONDS_LATER = "N_SECONDS_LATER"
+        triggers = [N_SECONDS_LATER, PRACTICE_FAILED,PRACTICE_FINISHED ,PRONUNCIATION_PANEL_CLOSED,TARGET_OBJECT_COLLECTED, SAY_BUTTON_PRESSED,SCREEN_MOVED, START_BUTTON_PRESSED ,TOPLEFT_BUTTON_PRESSED,OBJECT_CLICKED]
 
     def __init__(self):
         pass
@@ -68,11 +68,15 @@ class iSpyRobotInteractionStates():
     ROBOT_TURN="robotTURN"
     CHILD_TURN="childTURN"
     ROBOT_HELP = "robotHelp"
-    
+    CHILD_HELP = "childHelp"
+    QUESTION_ASKING="questionAsking"
+
     class Triggers():
         CHILD_TURN_DONE="childTurnDone"
         ROBOT_TURN_DONE="robotTurnDone"
         ROBOT_HELP_TRIGGER="robotHelpTigger"
+        CHILD_HELP_TRIGGER="childHelpTrigger"
+        ROBOT_QUESTION="robotQuestion"
 
 class TapGameCommand(): # pylint: disable=too-few-public-methods
     """

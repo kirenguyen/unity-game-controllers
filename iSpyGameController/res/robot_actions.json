@@ -1,0 +1,334 @@
+{
+  "EXPERT":{
+    "robotTURN": {
+      "physical":{
+        "TURN_FINISHED": {
+          "general": [
+            "ROBOT_ENCOURAGING"
+          ]
+        },
+        "TURN_STARTED": {
+          "general": [
+            "ROBOT_INTERESTED", 
+            "LOOK_AT_TABLET"
+          ]
+        },
+        "SCREEN_MOVED": {
+          "general": [
+          
+          ]
+        },
+        "OBJECT_CLICKED": {
+          "general": [
+            "ROBOT_CURIOUS"
+          ]
+        },
+        "OBJECT_FOUND": {
+          "general": [
+            "ROBOT_CURIOU"
+          ]
+        },
+        "OBJECT_PRONOUNCED":{
+          "general": [
+            "LOOK_CENTER", 
+            "ROBOT_SAY_WORD"
+          ]
+        },
+        "PRONOUNCE_CORRECT":{
+          "general": [
+            "ROBOT_CELEBRATION"
+          ]
+        },
+        "RESULTS_RETURNED":{
+          "general": [
+          
+          ]
+        },
+        "WRONG_OBJECT_FAIL":{
+          "general": [
+          
+          ]
+        }
+      },
+
+      "virtual":["VIRTUALLY_CLICK_CORRECT_OBJ"]
+    },
+    "childTURN": {
+
+      "physical": {
+        "TURN_FINISHED": {
+          "general": [
+            "ROBOT_EXCITED"
+          ]
+        },
+        "TURN_STARTED": {
+          "general": [
+            "ROBOT_ATTENTION"
+          ]
+        },
+        "SCREEN_MOVED": {
+          "general": [
+            "ROBOT_COMFORT", "LOOK_CENTER"
+          ]
+        },
+        "OBJECT_CLICKED": {
+          "general": [
+            "ROBOT_UNSURE"
+          ]
+        },
+        "OBJECT_FOUND": {
+          "general": [
+            "ROBOT_YES"
+          ]
+        },
+        "OBJECT_PRONOUNCED":{
+          "general": [
+            "LOOK_CENTER", 
+            "ROBOT_ATTENTION"
+          ]
+        },
+        "PRONOUNCE_CORRECT":{
+          "general": [
+            "ROBOT_HAPPY_DANCE"
+          ]
+        },
+        "RESULTS_RETURNED":{
+          "general": [
+          
+          ]
+        },
+        "WRONG_OBJECT_FAIL":{
+          "general": [
+            "ROBOT_SAD"
+          ]
+        }
+      },
+
+      "virtual":[]
+    }
+  },
+
+
+
+
+  "NOVICE":{
+    "robotTURN": {
+      "physical":{
+        "TURN_FINISHED": {
+          "general": [
+            "LOOK_CENTER", 
+            "ROBOT_CURIOUS"
+          ]
+        },
+        "TURN_STARTED": {
+          "general": [
+            "ROBOT_EXCITED", 
+            "LOOK_AT_TABLET"
+          ]
+          
+        },
+        "SCREEN_MOVED": {
+          "general": [
+          
+          ],
+          "question":[
+            "ROBOT_ASK_HELP"
+          ]
+        },
+        "OBJECT_CLICKED": {
+          "general": [
+            "ROBOT_UNSURE"
+          ]
+        },
+        "OBJECT_FOUND": {
+          "general": [
+            "ROBOT_UNSURE"
+          ]
+        },
+        "OBJECT_PRONOUNCED":{
+          "general": [
+            "ROBOT_SAY_WORD"
+          ]
+        },
+        "PRONOUNCE_CORRECT":{
+          "general": [
+            "ROBOT_HAPPY_DANCE"
+          ]
+        },
+        "RESULTS_RETURNED":{
+          "general": [
+          
+          ]
+        },
+        "WRONG_OBJECT_FAIL":{
+          "general": [
+            
+          ]
+        }
+      },
+
+      "virtual":["VIRTUALLY_CLICK_WRONG_OBJ"]
+    },
+
+
+    "childTURN": {
+      "physical":{
+        "TURN_FINISHED": {
+          "general": [
+            "ROBOT_WINK"
+          ]
+        },
+        "TURN_STARTED": {
+          "general": [
+            "LOOK_CENTER", 
+            "ROBOT_INTERESTED"
+          ]
+        },
+        "SCREEN_MOVED": {
+          "general": [
+            "ROBOT_COMFORT", 
+            "LOOK_CENTER"
+          ]
+        },
+        "OBJECT_CLICKED": {
+          "general": [
+            "LOOK_AT_TABLET"
+          ]
+        },
+        "OBJECT_FOUND": {
+          "general": [
+            "LOOK_AT_TABLET", 
+            "LOOK_CENTER"
+          ]
+        },
+        "OBJECT_PRONOUNCED":{
+          "general": [
+            "LOOK_CENTER", 
+            "ROBOT_ATTENTION"
+          ]
+        },
+        "PRONOUNCE_CORRECT":{
+          "general": [
+            "ROBOT_HAPPY_DANCE"
+          ]
+        },
+        "RESULTS_RETURNED":{
+          "general": [
+          
+          ]
+        },
+        "WRONG_OBJECT_FAIL":{
+          "general": [
+            "ROBOT_SAD"
+          ]
+        }
+      },
+
+      "virtual":[]
+    }
+  },
+
+
+
+
+  "BACKUP":{
+    "robotTURN": {
+      "physical":{
+        "TURN_FINISHED": {
+          "general": [
+          ]
+        },
+        "TURN_STARTED": {
+          "general": [
+          ]
+        },
+        "SCREEN_MOVED": {
+          "general": [  
+          ]
+        },
+        "OBJECT_CLICKED": {
+          "general": [
+          ]
+        },
+        "OBJECT_FOUND": {
+          "general": [
+          ]
+        },
+        "OBJECT_PRONOUNCED":{
+          "general": [
+          ]
+        },
+        "PRONOUNCE_CORRECT":{
+          "general": [
+          ]
+        },
+        "RESULTS_RETURNED":{
+          "general": [
+          ]
+        },
+        "WRONG_OBJECT_FAIL":{
+          "general": [
+          ]
+        }
+      },
+      "virtual":[]
+
+    },
+    "childTURN": {
+      "physical":{
+        "TURN_FINISHED": {
+          "general": [
+            "ROBOT_childTURN_SPEECH", 
+            "ROBOT_ASK_HELP_SPEECH"
+          ]
+        },
+        "TURN_STARTED": {
+          "general": [
+            "LOOK_AT_TABLET"
+          ]
+        },
+        "SCREEN_MOVED": {
+          "general": [
+          ]
+        },
+        "OBJECT_CLICKED": {
+          "general": [
+            "LOOK_AT_TABLET"
+          ]
+        },
+        "OBJECT_FOUND": {
+          "general": [
+            "LOOK_AT_TABLET"
+          ]
+        },
+        "OBJECT_PRONOUNCED":{
+          "general": [
+            "LOOK_AT_TABLET"
+          ]
+        },
+        "PRONOUNCE_CORRECT":{
+          "general": [
+            "ROBOT_CELEBRATION", 
+            "ROBOT_HAPPY_DANCE"
+          ]
+        },
+        "RESULTS_RETURNED":{
+          "general": [
+          
+          ]
+        },
+        "WRONG_OBJECT_FAIL":{
+          "general": [
+            "ROBOT_COMFORT_SPEECH"
+          ]
+        }
+      },
+
+      "virtual":[]
+    }
+  }
+
+
+
+
+}

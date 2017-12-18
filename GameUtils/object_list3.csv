@@ -19,7 +19,7 @@ dress,dress,inanimate,inanimate:apparel,yellow,,,,,,,,,garment
 duck,duck,animal,omnivore,2legs:small:water,,omnivore,,,,aquatic,,,
 eating,eating,action,,,,,,delighted,,,,,
 father,father,human,households:relatives,,,,,,,,,,
-fish,fish,animal,omnivore,water:small,crimson,omnivore,,,,aquatic,minuscule,,
+fish,fish,animal,omnivore,water:small,crimson:azure,omnivore,,,,aquatic,minuscule,,
 fishing,fishing,action,hobby,,crimson,,,delighted,,,,recreational ,
 flower,flower,inanimate,inanimate,purple:green:small,,,,,,,,,
 forest,forest,landscape,landscape,,,,,,,,gigantic,,

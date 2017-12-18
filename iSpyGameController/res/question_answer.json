@@ -1,6 +1,29 @@
 {
-  "1_1_1-time_to_demo":{
-    "question": [["1_1_1-time_to_demo"]],
+  "expert/child/ROBOT_ASK_HELP":{
+    "question": ["robot_ask_help"],
+    "user_input":[
+      {
+        "en_US":[["yes"]],
+        "zh_CN":[["yes"]],
+        "response":[["1_1_2-will_introduce_myself", "1_2_1-my_chinese_name", "1_2_2-them_in_chinese", "1_2_3-tell_me_anything"]]
+      },
+      {
+        "en_US":[["no"]],
+        "zh_CN":[["no"]],
+        "response":[["1_1_3-we_are_ready"]]
+      }
+    ],
+    "other":{
+      "type": "yes/no"
+    },
+    "max_attempt":[
+      ["1_1_3-we_are_ready"]
+    ]
+  },
+
+
+  "novice/robot/ROBOT_ASK_HELP":{
+    "question": ["robot_ask_help"],
     "user_input":[
       {
         "en_US":[["yes"]],
@@ -20,4 +43,9 @@
       ["1_1_3-we_are_ready"]
     ]
   }
+
+
+
+
+
 }

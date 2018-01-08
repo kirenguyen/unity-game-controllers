@@ -14,16 +14,20 @@ from affdex_msgs.msg import AffdexFrameInfo # please download affdex ros msg fro
 from affdex_msgs.msg import Vec2 # please download affdex ros msg from PRG's git
 
 
+
 if GlobalSettings.USE_ROS:
     import rospy
     from std_msgs.msg import Header  # standard ROS msg header
     from unity_game_msgs.msg import iSpyCommand
     from unity_game_msgs.msg import iSpyAction
+    from unity_game_msgs.msg import iSpyChildRobotInteraction
     from r1d1_msgs.msg import TegaAction
     from r1d1_msgs.msg import TegaState
     from r1d1_msgs.msg import Vec3
     from jibo_msgs.msg import JiboAction
     from std_msgs.msg import String
+    from asr_google_cloud.msg import AsrResult
+
 else:
     TapGameLog = GlobalSettings.iSpyAction  # Mock object, used for testing in non-ROS environments
     TapGameCommand = GlobalSettings.iSpyCommand
@@ -41,6 +45,7 @@ ISPY_GAME_TO_ROS_ACTION_TOPIC = 'ispy_action_topic'
 ISPY_GAME_TO_ROS_TRANSITION_TOPIC = 'ispy_transition_state_topic'
 ISPY_GAME_TO_ROS_LOG_TOPIC = 'ispy_log_topic'
 ROS_TO_ANDROID_MIC_TOPIC = 'android_audio'
+DATA_CHILD_ROBOT_INTERACTION = 'data_child_robot_interaction'
 
 
 ROSCORE_TO_JIBO_TOPIC = '/jibo'
@@ -239,8 +244,13 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
 
 
     def start_tega_asr(self, on_tega_new_asr_result):
-        pass
-        # self.sub_asr_result = rospy.Subscriber('asr_result', AsrResult, on_tega_new_asr_result)
-        # self.pub_asr_start = rospy.Publisher('asr_start', String, queue_size=1)
-        # sleep(1)
-        # self.pub_asr_start.publish("start")
+        self.sub_asr_result = rospy.Subscriber('asr_result', AsrResult, on_tega_new_asr_result)
+        self.pub_asr_start = rospy.Publisher('asr_start', String, queue_size=1)
+        time.sleep(1)
+        self.pub_asr_start.publish("start")
+
+
+    def start_child_robot_interaction_pub_sub(self, on_interaction_data):
+        print("start child robot interaction publisher/subscriber")
+        self.pub_child_robot_interaction = rospy.Publisher(DATA_CHILD_ROBOT_INTERACTION,iSpyChildRobotInteraction,queue_size=1)
+        self.sub_child_robot_interacftion = rospy.Subscriber(DATA_CHILD_ROBOT_INTERACTION,iSpyChildRobotInteraction, on_interaction_data)

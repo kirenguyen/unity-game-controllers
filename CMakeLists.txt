@@ -18,7 +18,9 @@ find_package(catkin REQUIRED COMPONENTS
    TapGameRoundSummary.msg
    iSpyCommand.msg
    iSpyAction.msg
+   iSpyChildRobotInteraction.msg
    TapGameLog.msg
+
  )
 
 ## Generate added messages and services with any dependencies listed here

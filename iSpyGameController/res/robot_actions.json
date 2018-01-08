@@ -193,6 +193,9 @@
         "OBJECT_CLICKED": {
           "general": [
             "LOOK_AT_TABLET"
+          ],
+          "question":[
+            "ROBOT_ASK_WHY_CHOOSE_IT"
           ]
         },
         "OBJECT_FOUND": {

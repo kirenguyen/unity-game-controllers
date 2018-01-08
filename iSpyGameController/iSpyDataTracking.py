@@ -4,22 +4,60 @@ import threading
 import time
 
 from GameUtils.GlobalSettings import iSpyRobotInteractionStates as ris
+
+
 #from unity_game_msgs.msg import iSpyAction
+CSV_PATH = "ispy_data_files/"
+
+
 
 class iSpyDataTracking:
-	def __init__(self,childRobotFSM):
+	def __init__(self,childRobotFSM,ros_node_mgr):
+
+		self.ros_node_mgr = ros_node_mgr
 		# create a pandas dataframe to store all interaction data based on timestamps
 		self.game_start_time = datetime.now()
-		self.ispy_action_log_csv = open("ispy_action_log.csv","a") 
-		self.ispy_action_log_csv.write(','.join(['elapsedTime','localTime', 'isScalingUpDown','pointerClick','isDragging','onPinch','clickedObjectName']))
 		self.child_robot_FSM = childRobotFSM
+
+		self._initialize_csv()
+
+		self.ros_node_mgr.start_child_robot_interaction_pub_sub(self.on_child_robot_interaction_data_received)
+		# create ros subscribers to published data
+		#self.sub_child_robot_interaction = rospy.Subscriber()
 		
-	def save_data_to_csv(self):
-		pass
+	def _initialize_csv(self):
+		self.ispy_action_log_csv = open(CSV_PATH + "ispy_action_log.csv","a") 
+		self.ispy_action_log_csv.write(','.join(['elapsedTime','localTime', 'isScalingUpDown',
+			'pointerClick','isDragging','onPinch','clickedObjectName']))
+
+		self.child_robot_interaction_csv = open(CSV_PATH+"ispy_interaction_log.csv","a") 
+		self.child_robot_interaction_csv.write(','.join(['elapsedTime','localTime', 'whoseTurn',
+			'robotRole','robotBehavior','robotClickedObj','clickedRightObject','clickedObjName',
+			'gameTask','vocab','numFinishedObjects', 'numQsAsked','numQsAnswered','numChildAttempts'
+			'numChildCorrectAttempts','gameStateTrigger']))
+
+
+	def on_child_robot_interaction_data_received(self,msg):
+		'''
+		callback function. called by ros node manager when child-robot interaction data are received
+		write the data to csv file
+		'''
+		
+		# update the ispy action data frame
+		elapsedTime = str(datetime.now() - self.game_start_time)
+		content = ','.join(map(str,[elapsedTime,str(datetime.now()),msg.whoseTurn, 
+			msg.robotRole, msg.robotBehavior, msg.robotClickedObj, msg.clickedRightObject, msg.clickedRightObject, 
+			msg.clickedObjName, msg.gameTask, msg.taskVocab, msg.numFinishedObjects, 
+			msg.numQsAsked, msg.numQsAnswered, msg.numChildAttempts, msg.numChildCorrectAttempts,
+			msg.gameStateTrigger]))
+
+		self.child_robot_interaction_csv.write(content)
+
 
 	def on_ispy_action_received(self,data):
 		'''
-		receive iSpy interaction log data from iSpyGameFSM
+		receive iSpy interaction log data from iSpyGameFSM. 
+		called everytime when an interaction action from ispy game is received
 		'''
 		
 		self.stop_thread_flag  = True # set stop thread to be true to stop elapsed time counting thread 

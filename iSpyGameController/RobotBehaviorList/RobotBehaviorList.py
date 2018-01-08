@@ -35,6 +35,8 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
 
     ROBOT_OFFER_HELP = "ROBOT_OFFER_HELP"
 
+    ROBOT_ASK_WHY_CHOOSE_IT="ROBOT_ASK_WHY_CHOOSE_IT"
+
     ROBOT_SAY_WORD = 'ROBOT_SAY_WORD'
     
     # Negative Emotions

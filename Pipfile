@@ -1,0 +1,26 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[packages]
+
+nose = "*"
+Sphinx = "*"
+transitions = "*"
+numpy = "*"
+matplotlib = "*"
+PyAudio = "*"
+pronouncing = "*"
+weighted-levenshtein = "*"
+pandas = "*"
+spacy = "*"
+PyYAML = "*"
+rospkg = "*"
+catkin_pkg = "*"
+
+
+[dev-packages]
+

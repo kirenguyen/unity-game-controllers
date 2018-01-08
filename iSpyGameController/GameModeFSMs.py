@@ -59,6 +59,8 @@ class AlwaysMissionModeFSM(BaseGameFSM):
 				#{'trigger': gs.Triggers.TOPLEFT_BUTTON_PRESSED, 'source': gs.MISSION_MODE, 'dest': gs.EXPLORATION_MODE},
 				{'trigger': gs.Triggers.OBJECT_CLICKED, 'source': gs.MISSION_MODE, 'dest': gs.PRONUNCIATION_PANEL},
 				{'trigger': gs.Triggers.TARGET_OBJECT_COLLECTED , 'source': gs.PRONUNCIATION_RESULT, 'dest': gs.MISSION_MODE},
+				{'trigger': gs.Triggers.NONTARGET_OBJECT_COLLECTED , 'source': gs.PRONUNCIATION_RESULT, 'dest': gs.MISSION_MODE},
+
 				{'trigger': gs.Triggers.SAY_BUTTON_PRESSED, 'source': gs.PRONUNCIATION_PANEL, 'dest': gs.PRONUNCIATION_RESULT},
 				{'trigger': gs.Triggers.PRACTICE_FAILED, 'source': gs.PRONUNCIATION_RESULT, 'dest': gs.PRONUNCIATION_PANEL},
 				{'trigger': gs.Triggers.PRONUNCIATION_PANEL_CLOSED, 'source':gs.PRONUNCIATION_RESULT , 'dest': gs.MISSION_MODE},

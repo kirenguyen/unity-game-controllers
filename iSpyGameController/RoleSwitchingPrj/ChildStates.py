@@ -14,11 +14,20 @@ class ChildStates:
 		# for a given turn: number of pronunciation trials / number of available clickable objects in the game
 		self.correct_rate_arr = []
 
-		# 
+		# number of child's attempts of retrieving an object
 		self.current_num_trials = 0
+
+		# number of child's correct attempts (num of objs collected by the child)
+		self.current_num_correcft_trials = 0
 
 		# keep track of whose turn it is
 		self.current_turn = ""
+
+		# how many questions robot has asked the child
+		self.num_robot_questions_asked = 0
+
+		self.num_robot_questions_answered = 0
+
 		
 	def set_num_available_objs(self,_num_available_target_objs):
 		self.num_available_target_objs = _num_available_target_objs	
@@ -27,10 +36,10 @@ class ChildStates:
 		'''
 		update the current object retrieval result 
 		'''
-		if correct == False:
+		self.current_num_trials += 1
+		if correct == True:
 			# the child fails to find a correct target object 
-			self.current_num_trials += 1
-		else:
+			self.current_num_correcft_trials +=1
 			if self.num_available_target_objs != 0:
 				self.correct_rate_arr.append(float(self.current_num_trials / self.num_available_target_objs))
 

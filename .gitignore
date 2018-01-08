@@ -102,4 +102,4 @@ scripts/videos
 scripts/affdex_data
 
 # data files for ispy game
-ispy_data_files
+ispy_data_files/

@@ -102,12 +102,46 @@
 		"WRONG_OBJECT_FAIL_3"
 	],
 
-	"general/speech":[
+	"general/others":[
 		"no_ispy_action_alert1_response_1",
 		"no_ispy_action_alert1_response_2",
 
 		"no_ispy_action_alert2_response_1",
 		"no_ispy_action_alert2_response_2"
-	]
+	],
 
+	"general/before_game":[
+		"before_game_1",
+		"before_game_2",
+		"before_game_3"
+	],
+
+	"general/vocab_explanation":[
+		"vehicle_general_explanation",
+		"vehicle_car_explanation",
+		"vehicle_boat_explanation",
+		"minuscule_general_explanation",
+		"gigantic_general_explanation",
+		"garment_general_explanation",
+		"delighted_general_explanation",
+		"crimson_general_explanation",
+		"azure_general_explanation"
+	],
+
+	"general/hint":[
+		"delighted_hint",
+		"crimson_hint",
+		"azure_hint"
+	],
+
+	"general/keyword_definition":[
+		"vehicle_definition",
+		"soar_definition",
+		"recreational_definition",
+		"minuscule_definition",
+		"garment_definition",
+		"delighted_definition",
+		"crimson_definition",
+		"azure_definition"
+	]
 }

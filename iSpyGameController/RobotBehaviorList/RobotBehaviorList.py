@@ -7,6 +7,7 @@ Robot Behaviors
 from unity_game_msgs.msg import iSpyCommand
 from enum import Enum
 import json
+import random
 
 
 
@@ -33,9 +34,7 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     ROBOT_WINK = 'ROBOT_WINK'
     ROBOT_THINKING = 'ROBOT_THINKING'
 
-    ROBOT_OFFER_HELP = "ROBOT_OFFER_HELP"
-
-    ROBOT_ASK_WHY_CHOOSE_IT="ROBOT_ASK_WHY_CHOOSE_IT"
+   
 
     ROBOT_SAY_WORD = 'ROBOT_SAY_WORD'
     
@@ -65,14 +64,22 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
 
     ROBOT_CUSTOM_SPEECH = "ROBOT_CUSTOM_SPEECH"
 
+    ### ============== Tega Speech for Role Switching Project ================== ###
+    BEFORE_GAME_SPEECH = "ROBOT_BEFORE_GAME_SPEECH"
+    VOCAB_EXPLANATION_SPEECH = "VOCAB_EXPLANATION_SPEECH"
+    HINT_SPEECH = "HINT_SPEECH"
+    KEYWORD_DEFINITION_SPEECH = "KEYWORD_DEFINITION_SPEECH"
 
-    ROBOT_CHILD_TURN_SPEECH =""
-    ROBOT_ASK_HELP_SPEECH = ""
-    ROBOT_COMFORT_SPEECH =""
 
-    
-     ### robot's actions that can be optional, and are not necessary to play every single time
-    OPTIONAL_ACTIONS = [GENERAL_CURIOSITY_SPEECH,BASED_ON_PROMPTS_SPEECH]
+   ### ====== Tega Question Asking =================== ####
+    Q_ROBOT_OFFER_HELP = "Q_ROBOT_OFFER_HELP"
+    Q_ROBOT_ASK_WHY_CHOOSE_IT="Q_ROBOT_ASK_WHY_CHOOSE_IT"
+    Q_ROBOT_WANT_LEARN="Q_ROBOT_WANT_LEARN"
+    Q_ROBOT_ASK_HELP="Q_ROBOT_ASK_HELP"
+    Q_ROBOT_ASK_WHY_WRONG="Q_ROBOT_ASK_WHY_WRONG"
+    Q_END_OF_TURN="Q_END_OF_TURN"
+
+
 
 
 
@@ -101,6 +108,8 @@ class RobotActionSequence:
         NEXT = "Next"
         RESET = "Reset"
 
+
+ROOT_TEGA_SPEECH_FOLDER = 'roleswitching18/'
             
 class RobotRolesBehaviorsMap:
     '''
@@ -116,6 +125,9 @@ class RobotRolesBehaviorsMap:
         robot_actions_file = open("iSpyGameController/res/robot_actions.json")
         self.robot_actions_dict = json.loads(robot_actions_file.read())
 
+        question_answer_file = open("iSpyGameController/res/question_answer.json")
+        self.question_answer_dict = json.loads(question_answer_file.read())
+
         #test = getattr(RobotBehaviors,pre)
       
     def get_action_name(self,action):
@@ -129,6 +141,42 @@ class RobotRolesBehaviorsMap:
 
     def get_robot_general_responses(self):
         pass   
+
+    def get_robot_question(self,question_query_path):
+        '''
+        get question query result 
+        '''
+        print("quewstion query path: "+question_query_path)
+        self.current_question_query_path = question_query_path
+        if question_query_path in self.question_answer_dict.keys():
+            self.question_query = self.question_answer_dict[question_query_path]
+            print("question query: ")
+            print(self.question_query)
+            question_name = random.choice(self.question_query['question'])
+
+            return ROOT_TEGA_SPEECH_FOLDER + "questions/" +question_name+".wav"
+        else:
+            print("ERROR: Cannot find the question query.")
+            return ""
+
+    def get_robot_response_to_answer(self,child_answer):
+        '''
+        get robot's contigent response to the child's answer
+        '''
+        print("child answer: "+child_answer)
+        if self.current_question_query_path in self.question_answer_dict.keys():
+            for i in self.question_query["user_input"]:
+                print("i:")
+                print(i)
+                if any(m in child_answer for m in i["en_US"]): # found child's answer
+                    return i["response"]
+                    break
+            print("WARNING: Cannot find child's answer")
+            return []
+        else:
+            print("ERROR: Cannot find the question query.")
+            return []
+
         
     def get_actions(self,role,robot_turn,physical_virtual):
     

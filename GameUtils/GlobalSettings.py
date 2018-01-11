@@ -72,6 +72,9 @@ class iSpyRobotInteractionStates():
     ROBOT_HELP = "robotHelp"
     CHILD_HELP = "childHelp"
     QUESTION_ASKING="questionAsking"
+    NO_INTERACTION_1="noInteraction1"
+    LISTEN_CHILD_SPEECH_RESPONSE="listenChildSpeechResponse"
+    PARSE_CHILD_SPEECH_RESPONSE="parseChildSpeechResponse"
 
     class Triggers():
         CHILD_TURN_DONE="childTurnDone"
@@ -79,6 +82,10 @@ class iSpyRobotInteractionStates():
         ROBOT_HELP_TRIGGER="robotHelpTigger"
         CHILD_HELP_TRIGGER="childHelpTrigger"
         ROBOT_QUESTION="robotQuestion"
+        QA_FINISHED="QAFinished"
+        NO_INTERACTION_ALERT="NoInteractionAlert"
+        LISTEN_RESPONSE="ListenResponse"
+        SPEECH_RECEIVED="SpeechReceived"
 
 class TapGameCommand(): # pylint: disable=too-few-public-methods
     """

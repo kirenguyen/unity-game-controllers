@@ -116,7 +116,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 	def on_ispy_state_info_received(self,transition_msg):
 		"""
-		Rospy Callback for when we get log messages
+		Rospy Callback for when we get log messages from ispy game
 		"""
 
 		print("transition!!!!!: ")

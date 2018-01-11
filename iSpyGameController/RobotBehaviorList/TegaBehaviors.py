@@ -38,12 +38,15 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     """
     A Class definition for "cosmetic" robot behavior strings, which get translated by the ROSNodeMgr
     """
+
     @staticmethod
     def get_msg_from_behavior(command, *args): #pylint: disable=too-many-branches, too-many-statements
 
         msg = TegaAction()
         msg.header = Header()
         msg.header.stamp = rospy.Time.now()
+
+        
 
 
 
@@ -119,6 +122,75 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.enqueue = True
             print(msg.wav_filename) 
 
+
+        ### ============== Tega Speech for Role Switching Project ================== ###
+        if command == RobotBehaviors.BEFORE_GAME_SPEECH:
+            PATH = "general/before_game/"
+            file = "before_game_"+str(random.randint(1,3))+".wav"
+            msg.wav_filename = PATH + file
+            msg.motion = ""
+            print("before game speech wav: "+msg.wav_filename)
+
+        if command == RobotBehaviors.VOCAB_EXPLANATION_SPEECH:
+            PATH = "general/vocab_explanation/"
+           
+            vocab_word = args[0][0][0].lower()
+            itype = args[0][0][1].lower()
+            file = vocab_word+"_"+itype+"_explanation.wav"
+            msg.wav_filename = PATH + file
+            msg.motion = ""
+            print("vocab expla speech wav: "+msg.wav_filename)
+
+        if command == RobotBehaviors.HINT_SPEECH:
+            PATH = "general/hint/"
+            vocab_word = args[0][0].lower()
+            msg.wav_filename = PATH + vocab_word + "_hint.wav"
+            msg.motion = ""
+            print("hint speech wav: "+msg.wav_filename)
+
+        if command == RobotBehaviors.KEYWORD_DEFINITION_SPEECH:
+            PATH = "general/keyword_definition/"
+            file = args[0][0].lower()+"_definition.wav"
+            msg.wav_filename = PATH + file
+            msg.motion = ""
+            print("key word definition speech wav: "+msg.wav_filename)
+
+        ### ====== Tega Question Asking =================== ####
+        if command == RobotBehaviors.Q_ROBOT_OFFER_HELP:
+            PATH = "questions/"
+            msg.wav_filename = PATH + args[0][0].lower()+".wav"
+
+            print("robot offer help wav: "+msg.wav_filename)
+
+        if command == RobotBehaviors.Q_ROBOT_ASK_WHY_CHOOSE_IT:
+            PATH = "questions/"
+            msg.wav_filename = PATH + args[0][0].lower()+".wav"
+
+            print("robot ask why choose it wav: "+msg.wav_filename)
+
+        if command == RobotBehaviors.Q_ROBOT_WANT_LEARN:
+            PATH = "questions/"
+            msg.wav_filename = PATH + args[0][0].lower()+".wav"
+
+            print("robot want learn wav: "+msg.wav_filename)
+
+        if command == RobotBehaviors.Q_ROBOT_ASK_HELP:
+            PATH = "questions/"
+            msg.wav_filename = PATH + args[0][0].lower()+".wav"
+            print("robot ask help wav: "+msg.wav_filename)
+
+        if command == RobotBehaviors.Q_ROBOT_ASK_WHY_WRONG:
+            PATH = "questions/"
+            msg.wav_filename = PATH + args[0][0].lower()+".wav"
+            print("robot ask why wrong wav: "+msg.wav_filename)
+
+        if command == RobotBehaviors.Q_END_OF_TURN:
+            vocab_word = args[0][0].lower()
+            file = "questions/end_of_turn_question_"+vocab_word+".wav"
+            msg.wav_filename = file
+            print("end of turn wav: "+msg.wav_filename)
+
+
         ### ============= Tega Speech for Curiosity Assessment =====================
 
         # General Curiosity Speech
@@ -170,6 +242,7 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.wav_filename = speech_file_name
             msg.enqueue = True
         
+       
 
         return msg
 

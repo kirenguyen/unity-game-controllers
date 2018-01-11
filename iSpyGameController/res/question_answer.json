@@ -1,92 +1,222 @@
 {
-  "expert/child/ROBOT_OFFER_HELP":{
-    "question": ["yes_no_question_3"],
+  "Q_ROBOT_OFFER_HELP":{
+    "question": ["yes_no_question_4"],
     "user_input":[
       {
-        "en_US":[["yes"]],
-        "zh_CN":[["yes"]],
-        "response":[["1_1_2-will_introduce_myself", "1_2_1-my_chinese_name", "1_2_2-them_in_chinese", "1_2_3-tell_me_anything"]]
+        "en_US":["yes"],
+        "response":["ROBOT_EXCITED"]
       },
       {
-        "en_US":[["no"]],
-        "zh_CN":[["no"]],
-        "response":[["1_1_3-we_are_ready"]]
+        "en_US":["no"],
+        "response":["response_b"]
       }
     ],
     "other":{
-      "type": "yes/no"
+      "type": "yes/no",
+      "help": true
     },
-    "max_attempt":[
+    "no_response":[
+      [""]
+    ]
+  },
+
+
+  "Q_ROBOT_WANT_LEARN":{
+    "question": ["yes_no_question_2"],
+    "user_input":[
+      {
+        "en_US":["yes"],
+        "response":[]
+      },
+      {
+        "en_US":["no"],
+        "response":[]
+      }
+    ],
+    "other":{
+      "type": "yes/no",
+      "help": true
+    },
+    "no_response":[
       ["1_1_3-we_are_ready"]
     ]
   },
 
 
-  "novice/child/ROBOT_OFFER_HELP":{
-    "question": ["yes_no_question_3"],
+  "Q_ROBOT_ASK_HELP":{
+    "question": ["yes_no_question_5","yes_no_question_3","yes_no_question_1","response_e"],
     "user_input":[
       {
-        "en_US":[["yes"]],
-        "zh_CN":[["yes"]],
-        "response":[["1_1_2-will_introduce_myself", "1_2_1-my_chinese_name", "1_2_2-them_in_chinese", "1_2_3-tell_me_anything"]]
+        "en_US":["yes"],
+        "response":["response_e"]
       },
       {
-        "en_US":[["no"]],
-        "zh_CN":[["no"]],
-        "response":[["1_1_3-we_are_ready"]]
+        "en_US":["no"],
+        "response":["response_f"]
       }
     ],
     "other":{
-      "type": "yes/no"
+      "type": "yes/no",
+      "help": true
     },
-    "max_attempt":[
+    "no_response":[
       ["1_1_3-we_are_ready"]
     ]
   },
 
 
-  "novice/robot/ROBOT_ASK_HELP":{
-    "question": ["yes_no_question_1","yes_no_question_2"],
+  "Q_ROBOT_ASK_WHY_CHOOSE_IT":{
+    "question": ["open_ended_question_4","open_ended_question_2"],
     "user_input":[
       {
-        "en_US":[["yes"]],
-        "zh_CN":[["yes"]],
-        "response":[["1_1_2-will_introduce_myself", "1_2_1-my_chinese_name", "1_2_2-them_in_chinese", "1_2_3-tell_me_anything"]]
+        "en_US":["because"],
+        "response":["1_1_2-will_introduce_myself"]
       },
       {
-        "en_US":[["no"]],
-        "zh_CN":[["no"]],
-        "response":[["1_1_3-we_are_ready"]]
+        "en_US":["no","dont know","don't know"],
+        "response":["1_1_3-we_are_ready"]
       }
     ],
     "other":{
-      "type": "yes/no"
+      "type": "open_ended",
+      "help": false
     },
-    "max_attempt":[
+    "no_response":[
       ["1_1_3-we_are_ready"]
     ]
   },
 
 
-  "novice/child/ROBOT_ASK_WHY_CHOOSE_IT":{
-    "question": ["open_ended_question_2"],
+  "Q_ROBOT_ASK_WHY_WRONG":{
+    "question": ["open_ended_question_3","open_ended_question_1"],
     "user_input":[
       {
-        "en_US":[["yes"]],
-        "zh_CN":[["yes"]],
-        "response":[["1_1_2-will_introduce_myself", "1_2_1-my_chinese_name", "1_2_2-them_in_chinese", "1_2_3-tell_me_anything"]]
+        "en_US":["because"],
+        "response":[""]
       },
       {
-        "en_US":[["no"]],
-        "zh_CN":[["no"]],
-        "response":[["1_1_3-we_are_ready"]]
+        "en_US":["no","dont know","don't know"],
+      
+        "response":[""]
       }
     ],
     "other":{
-      "type": "yes/no"
+      "type": "open_ended",
+      "help": false
     },
-    "max_attempt":[
+    "no_response":[
       ["1_1_3-we_are_ready"]
+    ]
+  },
+
+  "end_turn/vehicle":{
+    "question": ["end_of_turn_question_vehicle"],
+    "user_input":[
+      {
+        "en_US":["mean","means"],
+        "response":[""]
+      },
+      {
+        "en_US":["no","dont know","don't know"],
+      
+        "response":[""]
+      }
+    ],
+    "other":{
+      "type": "open_ended",
+      "help": false
+    },
+    "no_response":[
+      [""]
+    ]
+  },
+
+  "end_turn/recreational":{
+    "question": ["end_of_turn_question_recreational"],
+    "user_input":[
+      {
+        "en_US":["mean","means"],
+        "response":[""]
+      },
+      {
+        "en_US":["no","dont know","don't know"],
+      
+        "response":[""]
+      }
+    ],
+    "other":{
+      "type": "open_ended",
+      "help": false
+    },
+    "no_response":[
+      [""]
+    ]
+  },
+
+  "end_turn/minuscule":{
+    "question": ["end_of_turn_question_minuscule"],
+    "user_input":[
+      {
+        "en_US":["mean","means"],
+        "response":[""]
+      },
+      {
+        "en_US":["no","dont know","don't know"],
+      
+        "response":[""]
+      }
+    ],
+    "other":{
+      "type": "open_ended",
+      "help": false
+    },
+    "no_response":[
+      [""]
+    ]
+  },
+
+   "end_turn/land_animals":{
+    "question": ["end_of_turn_question_land_animals"],
+    "user_input":[
+      {
+        "en_US":["mean","means"],
+        "response":[""]
+      },
+      {
+        "en_US":["no","dont know","don't know"],
+      
+        "response":[""]
+      }
+    ],
+    "other":{
+      "type": "open_ended",
+      "help": false
+    },
+    "no_response":[
+      [""]
+    ]
+  },
+
+
+   "end_turn/gigantic":{
+    "question": ["end_of_turn_question_gigantic"],
+    "user_input":[
+      {
+        "en_US":["mean","means"],
+        "response":[""]
+      },
+      {
+        "en_US":["no","dont know","don't know"],
+      
+        "response":[""]
+      }
+    ],
+    "other":{
+      "type": "open_ended",
+      "help": false
+    },
+    "no_response":[
+      [""]
     ]
   }
 

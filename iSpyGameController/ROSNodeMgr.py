@@ -27,6 +27,7 @@ if GlobalSettings.USE_ROS:
     from jibo_msgs.msg import JiboAction
     from std_msgs.msg import String
     from asr_google_cloud.msg import AsrResult
+    from asr_google_cloud.msg import AsrCommand
 
 else:
     TapGameLog = GlobalSettings.iSpyAction  # Mock object, used for testing in non-ROS environments
@@ -245,9 +246,23 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
 
     def start_tega_asr(self, on_tega_new_asr_result):
         self.sub_asr_result = rospy.Subscriber('asr_result', AsrResult, on_tega_new_asr_result)
-        self.pub_asr_start = rospy.Publisher('asr_start', String, queue_size=1)
-        time.sleep(1)
-        self.pub_asr_start.publish("start")
+        self.pub_asr_command = rospy.Publisher('asr_command', AsrCommand, queue_size=1)
+
+    def start_asr_listening(self):
+        '''
+        start asr's listening
+        '''
+        msg = AsrCommand()
+        msg.command = AsrCommand.START_FINAL # start final
+        self.pub_asr_command.publish(msg)
+
+    def stop_asr_listening(self):
+        '''
+        stop asr's listening and get the results
+        '''
+        msg = AsrCommand()
+        msg.command = AsrCommand.STOP_FINAL # stop final for the asr result
+        self.pub_asr_command.publish(msg)
 
 
     def start_child_robot_interaction_pub_sub(self, on_interaction_data):

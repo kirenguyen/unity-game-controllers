@@ -113,6 +113,20 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		self.affdexAnalysis = AffdexAnalysis(self.ros_node_mgr)
 
+		# start a thread to check the game update
+		self.t = threading.Thread(target=self.update)
+		self.t.start()
+
+
+	def update(self):
+		
+		while True:
+			if self.FSM.state != gs.MISSION_MODE:
+				self.iSpyDataTracking.on_stop_tracking_child_interaction()
+			if self.interaction.state != ris.CHILD_TURN and self.interaction.state != ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
+				self.iSpyDataTracking.on_stop_tracking_child_interaction()
+
+
 
 	def on_ispy_state_info_received(self,transition_msg):
 		"""
@@ -132,14 +146,12 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 
 			elif transition_msg.data == gs.Triggers.OBJECT_CLICKED:
-				self.iSpyDataTracking.on_stop_tracking_child_interaction()
+				pass
 		
 				
 			elif transition_msg.data == gs.Triggers.NONTARGET_OBJECT_COLLECTED:
 				self.interaction.turn_taking()
-				if self.interaction.state == ris.CHILD_TURN: # when a new turn is child's, then start tracking the child's interaction
-					time.sleep(3)
-					self.iSpyDataTracking.on_start_tracking_child_interaction()
+				
 
 			elif transition_msg.data == gs.Triggers.TARGET_OBJECT_COLLECTED:
 				# one of the target objects is successfully collected. give the turn to the other player now
@@ -149,6 +161,11 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 				self.interaction.turn_taking()
 				
+			elif transition_msg.data == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
+				print("transition msg data: pronunciation panel closed")
+				if self.interaction.state == ris.CHILD_TURN: # when a new turn is child's, then start tracking the child's interaction
+					time.sleep(3)
+					self.iSpyDataTracking.on_start_tracking_child_interaction()
 
 			# If the message is in gs.Triggers, then allow the trigger
 			if transition_msg.data != gs.Triggers.SCREEN_MOVED:

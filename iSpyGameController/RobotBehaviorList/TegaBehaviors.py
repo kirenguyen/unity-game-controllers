@@ -32,7 +32,7 @@ BASED_ON_OBJECTS_TEMPLATES=["b-template.mp3", "c-template.mp3"]
 OBJECTS=["baby.mp3","bicylce.mp3", "baby.mp3", "bicycle.mp3", "bird.mp3", "boat.mp3", "bucket.mp3" , "bus.mp3" , "car.mp3" , "castle.mp3" , "cat.mp3" , "cloud.mp3" , "coconut.mp3" , "deer.mp3" , "digging.mp3" , "dog.mp3" , "dolphine.mp3" , "door.mp3" , "dress.mp3" , "duck.mp3" , "eating.mp3" , "father.mp3" , "fish.mp3" , "fishing.mp3" , "flower.mp3" , "forest.mp3" , "frog.mp3" , "giraffe.mp3" ,"goat.mp3","grandma.mp3","grandpa.mp3","hat.mp3","horse.mp3","jumping.mp3","lion.mp3","mailbox.mp3","mother.mp3" ,"mountain.mp3","mouse.mp3","pants.mp3" ,"plane.mp3" ,"rabbit.mp3","rooster.mp3" ,"running.mp3","seal.mp3","seashell.mp3" , "sheep.mp3" , "shirt.mp3" , "sun.mp3" , "tractor.mp3" , "train.mp3", "waving.mp3", "window.mp3"]
 
 
-OPTIONAL_ACTIONS = []
+ROOT_TEGA_SPEECH_FOLDER = 'roleswitching18/'
 
 class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     """
@@ -120,19 +120,19 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
         if command == RobotBehaviors.ROBOT_CUSTOM_SPEECH:
             msg.wav_filename = args[0][0].lower()
             msg.enqueue = True
-            print(msg.wav_filename) 
+            print("custom speech: "+msg.wav_filename)
 
 
         ### ============== Tega Speech for Role Switching Project ================== ###
         if command == RobotBehaviors.BEFORE_GAME_SPEECH:
-            PATH = "general/before_game/"
-            file = "before_game_"+str(random.randint(1,3))+".wav"
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/before_game/"
+            file = "before_game_"+random.choice(["1","3"])+".wav"
             msg.wav_filename = PATH + file
             msg.motion = ""
             print("before game speech wav: "+msg.wav_filename)
 
         if command == RobotBehaviors.VOCAB_EXPLANATION_SPEECH:
-            PATH = "general/vocab_explanation/"
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/vocab_explanation/"
            
             vocab_word = args[0][0][0].lower()
             itype = args[0][0][1].lower()
@@ -142,14 +142,14 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             print("vocab expla speech wav: "+msg.wav_filename)
 
         if command == RobotBehaviors.HINT_SPEECH:
-            PATH = "general/hint/"
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/hint/"
             vocab_word = args[0][0].lower()
             msg.wav_filename = PATH + vocab_word + "_hint.wav"
             msg.motion = ""
             print("hint speech wav: "+msg.wav_filename)
 
         if command == RobotBehaviors.KEYWORD_DEFINITION_SPEECH:
-            PATH = "general/keyword_definition/"
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/keyword_definition/"
             file = args[0][0].lower()+"_definition.wav"
             msg.wav_filename = PATH + file
             msg.motion = ""
@@ -157,39 +157,57 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
 
         ### ====== Tega Question Asking =================== ####
         if command == RobotBehaviors.Q_ROBOT_OFFER_HELP:
-            PATH = "questions/"
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "questions/"
             msg.wav_filename = PATH + args[0][0].lower()+".wav"
 
             print("robot offer help wav: "+msg.wav_filename)
 
         if command == RobotBehaviors.Q_ROBOT_ASK_WHY_CHOOSE_IT:
-            PATH = "questions/"
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "questions/"
             msg.wav_filename = PATH + args[0][0].lower()+".wav"
 
             print("robot ask why choose it wav: "+msg.wav_filename)
 
         if command == RobotBehaviors.Q_ROBOT_WANT_LEARN:
-            PATH = "questions/"
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "questions/"
             msg.wav_filename = PATH + args[0][0].lower()+".wav"
 
             print("robot want learn wav: "+msg.wav_filename)
 
         if command == RobotBehaviors.Q_ROBOT_ASK_HELP:
-            PATH = "questions/"
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "questions/"
             msg.wav_filename = PATH + args[0][0].lower()+".wav"
             print("robot ask help wav: "+msg.wav_filename)
 
         if command == RobotBehaviors.Q_ROBOT_ASK_WHY_WRONG:
-            PATH = "questions/"
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "questions/"
             msg.wav_filename = PATH + args[0][0].lower()+".wav"
             print("robot ask why wrong wav: "+msg.wav_filename)
 
         if command == RobotBehaviors.Q_END_OF_TURN:
             vocab_word = args[0][0].lower()
-            file = "questions/end_of_turn_question_"+vocab_word+".wav"
+            file = ROOT_TEGA_SPEECH_FOLDER + "questions/end_of_turn_question_"+vocab_word+".wav"
             msg.wav_filename = file
             print("end of turn wav: "+msg.wav_filename)
 
+        if command == RobotBehaviors.ROBOT_SAY_WORD:
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "object_words/"
+            object_word =args[0][0].lower()
+            speech_file_name = PATH + object_word + ".wav"
+            msg.wav_filename = speech_file_name
+            msg.enqueue = True
+
+
+
+        ### ================ NO iSpy Action Alert #### ====================
+
+        if command == RobotBehaviors.NO_ISPY_ACTION_ALERT:
+            path= ROOT_TEGA_SPEECH_FOLDER + 'general/others/'
+            files = ["no_ispy_action_alert1_response_1", "no_ispy_action_alert1_response_2"]
+            speech_file = path + random.choice(files)+".wav"
+            msg.wav_filename = speech_file
+            print("no ispy action alert wav: "+msg.wav_filename)
+            #msg.motion = 
 
         ### ============= Tega Speech for Curiosity Assessment =====================
 
@@ -235,14 +253,7 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.wav_filename = speech_file_name
             msg.enqueue = True
 
-        if command == RobotBehaviors.ROBOT_SAY_WORD:
-            PATH = "roleswitching18/object_words/"
-            object_word =args[0][0].lower()
-            speech_file_name = PATH + object_word + ".mp3"
-            msg.wav_filename = speech_file_name
-            msg.enqueue = True
-        
-       
+
 
         return msg
 

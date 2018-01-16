@@ -1,11 +1,11 @@
 {
 	"general/expert/child":[
-		"OBJECT_CLICKED_1",
-		"OBJECT_CLICKED_2",
+		"WRONG_OBJECT_CLICKED_1",
+		"WRONG_OBJECT_CLICKED_2",
 
-		"OBJECT_FOUND_1",
-		"OBJECT_FOUND_2",
-		"OBJECT_FOUND_3",
+		"RIGHT_OBJECT_FOUND_1",
+		"RIGHT_OBJECT_FOUND_2",
+		"RIGHT_OBJECT_FOUND_3",
 
 		"WRONG_OBJECT_FAIL_1",
 		"WRONG_OBJECT_FAIL_2",
@@ -25,12 +25,12 @@
 
 
 	"general/expert/robot":[
-		"OBJECT_CLICKED_1",
-		"OBJECT_CLICKED_2",
+		"WRONG_OBJECT_CLICKED_1",
+		"WRONG_OBJECT_CLICKED_2",
 
-		"OBJECT_FOUND_1",
-		"OBJECT_FOUND_2",
-		"OBJECT_FOUND_3",
+		"RIGHT_OBJECT_FOUND_1",
+		"RIGHT_OBJECT_FOUND_2",
+		"RIGHT_OBJECT_FOUND_3",
 	
 	
 		"TURN_FINISHED_1",
@@ -47,11 +47,11 @@
 
 	"general/novice/child":[
 		
-		"OBJECT_CLICKED_2",
+		"WRONG_OBJECT_CLICKED_2",
 
-		"OBJECT_FOUND_1",
-		"OBJECT_FOUND_2",
-		"OBJECT_FOUND_3",
+		"RIGHT_OBJECT_FOUND_1",
+		"RIGHT_OBJECT_FOUND_2",
+		"RIGHT_OBJECT_FOUND_3",
 
 		"WRONG_OBJECT_FAIL_1",
 		"WRONG_OBJECT_FAIL_2",
@@ -76,12 +76,12 @@
 	],
 
 	"general/novice/robot":[
-		"OBJECT_CLICKED_3",
-		"OBJECT_CLICKED_4",
+		"WRONG_OBJECT_CLICKED_3",
+		"WRONG_OBJECT_CLICKED_4",
 
-		"OBJECT_FOUND_1",
-		"OBJECT_FOUND_2",
-		"OBJECT_FOUND_3",
+		"RIGHT_OBJECT_FOUND_1",
+		"RIGHT_OBJECT_FOUND_2",
+		"RIGHT_OBJECT_FOUND_3",
 	
 		"TURN_FINISHED_1",
 		"TURN_FINISHED_2",
@@ -114,34 +114,7 @@
 		"before_game_1",
 		"before_game_2",
 		"before_game_3"
-	],
-
-	"general/vocab_explanation":[
-		"vehicle_general_explanation",
-		"vehicle_car_explanation",
-		"vehicle_boat_explanation",
-		"minuscule_general_explanation",
-		"gigantic_general_explanation",
-		"garment_general_explanation",
-		"delighted_general_explanation",
-		"crimson_general_explanation",
-		"azure_general_explanation"
-	],
-
-	"general/hint":[
-		"delighted_hint",
-		"crimson_hint",
-		"azure_hint"
-	],
-
-	"general/keyword_definition":[
-		"vehicle_definition",
-		"soar_definition",
-		"recreational_definition",
-		"minuscule_definition",
-		"garment_definition",
-		"delighted_definition",
-		"crimson_definition",
-		"azure_definition"
 	]
+
+	
 }

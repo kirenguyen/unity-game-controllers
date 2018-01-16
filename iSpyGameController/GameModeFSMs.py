@@ -3,6 +3,8 @@ from GameUtils.GlobalSettings import iSpyGameStates as gs
 from GameUtils.GlobalSettings import iSpyRobotInteractionStates as ris
 from .ROSNodeMgr import ROSNodeMgr
 
+from .RobotBehaviorList.RobotBehaviorList import RobotBehaviors 
+
 # contain FSMs for different modes
 # iSpy role switching project uses "alwaysMissionModeFSM"
 # curiosity assessment project uses "alwaysExploreModeFSM"
@@ -50,7 +52,8 @@ class AlwaysMissionModeFSM(BaseGameFSM):
 	'''
 	the game only has mission mode
 	'''
-	def __init__(self,ros_node_mgr):
+	def __init__(self,ros_node_mgr,game_round):
+
 		self.states = [gs.GAME_START, gs.EXPLORATION_MODE,gs.MISSION_MODE,gs.PRONUNCIATION_PANEL,gs.PRONUNCIATION_RESULT,gs.WORD_DISPLAY]
 		self.transitions = [
 				{'trigger': gs.Triggers.START_BUTTON_PRESSED, 'source': gs.GAME_START, 'dest': gs.EXPLORATION_MODE},
@@ -77,6 +80,8 @@ class AlwaysMissionModeFSM(BaseGameFSM):
 									 initial=gs.GAME_START)
 		self.ros_node_mgr = ros_node_mgr
 
+		self.game_round = game_round
+
 	def start_trigger(self,trigger_string):
 		if trigger_string == gs.Triggers.TOPLEFT_BUTTON_PRESSED:
 			if self.state == gs.EXPLORATION_MODE:
@@ -87,6 +92,16 @@ class AlwaysMissionModeFSM(BaseGameFSM):
 				self.ros_node_mgr.send_ispy_cmd(BUTTON_DISABLED,results_params)
 		getattr(self, trigger_string)()
 
+
+	def on_enter_explorationMODE(self):
+		'''
+		before the mission mode starts. robot says a few things
+		'''
+		if self.game_round == "practice":
+			return 
+
+		print("on enter exploration mode")
+		#self.ros_node_mgr.send_robot_cmd(RobotBehaviors.BEFORE_GAME_SPEECH)
 	
 class AlwaysExploreModeFSM(BaseGameFSM):
 	'''

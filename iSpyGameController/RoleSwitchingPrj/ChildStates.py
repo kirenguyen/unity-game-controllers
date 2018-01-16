@@ -18,15 +18,20 @@ class ChildStates:
 		self.current_num_trials = 0
 
 		# number of child's correct attempts (num of objs collected by the child)
-		self.current_num_correcft_trials = 0
+		self.current_num_correct_trials = 0
 
 		# keep track of whose turn it is
 		self.current_turn = ""
 
 		# how many questions robot has asked the child
-		self.num_robot_questions_asked = 0
+		self.num_robot_questions_asked = 0 # updated by ChildRobotInteraction
 
-		self.num_robot_questions_answered = 0
+		self.num_robot_questions_answered = 0  # updated by ChildRobotInteraction
+
+		self.child_answer_content = ""
+
+		self.child_turn_length = 0
+
 
 		
 	def set_num_available_objs(self,_num_available_target_objs):
@@ -39,7 +44,7 @@ class ChildStates:
 		self.current_num_trials += 1
 		if correct == True:
 			# the child fails to find a correct target object 
-			self.current_num_correcft_trials +=1
+			self.current_num_correct_trials +=1
 			if self.num_available_target_objs != 0:
 				self.correct_rate_arr.append(float(self.current_num_trials / self.num_available_target_objs))
 

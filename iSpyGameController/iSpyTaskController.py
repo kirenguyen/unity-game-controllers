@@ -10,7 +10,7 @@ NUM_WORDS_THRESHOLD =4
 class iSpyTaskController():
 	"""docstring for iSpyTaskController"""
 
-	def __init__(self):
+	def __init__(self,game_round):
 		# List that will hold the names of the target objects
 		self.target_list = []
 
@@ -29,13 +29,13 @@ class iSpyTaskController():
 		self.vocab_word = ""
 
 
-		self.load_task_list()
+		self.load_task_list(game_round)
 		self.load_object_list()
 
 	def get_vocab_word(self):
 		return self.vocab_word
 
-	def load_task_list(self):
+	def load_task_list(self,game_round):
 		""" Loads the task_list csv file into a 2d array """
 		dir_path = os.path.dirname(os.path.realpath(__file__))
 		print (dir_path)
@@ -46,8 +46,11 @@ class iSpyTaskController():
 		# {task_number: (task, category, attribute)}
 		# Ex:
 		# {1: ("What objects are related to weather?", object_type, weather)}
+		file_name =  '/../GameUtils/task_list_practice.csv' if game_round == "practice" else '/../GameUtils/task_list_experiment.csv'
 		
-		with open(dir_path + '/../GameUtils/task_list4.csv','r') as csvfile:
+
+		
+		with open(dir_path + file_name,'r') as csvfile:
 			spamreader = csv.reader(csvfile, delimiter=',')
 			for row in spamreader:
 				if row[0] != "":
@@ -57,6 +60,9 @@ class iSpyTaskController():
 		# Fill the available quests list with the ID of all the quests
 		for i in self.task_dict:
 			self.available_quests.append(i)
+		for i in self.task_dict:
+			self.available_quests.append(i)
+
 
 
 	def load_object_list(self):
@@ -88,8 +94,7 @@ class iSpyTaskController():
 			spamreader = csv.reader(csvfile)
 			for row in spamreader:
 				if row[0] != "" and row[0] != "key_object":
-					self.object_dict[row[0]] = (row[1], row[2], row[3], row[4], row[5], row[6],row[7],row[8],row[9],row[10],row[11],row[12],row[13])
-
+					self.object_dict[row[0]] = (row[1], row[2], row[3], row[4], row[5], row[6],row[7],row[8],row[9],row[10],row[11],row[12],row[13],row[14])
 
 
 	def get_next_task(self):
@@ -100,11 +105,15 @@ class iSpyTaskController():
 			return
 
 		# Gets a random index from the list of available quests, and used the value as the key in the task_dict
-		index = random.randint(0, len(self.available_quests)-1)
+		#index = random.randint(0, len(self.available_quests)-1)
+		index = 0
 
+		
 		task, task_category, task_attribute, prompt_audio_name = self.task_dict[self.available_quests[index]]
 
 		self.vocab_word = task_attribute
+
+		
 
 		# Delete the quest after it is chosen
 		del self.available_quests[index]
@@ -112,11 +121,10 @@ class iSpyTaskController():
 		# Get the index in the dicitonary from a given category. See object_dict for indices
 		category_index = self.category_to_index(task_category)
 		
-
+		
 		# If the item has the attribute that matches the quest, add it to the list
-		#print("task attribute: "+task_attribute)
 		for key in self.object_dict:
-			#print("key:"+key)
+			
 			#print(self.object_dict[key][category_index])
 			if task_attribute in self.object_dict[key][category_index]:
 				self.target_list.append(key)
@@ -128,6 +136,7 @@ class iSpyTaskController():
 
 
 		task_message = self.get_task_message(str(len(self.target_list)),task_category,task_attribute)
+		
 		return {"task": task_message, "task_vocab": task_attribute, "list" : self.target_list,"prompt_audio_name":prompt_audio_name}
 
 	def get_task_message(self, how_many, task_category, task_attribute):
@@ -168,6 +177,8 @@ class iSpyTaskController():
 			return 11
 		elif category == "cloth":
 			return 12
+		elif category == "land":
+			return 13
 
 	def isTarget(self, object_name):
 		""" Returns whether or not the object is a target """

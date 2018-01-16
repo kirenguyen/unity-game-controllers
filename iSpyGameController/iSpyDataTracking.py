@@ -12,25 +12,31 @@ CSV_PATH = "ispy_data_files/"
 
 
 class iSpyDataTracking:
-	def __init__(self,childRobotFSM,ros_node_mgr):
+	def __init__(self,childRobotFSM,ros_node_mgr,participant_id, experimenter):
 
 		self.ros_node_mgr = ros_node_mgr
 		# create a pandas dataframe to store all interaction data based on timestamps
 		self.game_start_time = datetime.now()
 		self.child_robot_FSM = childRobotFSM
 
-		self._initialize_csv()
+		self._initialize_csv(participant_id, experimenter)
 
 		self.ros_node_mgr.start_child_robot_interaction_pub_sub(self.on_child_robot_interaction_data_received)
 		# create ros subscribers to published data
 		#self.sub_child_robot_interaction = rospy.Subscriber()
 		
-	def _initialize_csv(self):
+	def _initialize_csv(self,participant_id, experimenter):
+
+		import datetime
+
+		now = datetime.datetime.now()
+		date = now.strftime("%Y-%m-%d")
+
 		self.ispy_action_log_csv = open(CSV_PATH + "ispy_action_log.csv","a") 
 		self.ispy_action_log_csv.write(','.join(['elapsedTime','localTime', 'isScalingUpDown',
 			'pointerClick','isDragging','onPinch','clickedObjectName']))
 
-		self.child_robot_interaction_csv = open(CSV_PATH+"ispy_interaction_log.csv","a") 
+		self.child_robot_interaction_csv = open(CSV_PATH+"interaction_log_"+participant_id+"_"+experimenter+"_"+date+".csv","a") 
 		self.child_robot_interaction_csv.write(','.join(['elapsedTime','localTime', 'whoseTurn',
 			'robotRole','robotBehavior','robotClickedObj','clickedRightObject','clickedObjName',
 			'gameTask','vocab','numFinishedObjects', 'numQsAsked','numQsAnswered','numChildAttempts'
@@ -48,7 +54,7 @@ class iSpyDataTracking:
 		content = ','.join(map(str,[elapsedTime,str(datetime.now()),msg.whoseTurn, 
 			msg.robotRole, msg.robotBehavior, msg.robotClickedObj, msg.clickedRightObject, msg.clickedRightObject, 
 			msg.clickedObjName, msg.gameTask, msg.taskVocab, msg.numFinishedObjects, 
-			msg.numQsAsked, msg.numQsAnswered, msg.numChildAttempts, msg.numChildCorrectAttempts,
+			msg.numRobotQuestionsAsked, msg.numRobotQuestionsAnswered, msg.numChildAttempts, msg.numChildCorrectAttempts,
 			msg.gameStateTrigger]))
 
 		self.child_robot_interaction_csv.write(content)
@@ -75,38 +81,9 @@ class iSpyDataTracking:
 
 		self.ispy_action_log_csv.write(','.join(map(str,[elapsedTime,str(datetime.now()), isScalingUpDown, data.pointerClick,data.isDragging,data.onPinch,object_name,data.speakingStage ])))
 	
-	def on_start_tracking_child_interaction(self):
-		'''
-		callback function on tracking child's engagment with the tablet. 
-		called by ChildRobotInteraction
-		'''
+	
 		
 
-		# start a new thread to keep track of elapsed time
-		def elapsed_time_alert(stop):
-			#print("!!!!!======....start thread.....")
-			start_time = datetime.now()
-			alerted_once = False
-			while True:
-				delta_time = datetime.now() - start_time
-				if stop():
-					break
-				if delta_time.total_seconds() > 20:
-					self.child_robot_FSM.on_no_ispy_action_alert(2)
-					break
-				elif delta_time.total_seconds() > 10 and alerted_once == False :
-					# 10 secs have passed without receiving any tablet interaction input from the cihld
-					self.child_robot_FSM.on_no_ispy_action_alert(1)
-					alerted_once = True		
-				
-		if self.child_robot_FSM.state == ris.CHILD_TURN: 
-			time.sleep(1)
-			self.stop_thread_flag = False
-			t = threading.Thread(target=elapsed_time_alert, args=(lambda: self.stop_thread_flag,))
-			t.start()
-		else:
-			self.stop_thread_flag = True
-		
 	def on_stop_tracking_child_interaction(self):
 		self.stop_thread_flag = True
 

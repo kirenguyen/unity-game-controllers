@@ -79,6 +79,10 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     Q_ROBOT_ASK_WHY_WRONG="Q_ROBOT_ASK_WHY_WRONG"
     Q_END_OF_TURN="Q_END_OF_TURN"
 
+    ## ===== no ispy action alert ===
+    NO_ISPY_ACTION_ALERT = "NO_ISPY_ACTION_ALERT"
+
+
 
 
 
@@ -96,8 +100,8 @@ class RobotActionSequence:
 
     TURN_STARTED = "TURN_STARTED"
     SCREEN_MOVED = "SCREEN_MOVED"
-    OBJECT_FOUND = "OBJECT_FOUND"
-    OBJECT_CLICKED = "OBJECT_CLICKED" #
+    RIGHT_OBJECT_FOUND = "RIGHT_OBJECT_FOUND"
+    WRONG_OBJECT_CLICKED = "WRONG_OBJECT_CLICKED" #
     OBJECT_PRONOUNCED = "OBJECT_PRONOUNCED" #
     RESULTS_RETURNED = "RESULTS_RETURNED" 
     TURN_FINISHED = "TURN_FINISHED" #
@@ -109,7 +113,6 @@ class RobotActionSequence:
         RESET = "Reset"
 
 
-ROOT_TEGA_SPEECH_FOLDER = 'roleswitching18/'
             
 class RobotRolesBehaviorsMap:
     '''
@@ -128,16 +131,20 @@ class RobotRolesBehaviorsMap:
         question_answer_file = open("iSpyGameController/res/question_answer.json")
         self.question_answer_dict = json.loads(question_answer_file.read())
 
-        #test = getattr(RobotBehaviors,pre)
+        self.current_action_name = ""
+
+
       
     def get_action_name(self,action):
         '''
         return the correct action name (convert the action name in json file to the action name in RobotBehaviorList)
         '''
         try: 
-            return getattr(RobotBehaviors,action)
+            self.current_action_name = getattr(RobotBehaviors,action)
+            return self.current_action_name
         except:
-            return action
+            self.current_action_name = action
+            return self.current_action_name
 
     def get_robot_general_responses(self):
         pass   
@@ -150,11 +157,9 @@ class RobotRolesBehaviorsMap:
         self.current_question_query_path = question_query_path
         if question_query_path in self.question_answer_dict.keys():
             self.question_query = self.question_answer_dict[question_query_path]
-            print("question query: ")
-            print(self.question_query)
             question_name = random.choice(self.question_query['question'])
 
-            return ROOT_TEGA_SPEECH_FOLDER + "questions/" +question_name+".wav"
+            return question_name
         else:
             print("ERROR: Cannot find the question query.")
             return ""
@@ -163,19 +168,21 @@ class RobotRolesBehaviorsMap:
         '''
         get robot's contigent response to the child's answer
         '''
-        print("child answer: "+child_answer)
+
+        print("CHILD ANSWER: "+child_answer)
         if self.current_question_query_path in self.question_answer_dict.keys():
-            for i in self.question_query["user_input"]:
-                print("i:")
-                print(i)
-                if any(m in child_answer for m in i["en_US"]): # found child's answer
-                    return i["response"]
-                    break
-            print("WARNING: Cannot find child's answer")
-            return []
+            if "no_response_" in child_answer: # no response from child
+                return random.choice(self.question_query[child_answer])
+            else:
+                for i in self.question_query["user_input"]:
+                    if any(m in child_answer for m in i["en_US"]): # found child's answer
+                        return random.choice(i["response"])
+                        break
+                print("WARNING: Cannot find child's answer")
+                return ""
         else:
             print("ERROR: Cannot find the question query.")
-            return []
+            return ""
 
         
     def get_actions(self,role,robot_turn,physical_virtual):

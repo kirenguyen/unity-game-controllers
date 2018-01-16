@@ -27,7 +27,7 @@ from GameUtils.PronunciationUtils.PronunciationUtils import PronunciationUtils
 from .ROSNodeMgr import ROSNodeMgr
 from .iSpyDataTracking import iSpyDataTracking
 #from .StudentModel import StudentModel
-from .RobotBehaviorList.RobotBehaviorList import RobotBehaviors
+from .RobotBehaviorList.RobotBehaviorList import RobotBehaviors 
 from .RobotBehaviorList.RobotBehaviorList import RobotRoles
 from .RobotBehaviorList.RobotBehaviorList import RobotRolesBehaviorsMap
 
@@ -37,6 +37,7 @@ from .RoleSwitchingPrj.ChildRobotInteractionFSM import ChildRobotInteractionFSM
 
 from .GameModeFSMs import AlwaysMissionModeFSM,CompleteModeFSM,AlwaysExploreModeFSM
 
+from multiprocessing import Process
 # from StudentModel import StudentModel
 
 if GlobalSettings.USE_ROS:
@@ -75,7 +76,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 	"""
 
 
-	def __init__(self):
+	def __init__(self,game_round,participant_id, experimenter):
 
 		self.ros_node_mgr = ROSNodeMgr()
 		self.ros_node_mgr.init_ros_node()
@@ -95,13 +96,13 @@ class iSpyGameFSM: # pylint: disable=no-member
 		# Bool telling if the cmd message was heard from Unity
 		self.ros_node_mgr.message_received = False
 
-		self.task_controller = iSpyTaskController()
+		self.task_controller = iSpyTaskController(game_round)
 
 		self.results_handler = PronunciationUtils()
 
 		self.interaction = ChildRobotInteractionFSM(self.ros_node_mgr,self.task_controller)
 
-		self.iSpyDataTracking = iSpyDataTracking(self.interaction,self.ros_node_mgr)
+		self.iSpyDataTracking = iSpyDataTracking(self.interaction,self.ros_node_mgr, participant_id, experimenter)
 
 		# Bool stating whether or not the current mission is completed
 		self.mission_completed = True
@@ -109,32 +110,35 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		# choose which game FSM to call
 		# AlwaysMissionModeFSM(self.ros_node_mgr) # CompleteModeFSM() # AlwaysExploreModeFSM(self.ros_node_mgr)
-		self.FSM = AlwaysMissionModeFSM(self.ros_node_mgr)
+		self.FSM = AlwaysMissionModeFSM(self.ros_node_mgr,game_round)
 
 		self.affdexAnalysis = AffdexAnalysis(self.ros_node_mgr)
 
+		self.kill_received = False # for stopping the update() thread
+
 		# start a thread to check the game update
-		self.t = threading.Thread(target=self.update)
-		self.t.start()
-
-
-	def update(self):
+		#self.t = threading.Thread(target=self.update)
+		#self.t.start()
 		
-		while True:
+		
+	def update(self):
+		while self.kill_received == False:
 			if self.FSM.state != gs.MISSION_MODE:
-				self.iSpyDataTracking.on_stop_tracking_child_interaction()
+				self.iSpyDataTracking.stop_tracking_child_interaction()
 			if self.interaction.state != ris.CHILD_TURN and self.interaction.state != ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
-				self.iSpyDataTracking.on_stop_tracking_child_interaction()
+				self.iSpyDataTracking.stop_tracking_child_interaction()
 
+			if self.kill_received == True:
+				break
 
+	
 
 	def on_ispy_state_info_received(self,transition_msg):
 		"""
 		Rospy Callback for when we get log messages from ispy game
 		"""
 
-		print("transition!!!!!: ")
-		print(transition_msg)
+		print("State Transition: "+transition_msg.data)
 
 		if transition_msg.data in gs.Triggers.triggers:
 			time.sleep(.1)
@@ -162,10 +166,13 @@ class iSpyGameFSM: # pylint: disable=no-member
 				self.interaction.turn_taking()
 				
 			elif transition_msg.data == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
-				print("transition msg data: pronunciation panel closed")
 				if self.interaction.state == ris.CHILD_TURN: # when a new turn is child's, then start tracking the child's interaction
 					time.sleep(3)
-					self.iSpyDataTracking.on_start_tracking_child_interaction()
+					self.interaction.start_tracking_child_interaction()
+				
+					
+			# elif transition_msg.data == gs.Triggers.SCREEN_MOVED:
+			# 	self.interaction.react(gs.Triggers.SCREEN_MOVED)
 
 			# If the message is in gs.Triggers, then allow the trigger
 			if transition_msg.data != gs.Triggers.SCREEN_MOVED:
@@ -192,7 +199,6 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		def speakingStage(stage):
 			if stage == "speakingStart":
-				print(self.interaction.state)
 				self.recorder.start_recording(self.origText, RECORD_TIME_MS, self.interaction.state) #TODO: Update 'test' to actual word
 			elif stage == "speakingEnd":
 				self.recorder.stop_recording()
@@ -215,7 +221,6 @@ class iSpyGameFSM: # pylint: disable=no-member
 			#Initializes a new audio recorder object if one hasn't been created
 			if self.recorder == None: self.recorder = AudioRecorder()
 	
-			# print (ispy_action_msg.speakingStage)
 			speakingStage(ispy_action_msg.speakingStage)
 
 
@@ -224,7 +229,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		self._speechace_analysis()
 
-		if self.interaction.state == ris.CHILD_TURN: self.iSpyDataTracking.on_start_tracking_child_interaction() # start tracking the elapsed time of child's lack of tablet interaction
+		if self.interaction.state == ris.CHILD_TURN: self.interaction.start_tracking_child_interaction() # start tracking the elapsed time of child's lack of tablet interaction
 
 
 		
@@ -241,7 +246,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			self.correct_obj = self.task_controller.isTarget(self.origText) 
 			
-			print("start analyzing...")
+			
 			if not self.recorder.valid_recording:
 				letters = list(self.origText)
 				passed = ['1'] * len(letters)
@@ -283,18 +288,12 @@ class iSpyGameFSM: # pylint: disable=no-member
 			self.recorder.has_recorded = 0
 
 
-			# if not self.task_controller.task_in_progress:
-			# 	print("task is no longer in progress")
-			# 	# let the game knows the task is completed
-			# 	time.sleep(0.5)
-			# 	self.ros_node_mgr.send_ispy_cmd(TASK_COMPLETED)
 	
 	
 	def _run_game_task(self):
 		# When entering mission mode from exploration mode, get a random task
 		# and send it to Unity
 
-		print("run game task")
 		if self.task_controller.task_in_progress == False:
 		
 			task = self.task_controller.get_next_task()
@@ -310,7 +309,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 				
 				
 				time.sleep(3)
-				self.iSpyDataTracking.on_start_tracking_child_interaction()
+				self.interaction.start_tracking_child_interaction()
 
 
 	

@@ -205,6 +205,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         self.ispy_to_ros__action_subs = rospy.Subscriber(ISPY_GAME_TO_ROS_ACTION_TOPIC, iSpyAction, on_ispy_action_received)   
         print("action listener")
         rospy.spin()
+        
 
     def start_ispy_transition_listener(self,on_ispy_state_info_received):
         """

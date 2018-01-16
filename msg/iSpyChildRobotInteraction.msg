@@ -28,17 +28,44 @@ string taskVocab
 # number of retrieved object for the given task
 int8 numFinishedObjects
 
-# number of questions the robot asked
-int8 numQsAsked 
- 
-# number of questions the child answered
-int8 numQsAnswered 
 
 # number of child's attempts of retrieving an object
 int8 numChildAttempts 
+
+string childAnswerContent
 
 # number of child's correct attempts (num of objs collected by the child)
 int8 numChildCorrectAttempts 
 
 # game state trigger (e.g., object clicked, object found, object pronounced)
 string gameStateTrigger
+
+# how many questions robot has asked the child
+int8 numRobotQuestionsAsked
+
+# how many questions child answers the robot
+int8 numRobotQuestionsAnswered 
+
+# how many yes/no questions
+int8 numRobotYNQuestion
+
+# how many yes/no questions answered
+int8 numRobotYNQuestionAnswered
+
+# how many open ended questions
+int8 numRobotOpenQuestion
+
+# how many open ended questions answered
+int8 numRobotOpenQuestionAnswered
+
+# no tablet touch alert 
+int8 numTouchAbsenceAlert
+
+# current turn length
+float32 current_turn_length
+
+
+
+
+
+

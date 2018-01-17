@@ -9,40 +9,51 @@ import random
 
 import math
 import operator
-import os
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats
+import pandas as pd
+
+import pronouncing
+import csv
+import os
 
 
-from GameUtils.GlobalSettings import DO_ACTIVE_LEARNING
 from GameUtils.Curriculum import Curriculum
 from GameUtils.PronunciationUtils.PronunciationUtils import PronunciationUtils
 
 from .AgentModel import ActionSpace
 
+WPSM_PATH = '/GameUtils/PronunciationUtils/data/wpsm.csv'
 
-class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,too-many-instance-attributes
+
+
+class StudentPhonemeModel(): # pylint: disable=invalid-name,consider-using-enumerate,too-many-instance-attributes
 
     """
     This class implements a Gaussian Process, intended to model student vocabulary knowledge
-    It uses a kernel based on the distance between two words in ConceptNet as well as a
-    phonetic distance heuristic.
+    It uses a kernel based on a phonetic distance heuristic.
     pylint's 'invalid-name' checker has been disabled to conform with the notation
     in Rasmussen and Williams
     """
 
     def __init__(self):
 
-        #fancy python one-liner to read all string attributes off of a class
-        self.curriculum = [p for p in dir(Curriculum)
+        self.DO_ACTIVE_LEARNING = True
+
+        # load all phonemes into a list
+        
+        df = pd.read_csv(os.getcwd() + WPSM_PATH, sep=',', header=0, index_col=0)
+        arpabet_phonemes = df.keys()
+        self.curriculum = list(arpabet_phonemes) # for phoneme model, this is the list of arpabet phonemes
+        self.word_list = [p for p in dir(Curriculum)
                            if isinstance(getattr(Curriculum, p), str)
-                           and not p.startswith('__')]
+                           and not p.startswith('__')] #this is the list of words, used for active learning selection
 
         self.pronunciation_utils = PronunciationUtils()
 
         self.loaded_covariance_matrix = np.load(
-            os.getcwd() + self.pronunciation_utils.COVARIANCE_PATH + '.npy')
+            os.getcwd() + self.pronunciation_utils.ARPABET_COVARIANCE_PATH + '.npy')
 
         # these parameters govern the assumed Gaussian noise added to the child's recorded
         # pronunciation assessment
@@ -51,16 +62,15 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
 
         self.X_train = [] # These are persistent lists of training data!
         self.Y_train = []
+        self.words_so_far = [] # In order to do the active learning properly, we need to maintain a list of what words
+                               # have been asked already
 
         self.means = [.5] * len(self.curriculum)  # These are the most recent posteriors
         self.variances = [.3] * len(self.curriculum) # Together they form the Student Model!
         #self.fig = None # Figure for drawing
         #self.plts = None #Plots
 
-        self.n_rows = 8 # needs to be > 1
-
-        self.fig, self.plts = plt.subplots(self.n_rows, math.ceil(len(self.curriculum)/self.n_rows),
-                                           figsize=(15, 10))
+        self.n_rows = 5 # needs to be > 1        
 
 
     def init_model(self):
@@ -79,7 +89,7 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         # we only care about evaluating the GP at this finite collection of points
         x_test = self.curriculum
 
-        K_ss = self.psdm_kernel(x_test, x_test) #the Kernel Matrix for the words
+        K_ss = self.phoneme_distance_kernel(x_test, x_test) #the Kernel Matrix for the words
 
         # Get cholesky decomposition (square root) of the
         # covariance matrix
@@ -94,8 +104,8 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         """
         Takes in a list of labeled X and labeled Y data points and computes a new posterior
         E.g.
-        new_X_train = ['BEE', 'SNAKE', 'TIGER']  # these numbers are the word labels
-        new_Y_train = [1, 1, 1] # these numbers correspond to full correct pronunciations
+        new_X_train = ['K', 'AE', 'T']  # these numbers are the phoneme labels
+        new_Y_train = [1, 1, 1] # these numbers correspond to phoneme scores
 
         See Algorithm 2.1 in Rasmussen and Williams to follow along with implementation + notation
         """
@@ -113,18 +123,22 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         print(self.Y_train)
         print(self.means)
         print(self.variances)
-        K = self.psdm_kernel(self.X_train, self.X_train)
-        K_ss = self.psdm_kernel(Xtest, Xtest)
+        K = self.phoneme_distance_kernel(self.X_train, self.X_train)
+        K_ss = self.phoneme_distance_kernel(Xtest, Xtest)
 
-        L = np.linalg.cholesky(K + 0.00005 * np.eye(len(self.X_train)) +
+        cholesky_mtx = (K + 0.00005 * np.eye(len(self.X_train)) +
                                ((self.noise_sigma ** 2) * np.eye(len(self.X_train))))
+        print(cholesky_mtx)
+        # cholesky_mtx[cholesky_mtx > 1.0] = 1.0
+        # print(cholesky_mtx)
+        L = np.linalg.cholesky(cholesky_mtx)
 
         L_y = np.linalg.solve(L, (list(map(operator.sub, self.Y_train, self.get_mean(self.X_train))))) #pythonic way to subtract two lists #pylint: disable=line-too-long
         #L_y = np.linalg.solve(L, self.Y_train) #zero mean function version
         a = np.linalg.solve(L.T, L_y)
 
         # Compute the mean at our test points.
-        K_s = self.psdm_kernel(self.X_train, Xtest)
+        K_s = self.phoneme_distance_kernel(self.X_train, Xtest)
         mu = self.get_mean(Xtest) + np.dot(K_s.T, a).reshape(len(self.curriculum), )
         #mu = np.dot(K_s.T, a).reshape(len(self.curriculum), ) #zero mean function version
         v = np.linalg.solve(L, K_s)
@@ -136,13 +150,21 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
 
         self.means = mu
         self.variances = variance
+
         print("GP POSTERIOR IS NOW")
         print("XTRAIN, YTRAIN, MU, VAR")
+
+        # dont let variances underflow below 0
+        # self.variances.flags.writeable = True        
+        # self.variances[self.variances < 0.00005] = 0.00005
+        # self.means.flags.writeable = True        
+        # self.means[self.variances < 0.00005] = 0.00005
+
         print(self.X_train)
         print(self.Y_train)
         print(self.means)
         print(self.variances)
-        return mu, variance
+        return self.means, self.variances
 
 
     def get_next_best_word(self, action):
@@ -152,31 +174,44 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         """
 
 
-        if DO_ACTIVE_LEARNING and random.random() < .25:
+        if self.DO_ACTIVE_LEARNING:
+
+            print("WORDS SO FAR IS")
+            print(self.words_so_far)
+
             if action == ActionSpace.RING_ANSWER_CORRECT:
 
-                # choose lowest mean word
-                lowest_mean = self.means[0]
+                # choose lowest mean word of words that have not yet been asked about
+                lowest_mean = 10.0 # any mean will be lower than initial value
                 lowest_mean_index = 0
 
-                for i in range(0, len(self.means)):
-                    if self.means[i] < lowest_mean:
-                        lowest_mean = self.means[i]
+
+                for i in range(0, len(self.word_list)):
+                    candidate_mean = self.get_phoneme_mean(self.word_list[i])
+                    if candidate_mean < lowest_mean and self.word_list[i] not in self.words_so_far:
+                        lowest_mean = candidate_mean
                         lowest_mean_index = i
-                chosen_word = self.curriculum[lowest_mean_index]
+                chosen_word = self.word_list[lowest_mean_index]
+                print("CHOSEN WORD WAS")
+                print(chosen_word)
+                print("W MEAN OF " + str(lowest_mean))
 
 
             elif action == ActionSpace.DONT_RING:
 
                 # choose highest var word
-                highest_var = self.variances[0]
+                highest_var = -10
                 highest_var_index = 0
 
-                for i in range(0, len(self.variances)):
-                    if self.variances[i] > highest_var:
-                        highest_var = self.variances[i]
+                for i in range(0, len(self.word_list)):
+                    candidate_var = self.get_phoneme_var(self.word_list[i])
+                    if candidate_var > highest_var and self.word_list[i] not in self.words_so_far:
+                        highest_var = candidate_var
                         highest_var_index = i
-                chosen_word = self.curriculum[highest_var_index]
+                chosen_word = self.word_list[highest_var_index]
+                print("CHOSEN WORD WAS")
+                print(chosen_word)
+                print("W VAR OF " + str(highest_var))
 
         else:
             # randint is inclusive
@@ -195,33 +230,33 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         return np.exp(-.5 * (1 / length_scale) * sqdist)
 
 
-    def psdm_kernel(self, word_set_a, word_set_b):
+    def phoneme_distance_kernel(self, phoneme_set_a, phoneme_set_b):
         """
-        Calculates word matrix covariance via a phonetic-semantic distance metric
+        Calculates word matrix covariance via a phonetic-ONLY distance metric
         """
         #k = np.empty((len(word_set_a), len(word_set_b),))
 
         #first, validate that these are all words in our curriculum
-        for elem in set().union(word_set_a, word_set_b):
+        for elem in set().union(phoneme_set_a, phoneme_set_b):
             if not elem in self.curriculum:
-                raise Exception(elem + ' is not a word in our curriculum')
+                raise Exception(elem + ' is not a phoneme in our curriculum')
 
-        k = np.ones((len(word_set_a), len(word_set_b)))
-        for i in range(len(word_set_a)):
-            for j in range(len(word_set_b)):
-                k[i][j] = self.get_word_cov(word_set_a[i], word_set_b[j])
+        k = np.ones((len(phoneme_set_a), len(phoneme_set_b)))
+        for i in range(len(phoneme_set_a)):
+            for j in range(len(phoneme_set_b)):
+                k[i][j] = self.get_phoneme_cov(phoneme_set_a[i], phoneme_set_b[j])
 
         return k
 
-    def get_word_cov(self, word1, word2):
+    def get_phoneme_cov(self, phoneme1, phoneme2):
         """
-        Returns specific values from the global covariance matrix
+        Returns specific values from the phoneme covariance matrix
         """
 
-        index1 = self.curriculum.index(word1)
-        index2 = self.curriculum.index(word2)
+        index1 = self.curriculum.index(phoneme1)
+        index2 = self.curriculum.index(phoneme2)
 
-        #print("covariance between " + word1 + " and " + word2)
+        #print("covariance between " + phoneme1 + " and " + phoneme2)
         #print(round(self.loaded_covariance_matrix[index1][index2], 3))
         return round(self.loaded_covariance_matrix[index1][index2], 3)
 
@@ -237,8 +272,38 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
         else:
             return 0.5
 
+    def get_phoneme_mean(self, word):
+        """
+        gets the phoneme-based mean of a word, given the current model
+        """
+        phonemes_raw = pronouncing.phones_for_word(word.lower())[0].split(' ')
+        phonemes = [''.join(filter(lambda c: not c.isdigit(), pho)) for pho in phonemes_raw]
+        
+        phoneme_means = []
+        for i in range(0, len(phonemes)):
+            for j in range(0, len(self.curriculum)):
+                if phonemes[i] == self.curriculum[j]:
+                    phoneme_means.append(self.means[j])        
+        return np.mean(phoneme_means)
 
 
+    def get_phoneme_var(self, word):
+        """
+        gets the phoneme-based variance of a word, given the current model
+        """
+        phonemes_raw = pronouncing.phones_for_word(word.lower())[0].split(' ')
+        phonemes = [''.join(filter(lambda c: not c.isdigit(), pho)) for pho in phonemes_raw]
+        
+        phoneme_vars = []
+        for i in range(0, len(phonemes)):
+            for j in range(0, len(self.curriculum)):
+                if phonemes[i] == self.curriculum[j]:
+                    phoneme_vars.append(self.variances[j])        
+        return np.mean(phoneme_vars)
+
+    def init_plot(self):
+        self.fig, self.plts = plt.subplots(self.n_rows, math.ceil(len(self.curriculum)/self.n_rows),
+                                           figsize=(15, 10))
 
     def plot_curricular_distro(self):
         """
@@ -264,7 +329,7 @@ class StudentModel(): # pylint: disable=invalid-name,consider-using-enumerate,to
                                                                          self.variances[i]),
                                                  color='b')
             self.plts[row_index][col_index].set_title(
-                self.curriculum[i] + ": u= " + str(round(self.means[i], 2)) + ", var= " + str(
+                self.curriculum[i] + ":\n u= " + str(round(self.means[i], 2)) + ", var= " + str(
                     round(self.variances[i], 2)))
 
         plt.subplots_adjust(left, bottom, right, top, wspace, hspace)

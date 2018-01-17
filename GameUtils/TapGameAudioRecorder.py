@@ -68,6 +68,7 @@ class AudioRecorder:
         self.experimenter_id = experimenter_id
         self.experiment_phase = experiment_phase
         self.WAV_OUTPUT_FILENAME_PREFIX = 'GameUtils/PronunciationUtils/data/recordings/' + self.participant_id + '_' + self.experimenter_id + '_' + self.experiment_phase + '_'
+        self.recording_index = 0 # number of recordings we have made this run
         self.expected_text = None #this dynamically updates each time start_recording is called. It is the current word we expect to be recording
 
         if GlobalSettings.USE_USB_MIC: #start recording so we dont have to repoen a new stream every time
@@ -166,7 +167,7 @@ class AudioRecorder:
             #stream.close()
             #audio.terminate()
 
-            wav_file = wave.open(self.WAV_OUTPUT_FILENAME_PREFIX + self.expected_text + '.wav', 'wb')
+            wav_file = wave.open(self.WAV_OUTPUT_FILENAME_PREFIX + self.expected_text + '_' + str(self.recording_index) + '.wav', 'wb')
             wav_file.setnchannels(AudioRecorder.CHANNELS)
             wav_file.setsampwidth(2)
             wav_file.setframerate(AudioRecorder.RATE)
@@ -186,13 +187,12 @@ class AudioRecorder:
 
         # send request to speechace api
         api_command = "curl --form text='" + self.expected_text + "' --form user_audio_file=@" + audio_file + " --form dialect=general_american --form user_id=1234 \"https://api.speechace.co/api/scoring/text/v0.1/json?key=po%2Fc4gm%2Bp4KIrcoofC5QoiFHR2BTrgfUdkozmpzHFuP%2BEuoCI1sSoDFoYOCtaxj8N6Y%2BXxYpVqtvj1EeYqmXYSp%2BfgNfgoSr5urt6%2FPQzAQwieDDzlqZhWO2qFqYKslE&user_id=002\"" # pylint: disable=line-too-long
-        process = subprocess.Popen(api_command, shell=True, stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT)
-        process.wait()
-        pouts = process.stdout.readlines()
+        pouts = subprocess.check_output(api_command, shell=True)
+        #process.wait()
+        #pouts = process.stdout.readlines()
         print("RESULT")
         print(pouts)
-        out_json = pouts[3]
+        out_json = pouts
 
         elapsed_time = time.time() - start_time
         print("took " + str(elapsed_time) + " seconds to get speechAce results")
@@ -211,11 +211,16 @@ class AudioRecorder:
             return
 
 
+<<<<<<< HEAD
     def start_recording(self, expected_text, recording_length_ms, robots_turn):
+=======
+    def start_recording(self, expected_text, round_index, recording_length_ms):
+>>>>>>> playtest-features
         """
         Starts a new thread that records the microphones audio.
         """
         self.expected_text = expected_text
+        self.recording_index = round_index
         self.is_recording = True
         self.has_recorded += 1
         self.buffered_audio_data = []  # Resets audio data

@@ -28,7 +28,7 @@ list="practice experiment"
 if ! [[ $list =~ (^| )$3($| ) ]]; then
   echo "error: study phase [$3] does not exist"
   echo "Usage: ./startStudy.sh <participant_id> <experimenter_name> <study_phase>"
-  echo "./startStudy.sh p01 huili experiment"
+  echo "./startStudy.sh p000 sam experiment"
   exit
 fi
 
@@ -37,8 +37,7 @@ mkdir -p log
 mkdir -p rosbag
 
 
-gnome-terminal --geometry 40x120+0+0 --title ">>>iSpy Game Study MAIN<<<" -e "./scripts/run_ispy.sh $1 $2 $3"
+gnome-terminal --geometry 240x120+0+0 --title ">>>Tap Game Study MAIN<<<" -e "./scripts/runFSM.sh $1 $2 $3 $pg $5"
 
-if [ $3 = 'experiment' ]; then
-  ./scripts/rosbag_record.sh $1 $2 $3
-fi
+#./scripts/rosbag_record.sh $1 $2 $4
+

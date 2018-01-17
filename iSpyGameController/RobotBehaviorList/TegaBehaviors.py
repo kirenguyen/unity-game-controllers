@@ -116,6 +116,32 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.motion = TegaAction.MOTION_FRUSTRATED 
 
 
+        ## Silent Emotion Commands
+        if command == RobotBehaviors.ROBOT_SILENT_SAD:
+            msg.motion = TegaAction.MOTION_SILENT_SAD
+
+        if command == RobotBehaviors.ROBOT_SILENT_NOD:
+            msg.motion = TegaAction.MOTION_SILENT_NOD
+
+        if command == RobotBehaviors.ROBOT_SILENT_HAPPY_DANCE:
+            msg.motion = TegaAction.MOTION_SILENT_HAPPY_DANCE
+
+        if command == RobotBehaviors.ROBOT_SILENT_YES:
+            msg.motion = TegaAction.MOTION_SILENT_YES
+
+        if command == RobotBehaviors.ROBOT_SILENT_PUZZLED:
+            msg.motion = TegaAction.MOTION_SILENT_PUZZLED
+
+        if command == RobotBehaviors.ROBOT_SILENT_FRUSTRATED:
+            msg.motion = TegaAction.MOTION_SILENT_FRUSTRATED
+
+        if command == RobotBehaviors.ROBOT_SILENT_INTERESTED:
+            msg.motion = TegaAction.MOTION_SILENT_INTERESTED
+
+        if command == RobotBehaviors.ROBOT_SILENT_EXCITED:
+            msg.motion = TegaAction.MOTION_SILENT_HAPPY_WIGGLE
+
+
         # Tega speech commands
         if command == RobotBehaviors.ROBOT_CUSTOM_SPEECH:
             msg.wav_filename = args[0][0].lower()

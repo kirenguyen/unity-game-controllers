@@ -45,6 +45,15 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     ROBOT_ASK_HELP = 'ROBOT_ASK_HELP'
     ROBOT_DISAPPOINTED = 'ROBOT_DISAPPOINTED'
 
+    # Silent Emotions
+    ROBOT_SILENT_NOD = 'ROBOT_SILENT_NOD'
+    ROBOT_SILENT_HAPPY_DANCE = 'ROBOT_SILENT_HAPPY_DANCE'
+    ROBOT_SILENT_YES = 'ROBOT_SILENT_YES'
+    ROBOT_SILENT_PUZZLED = 'ROBOT_SILENT_PUZZLED'
+    ROBOT_SILENT_FRUSTRATED = 'ROBOT_SILENT_FRUSTRATED'
+    ROBOT_SILENT_SAD = 'ROBOT_SILENT_SAD'
+    ROBOT_SILENT_INTERESTED = 'ROBOT_SILENT_INTERESTED'
+    ROBOT_SILENT_EXCITED = 'ROBOT_SILENT_EXCITED'
  
 
     # virtual actions on the app
@@ -153,7 +162,7 @@ class RobotRolesBehaviorsMap:
         '''
         get question query result 
         '''
-        print("quewstion query path: "+question_query_path)
+        print("question query path: "+question_query_path)
         self.current_question_query_path = question_query_path
         if question_query_path in self.question_answer_dict.keys():
             self.question_query = self.question_answer_dict[question_query_path]

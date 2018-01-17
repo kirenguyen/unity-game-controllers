@@ -4,36 +4,39 @@
       "physical":{
         "TURN_FINISHED": {
           "general": [
-            "ROBOT_ENCOURAGING",
-            "ROBOT_CUSTOM_SPEECH"
-          ] 
+            "LOOK_CENTER",
+            "ROBOT_SILENT_NOD"
+          ],
+          "optional":{
+            "ROBOT_CUSTOM_SPEECH": 0.6
+          }
         },
         "TURN_STARTED": {
           "general": [
-            "ROBOT_INTERESTED", 
-            "ROBOT_CUSTOM_SPEECH",
-            "LOOK_AT_TABLET"
-          ],
-          "optional":{
-            "KEYWORD_DEFINITION_SPEECH":0.99,
-            "Q_ROBOT_WANT_LEARN":0.999
-          }
-        },
-        "SCREEN_MOVED": {
-          "general": [
+            "ROBOT_SILENT_INTERESTED",
             "ROBOT_CUSTOM_SPEECH"
           ]
         },
+        "SCREEN_MOVED": {
+          "general": [
+            "LOOK_AT_TABLET"
+          ],
+          "optional":{
+            "ROBOT_CUSTOM_SPEECH": 0.5,
+            "Q_ROBOT_WANT_LEARN":0.2
+          }
+        },
         "WRONG_OBJECT_CLICKED": {
           "general": [
-            "ROBOT_CURIOUS",
-            "ROBOT_CUSTOM_SPEECH"
+
           ]
         },
         "RIGHT_OBJECT_FOUND": {
           "general": [
-            "ROBOT_CURIOUS"
-          ]
+            "ROBOT_CURIOUS",
+            "ROBOT_CUSTOM_SPEECH"
+          ],
+          "ROBOT_INTERESTED":0.5
         },
         "OBJECT_PRONOUNCED":{
           "general": [
@@ -43,11 +46,10 @@
         },
         "PRONOUNCE_CORRECT":{
           "general": [
-            
             "ROBOT_CELEBRATION"
           ],
           "optional":{
-            "VOCAB_EXPLANATION_SPEECH":0.99
+            "VOCAB_EXPLANATION_SPEECH":0.9
           }
         },
         "RESULTS_RETURNED":{
@@ -57,7 +59,7 @@
         },
         "WRONG_OBJECT_FAIL":{
           "general": [
-            "ROBOT_CUSTOM_SPEECH"
+
           ]
         }
       },
@@ -69,10 +71,12 @@
       "physical": {
         "TURN_FINISHED": {
           "general": [
-            "ROBOT_EXCITED"
+            "ROBOT_SILENT_EXCITED",
+            "LOOK_CENTER"
           ],
           "optional":{
-            "ROBOT_CUSTOM_SPEECH":0.99
+            "ROBOT_CUSTOM_SPEECH":0.7,
+            "ROBOT_SILENT_INTERESTED":0.3
           }
         },
         "TURN_STARTED": {
@@ -83,27 +87,29 @@
         },
         "SCREEN_MOVED": {
           "general": [ 
-            "LOOK_CENTER",
-            "ROBOT_CUSTOM_SPEECH"
+            "LOOK_AT_TABLET"
           ],
           "optional":{
-            "ROBOT_COMFORT":0.1,
-            "KEYWORD_DEFINITION_SPEECH":0.99,
-            
-            "Q_ROBOT_WANT_LEARN":0.999
-            
+            "KEYWORD_DEFINITION_SPEECH":0.6,
+            "Q_ROBOT_WANT_LEARN":0.2
           }
         },
         "WRONG_OBJECT_CLICKED": {
           "general": [
-            "ROBOT_UNSURE",
-            "ROBOT_CUSTOM_SPEECH"
-          ]
+            "ROBOT_SILENT_PUZZLED"
+          ],
+          "optional":{
+            "ROBOT_CUSTOM_SPEECH": 0.8
+          }
         },
         "RIGHT_OBJECT_FOUND": {
           "general": [
-            "ROBOT_YES"
-          ]
+            "ROBOT_SILENT_YES"
+          ],
+          "optional":{
+            "ROBOT_CUSTOM_SPEECH":0.7,
+            "ROBOT_SILENT_NOD":0.5
+          }
         },
         "OBJECT_PRONOUNCED":{
           "general": [
@@ -113,18 +119,18 @@
         },
         "PRONOUNCE_CORRECT":{
           "general": [
-            "ROBOT_HAPPY_DANCE",
+            "ROBOT_SILENT_HAPPY_DANCE",
             "ROBOT_CUSTOM_SPEECH"
           ]
         },
         "RESULTS_RETURNED":{
           "general": [
-          
+            "ROBOT_CURIOUS"
           ]
         },
         "WRONG_OBJECT_FAIL":{
           "general": [
-            "ROBOT_SAD",
+            "ROBOT_SILENT_SAD",
             "ROBOT_CUSTOM_SPEECH"
           ]
         }
@@ -143,46 +149,55 @@
         "TURN_FINISHED": {
           "general": [
             "LOOK_CENTER", 
-            "ROBOT_CURIOUS",
-            "ROBOT_CUSTOM_SPEECH"
-          ]
+            "ROBOT_CURIOUS"
+          ],
+          "optional":{
+            "ROBOT_CUSTOM_SPEECH": 0.7
+          }
         },
         "TURN_STARTED": {
           "general": [
-            "ROBOT_EXCITED", 
-            "ROBOT_CUSTOM_SPEECH",
-            "LOOK_AT_TABLET"
+            "ROBOT_SILENT_EXCITED", 
+            "ROBOT_CUSTOM_SPEECH"
           ]
           
         },
         "SCREEN_MOVED": {
           "general": [
-            "ROBOT_CUSTOM_SPEECH"
+            "LOOK_AT_TABLET",
+            "ROBOT_SILENT_INTERESTED"
           ],
           "optional": {
-            "Q_ROBOT_ASK_HELP":0.99
+            "ROBOT_CUSTOM_SPEECH":0.3,
+            "Q_ROBOT_ASK_HELP":0.6
           }
         },
         "WRONG_OBJECT_CLICKED": {
           "general": [
-            "ROBOT_UNSURE",
-            "ROBOT_CUSTOM_SPEECH"
-          ]
+            "ROBOT_SILENT_PUZZLED"
+          ],
+          "optional":{
+            "ROBOT_CUSTOM_SPEECH":0.5
+          }
         },
         "RIGHT_OBJECT_FOUND": {
           "general": [
-            "ROBOT_UNSURE",
-            "ROBOT_CUSTOM_SPEECH"
-          ]
+            "ROBOT_INTERESTED"
+          ],
+          "optional":{
+            "ROBOT_CUSTOM_SPEECH": 0.4,
+            "ROBOT_SILENT_PUZZLED":0.3
+          }
         },
         "OBJECT_PRONOUNCED":{
           "general": [
+            "LOOK_CENTER",
             "ROBOT_SAY_WORD"
           ]
         },
         "PRONOUNCE_CORRECT":{
           "general": [
-            "ROBOT_HAPPY_DANCE",
+            "ROBOT_SILENT_HAPPY_DANCE",
             "ROBOT_CUSTOM_SPEECH"
           ]
         },
@@ -193,10 +208,10 @@
         },
         "WRONG_OBJECT_FAIL":{
           "general": [
-            "ROBOT_CUSTOM_SPEECH"
+
           ],
           "optional":{
-            "Q_ROBOT_ASK_WHY_WRONG":0.999
+            "Q_ROBOT_ASK_WHY_WRONG":0.8
           }
         }
       },
@@ -209,54 +224,59 @@
       "physical":{
         "TURN_FINISHED": {
           "general": [
-            "ROBOT_WINK",
-            "ROBOT_CUSTOM_SPEECH"
-          ]
+            "ROBOT_SILENT_NOD",
+            "LOOK_CENTER"
+          ],
+          "optional":{
+            "ROBOT_CUSTOM_SPEECH": 0.7
+          }
         },
         "TURN_STARTED": {
           "general": [
-            "LOOK_CENTER", 
-            "ROBOT_INTERESTED",
-            "ROBOT_CUSTOM_SPEECH"
+            "ROBOT_SILENT_INTERESTED"
           ],
           "optional":{
-            "Q_ROBOT_WANT_LEARN":0.999
+            "ROBOT_CUSTOM_SPEECH":0.7
             }
         },
         "SCREEN_MOVED": {
           "general": [
-            "ROBOT_COMFORT", 
-            "LOOK_CENTER",
+            "LOOK_AT_TABLET",
             "ROBOT_CUSTOM_SPEECH"
-          ]
+          ],
+          "original":{
+            "Q_ROBOT_WANT_LEARN":0.7
+          }
         },
         "WRONG_OBJECT_CLICKED": {
           "general": [
-            "LOOK_AT_TABLET",
-            "ROBOT_CUSTOM_SPEECH"
-          ]  
+            "LOOK_AT_TABLET"
+          ],
+          "optional":{
+            "ROBOT_CUSTOM_SPEECH":0.6
+          }
         },
         "RIGHT_OBJECT_FOUND": {
           "general": [
-            "LOOK_AT_TABLET", 
-            "LOOK_CENTER",
-            "ROBOT_CUSTOM_SPEECH"
-          ]
+            "LOOK_AT_TABLET" 
+          ],
+          "optional":{
+            "ROBOT_CUSTOM_SPEECH": 0.6
+          }
         },
         "OBJECT_PRONOUNCED":{
           "general": [
             "LOOK_CENTER", 
-            "ROBOT_ATTENTION",
-            "ROBOT_CUSTOM_SPEECH"
+            "ROBOT_ATTENTION"
           ]
         },
         "PRONOUNCE_CORRECT":{
           "general": [
-            "ROBOT_HAPPY_DANCE",
-            "ROBOT_CUSTOM_SPEECH"
+            "ROBOT_SILENT_EXCITED"
           ],
           "optional":{
-            "Q_ROBOT_ASK_WHY_CHOOSE_IT":0.999
+            "ROBOT_CUSTOM_SPEECH":0.3,
+            "Q_ROBOT_ASK_WHY_CHOOSE_IT":0.8
           }
         },
         "RESULTS_RETURNED":{
@@ -266,7 +286,7 @@
         },
         "WRONG_OBJECT_FAIL":{
           "general": [
-            "ROBOT_SAD",
+            "ROBOT_SILENT_SAD",
             "ROBOT_CUSTOM_SPEECH"
           ]
         }
@@ -277,15 +297,16 @@
   },
 
 
-
-
   "BACKUP":{
     "robotTURN": {
       "physical":{
         "TURN_FINISHED": {
           "general": [
-            "ROBOT_CUSTOM_SPEECH"
-          ]
+
+          ],
+          "optional":{
+            "ROBOT_CUSTOM_SPEECH": 0.5
+          }
         },
         "TURN_STARTED": {
           "general": [
@@ -294,48 +315,59 @@
         },
         "SCREEN_MOVED": {
           "general": [  
-            "ROBOT_CUSTOM_SPEECH"
+            "ROBOT_SILENT_INTERESTED"
           ],
           "optional":{
-            "Q_ROBOT_ASK_WHY_CHOOSE_IT":0.999
+            "ROBOT_CUSTOM_SPEECH": 0.5
           }
         },
+
         "WRONG_OBJECT_CLICKED": {
           "general": [
-            "ROBOT_CUSTOM_SPEECH"
-          ]
+            "ROBOT_THINKING"
+          ],
+          "optional":{
+            "ROBOT_SILENT_PUZZLED": 0.5,
+            "ROBOT_CUSTOM_SPEECH": 0.5
+          }
         },
         "RIGHT_OBJECT_FOUND": {
           "general": [
-            "ROBOT_CUSTOM_SPEECH"
-          ]
+            "ROBOT_CURIOUS"
+          ],
+          "optional":{
+            "ROBOT_SILENT_EXCITED": 0.4,
+            "ROBOT_CUSTOM_SPEECH": 0.5
+          }
         },
+
         "OBJECT_PRONOUNCED":{
           "general": [
-            "ROBOT_CUSTOM_SPEECH"
+            "ROBOT_SAY_WORD"
           ]
         },
         "PRONOUNCE_CORRECT":{
           "general": [
             "ROBOT_CUSTOM_SPEECH"
-          ]
+          ],
+          "optional":{
+            "ROBOT_SILENT_HAPPY_DANCE": 0.4
+          }
         },
         "RESULTS_RETURNED":{
           "general": [
             "ROBOT_CUSTOM_SPEECH"
           ]
         },
+
         "WRONG_OBJECT_FAIL":{
           "general": [
             "ROBOT_CUSTOM_SPEECH"
-          ]
-        },
-        "SCREEN_MOVED": {
-          "general": [
-            "ROBOT_COMFORT"
-          ]
+          ],
+          "optional":{
+            "ROBOT_SILENT_SAD": 0.6
+          }
         }
-
       },
       "virtual":[]
 
@@ -344,46 +376,55 @@
       "physical":{
         "TURN_FINISHED": {
           "general": [
-            "GENERAL_CURIOSITY_SPEECH",
-            "ROBOT_CUSTOM_SPEECH"
-          ]
+            "LOOK_CENTER"
+          ],
+          "optional":{
+            "ROBOT_CUSTOM_SPEECH": 0.5, 
+            "GENERAL_CURIOSITY_SPEECH":0.2
+          }
         },
         "TURN_STARTED": {
           "general": [
-            "ROBOT_EXCITED",
-            "ROBOT_CUSTOM_SPEECH"
-          ]
-        },
-        "SCREEN_MOVED": {
-          "general": [
-            "ROBOT_COMFORT",
             "ROBOT_CUSTOM_SPEECH"
           ],
           "optional":{
-            "Q_ROBOT_ASK_WHY_CHOOSE_IT":0.999
+            "ROBOT_EXCITED": 0.2,
+            "ROBOT_SILENT_INTERESTED":0.5
+          }
+        },
+        "SCREEN_MOVED": {
+          "general": [
+            "ROBOT_CUSTOM_SPEECH"
+          ],
+          "optional":{
+            "Q_ROBOT_WANT_LEARN":0.6
           }
         },
         "WRONG_OBJECT_CLICKED": {
           "general": [
-            "LOOK_AT_TABLET",
-            "ROBOT_CUSTOM_SPEECH"
-          ]
+            "LOOK_AT_TABLET"
+          ],
+          "optional": {
+            "ROBOT_CUSTOM_SPEECH": 0.5
+          }
         },
         "RIGHT_OBJECT_FOUND": {
           "general": [
-            "ROBOT_YES",
-            "ROBOT_CUSTOM_SPEECH"
-          ]
+            "ROBOT_SILENT_YES"
+          ],
+          "optional":{
+            "ROBOT_SILENT_NOD":0.4,
+            "ROBOT_CUSTOM_SPEECH": 0.6
+          }
         },
         "OBJECT_PRONOUNCED":{
           "general": [
-            "LOOK_AT_TABLET"
+            "LOOK_CENTER"
           ]
         },
         "PRONOUNCE_CORRECT":{
           "general": [
-            "ROBOT_YES", 
-            "ROBOT_HAPPY_DANCE",
+            "ROBOT_SILENT_HAPPY_DANCE",
             "ROBOT_CUSTOM_SPEECH"
           ]
         },
@@ -394,7 +435,7 @@
         },
         "WRONG_OBJECT_FAIL":{
           "general": [
-            "ROBOT_SAD",
+            "ROBOT_SILENT_SAD",
             "ROBOT_CUSTOM_SPEECH"
           ]
         }

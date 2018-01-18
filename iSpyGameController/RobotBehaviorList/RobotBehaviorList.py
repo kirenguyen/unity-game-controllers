@@ -107,13 +107,13 @@ class RobotRoles(Enum):
 
 class RobotActionSequence:
 
-    TURN_STARTED = "TURN_STARTED"
-    SCREEN_MOVED = "SCREEN_MOVED"
+    TURN_STARTING = "TURN_STARTING"
+    SCREEN_MOVING = "SCREEN_MOVING"
     RIGHT_OBJECT_FOUND = "RIGHT_OBJECT_FOUND"
     WRONG_OBJECT_CLICKED = "WRONG_OBJECT_CLICKED" #
     OBJECT_PRONOUNCED = "OBJECT_PRONOUNCED" #
     RESULTS_RETURNED = "RESULTS_RETURNED" 
-    TURN_FINISHED = "TURN_FINISHED" #
+    TURN_SWITCHING = "TURN_SWITCHING" #
     PRONOUNCE_CORRECT = "PRONOUNCE_CORRECT"
     WRONG_OBJECT_FAIL ="WRONG_OBJECT_FAIL" 
 
@@ -172,6 +172,20 @@ class RobotRolesBehaviorsMap:
         else:
             print("ERROR: Cannot find the question query.")
             return ""
+
+    def get_robot_response_to_help(self,child_help_response):
+        '''
+        return bool for child answer to helping the robot
+        '''
+        print("RESPONSE_TO_HELP: "+child_help_response)
+        if self.current_question_query_path in self.question_answer_dict.keys():
+            if "no_response_" in child_help_response: # no response from child
+                return False
+            else:
+                yes_response = self.question_query["user_input"][0]
+                if any(m in child_help_response for m in yes_response["en_US"]): # found child's answer
+                    return True
+                return False
 
     def get_robot_response_to_answer(self,child_answer):
         '''

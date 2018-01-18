@@ -11,6 +11,9 @@
         "response":["response_b"]
       }
     ],
+    "other_input":[
+      "no_response_j"
+    ],
     "other":{
       "type": "yes/no",
       "help": true
@@ -35,6 +38,9 @@
         "en_US":["no","nope","don't","dont","don"],
         "response":["response_f"]
       }
+    ],
+    "other_input":[
+      "no_response_j"
     ],
     "other":{
       "type": "yes/no",
@@ -61,6 +67,9 @@
         "response":["response_f"]
       }
     ],
+    "other_input":[
+      "no_response_j"
+    ],
     "other":{
       "type": "yes/no",
       "help": true
@@ -78,13 +87,16 @@
     "question": ["open_ended_question_4","open_ended_question_2"],
     "user_input":[
       {
-        "en_US":["because","yes","yeah","ok","cause","pause"],
+        "en_US":["because","is", "it's", "yes","yeah","ok","cause","pause"],
         "response":["response_g","response_c"]
       },
       {
         "en_US":["no","dont know","don't know","don"],
         "response":["response_i"]
       }
+    ],
+    "other_input":[
+      "no_response_i"
     ],
     "other":{
       "type": "open_ended",
@@ -103,14 +115,16 @@
     "question": ["open_ended_question_3","open_ended_question_1"],
     "user_input":[
       {
-        "en_US":["because","yes","yeah","ok","cause","pause"],
+        "en_US":["because","yes","not", "yeah","ok","cause","pause"],
         "response":["response_g", "response_c"]
       },
       {
         "en_US":["no","dont know","don't know","don"],
-      
         "response":["response_i"]
       }
+    ],
+    "other_input":[
+      "no_response_i"
     ],
     "other":{
       "type": "open_ended",

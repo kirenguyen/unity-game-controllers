@@ -2,7 +2,7 @@
   "EXPERT":{
     "robotTURN": {
       "physical":{
-        "TURN_FINISHED": {
+        "TURN_SWITCHING": {
           "general": [
             "LOOK_CENTER",
             "ROBOT_SILENT_NOD"
@@ -11,18 +11,18 @@
             "ROBOT_CUSTOM_SPEECH": 0.6
           }
         },
-        "TURN_STARTED": {
+        "TURN_STARTING": {
           "general": [
             "ROBOT_SILENT_INTERESTED",
             "ROBOT_CUSTOM_SPEECH"
           ]
         },
-        "SCREEN_MOVED": {
+        "SCREEN_MOVING": {
           "general": [
-            "LOOK_AT_TABLET"
+            "LOOK_AT_TABLET",
+            "ROBOT_CUSTOM_SPEECH"
           ],
           "optional":{
-            "ROBOT_CUSTOM_SPEECH": 0.5,
             "Q_ROBOT_WANT_LEARN":0.2
           }
         },
@@ -69,7 +69,7 @@
     "childTURN": {
 
       "physical": {
-        "TURN_FINISHED": {
+        "TURN_SWITCHING": {
           "general": [
             "ROBOT_SILENT_EXCITED",
             "LOOK_CENTER"
@@ -79,13 +79,13 @@
             "ROBOT_SILENT_INTERESTED":0.3
           }
         },
-        "TURN_STARTED": {
+        "TURN_STARTING": {
           "general": [
             "ROBOT_CUSTOM_SPEECH",
             "ROBOT_ATTENTION"
           ]
         },
-        "SCREEN_MOVED": {
+        "SCREEN_MOVING": {
           "general": [ 
             "LOOK_AT_TABLET"
           ],
@@ -146,7 +146,7 @@
   "NOVICE":{
     "robotTURN": {
       "physical":{
-        "TURN_FINISHED": {
+        "TURN_SWITCHING": {
           "general": [
             "LOOK_CENTER", 
             "ROBOT_CURIOUS"
@@ -155,14 +155,14 @@
             "ROBOT_CUSTOM_SPEECH": 0.7
           }
         },
-        "TURN_STARTED": {
+        "TURN_STARTING": {
           "general": [
             "ROBOT_SILENT_EXCITED", 
             "ROBOT_CUSTOM_SPEECH"
           ]
           
         },
-        "SCREEN_MOVED": {
+        "SCREEN_MOVING": {
           "general": [
             "LOOK_AT_TABLET",
             "ROBOT_SILENT_INTERESTED"
@@ -197,8 +197,7 @@
         },
         "PRONOUNCE_CORRECT":{
           "general": [
-            "ROBOT_SILENT_HAPPY_DANCE",
-            "ROBOT_CUSTOM_SPEECH"
+            "ROBOT_SILENT_HAPPY_DANCE"
           ]
         },
         "RESULTS_RETURNED":{
@@ -208,7 +207,7 @@
         },
         "WRONG_OBJECT_FAIL":{
           "general": [
-
+            "ROBOT_CUSTOM_SPEECH"
           ],
           "optional":{
             "Q_ROBOT_ASK_WHY_WRONG":0.8
@@ -222,7 +221,7 @@
 
     "childTURN": {
       "physical":{
-        "TURN_FINISHED": {
+        "TURN_SWITCHING": {
           "general": [
             "ROBOT_SILENT_NOD",
             "LOOK_CENTER"
@@ -231,7 +230,7 @@
             "ROBOT_CUSTOM_SPEECH": 0.7
           }
         },
-        "TURN_STARTED": {
+        "TURN_STARTING": {
           "general": [
             "ROBOT_SILENT_INTERESTED"
           ],
@@ -239,7 +238,7 @@
             "ROBOT_CUSTOM_SPEECH":0.7
             }
         },
-        "SCREEN_MOVED": {
+        "SCREEN_MOVING": {
           "general": [
             "LOOK_AT_TABLET",
             "ROBOT_CUSTOM_SPEECH"
@@ -300,7 +299,7 @@
   "BACKUP":{
     "robotTURN": {
       "physical":{
-        "TURN_FINISHED": {
+        "TURN_SWITCHING": {
           "general": [
 
           ],
@@ -308,12 +307,12 @@
             "ROBOT_CUSTOM_SPEECH": 0.5
           }
         },
-        "TURN_STARTED": {
+        "TURN_STARTING": {
           "general": [
             "ROBOT_CUSTOM_SPEECH"
           ]
         },
-        "SCREEN_MOVED": {
+        "SCREEN_MOVING": {
           "general": [  
             "ROBOT_SILENT_INTERESTED"
           ],
@@ -374,7 +373,7 @@
     },
     "childTURN": {
       "physical":{
-        "TURN_FINISHED": {
+        "TURN_SWITCHING": {
           "general": [
             "LOOK_CENTER"
           ],
@@ -383,22 +382,18 @@
             "GENERAL_CURIOSITY_SPEECH":0.2
           }
         },
-        "TURN_STARTED": {
+        "TURN_STARTING": {
           "general": [
             "ROBOT_CUSTOM_SPEECH"
           ],
           "optional":{
-            "ROBOT_EXCITED": 0.2,
             "ROBOT_SILENT_INTERESTED":0.5
           }
         },
-        "SCREEN_MOVED": {
+        "SCREEN_MOVING": {
           "general": [
-            "ROBOT_CUSTOM_SPEECH"
-          ],
-          "optional":{
-            "Q_ROBOT_WANT_LEARN":0.6
-          }
+            "ROBOT_EXCITED"
+          ]
         },
         "WRONG_OBJECT_CLICKED": {
           "general": [

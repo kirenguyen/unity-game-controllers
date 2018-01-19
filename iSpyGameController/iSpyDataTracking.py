@@ -37,10 +37,10 @@ class iSpyDataTracking:
 			'pointerClick','isDragging','onPinch','clickedObjectName']))
 
 		self.child_robot_interaction_csv = open(CSV_PATH+"interaction_log_"+participant_id+"_"+experimenter+"_"+date+".csv","a") 
-		self.child_robot_interaction_csv.write(','.join(['elapsedTime','localTime', 'whoseTurn',
+		self.child_robot_interaction_csv.write(','.join(['elapsedTime','localTime', 'whoseTurn', 'gameStateTrigger',
 			'robotRole','robotBehavior','robotClickedObj','clickedRightObject','clickedObjName',
-			'gameTask','vocab','numFinishedObjects', 'numQsAsked','numQsAnswered','numChildAttemptsPerGame'
-			'numChildCorrectAttemptsPerGame','gameStateTrigger', 
+			'gameTask','vocab','numFinishedObjects', 'numQsAsked','numQsAnswered','numChildAttemptsPerGame',
+			'numChildCorrectAttemptsPerGame', 
 			'numRobotYNQuestion', 'numRobotYNQuestionAnswered',
 			'numRobotOpenQuestion','numRobotOpenQuestionAnswered','numTouchAbsenceAlertPerTask',
 			'current_turn_length','currentInteractionState',
@@ -63,12 +63,12 @@ class iSpyDataTracking:
 		
 		# update the ispy action data frame
 		elapsedTime = str(datetime.now() - self.game_start_time)
-		content = ','.join(map(str,[elapsedTime,str(datetime.now()),msg.whoseTurn, 
-			msg.robotRole, msg.robotBehavior, msg.robotClickedObj, msg.clickedRightObject, msg.clickedRightObject, 
+		content = ','.join(map(str,[elapsedTime,str(datetime.now()),msg.whoseTurn, msg.gameStateTrigger, 
+			msg.robotRole, msg.robotBehavior, msg.robotClickedObj, msg.clickedRightObject, 
 			msg.clickedObjName, msg.gameTask, msg.taskVocab, msg.numFinishedObjects, 
 			msg.numRobotQuestionsAsked, msg.numRobotQuestionsAnswered, msg.numChildAttemptsPerGame, 
 			msg.numChildCorrectAttemptsPerGame, 
-			msg.gameStateTrigger, 
+		
 			msg.numRobotYNQuestion, msg.numRobotYNQuestionAnswered,
 			msg.numRobotOpenQuestion, msg.numRobotOpenQuestionAnswered, msg.numTouchAbsenceAlertPerTask,
 			msg.current_turn_length, msg.currentInteractionState, 
@@ -98,7 +98,7 @@ class iSpyDataTracking:
 			object_name += letter
 
 		# update the ispy action data frame
-		elapsedTime = str(datetime.now() - self.game_start_time)
+		elapsedTime = str(datetime.now() - self.game_start_time) if self.game_start_time else ""
 		isScalingUpDown = any(n == True for n in [data.isScalingUp,data.isScalingDown])
 
 		self.ispy_action_log_csv.write(','.join(map(str,[elapsedTime,str(datetime.now()), isScalingUpDown, data.pointerClick,data.isDragging,data.onPinch,object_name,data.speakingStage ])))

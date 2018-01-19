@@ -119,6 +119,10 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         This function maps actions from the ActionSpace into actual ROS Msgs
         """
         
+        print("send robot cmd...")
+        print(command)
+        print("args...")
+        print(args)
         if self.robot_commander is None:
             self.start_robot_publisher()
             time.sleep(.5)
@@ -264,6 +268,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         msg = AsrCommand()
         msg.command = AsrCommand.STOP_FINAL # stop final for the asr result
         self.pub_asr_command.publish(msg)
+        print("stop asr listening....")
 
 
     def start_child_robot_interaction_pub_sub(self, on_interaction_data):

@@ -142,7 +142,9 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		if transition_msg.data in gs.Triggers.triggers:
 			time.sleep(.1)
-			self.interaction.react(transition_msg.data,self.origText) # the robot reacts
+
+			if self.FSM.state != gs.EXPLORATION_MODE and self.FSM.state != gs.WORD_DISPLAY: # if the game is still in explore mode
+				self.interaction.react(transition_msg.data,self.origText) # the robot reacts
 
 
 			if transition_msg.data == gs.Triggers.TOPLEFT_BUTTON_PRESSED:
@@ -168,17 +170,16 @@ class iSpyGameFSM: # pylint: disable=no-member
 				
 			elif transition_msg.data == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
 				if self.interaction.state == ris.CHILD_TURN: # when a new turn is child's, then start tracking the child's interaction
-					time.sleep(3)
-					self.interaction.start_tracking_child_interaction()
-				
-					
-			# elif transition_msg.data == gs.Triggers.SCREEN_MOVED:
-			# 	self.interaction.react(gs.Triggers.SCREEN_MOVED)
+					t = threading.Timer(3.0, self.interaction.start_tracking_child_interaction).start() # checking for timeout 
+			
+			elif transition_msg.data == gs.Triggers.SCREEN_MOVED:
+				self.interaction.stop_tracking_child_interaction()
 
 			# If the message is in gs.Triggers, then allow the trigger
 			if transition_msg.data != gs.Triggers.SCREEN_MOVED:
 				self.FSM.start_trigger(transition_msg.data)
-
+				print("transition!!!")
+				print(self.FSM.state)
 			
 
 	#################################################################################################
@@ -195,6 +196,13 @@ class iSpyGameFSM: # pylint: disable=no-member
 		"""
 		Rospy callback for when we get ispy action from the unity game over ROS
 		"""
+
+		if self.FSM.state == gs.EXPLORATION_MODE or self.FSM.state == gs.WORD_DISPLAY: return# if the game is still in explore mode
+			
+		time.sleep(0.5) # wait for on_ispy_state_info_received() to finish and FSM to transition first
+		print(self.FSM.state)
+		#self.interaction.stop_tracking_child_interaction() # start tracking the elapsed time of child's lack of tablet interaction
+
 		
 		self.iSpyDataTracking.on_ispy_action_received(ispy_action_msg)
 
@@ -230,7 +238,10 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		self._speechace_analysis()
 
-		if self.interaction.state == ris.CHILD_TURN: self.interaction.start_tracking_child_interaction() # start tracking the elapsed time of child's lack of tablet interaction
+
+		if self.interaction.state == ris.CHILD_TURN or self.interaction.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
+			if self.FSM.state == gs.MISSION_MODE: 
+				threading.Timer(0.5, self.interaction.start_tracking_child_interaction).start() # start tracking the elapsed time of child's lack of tablet interaction
 
 
 		
@@ -244,6 +255,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		if self.origText and self.recorder.has_recorded % 2 == 0 and self.recorder.has_recorded != 0:
 			# If you couldn't find the android audio topic, automatically pass
 			# instead of using the last audio recording
+
 
 			self.correct_obj = self.task_controller.isTarget(self.origText) 
 			
@@ -261,7 +273,6 @@ class iSpyGameFSM: # pylint: disable=no-member
 					for word in word_score_list:
 						letters, passed = self.results_handler.process_speechace_word_results(word)
 					
-
 				else:
 					letters = list(self.origText)
 					passed = ['1'] * len(letters)
@@ -308,9 +319,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 				self.interaction.reset_turn_taking()
 				self.interaction.get_robot_general_response()
 				
-				
-				time.sleep(3)
-				self.interaction.start_tracking_child_interaction()
+				t = threading.Timer(3.0,self.interaction.start_tracking_child_interaction).start()
+
 
 
 	

@@ -14,7 +14,7 @@ string robotBehavior
 string robotClickedObj
 
 # clicked object (either robot's or child's) right or wrong (bool)
-bool clickedRightObject  
+string clickedRightObject  
 
 # clicked object name (either robot's or child's)
 string clickedObjName

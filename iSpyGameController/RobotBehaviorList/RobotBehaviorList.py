@@ -164,6 +164,11 @@ class RobotRolesBehaviorsMap:
             print("ERROR: Cannot find the question query.")
             return ""
 
+    def get_question_type(self):
+        if self.current_question_query_path in self.question_answer_dict.keys():
+            return self.question_query['other']['type']
+        else:
+            return ["",False]
     def get_robot_response_to_answer(self,child_answer):
         '''
         get robot's contigent response to the child's answer

@@ -16,7 +16,7 @@ class iSpyDataTracking:
 
 		self.ros_node_mgr = ros_node_mgr
 		# create a pandas dataframe to store all interaction data based on timestamps
-		self.game_start_time = datetime.now()
+		self.game_start_time = None
 		self.child_robot_FSM = childRobotFSM
 
 		self._initialize_csv(participant_id, experimenter)
@@ -39,8 +39,20 @@ class iSpyDataTracking:
 		self.child_robot_interaction_csv = open(CSV_PATH+"interaction_log_"+participant_id+"_"+experimenter+"_"+date+".csv","a") 
 		self.child_robot_interaction_csv.write(','.join(['elapsedTime','localTime', 'whoseTurn',
 			'robotRole','robotBehavior','robotClickedObj','clickedRightObject','clickedObjName',
-			'gameTask','vocab','numFinishedObjects', 'numQsAsked','numQsAnswered','numChildAttempts'
-			'numChildCorrectAttempts','gameStateTrigger']))
+			'gameTask','vocab','numFinishedObjects', 'numQsAsked','numQsAnswered','numChildAttemptsPerGame'
+			'numChildCorrectAttemptsPerGame','gameStateTrigger', 
+			'numRobotYNQuestion', 'numRobotYNQuestionAnswered',
+			'numRobotOpenQuestion','numRobotOpenQuestionAnswered','numTouchAbsenceAlertPerTask',
+			'current_turn_length','currentInteractionState',
+			'childCurrAttemptCorrectness', 'childPrevAttemptCorrectness',
+			'objectWordPronounced' , 'numChildAttemptsCurrTask',
+			'numChildCorrectAttemptsCurrTask', 'numRobotOfferHelp' ,
+			'numChildAcceptHelp', 'numRobotAskHelp',
+			'numChildOfferHelp'
+			])+'\n')
+
+	def start_stopwatch(self): #
+		self.game_start_time = datetime.now()
 
 
 	def on_child_robot_interaction_data_received(self,msg):
@@ -54,10 +66,20 @@ class iSpyDataTracking:
 		content = ','.join(map(str,[elapsedTime,str(datetime.now()),msg.whoseTurn, 
 			msg.robotRole, msg.robotBehavior, msg.robotClickedObj, msg.clickedRightObject, msg.clickedRightObject, 
 			msg.clickedObjName, msg.gameTask, msg.taskVocab, msg.numFinishedObjects, 
-			msg.numRobotQuestionsAsked, msg.numRobotQuestionsAnswered, msg.numChildAttempts, msg.numChildCorrectAttempts,
-			msg.gameStateTrigger]))
+			msg.numRobotQuestionsAsked, msg.numRobotQuestionsAnswered, msg.numChildAttemptsPerGame, 
+			msg.numChildCorrectAttemptsPerGame, 
+			msg.gameStateTrigger, 
+			msg.numRobotYNQuestion, msg.numRobotYNQuestionAnswered,
+			msg.numRobotOpenQuestion, msg.numRobotOpenQuestionAnswered, msg.numTouchAbsenceAlertPerTask,
+			msg.current_turn_length, msg.currentInteractionState, 
+			msg.childCurrAttemptCorrectness, msg.childPrevAttemptCorrectness,
+			msg.objectWordPronounced , msg.numChildAttemptsCurrTask,
+			msg.numChildCorrectAttemptsCurrTask, msg.numRobotOfferHelp ,
+			msg.numChildAcceptHelp, msg.numRobotAskHelp,
+			msg.numChildOfferHelp
+			]))
 
-		self.child_robot_interaction_csv.write(content)
+		self.child_robot_interaction_csv.write(content+'\n')
 
 
 	def on_ispy_action_received(self,data):
@@ -84,8 +106,7 @@ class iSpyDataTracking:
 	
 		
 
-	def on_stop_tracking_child_interaction(self):
-		self.stop_thread_flag = True
+	
 
 	def on_ispy_child_learning_received(self,data):
 		pass

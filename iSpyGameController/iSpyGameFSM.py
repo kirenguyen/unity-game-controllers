@@ -146,6 +146,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 
 			if transition_msg.data == gs.Triggers.TOPLEFT_BUTTON_PRESSED:
+				self.iSpyDataTracking.start_stopwatch()
 				self._run_game_task()
 
 

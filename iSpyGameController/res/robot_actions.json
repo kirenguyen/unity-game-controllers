@@ -15,8 +15,7 @@
             "LOOK_AT_TABLET"
           ],
           "optional":{
-            "KEYWORD_DEFINITION_SPEECH":0.99,
-            "Q_ROBOT_WANT_LEARN":0.999
+            "Q_ROBOT_ASK_HELP":0.99
           }
         },
         "SCREEN_MOVED": {
@@ -160,7 +159,7 @@
             "ROBOT_CUSTOM_SPEECH"
           ],
           "optional": {
-            "Q_ROBOT_ASK_HELP":0.99
+             "Q_ROBOT_ASK_HELP":0.99
           }
         },
         "WRONG_OBJECT_CLICKED": {

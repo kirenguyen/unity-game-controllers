@@ -26,13 +26,13 @@ DELAY = 25
 
 class AffdexAnalysis:
 
-	def __init__(self,ros_node_mgr):
+	def __init__(self,ros_node_mgr,game_round,p_id, experimenter):
 		self.ros_node_mgr = ros_node_mgr
 		self.ros_node_mgr.start_affdex_listener(self.on_affdex_data_received)
-		self.csv_file_prefix = "scripts/affdex_data/affdex-csv-file"
+		self.csv_file_prefix = "ispy_data_files/affdex_data/affdex_log_"+p_id+"_"+experimenter+"_"+game_round+"_"
 		self.start_time = '-'.join([str(i) for i in time.localtime()])
-		self.csv_file_name = self.csv_file_prefix+"-"+self.start_time+".csv"
-		#self.file = open(self.csv_file_name, 'w')
+		self.csv_file_name = self.csv_file_prefix+self.start_time+".csv"
+		self.file = open(self.csv_file_name, 'w')
 
 		self.first_line = True
 		self.start_time = ""
@@ -41,12 +41,12 @@ class AffdexAnalysis:
 
 	def add_file_heading(self,data):
 		print("affdex recording starts")
-		heading = "frame_number, elapsed_time (sec), timestamp"
+		heading = "frame_number, elapsed_time (sec), localtime"
 		emotion_heading = ','.join([ "emotion-"+str(i) for i in range(1,len(data.emotions)+1,1)])
 		expression_heading = ','.join([ "expression-"+str(i) for i in range(1,len(data.expressions)+1,1)])
 		measurement_heading = ','.join([ "measurement-"+str(i) for i in range(1,len(data.measurements)+1,1)])
 
-		self.file.write(','.join([heading,emotion_heading,expression_heading,measurement_heading]))
+		self.file.write(','.join([heading,emotion_heading,expression_heading,measurement_heading])+'\n')
 	
 
 	def on_affdex_data_received(self,data):
@@ -71,9 +71,6 @@ class AffdexAnalysis:
 		timestamp = '-'.join([str(i) for i in time.localtime()])
 		elapsed_time = time.time() - self.start_time
 
-
-
-		
 			
 		emotions_str = ','.join([str(i) for i in data.emotions])	
 		expressions_str = ','.join([str(i) for i in data.expressions])

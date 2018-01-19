@@ -173,6 +173,7 @@ class RobotRolesBehaviorsMap:
             print("ERROR: Cannot find the question query.")
             return ""
 
+
     def get_robot_response_to_help(self,child_help_response):
         '''
         return bool for child answer to helping the robot

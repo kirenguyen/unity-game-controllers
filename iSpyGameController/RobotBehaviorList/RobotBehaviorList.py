@@ -45,6 +45,15 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     ROBOT_ASK_HELP = 'ROBOT_ASK_HELP'
     ROBOT_DISAPPOINTED = 'ROBOT_DISAPPOINTED'
 
+    # Silent Emotions
+    ROBOT_SILENT_NOD = 'ROBOT_SILENT_NOD'
+    ROBOT_SILENT_HAPPY_DANCE = 'ROBOT_SILENT_HAPPY_DANCE'
+    ROBOT_SILENT_YES = 'ROBOT_SILENT_YES'
+    ROBOT_SILENT_PUZZLED = 'ROBOT_SILENT_PUZZLED'
+    ROBOT_SILENT_FRUSTRATED = 'ROBOT_SILENT_FRUSTRATED'
+    ROBOT_SILENT_SAD = 'ROBOT_SILENT_SAD'
+    ROBOT_SILENT_INTERESTED = 'ROBOT_SILENT_INTERESTED'
+    ROBOT_SILENT_EXCITED = 'ROBOT_SILENT_EXCITED'
  
 
     # virtual actions on the app
@@ -98,13 +107,13 @@ class RobotRoles(Enum):
 
 class RobotActionSequence:
 
-    TURN_STARTED = "TURN_STARTED"
-    SCREEN_MOVED = "SCREEN_MOVED"
+    TURN_STARTING = "TURN_STARTING"
+    SCREEN_MOVING = "SCREEN_MOVING"
     RIGHT_OBJECT_FOUND = "RIGHT_OBJECT_FOUND"
     WRONG_OBJECT_CLICKED = "WRONG_OBJECT_CLICKED" #
     OBJECT_PRONOUNCED = "OBJECT_PRONOUNCED" #
     RESULTS_RETURNED = "RESULTS_RETURNED" 
-    TURN_FINISHED = "TURN_FINISHED" #
+    TURN_SWITCHING = "TURN_SWITCHING" #
     PRONOUNCE_CORRECT = "PRONOUNCE_CORRECT"
     WRONG_OBJECT_FAIL ="WRONG_OBJECT_FAIL" 
 
@@ -153,7 +162,7 @@ class RobotRolesBehaviorsMap:
         '''
         get question query result 
         '''
-        print("quewstion query path: "+question_query_path)
+        print("question query path: "+question_query_path)
         self.current_question_query_path = question_query_path
         if question_query_path in self.question_answer_dict.keys():
             self.question_query = self.question_answer_dict[question_query_path]
@@ -164,11 +173,21 @@ class RobotRolesBehaviorsMap:
             print("ERROR: Cannot find the question query.")
             return ""
 
-    def get_question_type(self):
+
+    def get_robot_response_to_help(self,child_help_response):
+        '''
+        return bool for child answer to helping the robot
+        '''
+        print("RESPONSE_TO_HELP: "+child_help_response)
         if self.current_question_query_path in self.question_answer_dict.keys():
-            return self.question_query['other']['type']
-        else:
-            return ["",False]
+            if "no_response_" in child_help_response: # no response from child
+                return False
+            else:
+                yes_response = self.question_query["user_input"][0]
+                if any(m in child_help_response for m in yes_response["en_US"]): # found child's answer
+                    return True
+                return False
+
     def get_robot_response_to_answer(self,child_answer):
         '''
         get robot's contigent response to the child's answer

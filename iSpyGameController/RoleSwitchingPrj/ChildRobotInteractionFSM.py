@@ -181,7 +181,7 @@ class ChildRobotInteractionFSM:
 			# start ASR listening mode
 			print("ENTER STATE: listen child speech response")
 			
-			time.sleep(1.0)
+			time.sleep(0.5)
 			self._wait_until_all_audios_done()
 			print("start listening")
 			self.ros_node_mgr.start_asr_listening()
@@ -238,21 +238,22 @@ class ChildRobotInteractionFSM:
 			called by iSpyDataTracking 
 			attempt: first alert, second alert
 			'''
+			pass 
 			# check whether the current state is child_turn_no_interaction_1
-			if self.state != ris.CHILD_TURN:
-				return
+			# if self.state != ris.CHILD_TURN:
+			# 	return
 
-			else:
+			# else:
 
-				#getattr(self, ris.Triggers.NO_INTERACTION_ALERT)() # trigger the FSM transition 
+			# 	#getattr(self, ris.Triggers.NO_INTERACTION_ALERT)() # trigger the FSM transition 
 
-				print("INFO: No iSpy Tablet Touches")
+			# 	print("INFO: No iSpy Tablet Touches")
 				
-				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.NO_ISPY_ACTION_ALERT)
+			# 	self.ros_node_mgr.send_robot_cmd(RobotBehaviors.NO_ISPY_ACTION_ALERT)
 
-				self.child_states.numTouchAbsenceAlertPerTask += 1 # update the number of touch absence alert
+			# 	self.child_states.numTouchAbsenceAlertPerTask += 1 # update the number of touch absence alert
 
-				self.stop_tracking_child_interaction()
+			# 	self.stop_tracking_child_interaction()
 				# if attempt == 2: # first alert
 				# 	# robot intervenes (robot spies an object for the child)
 				# 	# select an object and then find it for the child
@@ -325,8 +326,6 @@ class ChildRobotInteractionFSM:
 
 				self.asr_input = "no_response_" + str(self.attempt) # set asr_input to get correct robot's action to "no response"
 
-				# if self.attempt == 2: # reach max attempt
-				# 	self.attempt = 0 # reset. Q & A is over
 
 			# get robot's contigent response based on child's speech content
 			action = self.role_behavior_mapping.get_robot_response_to_answer(self.asr_input) # action is based on child's answer
@@ -358,6 +357,8 @@ class ChildRobotInteractionFSM:
 			elif self.attempt == 2: # child gives a response or the child reaches the max attempt
 				print("INFO: QA finished")
 				getattr(self, ris.Triggers.QA_FINISHED)() # q & a activiity is done
+				self.attempt = 0
+				
 			elif self.attempt == 1:
 				print("INFO: RETRY QA")
 				getattr(self, ris.Triggers.RETRY_QA)()

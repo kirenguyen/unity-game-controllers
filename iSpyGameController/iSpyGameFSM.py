@@ -199,7 +199,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		if self.FSM.state == gs.EXPLORATION_MODE or self.FSM.state == gs.WORD_DISPLAY: return# if the game is still in explore mode
 			
-		time.sleep(0.5) # wait for on_ispy_state_info_received() to finish and FSM to transition first
+		time.sleep(0.1) # wait for on_ispy_state_info_received() to finish and FSM to transition first
 		print(self.FSM.state)
 		#self.interaction.stop_tracking_child_interaction() # start tracking the elapsed time of child's lack of tablet interaction
 

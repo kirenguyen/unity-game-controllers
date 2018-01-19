@@ -14,35 +14,31 @@
 		"PRONOUNCE_CORRECT_1",
 		"PRONOUNCE_CORRECT_2",
 
-		"TURN_FINISHED_1",
-		"TURN_FINISHED_2",
+		"TURN_SWITCHING_1",
+		"TURN_SWITCHING_2",
 
-		"TURN_STARTED_2",
-		"TURN_STARTED_3",
-		"TURN_STARTED_4",
-		"TURN_STARTED_5"
+		"TURN_STARTING_1",
+		"TURN_STARTING_2",
+		"TURN_STARTING_3"
 	],
 
 
 	"general/expert/robot":[
-		"WRONG_OBJECT_CLICKED_1",
-		"WRONG_OBJECT_CLICKED_2",
 
 		"RIGHT_OBJECT_FOUND_1",
 		"RIGHT_OBJECT_FOUND_2",
 		"RIGHT_OBJECT_FOUND_3",
 	
-	
-		"TURN_FINISHED_1",
-		"TURN_FINISHED_2",
-		"TURN_FINISHED_3",
+		"TURN_SWITCHING_1",
+		"TURN_SWITCHING_2",
 
-		"TURN_STARTED_1",
-		"TURN_STARTED_2",
+		"TURN_STARTING_1",
+		"TURN_STARTING_2",
+		"TURN_STARTING_3",
 
-		"SCREEN_MOVED_1",
-		"SCREEN_MOVED_2",
-		"SCREEN_MOVED_3"
+		"SCREEN_MOVING_1",
+		"SCREEN_MOVING_2",
+		"SCREEN_MOVING_3"
 	],
 
 	"general/novice/child":[
@@ -61,17 +57,16 @@
 		"PRONOUNCE_CORRECT_2",
 		"PRONOUNCE_CORRECT_3",
 
-		"TURN_FINISHED_1",
-		"TURN_FINISHED_2",
-		"TURN_FINISHED_3",
+		"TURN_SWITCHING_1",
+		"TURN_SWITCHING_2",
+		"TURN_SWITCHING_3",
 
-		"TURN_STARTED_1",
-		"TURN_STARTED_2",
-		"TURN_STARTED_3",
-		"TURN_STARTED_4",
+		"TURN_STARTING_1",
+		"TURN_STARTING_2",
+		"TURN_STARTING_3",
 
-		"SCREEN_MOVED_1",
-		"SCREEN_MOVED_2"
+		"SCREEN_MOVING_1",
+		"SCREEN_MOVING_2"
 		
 	],
 
@@ -79,23 +74,20 @@
 		"WRONG_OBJECT_CLICKED_3",
 		"WRONG_OBJECT_CLICKED_4",
 
-		"RIGHT_OBJECT_FOUND_1",
 		"RIGHT_OBJECT_FOUND_2",
 		"RIGHT_OBJECT_FOUND_3",
 	
-		"TURN_FINISHED_1",
-		"TURN_FINISHED_2",
-		"TURN_FINISHED_3",
+		"TURN_SWITCHING_1",
+		"TURN_SWITCHING_2",
+		"TURN_SWITCHING_3",
 
-		"TURN_STARTED_1",
-		"TURN_STARTED_2",
-		"TURN_STARTED_3",
-		"TURN_STARTED_4",
+		"TURN_STARTING_1",
+		"TURN_STARTING_2",
+		"TURN_STARTING_3",
+		"TURN_STARTING_4",
 
-		"SCREEN_MOVED_2",
-		"SCREEN_MOVED_3",
-
-		"PRONOUNCE_CORRECT_2",
+		"SCREEN_MOVING_2",
+		"SCREEN_MOVING_3",
 
 		"WRONG_OBJECT_FAIL_1",
 		"WRONG_OBJECT_FAIL_2",
@@ -104,15 +96,11 @@
 
 	"general/others":[
 		"no_ispy_action_alert1_response_1",
-		"no_ispy_action_alert1_response_2",
-
-		"no_ispy_action_alert2_response_1",
-		"no_ispy_action_alert2_response_2"
+		"no_ispy_action_alert1_response_2"
 	],
 
 	"general/before_game":[
 		"before_game_1",
-		"before_game_2",
 		"before_game_3"
 	]
 

@@ -12,15 +12,15 @@
       }
     ],
     "other_input":[
-      "no_response_j"
+      "none_yes_no_response_c","none_yes_no_response_b"
     ],
     "other":{
       "type": "yes/no",
       "help": true
     },
-    "no_response_1":
-      ["yes_no_question_6","no_response_h"]
-    ,
+    "no_response_1":[
+      "yes_no_question_6","no_response_h","response_l"
+    ],
     "no_response_2":[
       "no_response_e","response_c"]
     
@@ -32,25 +32,25 @@
     "user_input":[
       {
         "en_US":["yes","okay","ok","yeah","sure", "mhm"],
-        "response":["ROBOT_EXCITED","response_h","response_g"]
+        "response":["ROBOT_EXCITED","response_h","response_g","response_m","response_k"]
       },
       {
         "en_US":["no","nope","don't","dont","don"],
-        "response":["response_f"]
+        "response":["response_f","response_j"]
       }
     ],
     "other_input":[
-      "no_response_j"
+      "no_response_j","none_yes_no_response_c","none_yes_no_response_b"
     ],
     "other":{
       "type": "yes/no",
       "help": true
     },
     "no_response_1":[
-      "yes_no_question_6","no_response_h"
+      "yes_no_question_6","no_response_h","response_l"
     ],
     "no_response_2":[
-      "no_response_a","no_response_d"
+      "no_response_a","no_response_d","response_j"
     ]
   },
 
@@ -60,25 +60,25 @@
     "user_input":[
       {
         "en_US":["yes","okay","ok","yeah","sure"],
-        "response":["ROBOT_WINK", "response_h","response_g"]
+        "response":["ROBOT_WINK", "response_h","response_g","response_k"]
       },
       {
         "en_US":["no","nope","don't","dont","don"],
-        "response":["response_f"]
+        "response":["response_f","response_j"]
       }
     ],
     "other_input":[
-      "no_response_j"
+      "no_response_j","none_yes_no_response_c","none_yes_no_response_b"
     ],
     "other":{
       "type": "yes/no",
       "help": true
     },
     "no_response_1":[
-      "yes_no_question_6","response_e","no_response_h"
+      "yes_no_question_6","response_e","no_response_h","response_l"
     ],
     "no_response_2":[
-      "response_d","no_response_a"
+      "response_d","no_response_a","response_j"
     ]
   },
 
@@ -88,7 +88,7 @@
     "user_input":[
       {
         "en_US":["because","is", "it's", "yes","yeah","ok","cause","pause"],
-        "response":["response_g","response_c"]
+        "response":["response_g","response_c","response_n"]
       },
       {
         "en_US":["no","dont know","don't know","don"],
@@ -96,17 +96,17 @@
       }
     ],
     "other_input":[
-      "no_response_i"
+      "none_yes_no_response_a"
     ],
     "other":{
       "type": "open_ended",
       "help": false
     },
     "no_response_1":[
-      "response_e", "no_response_c"
+      "response_e", "no_response_c","response_l"
     ],
     "no_response_2":[
-      "no_response_b","response_d","no_response_f","no_response_a"
+      "no_response_b","response_d","no_response_f","no_response_a","response_i"
     ]
   },
 
@@ -116,7 +116,7 @@
     "user_input":[
       {
         "en_US":["because","yes","not", "yeah","ok","cause","pause"],
-        "response":["response_g", "response_c"]
+        "response":["response_g", "response_c","response_n"]
       },
       {
         "en_US":["no","dont know","don't know","don"],
@@ -124,14 +124,14 @@
       }
     ],
     "other_input":[
-      "no_response_i"
+      "no_response_i","none_yes_no_response_a"
     ],
     "other":{
       "type": "open_ended",
       "help": false
     },
     "no_response_1":[
-      "no_response_g","no_response_h"
+      "no_response_g","no_response_h","response_l"
     ],
     "no_response_2":[
       "no_response_e","no_response_a"

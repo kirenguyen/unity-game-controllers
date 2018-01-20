@@ -1,42 +1,42 @@
 key_object,word,object_type,object_vocab,attribute,color,animal,vehicle,emotion,action,aquatic,size,activity,cloth,land
 baby,baby,human,minor,young,,,,,soar,,,,,
-bird,bird,animal,omnivore,2legs:small:city,,omnivore,,,soar,,,,,
+bird,bird,animal,omnivore,2legs:small:city,,omnivore,,,soar,,minuscule,,,
 bicycle,bicycle,vehicle,vehicle,2wheels:road,,,vehicle,,soar,,,,,
 boat,boat,vehicle,vehicle,water,crimson,,vehicle,,,,,,,
-bucket,bucket,inanimate,inanimate,blue:small,azure,,,,,,,,,
-bus,bus,vehicle,vehicle:automobile:public,4wheels:road,azure,,vehicle,,,,gigantic,,,
-car,car,vehicle,vehicle:automobile,4wheels:road,,,vehicle,,,,gigantic,,,
+bucket,bucket,inanimate,inanimate,blue:small,azure:blue,,,,,,,,,
+bus,bus,vehicle,vehicle:automobile:public,4wheels:road,azure:blue,,vehicle,,,,gigantic:giant,,,
+car,car,vehicle,vehicle:automobile,4wheels:road,,,vehicle,,,,gigantic:giant,,,
 castle,castle,inanimate,inanimate,yellow,,,,,,,,,,
 cat,cat,animal,mammal:omnivore,4legs:small:city,,mammal:omnivore,,,,,,,,land
 cloud,cloud,inanimate,inanimate,large,,,,,,,,,,
 coconut,coconut,inanimate,inanimate,small,,,,,,,minuscule,,,
 deer,deer,animal,mammal:herbivore,4legs:large,,mammal:herbivore,,,,,,,,land
-digging,digging,action,hobby,,,,,delighted,,,,recreational ,,
+digging,digging,action,hobby,,,,,delighted:happy,,,,recreational ,,
 dog,dog,animal,mammal:omnivore,4legs:small:city,,mammal:omnivore,,,,,,,,land
-dolphin,dolphin,animal,mammal:carnivore,water:large,azure,mammal:carnivore,,,,aquatic,,,,
+dolphin,dolphin,animal,mammal:carnivore,water:large,azure:blue,mammal:carnivore,,,,aquatic,,,,
 door,door,inanimate,inanimate,yellow,,,,,,,,,,
 dress,dress,inanimate,inanimate:apparel,yellow,,,,,,,,,garment,
 duck,duck,animal,omnivore,2legs:small:water,,omnivore,,,,aquatic,,,,
-eating,eating,action,,,,,,delighted,,,,,,
+eating,eating,action,,,,,,delighted:happy,,,,,,
 father,father,human,households:relatives,,,,,,,,,,,
-fish,fish,animal,omnivore,water:small,crimson:azure,omnivore,,,,aquatic,minuscule,,,
-fishing,fishing,action,hobby,,crimson,,,delighted,,,,recreational ,,
+fish,fish,animal,omnivore,water:small,crimson:azure:blue,omnivore,,,,aquatic,minuscule,,,
+fishing,fishing,action,hobby,,crimson,,,delighted:happy,,,,recreational ,,
 flower,flower,inanimate,inanimate,purple:green:small,,,,,,,,,,
-forest,forest,landscape,landscape,,,,,,,,gigantic,,,
-frog,frog,animal,carnivore:omnivore,4legs:small:water,,carnivore:omnivore,,,,,,,,
+forest,forest,landscape,landscape,,,,,,,,gigantic:giant,,,
+frog,frog,animal,carnivore:omnivore,4legs:small:water,,carnivore:omnivore,,happy,,,,,,
 giraffe,giraffe,animal,mammal:herbivore,4legs:large,,mammal:herbivore,,,,,,,,land
 goat,goat,animal,mammal:herbivore,4legs:farm:large,,mammal:herbivore,,,,,,,,land
-grandma,grandma,human,relatives,,azure,,,,,,,,,
+grandma,grandma,human,relatives,,azure:blue,,,,,,,,,
 grandpa,grandpa,human,relatives,,,,,,,,,,,
 hat,hat,inanimate,inanimate:apparel,yellow,,,,,,,,,garment,
 horse,horse,animal,mammal:herbivore,4legs:farm:large,,mammal:herbivore,,,,,,,,land
-jumping,jumping,action,cardio,,,,,delighted,,,,recreational ,,
-lion,lion,animal,mammal:carnivore,4legs:large,,mammal:carnivore,,,,,gigantic,,,land
-mailbox,mailbox,inanimate,inanimate,blue:large,azure,,,,,,,,,
+jumping,jumping,action,cardio,,,,,delighted:happy,,,,recreational ,,
+lion,lion,animal,mammal:carnivore,4legs:large,,mammal:carnivore,,,,,gigantic:giant,,,land
+mailbox,mailbox,inanimate,inanimate,blue:large,azure:blue,,,,,,,,,
 mother,mother,human,households:relatives,,,,,,,,,,,
-mountain,mountain,landscape,landscape,,,,,,,,gigantic,,,
+mountain,mountain,landscape,landscape,,,,,,,,gigantic:giant,,,
 mouse,mouse,animal,mammal:omnivore,4legs:small:city,,mammal:omnivore,,,,,minuscule,,,land
-pants,pants,inanimate,inanimate:apparel,blue,azure,,,,,,,,garment,
+pants,pants,inanimate,inanimate:apparel,blue,azure:blue,,,,,,,,garment,
 plane,plane,vehicle,vehicle,fly,crimson,,vehicle,,soar,,,,,
 rabbit,rabbit,animal,mammal:herbivore,4legs:farm:small,,mammal:herbivore,,,,,minuscule,,,land
 rooster,rooster,animal,omnivore,2legs:farm:small,,omnivore,,,,,,,,land
@@ -45,8 +45,8 @@ seal,seal,animal,mammal:carnivore,water:large,,mammal:carnivore,,,,aquatic,,,,
 seashell,seashell,inanimate,inanimate,purple,,,,,,,minuscule,,,
 sheep,sheep,animal,mammal:herbivore,4legs:large:farm,,mammal:herbivore,,,,,,,,land
 shirt,shirt,inanimate,inanimate:apparel,red,,,,,,,,,garment,
-sun,sun,inanimate,inanimate,large,,,,,,,,,,
-tractor,tractor,vehicle,vehicle:automobile,4wheels:road,crimson,,vehicle,,,,gigantic,,,
-train,train,vehicle,vehicle:automobile:public,,,,vehicle,,,,gigantic,,,
-waving,waving,action,hobby,,,,,delighted,,,,,,
-window,window,inanimate,inanimate,purple,azure,,,,,,,,,
+sun,sun,inanimate,inanimate,large,,,,happy,,,,,,
+tractor,tractor,vehicle,vehicle:automobile,4wheels:road,crimson,,vehicle,,,,gigantic:giant,,,
+train,train,vehicle,vehicle:automobile:public,,,,vehicle,,,,gigantic:giant,,,
+waving,waving,action,hobby,,,,,delighted:happy,,,,,,
+window,window,inanimate,inanimate,purple,azure:blue,,,,,,,,,

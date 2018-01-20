@@ -46,9 +46,6 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
         msg.header = Header()
         msg.header.stamp = rospy.Time.now()
 
-        
-
-
 
         ## Look at Commands
         if command == RobotBehaviors.LOOK_AT_TABLET:
@@ -144,7 +141,6 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
 
         # Tega speech commands
         if command == RobotBehaviors.ROBOT_CUSTOM_SPEECH:
-            print(args)
             msg.wav_filename = args[0][0].lower()
             msg.enqueue = True
             print("custom speech: "+msg.wav_filename)
@@ -192,13 +188,13 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
         if command == RobotBehaviors.Q_ROBOT_ASK_WHY_CHOOSE_IT:
             PATH = ROOT_TEGA_SPEECH_FOLDER + "questions/"
             msg.wav_filename = PATH + args[0][0].lower()+".wav"
-
+            msg.motion = TegaAction.MOTION_SILENT_PUZZLED
             print("robot ask why choose it wav: "+msg.wav_filename)
 
         if command == RobotBehaviors.Q_ROBOT_WANT_LEARN:
             PATH = ROOT_TEGA_SPEECH_FOLDER + "questions/"
             msg.wav_filename = PATH + args[0][0].lower()+".wav"
-
+            msg.motion = TegaAction.MOTION_SILENT_INTERESTED
             print("robot want learn wav: "+msg.wav_filename)
 
         if command == RobotBehaviors.Q_ROBOT_ASK_HELP:
@@ -209,6 +205,7 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
         if command == RobotBehaviors.Q_ROBOT_ASK_WHY_WRONG:
             PATH = ROOT_TEGA_SPEECH_FOLDER + "questions/"
             msg.wav_filename = PATH + args[0][0].lower()+".wav"
+            msg.motion = TegaAction.MOTION_SILENT_FRUSTRATED
             print("robot ask why wrong wav: "+msg.wav_filename)
 
         if command == RobotBehaviors.Q_END_OF_TURN:
@@ -253,7 +250,6 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             PATH = "TegaAudio/basedonprompts/"
             vocab_word =args[0][0].lower()
             print("vocab word is "+vocab_word)
-            print(args)
             speech_file_name = PATH + vocab_word + ".mp3"
             msg.wav_filename = speech_file_name
             msg.enqueue = True

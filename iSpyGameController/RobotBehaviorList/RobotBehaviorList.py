@@ -170,7 +170,7 @@ class RobotRolesBehaviorsMap:
 
             return question_name
         else:
-            print("ERROR: Cannot find the question query.")
+            print("ERROR: Cannot find the question query.\n")
             return ""
 
 
@@ -208,10 +208,10 @@ class RobotRolesBehaviorsMap:
                     if any(m in child_answer for m in i["en_US"]): # found child's answer
                         return random.choice(i["response"])
                         break
-                print("WARNING: Cannot find child's answer")
-                return ""
+                print("INFO: Cannot find child's answer. Return other response\n")
+                return random.choice(self.question_query["other_input"])
         else:
-            print("ERROR: Cannot find the question query.")
+            print("ERROR: Cannot find the question query\n")
             return ""
 
         

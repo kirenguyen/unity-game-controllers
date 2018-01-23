@@ -1,8 +1,0 @@
-,q,category,attribute,audio_file_name,task_script
-0,,land,land,land.wav,Can you spy land animals
-1,,vehicle,vehicle,vehicle.wav,can you spy vehicles 
-2,,color,crimson,crimson.wav,can you spy objects in crimson
-3,,size,giant,giant.wav,can you spy objects that look giant
-4,,color,azure,azure.wav,can you spy objects in azure
-5,,aquatic,aquatic,aquatic.wav,can you spy aquatic animals
-6,,size,minuscule,minuscule.wav,can you spy objects that look minuscule

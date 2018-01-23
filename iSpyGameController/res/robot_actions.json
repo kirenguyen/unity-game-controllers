@@ -162,7 +162,7 @@
           ],
           "optional": {
             "ROBOT_CUSTOM_SPEECH":0.3,
-            "Q_ROBOT_ASK_HELP":0.8
+            "Q_ROBOT_ASK_HELP":0.4
           }
         },
         "WRONG_OBJECT_CLICKED": {
@@ -231,7 +231,7 @@
             "LOOK_AT_TABLET"
           ],
           "original":{
-            "Q_ROBOT_WANT_LEARN":0.4,
+            "Q_ROBOT_WANT_LEARN":0.2,
             "ROBOT_CUSTOM_SPEECH": 0.5
           }
         },

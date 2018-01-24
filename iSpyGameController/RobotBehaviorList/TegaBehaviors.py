@@ -180,10 +180,26 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
 
         if command == RobotBehaviors.REMINDER_SPEECH: 
             PATH = ROOT_TEGA_SPEECH_FOLDER + "general/reminder/"
-            file = args[0][0].lower() + random.choice(["1", "2", "3"]) + ".wav"
+            file = args[0][0].lower() + "_reminder_" + random.choice(["1", "2", "3"]) + ".wav"
             msg.wav_filename = PATH + file
             msg.motion = "" 
             print ("reminder speech wav: "+msg.wav_filename)
+
+        ### ====== Tega End of Task Celebration =========== ####
+
+        if command == RobotBehaviors.ROBOT_TASK_END_BEHAVIOR:
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/between_missions/"
+            file = "between_missions_"
+            speech_file = PATH + file + str(int(args[0][0])) + ".wav"
+            msg.wav_filename = speech_file
+            print("between missions celebration: "+msg.wav_filename)
+
+        if command == RobotBehaviors.ROBOT_PLAY_MUSIC:
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/music/"
+            file = "music_"
+            speech_file = PATH + file + random.choice(["1", "2"]) + ".wav"
+            msg.wav_filename = speech_file
+            print ("music: "+msg.wav_filename)
 
         ### ====== Tega Question Asking =================== ####
         if command == RobotBehaviors.Q_ROBOT_OFFER_HELP:

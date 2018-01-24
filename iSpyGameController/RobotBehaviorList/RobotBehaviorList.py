@@ -91,7 +91,8 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
 
     ## ===== no ispy action alert ===
     NO_ISPY_ACTION_ALERT = "NO_ISPY_ACTION_ALERT"
-
+    ROBOT_TASK_END_BEHAVIOR = "ROBOT_TASK_END_BEHAVIOR"
+    ROBOT_PLAY_MUSIC = "ROBOT_PLAY_MUSIC"
 
 
 

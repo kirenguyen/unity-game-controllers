@@ -538,6 +538,23 @@ class ChildRobotInteractionFSM:
 			if virtual_action: 
 				self._perform_robot_virtual_actions(virtual_action[0])
 		
+		def start_task_end_behavior(self, action_number):
+			'''
+			send between mission celebration behaviors 
+			'''
+
+			print ("end of task celebration")
+			action = RobotBehaviors.ROBOT_TASK_END_BEHAVIOR
+
+			# send command for between mission recordings 
+			self.ros_node_mgr.send_robot_cmd(action, action_number)
+
+			# send robot action depending on between mission 
+
+			time.sleep(5)
+			end_task_behavior_dict = {1: RobotBehaviors.ROBOT_HAPPY_DANCE, 2: RobotBehaviors.ROBOT_ATTENTION, 3: RobotBehaviors.ROBOT_PLAY_MUSIC, 4: RobotBehaviors.ROBOT_PLAY_MUSIC}
+			self.ros_node_mgr.send_robot_cmd(end_task_behavior_dict[int(action_number)])
+
 
 		def _perform_robot_physical_actions(self,action_type):
 			'''
@@ -612,6 +629,7 @@ class ChildRobotInteractionFSM:
 								input_data = [self.task_controller.get_vocab_word(), self.robot_clickedObj]
 							elif action == RobotBehaviors.ROBOT_CUSTOM_SPEECH:
 								input_data = _get_tega_speech(action_type) # speech file name
+
 
 							self.ros_node_mgr.send_robot_cmd(action,input_data)
 

@@ -198,6 +198,8 @@ class iSpyTaskController():
 			self.task_in_progress = False
 			self._reset_for_new_task()
 
+			self.current_task_index += 1
+
 	def get_current_answer_size(self):
 		pass
 

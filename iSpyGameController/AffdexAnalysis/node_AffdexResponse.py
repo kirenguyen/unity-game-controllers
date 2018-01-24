@@ -8,6 +8,7 @@ from std_msgs.msg import Bool # for child_attention topic
 from std_msgs.msg import Header # standard ROS msg header
 from std_msgs.msg import String
 from std_msgs.msg import Int32
+import os
 
 
 
@@ -29,6 +30,12 @@ class AffdexAnalysis:
 	def __init__(self,ros_node_mgr,game_round,p_id, experimenter):
 		self.ros_node_mgr = ros_node_mgr
 		self.ros_node_mgr.start_affdex_listener(self.on_affdex_data_received)
+		if not os.path.isdir("ispy_data_files/"): # check exitence of folders
+			os.makedirs("ispy_data_files/")
+
+		if not os.path.isdir("ispy_data_files/affdex_data/"): # check exitence of folders
+			os.makedirs("ispy_data_files/affdex_data/") 
+
 		self.csv_file_prefix = "ispy_data_files/affdex_data/affdex_log_"+p_id+"_"+experimenter+"_"+game_round+"_"
 		self.start_time = '-'.join([str(i) for i in time.localtime()])
 		self.csv_file_name = self.csv_file_prefix+self.start_time+".csv"

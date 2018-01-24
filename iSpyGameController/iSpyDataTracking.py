@@ -2,6 +2,7 @@ import pandas as pd
 from datetime import datetime
 import threading
 import time
+import os
 
 from GameUtils.GlobalSettings import iSpyRobotInteractionStates as ris
 
@@ -18,6 +19,9 @@ class iSpyDataTracking:
 		# create a pandas dataframe to store all interaction data based on timestamps
 		self.game_start_time = None
 		self.child_robot_FSM = childRobotFSM
+
+		if not os.path.isdir("ispy_data_files/"): # check exitence of folders
+			os.makedirs("ispy_data_files/")
 
 		self._initialize_csv(participant_id, experimenter)
 

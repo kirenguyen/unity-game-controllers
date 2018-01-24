@@ -112,7 +112,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		# AlwaysMissionModeFSM(self.ros_node_mgr) # CompleteModeFSM() # AlwaysExploreModeFSM(self.ros_node_mgr)
 		self.FSM = AlwaysMissionModeFSM(self.ros_node_mgr,game_round)
 
-		self.affdexAnalysis = AffdexAnalysis(self.ros_node_mgr)
+		self.affdexAnalysis = AffdexAnalysis(self.ros_node_mgr,game_round,participant_id,experimenter)
 
 		self.kill_received = False # for stopping the update() thread
 
@@ -138,10 +138,10 @@ class iSpyGameFSM: # pylint: disable=no-member
 		Rospy Callback for when we get log messages from ispy game
 		"""
 
-		print("State Transition: "+transition_msg.data)
+		#print("State Transition: "+transition_msg.data)
 
 		if transition_msg.data in gs.Triggers.triggers:
-			time.sleep(.1)
+			#time.sleep(.1)
 
 			if self.FSM.state != gs.EXPLORATION_MODE and self.FSM.state != gs.WORD_DISPLAY: # if the game is still in explore mode
 				self.interaction.react(transition_msg.data,self.origText) # the robot reacts
@@ -178,8 +178,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 			# If the message is in gs.Triggers, then allow the trigger
 			if transition_msg.data != gs.Triggers.SCREEN_MOVED:
 				self.FSM.start_trigger(transition_msg.data)
-				print("transition!!!")
-				print(self.FSM.state)
+				
 			
 
 	#################################################################################################
@@ -199,8 +198,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		if self.FSM.state == gs.EXPLORATION_MODE or self.FSM.state == gs.WORD_DISPLAY: return# if the game is still in explore mode
 			
-		time.sleep(0.5) # wait for on_ispy_state_info_received() to finish and FSM to transition first
-		print(self.FSM.state)
+		time.sleep(0.1) # wait for on_ispy_state_info_received() to finish and FSM to transition first
 		#self.interaction.stop_tracking_child_interaction() # start tracking the elapsed time of child's lack of tablet interaction
 
 		
@@ -256,8 +254,12 @@ class iSpyGameFSM: # pylint: disable=no-member
 			# If you couldn't find the android audio topic, automatically pass
 			# instead of using the last audio recording
 
+			print("clicked object is: "+self.origText)
 
 			self.correct_obj = self.task_controller.isTarget(self.origText) 
+			print("target list:")
+			print(self.task_controller.target_list)
+			print("is target: "+str(self.correct_obj))
 			
 			
 			if not self.recorder.valid_recording:
@@ -295,7 +297,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 					self.origText = ""
 
 			
-			print(results_params)
+			#print(results_params)
 			self.ros_node_mgr.send_ispy_cmd(SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, results_params)
 			self.recorder.has_recorded = 0
 

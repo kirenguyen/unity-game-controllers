@@ -101,7 +101,7 @@ class AlwaysMissionModeFSM(BaseGameFSM):
 			return 
 
 		print("on enter exploration mode")
-		#self.ros_node_mgr.send_robot_cmd(RobotBehaviors.BEFORE_GAME_SPEECH)
+		self.ros_node_mgr.send_robot_cmd(RobotBehaviors.BEFORE_GAME_SPEECH)
 	
 class AlwaysExploreModeFSM(BaseGameFSM):
 	'''

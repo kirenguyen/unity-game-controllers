@@ -40,4 +40,7 @@ mkdir -p rosbag
 gnome-terminal --geometry 240x120+0+0 --title ">>>Tap Game Study MAIN<<<" -e "./scripts/runFSM.sh $1 $2 $3 $pg $5"
 
 #./scripts/rosbag_record.sh $1 $2 $4
-
+if [ $3 = 'experiment' ]; then
+  echo "start rosbag recording...."
+  ./scripts/rosbag_record.sh $1 $2 $3
+fi

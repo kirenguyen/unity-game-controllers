@@ -59,7 +59,7 @@
     "question": ["yes_no_question_3","yes_no_question_1","response_e"],
     "user_input":[
       {
-        "en_US":["yes","okay","ok","yeah","sure"],
+        "en_US":["yes","okay","ok","yeah","sure","maybe","could be","can be"],
         "response":["ROBOT_WINK", "response_h","response_g","response_k"]
       },
       {
@@ -87,7 +87,7 @@
     "question": ["open_ended_question_4","open_ended_question_2"],
     "user_input":[
       {
-        "en_US":["because","is", "it's", "yes","yeah","ok","cause","pause"],
+        "en_US":["cousin","cuz","because","is", "it's", "yes","yeah","ok","cause","pause","and","is","are"],
         "response":["response_g","response_c","response_n"]
       },
       {
@@ -115,7 +115,7 @@
     "question": ["open_ended_question_3","open_ended_question_1"],
     "user_input":[
       {
-        "en_US":["because","yes","not", "yeah","ok","cause","pause"],
+        "en_US":["because","yes","not", "yeah","ok","cause","pause","and","is","are"],
         "response":["response_g", "response_c","response_n"]
       },
       {

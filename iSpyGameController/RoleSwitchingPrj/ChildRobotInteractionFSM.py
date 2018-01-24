@@ -28,6 +28,7 @@ import random
 from unity_game_msgs.msg import iSpyChildRobotInteraction
 import threading
 from datetime import datetime
+import os
 
 
 ROOT_TEGA_SPEECH_FOLDER = 'roleswitching18/'
@@ -126,12 +127,13 @@ class ChildRobotInteractionFSM:
 			import rospy
 			topics = rospy.get_published_topics()
 			self.asr_result_topic = False
+
 			
 			if '/asr_result' in [ i[0] for i in topics]:
-				print("asr result publisher exists")
+				print("=========asr result publisher exists=========")
 				self.asr_result_topic = True
 			else:
-				print("WARNING: asr result publisher does not exist. Remember to start ros_asr.py")
+				print("======WARNING: asr result publisher does not exist. Remember to start ros_asr.py======")
 
 		def on_enter_childTURN(self):
 			self.robot_clickedObj = "" # reset robot's clicked obj
@@ -172,25 +174,30 @@ class ChildRobotInteractionFSM:
 			listen to child's speech
 			called by listenChildSpeechResponse in either child's turn or robot's turn
 			'''
+			print("====================== listen child speech ===================")
+
 
 			def timeout_alert():
-				# 5 seconds
+				print("====== time out alert==")
+				# 6 seconds
 				if ris.LISTEN_CHILD_SPEECH_RESPONSE in self.state: 
 					self.on_tega_new_asr_result("")
 
 			# start ASR listening mode
 			print("\nENTER STATE: listen child speech response")
-			
-			time.sleep(0.5)
+			print("===============before time sleep======")
+			time.sleep(0.4)
+			print("============wait until =======")
 			self._wait_until_all_audios_done()
 			print("INFO: ASR start listening")
 			self.ros_node_mgr.start_asr_listening()
-			t = threading.Timer(6.0, timeout_alert) # checking for timeout 
-			t.start()
+			threading.Timer(6.0, timeout_alert).start() # checking for timeout 
 			
 
+			
 			if not self.asr_result_topic: # if the asr result topic publsiher doesn't exist
 				# manually call the asr result callback function
+				print("no asr result topic!!!")
 				print("INFO: manually call tega new asr result")
 				self.on_tega_new_asr_result("")
 
@@ -492,8 +499,10 @@ class ChildRobotInteractionFSM:
 			all_done = False
 			while all_done == False:
 				if self.tega_is_playing_sound==False:
-					time.sleep(0.5)
+					print("self.tega is playing sound==false")
+					time.sleep(0.1) #0.5
 					if self.tega_is_playing_sound==False:
+						print("teag sound false 2222")
 						break
 					else:
 					
@@ -583,6 +592,8 @@ class ChildRobotInteractionFSM:
 				#speech_actions = self._get_tega_speech(action_type)
 
 				# send physical moition commands
+				print("get actions for action type: "+action_type)
+				print(actions.items())
 				for action, prob in actions.items():
 				
 					print("action: "+action+" | prob:" + str(prob))
@@ -598,6 +609,8 @@ class ChildRobotInteractionFSM:
 
 					if "Q_" in action: # action is a question asking action
 						self._robot_question_asking(action)
+						print(" robot question asking is done... break for action loop")
+						break
 
 					else: 
 						# ensure the current FSM state is not in Q & A states
@@ -731,7 +744,22 @@ class ChildRobotInteractionFSM:
 			'''
 			robot asks a question and waits for the child to answer
 			'''
-			print("INFO: robot question asking")
+			print("asr topic...")
+			print(self.asr_result_topic)
+			self.check_existence_of_asr_rostopic()
+			if self.asr_result_topic == False: # if google asr shuts down, reopen it
+				print("\nINFO: Google ASR is restarting!!\n")
+				os.system("xterm -bg brown -geometry 45x20+300+550 -T \"Speech Recognition\" -e \"python3 /home/huilichen/catkin_ws/src/asr_google_cloud/src/ros_asr.py\" &")
+				time.sleep(2)
+				while self.asr_result_topic == False:
+					self.check_existence_of_asr_rostopic()
+					if self.asr_result_topic == True:
+						print("===============yeah....asr result exists!!!")
+						break
+
+
+
+			print("\nINFO: robot question asking")
 	
 			# FSM transitions to QA activity
 			getattr(self, ris.Triggers.ROBOT_QUESTION)() # trigger the FSM transition

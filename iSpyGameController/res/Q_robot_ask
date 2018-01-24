@@ -45,7 +45,7 @@
         },
         "PRONOUNCE_CORRECT":{
           "general": [
-
+            "ROBOT_CELEBRATION"
           ],
           "optional":{
             "VOCAB_EXPLANATION_SPEECH":0.8
@@ -88,9 +88,10 @@
           "general": [ 
             "LOOK_AT_TABLET",
             "ROBOT_CUSTOM_SPEECH"
+            //"Q_ROBOT_ASK_WHY_WRONG"
           ],
           "optional":{
-            "KEYWORD_DEFINITION_SPEECH":0.5
+            "KEYWORD_DEFINITION_SPEECH":0.4
           }
         },
         "WRONG_OBJECT_CLICKED": {
@@ -152,7 +153,8 @@
         },
         "TURN_STARTING": {
           "general": [
-            "ROBOT_SILENT_EXCITED"
+            "ROBOT_SILENT_EXCITED",
+             "ROBOT_CUSTOM_SPEECH"
           ]
         },
         "SCREEN_MOVING": {
@@ -161,8 +163,8 @@
             "ROBOT_SILENT_INTERESTED"
           ],
           "optional": {
-            "ROBOT_CUSTOM_SPEECH":0.3,
-            "Q_ROBOT_ASK_HELP":0.8
+            "ROBOT_CUSTOM_SPEECH":0.5,
+            "Q_ROBOT_ASK_HELP":0.3
           }
         },
         "WRONG_OBJECT_CLICKED": {
@@ -200,8 +202,8 @@
             "ROBOT_SILENT_SAD"
           ],
           "optional":{
-            "Q_ROBOT_ASK_WHY_WRONG":0.5,
-            "ROBOT_CUSTOM_SPEECH":0.5
+            "Q_ROBOT_ASK_WHY_WRONG":0.3,
+            "ROBOT_CUSTOM_SPEECH":0.6
           }
         }
       },
@@ -223,15 +225,16 @@
             "ROBOT_SILENT_INTERESTED"
           ],
           "optional":{
-             "HINT_SPEECH":0.1
+             "HINT_SPEECH":0.15
           }
         },
         "SCREEN_MOVING": {
           "general": [
             "LOOK_AT_TABLET"
+            //"Q_ROBOT_ASK_WHY_WRONG"
           ],
           "original":{
-            "Q_ROBOT_WANT_LEARN":0.4,
+            "Q_ROBOT_WANT_LEARN":0.3,
             "ROBOT_CUSTOM_SPEECH": 0.5
           }
         },
@@ -263,7 +266,7 @@
           ],
           "optional":{
             "ROBOT_CUSTOM_SPEECH":0.4,
-            "Q_ROBOT_ASK_WHY_CHOOSE_IT":0.5
+            "Q_ROBOT_ASK_WHY_CHOOSE_IT":0.30
           }
         },
         "RESULTS_RETURNED":{
@@ -347,10 +350,11 @@
 
         "WRONG_OBJECT_FAIL":{
           "general": [
-            "Q_ROBOT_ASK_WHY_WRONG"
+            //
           ],
           "optional":{
-            "ROBOT_SILENT_SAD": 0.6
+            "ROBOT_SILENT_SAD": 0.6,
+            "Q_ROBOT_ASK_WHY_WRONG":0.3
           }
         }
       },
@@ -373,7 +377,8 @@
         "SCREEN_MOVING": {
           "general": [
             "ROBOT_ENCOURAGING",
-            "ROBOT_CUSTOM_SPEECH"
+            "ROBOT_CUSTOM_SPEECH",
+            //"Q_ROBOT_ASK_WHY_WRONG"
           ]
         },
         "WRONG_OBJECT_CLICKED": {

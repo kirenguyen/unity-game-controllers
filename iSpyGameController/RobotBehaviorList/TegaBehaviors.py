@@ -178,6 +178,13 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.motion = TegaAction.MOTION_SILENT_NOD
             print("key word definition speech wav: "+msg.wav_filename)
 
+        if command == RobotBehaviors.REMINDER_SPEECH: 
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/reminder/"
+            file = args[0][0].lower() + random.choice(["1", "2", "3"]) + ".wav"
+            msg.wav_filename = PATH + file
+            msg.motion = "" 
+            print ("reminder speech wav: "+msg.wav_filename)
+
         ### ====== Tega Question Asking =================== ####
         if command == RobotBehaviors.Q_ROBOT_OFFER_HELP:
             PATH = ROOT_TEGA_SPEECH_FOLDER + "questions/"

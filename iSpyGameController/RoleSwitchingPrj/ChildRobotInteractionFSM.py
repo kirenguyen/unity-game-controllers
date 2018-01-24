@@ -606,7 +606,7 @@ class ChildRobotInteractionFSM:
 				
 							if action == RobotBehaviors.ROBOT_SAY_WORD:
 								input_data = self.robot_clickedObj
-							elif action == RobotBehaviors.BASED_ON_PROMPTS_SPEECH or action == RobotBehaviors.HINT_SPEECH or action == RobotBehaviors.KEYWORD_DEFINITION_SPEECH:
+							elif action == RobotBehaviors.BASED_ON_PROMPTS_SPEECH or action == RobotBehaviors.HINT_SPEECH or action == RobotBehaviors.KEYWORD_DEFINITION_SPEECH or action == RobotBehaviors.REMINDER_SPEECH:
 								input_data = self.task_controller.get_vocab_word()
 							elif action == RobotBehaviors.VOCAB_EXPLANATION_SPEECH:
 								input_data = [self.task_controller.get_vocab_word(), self.robot_clickedObj]

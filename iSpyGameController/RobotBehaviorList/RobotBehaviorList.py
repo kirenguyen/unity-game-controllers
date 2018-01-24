@@ -78,6 +78,7 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     VOCAB_EXPLANATION_SPEECH = "VOCAB_EXPLANATION_SPEECH"
     HINT_SPEECH = "HINT_SPEECH"
     KEYWORD_DEFINITION_SPEECH = "KEYWORD_DEFINITION_SPEECH"
+    REMINDER_SPEECH = "REMINDER_SPEECH"
 
 
    ### ====== Tega Question Asking =================== ####

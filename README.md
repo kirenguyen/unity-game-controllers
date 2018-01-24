@@ -40,6 +40,7 @@ We recommend using Anaconda with Python 2.7 as your default system-wide Python e
 	$ sudo apt-get install xdotool
 	$ sudo apt-get install wmctrl
 	$ sudo apt-get install ros-indigo-rosbridge-server
+	$ sudo apt-get install python3-tk
 	
 	# frequently needed for ROS-related code to work)
 	$ pip install rospkg

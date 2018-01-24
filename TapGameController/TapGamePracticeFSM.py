@@ -18,7 +18,7 @@ from GameUtils.AudioRecorder import AudioRecorder
 from .AgentModel import ActionSpace
 from .AgentModel import AgentModel
 from .ROSNodeMgr import ROSNodeMgr
-from .StudentModel import StudentModel
+from .StudentWordModel import StudentWordModel
 from .RobotBehaviorList import RobotBehaviors
 
 if GlobalSettings.USE_ROS:
@@ -33,7 +33,7 @@ SHOW_RESULTS_TIME_MS = 2500
 WAIT_TO_BUZZ_TIME_MS = 1500 #note, game currently waits 3000ms after receiving message
 SIMULATED_ROBOT_RESULTS_TIME_MS = 2500 # time to wait while we "process" robot speech (should be close to SpeechAce roundtrip time)
 
-PASSING_RATIO_THRESHOLD = .65
+PASSING_SCORE_THRESHOLD = .65
 
 FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameLog.INIT_ROUND_DONE,
                     TapGameLog.START_ROUND_DONE, TapGameLog.ROBOT_RING_IN,
@@ -41,42 +41,45 @@ FSM_LOG_MESSAGES = [TapGameLog.CHECK_IN, TapGameLog.GAME_START_PRESSED, TapGameL
                     TapGameLog.RESET_NEXT_ROUND_DONE, TapGameLog.SHOW_GAME_END_DONE,
                     TapGameLog.PLAYER_BEAT_ROBOT, TapGameLog.RESTART_GAME]
 
-EXPERIMENT_PHASES = ["practice", "experiment", "posttest"]
-
 
 class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attributes
     """
     An FSM for the Tap Game. Contains Game Logic and some nodes for interacting w the Unity "View"
     """
 
-    round_index = 1
-    max_rounds = 7 #practice ends after this many rounds
+    round_index = 0
+    max_rounds = 6 #game ends after this many rounds
 
     player_score = 0
     robot_score = 0
 
+    agent_model = AgentModel()
     pronunciation_utils = PronunciationUtils()
     ros_node_mgr = ROSNodeMgr()
     current_round_word = ""
     current_round_action = None
 
-    game_commander = None
-    robot_commander = None
-    log_listener = None
-    letters = None
-    passed = None
+    audio_file = None
+
+    letters = None # the graphemes/letters under consideration this rd
+    passed = None # whether each letter corresponded to a phoneme above the threshold
+    scores = None # the actual score of the phoneme each letter corresponds to
+
+    player_won_round_tap = None # did the player buzz in first
+    player_passed_round = None # was the players score high enough to pass the round
+
+
+    states = ['GAME_START', 'ROUND_START', 'ROUND_ACTIVE',
+              'PLAYER_PRONOUNCE', 'ROBOT_PRONOUNCE', 'SHOW_RESULTS', 'ROUND_RESOLVE',
+              'GAME_FINISHED']
 
     # Scripted Sequence of Actions and Words to use in Game
     practice_actions = [ActionSpace.DONT_RING, ActionSpace.DONT_RING, ActionSpace.DONT_RING,
                         ActionSpace.RING_ANSWER_CORRECT, ActionSpace.RING_ANSWER_CORRECT, ActionSpace.DONT_RING,
-                        ActionSpace.DONT_RING]
+                        ActionSpace.RING_ANSWER_CORRECT]              
 
-    practice_words = ["FORK", "FROG", "FISH", "DUCK", "CAT", "DOG", "DAD"]
+    practice_words = ["FORK", "FROG", "FISH", "DUCK", "SUN", "RABBIT", "DAD"]
 
-
-    states = ['GAME_START', 'ROUND_START', 'ROUND_ACTIVE',
-              'PLAYER_PRONOUNCE', 'ROBOT_PRONOUNCE', 'SHOW_RESULTS',
-              'GAME_FINISHED']
 
     transitions = [
         {'trigger': 'init_first_round',
@@ -109,14 +112,19 @@ class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attribu
          'dest': 'SHOW_RESULTS',
          'after': 'on_robot_pronounce_eval'},
 
-        {'trigger': 'handle_round_end',
+         {'trigger': 'resolve_round',
          'source': 'SHOW_RESULTS',
-         'dest': 'ROUND_START',
-         'conditions': 'is_not_last_round',
-         'after': 'on_round_reset'},
+         'dest': 'ROUND_RESOLVE',         
+         'after': 'on_round_resolve'},
 
         {'trigger': 'handle_round_end',
-         'source': 'SHOW_RESULTS',
+         'source': 'ROUND_RESOLVE',
+         'dest': 'ROUND_START',
+         'conditions': 'is_not_last_round',
+         'after': 'on_reset_round'},
+
+        {'trigger': 'handle_round_end',
+         'source': 'ROUND_RESOLVE',
          'dest': 'GAME_FINISHED',
          'conditions': 'is_last_round',
          'after': 'on_game_finished'},
@@ -127,27 +135,24 @@ class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attribu
          'after': 'on_game_replay'},
     ]
 
-    def __init__(self, participant_id, experimenter_name, starting_phase):
+    def __init__(self, participant_id, experimenter_name, experiment_phase):
 
         self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
                                      initial='GAME_START')
 
         self.participant_id = participant_id
         self.experimenter_name = experimenter_name
-        self.starting_phase = starting_phase
+        self.experiment_phase = experiment_phase
 
-        self.student_model = StudentModel()
-
-        if self.starting_phase not in EXPERIMENT_PHASES:
-            print("starting phase " + str(self.starting_phase) + " is not a valid experiment phase")
+        if not self.experiment_phase == 'practice':
+            print(str(self.experiment_phase) + " was not 'practice'")
             exit()
 
         # Initializes a new audio recorder object if one hasn't been created
-        self.recorder = AudioRecorder(self.participant_id, self.experimenter_name)
+        self.recorder = AudioRecorder(self.participant_id, self.experimenter_name, self.experiment_phase)
 
         # Tell robot to look at Tablet
         self.ros_node_mgr.init_ros_node()
-        self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LOOK_AT_TABLET)
 
     def on_init_first_round(self):
         """
@@ -156,13 +161,13 @@ class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attribu
         """
         print("got to init_first round!")
         # get the next robot action
-        self.current_round_action = self.practice_actions[self.round_index - 1]
+        self.current_round_action = self.practice_actions[self.round_index]
 
 
         #send message every 2s in case it gets dropped
         def send_msg_til_received():
             while(self.state == "ROUND_START"):
-                self.current_round_word = self.practice_words[self.round_index - 1]
+                self.current_round_word = self.practice_words[self.round_index]
                 self.ros_node_mgr.send_game_cmd(TapGameCommand.INIT_ROUND,
                                         json.dumps(self.current_round_word))
                 print('sent command!')
@@ -191,6 +196,8 @@ class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attribu
         Should send msg to Unity game telling it to load robot pronunciation screen
         """
         print('got to robot ring in cb')
+        self.player_won_round_tap = False
+        self.audio_file = 'None'
 
         # Send message to robot telling it to pronounce
 
@@ -200,7 +207,14 @@ class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attribu
             self.ros_node_mgr.send_robot_cmd(RobotBehaviors.PRONOUNCE_CORRECT, self.current_round_word)
             self.letters = list(self.current_round_word)
             self.passed = ['1'] * len(self.letters) #robot always gets it right if intentional ring
+            self.scores = [1] * len(self.letters) #robot always gets it right if intentional ring
 
+        elif self.current_round_action == ActionSpace.LATE_RING:
+            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.PRONOUNCE_WRONG_SOUND)
+            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.PRONOUNCE_WRONG_SPEECH)
+            self.letters = list(self.current_round_word)
+            self.passed = ['0'] * len(self.letters) #robot always gets it wrong if late ring
+            self.scores = [0] * len(self.letters) #robot always gets it right if intentional ring
 
         time.sleep((RECORD_TIME_MS / 2) / 1000.0)
 
@@ -211,16 +225,13 @@ class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attribu
         """
         This function details what happens when the robot wants to buzz, but gets beat by the human
         """        
-        print("PLAYER BEAT ROBOT TO THE PUNCH!")
 
-        tmp = [int(x) for x in self.passed]
-        passed_ratio = (sum(tmp) / len(tmp)) #TODO: do this over phonemes, not letters!
-        print("ROUND PASSED RATIO WAS" + str(passed_ratio))
+        # print("PLAYER BEAT ROBOT TO THE PUNCH!")
 
-        if passed_ratio > PASSING_RATIO_THRESHOLD:
-            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.REACT_TO_BEAT_CORRECT)
-        else:
-            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.REACT_TO_BEAT_WRONG)
+        # tmp = [int(x) for x in self.passed]
+        # passed_ratio = (sum(tmp) / len(tmp)) #TODO: do this over phonemes, not letters!
+        # print("ROUND PASSED RATIO WAS" + str(passed_ratio))
+
 
 
     def on_player_ring_in(self):
@@ -229,10 +240,12 @@ class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attribu
         Should send msg to Unity game telling it to load the pronunciation screen
         And also start recording from the phone for 5 seconds + writing to wav
         """
-        print('got to player ring in cb')        
+        print('got to player ring in cb')
+        self.player_won_round_tap = True
+        
 
         #SEND SHOW_PRONUNCIATION_PAGE MSG
-        self.recorder.start_recording(self.current_round_word, RECORD_TIME_MS)
+        self.recorder.start_recording(self.current_round_word, self.round_index, RECORD_TIME_MS)
         #time.sleep(RECORD_TIME_MS / 1000.0)
         self.recorder.stop_recording()
 
@@ -248,11 +261,14 @@ class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attribu
             if not self.recorder.valid_recording:
                 self.letters = list(self.current_round_word)
                 self.passed = ['0'] * len(self.letters)
+                self.scores = [0] * len(self.letters)
+
                 print ("NO RECORDING SO YOU AUTOMATICALLY FAIL")
+                self.audio_file = 'None'
             else: 
-                audio_file = self.recorder.WAV_OUTPUT_FILENAME_PREFIX + self.current_round_word + '.wav'
+                self.audio_file = self.recorder.WAV_OUTPUT_FILENAME_PREFIX + self.current_round_word + '_' + str(self.recorder.recording_index) + '.wav'
                 print("SENDING TO SPEECHACE")
-                word_score_list = self.recorder.speechace(audio_file)
+                word_score_list = self.recorder.speechace(self.audio_file)
                 print("WORD SCORE LIST")
                 print(word_score_list)
 
@@ -260,13 +276,15 @@ class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attribu
                 if word_score_list:
                     for word_results in word_score_list:
                         print("Message for ROS")
-                        self.letters, self.passed = \
+                        self.letters, self.passed, self.scores = \
                             self.pronunciation_utils.process_speechace_word_results(word_results)
                         print(self.letters)
                         print(self.passed)
+                        print(self.scores)
                 else:
                     self.letters = list(self.current_round_word)
                     self.passed = ['0'] * len(self.letters)
+                    self.scores = [0] * len(self.letters)
                     print('NO RECORDING, SO YOU AUTO-FAIL!!')
 
             self.player_pronounce_eval()
@@ -281,21 +299,18 @@ class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attribu
         """
         print('got to player pronounce eval cb')
         # Get the actual results here
-        tmp = [int(x) for x in self.passed]
-        passed_ratio = (sum(tmp) / len(tmp)) #TODO: do this over phonemes, not letters!
-        print("PASSED RATIO WAS" + str(passed_ratio))
-        
 
-        if passed_ratio > PASSING_RATIO_THRESHOLD:
-            self.player_score += 1
+        avg_phone_score = (sum(self.scores) / len(self.scores)) #TODO: do this over phonemes, not letters!
+        print("AVG PHONE SCORE WAS" + str(avg_phone_score))        
 
         results_params = {}
         results_params['letters'] = self.letters
         results_params['passed'] = self.passed
+        results_params['scores'] = [str(x) for x in self.scores] #convert to string before sending over json (ask Sam why)
 
         self.ros_node_mgr.send_game_cmd(TapGameCommand.SHOW_RESULTS, json.dumps(results_params))
         time.sleep(SHOW_RESULTS_TIME_MS / 1000.0)
-        self.handle_round_end()
+        self.resolve_round()
 
     def on_robot_pronounce_eval(self):
         """
@@ -309,33 +324,61 @@ class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attribu
         results_params = {}
         results_params['letters'] = self.letters
         results_params['passed'] = self.passed
-
-        tmp = [int(x) for x in self.passed]
-        passed_ratio = (sum(tmp) / len(tmp))  # TODO: do this over phonemes, not letters!
-        print("PASSED RATIO WAS" + str(passed_ratio))
+        results_params['scores'] = [str(x) for x in self.scores] #convert to string before sending over json (ask Sam why)
 
         self.ros_node_mgr.send_game_cmd(TapGameCommand.SHOW_RESULTS, json.dumps(results_params))
 
-        if passed_ratio > PASSING_RATIO_THRESHOLD:
-            self.robot_score += 1
-            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.REACT_ANSWER_CORRECT)
-        else:
-            self.ros_node_mgr.send_robot_cmd(RobotBehaviors.REACT_ANSWER_WRONG)
-
         time.sleep(SHOW_RESULTS_TIME_MS / 1000.0)
-        self.handle_round_end()
+        self.resolve_round()
 
-    def on_round_reset(self):
+    def on_round_resolve(self):
         """
-        Called after finishing a round in the game, but we have not hit
-        'max_rounds" yet
-        Should increment round index, and send cmd to game to reset for the next round
+        Called after finishing a round in the game
+        Should optionally send command for robot to react to result, then send cmd to game to reset for the next round
         """
         print('got to round reset')
-        self.round_index += 1
+        self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LOOK_CENTER)
+        time.sleep(.5) #wait for half a second so the lookat can go through
+
+        #ROBOT REACTION LOGIC  - consider using fidget text?      
+        
+        avg_phoneme_score = (sum(self.scores) / len(self.scores))
+        print('AVG PHONEME SCORE WAS')
+        print(avg_phoneme_score)
+
+        if self.player_won_round_tap: #reactions to player winning tap
+            if (not self.current_round_action == ActionSpace.DONT_RING): # if the robot intended to ring but got beaten,
+                if avg_phoneme_score >= PASSING_SCORE_THRESHOLD: #if the robot was beaten and the child got the word right
+                    self.player_score += 1
+                    self.player_passed_round = True
+                    self.ros_node_mgr.send_robot_cmd(RobotBehaviors.REACT_TO_BEAT_CORRECT)
+                else:
+                    self.player_passed_round = False
+                    self.ros_node_mgr.send_robot_cmd(RobotBehaviors.REACT_TO_BEAT_WRONG)
+
+            else: #regular response to human ring-in
+                if avg_phoneme_score >= PASSING_SCORE_THRESHOLD: #if child got the word right
+                    self.player_score += 1
+                    self.player_passed_round = True
+                    self.ros_node_mgr.send_robot_cmd(RobotBehaviors.REACT_PLAYER_CORRECT)
+                else:
+                    self.player_passed_round = False
+                    self.ros_node_mgr.send_robot_cmd(RobotBehaviors.REACT_PLAYER_WRONG)
+
+        else: #robot rang in
+            if avg_phoneme_score >= PASSING_SCORE_THRESHOLD: #if robot got the word right
+                self.robot_score += 1
+                self.ros_node_mgr.send_robot_cmd(RobotBehaviors.REACT_ROBOT_CORRECT)
+                self.player_passed_round = False
+            else:
+                self.player_passed_round = False
+                self.ros_node_mgr.send_robot_cmd(RobotBehaviors.REACT_ROBOT_WRONG)                
+
+        self.handle_round_end()       
+        
+
+    def on_reset_round(self):
         self.ros_node_mgr.send_game_cmd(TapGameCommand.RESET_NEXT_ROUND)
-
-
 
     def on_game_finished(self):
         """
@@ -343,6 +386,7 @@ class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attribu
         Sends msg to the Unity game to load the game end screen
         """
         print('got to game finished')
+        time.sleep(1)
         if self.player_score >= self.robot_score:
             self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LOSE_MOTION)
             self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LOSE_SPEECH)
@@ -380,6 +424,8 @@ class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attribu
 
             if data.message == TapGameLog.CHECK_IN:
                 print('Game Checked in!')
+                self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LOOK_CENTER)
+                self.ros_node_mgr.send_robot_cmd(RobotBehaviors.SAY_HI)
 
             if data.message == TapGameLog.GAME_START_PRESSED:
                 self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LOOK_AT_TABLET)
@@ -391,7 +437,7 @@ class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attribu
                 self.start_round()
 
             if data.message == TapGameLog.START_ROUND_DONE:
-                print('I heard Start Round DONE. Waiting for player input')
+                print('I heard Start Round DONE. Waiting for player input')                
                 
             if data.message == TapGameLog.PLAYER_RING_IN:
                 print('Player Rang in!')
@@ -401,12 +447,22 @@ class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attribu
                 print('Robot Rang in!')
                 self.robot_ring_in()
 
+            if data.message == TapGameLog.PLAYER_BEAT_ROBOT:
+                self.player_beat_robot = True
+
             if data.message == TapGameLog.RESET_NEXT_ROUND_DONE:
                 print('Game Done Resetting Round! Now initing new round')
-                self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LOOK_AT_TABLET)
 
-                self.current_round_action = self.practice_actions[self.round_index - 1]
-                self.current_round_word = self.practice_words[self.round_index - 1]
+                self.ros_node_mgr.send_robot_cmd(RobotBehaviors.LOOK_AT_TABLET)
+                #self.ros_node_mgr.publish_round_summary(self.round_index, self.current_round_action, self.current_round_word,
+                #                                         self.player_won_round_tap, self.player_passed_round, self.audio_file, self.letters, self.scores,
+                #                                         self.passed,self.player_score, self.robot_score, self.practice_words, 
+                #                                         [.5 * len(self.practice_words)],[.3 * len(self.practice_words)])
+
+                self.round_index += 1
+                self.player_beat_robot = False
+                self.current_round_action = self.practice_actions[self.round_index]
+                self.current_round_word = self.practice_words[self.round_index]
 
                 self.ros_node_mgr.send_game_cmd(TapGameCommand.INIT_ROUND, json.dumps(self.current_round_word))
 
@@ -430,5 +486,5 @@ class TapGamePracticeFSM: # pylint: disable=no-member, too-many-instance-attribu
         used by FSM to determine whether to start next round or end game
         """
         return not self.is_last_round()
+            
 
-        

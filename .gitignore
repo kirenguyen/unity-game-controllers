@@ -92,9 +92,9 @@ ENV/
 # PyCharm metadata
 .idea
 
-#stored audio files
+#stored data files
 *.wav
-
+*.bag
 .DS_Store
 
 # captured videos

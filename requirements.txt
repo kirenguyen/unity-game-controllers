@@ -12,3 +12,4 @@ spacy
 pyyaml
 rospkg
 catkin_pkg
+scipy

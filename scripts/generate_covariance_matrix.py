@@ -14,8 +14,8 @@ loaded_weighted_lev_distances = np.load(os.getcwd() + myUtils.WEIGHTED_LEV_DISTA
 loaded_gloVe_distances = np.load(os.getcwd() + myUtils.GLOVE_DISTANCE_PATH + '.npy')
 
 ### THESE MUST ADD UP TO 1!!! ###
-PHONETIC_WEIGHT = .6
-SEMANTIC_WEIGHT = .4
+PHONETIC_WEIGHT = .33
+SEMANTIC_WEIGHT = .66
 
 def create_cov_matrix():
     covariance_matrix = np.ones((len(myCurriculum), len(myCurriculum)),
@@ -31,7 +31,7 @@ def create_cov_matrix():
             print("cov between " + myCurriculum[i] + " and " + myCurriculum[j] + " was " + str(covariance_matrix[i][j]))
 
 
-    np.save(os.getcwd() + PronunciationUtils.COVARIANCE_PATH, covariance_matrix)
-    np.savetxt(os.getcwd() + PronunciationUtils.COVARIANCE_PATH + '.txt', covariance_matrix)
+    np.save(os.getcwd() + PronunciationUtils.WORD_COVARIANCE_PATH, covariance_matrix)
+    np.savetxt(os.getcwd() + PronunciationUtils.WORD_COVARIANCE_PATH + '.txt', covariance_matrix)
 
 create_cov_matrix()

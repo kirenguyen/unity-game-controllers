@@ -1,7 +1,6 @@
 import csv 
 import os
 import random
-from dateutil.parser import parse
 import datetime
 
 from GameUtils import GlobalSettings
@@ -30,9 +29,9 @@ class iSpyTaskController():
 		# vocab word in the prompts
 		self.vocab_word = ""
 
-		self.task_start_time = ""
+		self.task_start_time = None
 
-		self.task_end_time = ""
+		self.task_end_time = None
 
 		self.task_duration = ""
 
@@ -47,7 +46,7 @@ class iSpyTaskController():
 		'''
 		get task start time, end time and duration
 		'''
-		return {'start':self.task_start_time, 'end':self.task_end_time, 'duration':self.task_duration}
+		return {'start':str(self.task_start_time) , 'end': str(self.task_end_time), 'duration':self.task_duration}
 
 	def load_task_list(self,game_round):
 		""" Loads the task_list csv file into a 2d array """
@@ -151,8 +150,8 @@ class iSpyTaskController():
 
 		task_message = self.get_task_message(str(len(self.target_list)),task_category,task_attribute)
 
-		self.task_start_time = str(datetime.now())
-		self.task_end_time = ""
+		self.task_start_time = datetime.datetime.now()
+		self.task_end_time = None
 		self.task_duration = ""
 		
 		return {"task": task_message, "task_vocab": task_attribute, "list" : self.target_list,"prompt_audio_name":prompt_audio_name}
@@ -214,8 +213,8 @@ class iSpyTaskController():
 		if self.num_finished_words == NUM_WORDS_THRESHOLD:
 			print("**update target list: task in progress false")
 			self.task_in_progress = False
-			self.task_end_time = str(datetime.now()) 
-			self.task_duration = str(parse(self.task_end_time) - parse(self.task_start_time))
+			self.task_end_time = datetime.datetime.now()
+			self.task_duration = str(self.task_end_time - self.task_start_time)
 			self._reset_for_new_task()
 
 	def get_current_answer_size(self):

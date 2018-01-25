@@ -28,7 +28,9 @@ import random
 from unity_game_msgs.msg import iSpyChildRobotInteraction
 import threading
 from datetime import datetime
+
 import os
+import timestring
 
 
 ROOT_TEGA_SPEECH_FOLDER = 'roleswitching18/'
@@ -118,9 +120,9 @@ class ChildRobotInteractionFSM:
 
 			self.curr_robot_action = "NA"
 
-			self.turn_start_time = ""
+			self.turn_start_time = None
 
-			self.turn_end_time = ""
+			self.turn_end_time = None
 
 			self.turn_duration = ""
 
@@ -151,20 +153,24 @@ class ChildRobotInteractionFSM:
 		
 
 		def on_exit_childTURN(self):
-			self.turn_start_time = ""
-			self.turn_end_time = str(datetime.now()) 
-			self.turn_duration = str(parse(self.task_end_time) - parse(self.task_start_time))
+			
+			self.turn_end_time = datetime.now()
+			print(self.turn_end_time)
+			print(self.turn_start_time)
+			self.turn_duration = str(self.turn_end_time - self.turn_start_time)
 			self._ros_publish_data()
 
 		def on_exit_robotTURN(self):
-			self.turn_start_time = ""
-			self.turn_end_time = str(datetime.now()) 
-			self.turn_duration = str(parse(self.task_end_time) - parse(self.task_start_time))
+		
+			self.turn_end_time = datetime.now()
+			self.turn_duration = str(self.turn_end_time - self.turn_start_time)
+			print(self.turn_end_time)
+			print(self.turn_start_time)
 			self._ros_publish_data()
 
 		def on_enter_childTURN(self):
-			self.turn_start_time = str(datetime.now()) 
-			self.turn_end_time = ""
+			self.turn_start_time = datetime.now()
+			self.turn_end_time = None
 			self.turn_duration = ""
 			self.current_task_turn_index += 1
 			self.child_click_cancel_num =0 
@@ -173,8 +179,8 @@ class ChildRobotInteractionFSM:
 			threading.Timer(3.0, self.start_tracking_child_interaction).start()
 
 		def on_enter_robotTURN(self):
-			self.turn_start_time = str(datetime.now()) 
-			self.turn_end_time = ""
+			self.turn_start_time = datetime.now()
+			self.turn_end_time = None
 			self.turn_duration = ""
 			self.current_task_turn_index += 1
 			self.child_click_cancel_num = 0 
@@ -257,7 +263,7 @@ class ChildRobotInteractionFSM:
 						break
 					if delta_time.total_seconds() > 40:
 						self.on_no_ispy_action_alert(2)
-						breakf
+						break
 					elif delta_time.total_seconds() > 5 and alerted_once == False :
 						# 10 secs have passed without receiving any tablet interaction input from the cihld
 						self.on_no_ispy_action_alert(1)
@@ -469,17 +475,19 @@ class ChildRobotInteractionFSM:
 			if gameStateTrigger == gs.Triggers.TARGET_OBJECT_COLLECTED:
 				self._perform_robot_physical_actions(ras.PRONOUNCE_CORRECT)
 				self._perform_robot_physical_actions(ras.TURN_SWITCHING)
-				if self.state == ris.CHILD_TURN or self.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
-					self.child_states.update_turn_result(True) # the child finds the correct object
+				self.child_states.update_turn_result(self.state,True) # the child finds the correct object
 
+				if self.state == ris.CHILD_TURN or self.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
+					pass
 
 			elif gameStateTrigger  == gs.Triggers.NONTARGET_OBJECT_COLLECTED:
 				
 				self._perform_robot_physical_actions(ras.WRONG_OBJECT_FAIL)
 				self._perform_robot_physical_actions(ras.TURN_SWITCHING)
-				if self.state == ris.CHILD_TURN or self.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
-					self.child_states.update_turn_result(False) # the child finds the correct object
+				self.child_states.update_turn_result(self.state,False) # the child finds the correct object
 
+				if self.state == ris.CHILD_TURN or self.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
+					pass
 
 			elif gameStateTrigger  == gs.Triggers.OBJECT_CLICKED:
 				if self.state == ris.ROBOT_TURN or self.state == ris.CHILD_TURN+'_'+ris.ROBOT_HELP:
@@ -711,33 +719,28 @@ class ChildRobotInteractionFSM:
 			# robot's current role: expert or novice?
 			msg.robotRole = self.role.name if not isinstance(self.role,str) else self.role
 
-			msg.turnStartTime = self.turn_start_time
+			msg.turnStartTime = str(self.turn_start_time) if self.turn_start_time else ""
 
-			msg.turnEndTime = self.turn_end_time
+			msg.turnEndTime = str(self.turn_end_time) if self.turn_end_time else ""
 
 			msg.turnDuration = self.turn_duration
 
 			###############
 			
-			msg.numFinishedObjectsForTask[0] = self.task_controller.num_finished_words
+			msg.numFinishedObjectsForTask = [self.task_controller.num_finished_words,self.child_states.numChildCorrectAttemptsCurrTask ]
 
-			msg.numFinishedObjectsForTask[1] = self.child_states.numChildCorrectAttemptsCurrTask 
+			#msg.numFinishedObjectsForTask[1] = 
 
-			msg.numTotalAttemptsForTask[0] = self.child_states.total_num_trials
+			msg.numTotalAttemptsForTask = [self.child_states.total_num_trials,self.child_states.numChildAttemptsCurrTask]
 
-			msg.numTotalAttemptsForTask[1] = self.child_states.numChildAttemptsCurrTask
+ 
 
 			msg.numChildClickCancelForTurn = self.child_click_cancel_num 
 
-			msg.numQAForTurn[0] = self.child_states.num_robot_questions_asked
-
-			msg.numQAForTurn[1] = self.child_states.pos_answers  
-
-			msg.numQAForTurn[2] = self.child_states.neg_answers
-
-			msg.numQAForTurn[3] = self.child_states.other_answers
-
-			msg.numQAForTurn[4] =  self.child_states.no_answers
+			msg.numQAForTurn = [self.child_states.num_robot_questions_asked, self.child_states.pos_answers, 
+									self.child_states.neg_answers, self.child_states.other_answers,
+									self.child_states.no_answers]
+  
 
 			msg.gameStateTrigger = self.gameStateTrigger
 

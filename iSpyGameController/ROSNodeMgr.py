@@ -271,7 +271,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         print("stop asr listening....")
 
 
-    def start_child_robot_interaction_pub_sub(self, on_interaction_data,on_turn_summary_data):
+    def start_child_robot_interaction_pub_sub(self, on_interaction_data):
         print("start child robot interaction publisher/subscriber")
         self.pub_child_robot_interaction = rospy.Publisher(DATA_CHILD_ROBOT_INTERACTION,iSpyChildRobotInteraction,queue_size=1)
         self.sub_child_robot_interacftion = rospy.Subscriber(DATA_CHILD_ROBOT_INTERACTION,iSpyChildRobotInteraction, on_interaction_data)

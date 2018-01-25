@@ -38,6 +38,8 @@ from .RoleSwitchingPrj.ChildRobotInteractionFSM import ChildRobotInteractionFSM
 from .GameModeFSMs import AlwaysMissionModeFSM,CompleteModeFSM,AlwaysExploreModeFSM
 
 from multiprocessing import Process
+
+import datetime
 # from StudentModel import StudentModel
 
 if GlobalSettings.USE_ROS:
@@ -116,7 +118,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		self.kill_received = False # for stopping the update() thread
 
-		
+
 
 		# start a thread to check the game update
 		#self.t = threading.Thread(target=self.update)
@@ -151,6 +153,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			if transition_msg.data == gs.Triggers.TOPLEFT_BUTTON_PRESSED:
 				self.iSpyDataTracking.start_stopwatch()
+				self.interaction.turn_start_time = datetime.datetime.now()
 				self._run_game_task()
 
 

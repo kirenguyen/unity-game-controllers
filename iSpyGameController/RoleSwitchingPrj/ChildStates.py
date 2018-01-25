@@ -15,11 +15,9 @@ class ChildStates:
 		# for a given turn: number of pronunciation trials / number of available clickable objects in the game
 		self.correct_rate_arr = []
 
-		# number of child's attempts of retrieving an object
-		self.child_num_trials_for_task = 0
+		
 
-		# number of child's correct attempts (num of objs collected by the child)
-		self.child_num_correct_trials_for_task = 0
+	
 
 		self.total_num_trials = 0 # total number of trials
 
@@ -38,7 +36,9 @@ class ChildStates:
 		self.numTouchAbsenceAlertPerTask = 0
 
 
-		
+		self.numChildCorrectAttemptsCurrTask = 0
+
+		self.numChildAttemptsCurrTask = 0
 
 		self.objectWordPronounced = False
 
@@ -72,10 +72,10 @@ class ChildStates:
 		update the current object retrieval result 
 		'''
 		self.total_num_trials += 1
-		if whoseTurn == "childTURN":
-			self.child_num_trials_for_task += 1
+		if whoseTurn == "childTURN" or "childHelp" in whoseTurn:
+			self.numChildAttemptsCurrTask += 1
 			if correct == True: # the child fails to find a correct target object 
-				self.child_num_correct_trials_for_task +=1
+				self.numChildCorrectAttemptsCurrTask +=1
 
 			
 
@@ -86,14 +86,14 @@ class ChildStates:
 		# update child's state: increment the number of questions asked
 		self.num_robot_questions_asked += 1
 		self.current_q_type = q_type
-		if "yes/no" == q_type:
-			self.numRobotYNQuestion +=1
-		elif "open-ended" == q_type:
-			self.numRobotOpenQuestion += 1
+		# if "yes/no" == q_type:
+		# 	self.numRobotYNQuestion +=1
+		# elif "open-ended" == q_type:
+		# 	self.numRobotOpenQuestion += 1
 
 	def update_qa_result(self,category):
 		if category == "positive":
-			self.pos_answers + =1
+			self.pos_answers +=1
 		elif category == "negative":
 			self.neg_answers += 1
 		elif category == "others":

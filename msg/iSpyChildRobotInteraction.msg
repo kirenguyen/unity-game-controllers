@@ -16,7 +16,7 @@ string taskEndTime
 string taskDuration
 
 # current turn index in the task. initialize again when a new task is out
-int taskTurnIndex
+int8 taskTurnIndex
 
 # current turn: child or robot?
 string whoseTurn

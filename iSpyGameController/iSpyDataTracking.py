@@ -25,7 +25,7 @@ class iSpyDataTracking:
 
 		self._initialize_csvs(participant_id, experimenter)
 
-		self.ros_node_mgr.start_child_robot_interaction_pub_sub(self.on_child_robot_interaction_data_received,self.on_interaction_turn_summary_data_received)
+		self.ros_node_mgr.start_child_robot_interaction_pub_sub(self.on_child_robot_interaction_data_received)
 		# create ros subscribers to published data
 		#self.sub_child_robot_interaction = rospy.Subscriber()
 
@@ -101,19 +101,19 @@ class iSpyDataTracking:
 		content = ','.join(map(str,[
 			elapsedTime,str(datetime.now()),
 
-			msg.gameTask, msg.taskVocab,  msg.taskStartTime, msg.taskEndTime, msg.taskDuration  # task related 
+			msg.gameTask, msg.taskVocab,  msg.taskStartTime, msg.taskEndTime, msg.taskDuration,  # task related 
 
 			msg.taskTurnIndex, msg.whoseTurn, msg.robotRole, 
 
 			msg.turnStartTime, msg.turnEndTime, msg.turnDuration,
 
-			msg.numFinishedObjectsForTask[0], msg.numFinishedObjectsForTask[1] # turn related 
+			msg.numFinishedObjectsForTask[0], msg.numFinishedObjectsForTask[1], # turn related 
 
 			msg.numTotalAttemptsForTask[0],msg.numTotalAttemptsForTask[1],
 
 			msg.numChildClickCancelForTurn,
 
-			msg.numQAForTurn[0], msg.numQAForTurn[1], msg.numQAForTurn[2], msg.numQAForTurn[3], msg.numQAForTurn[4]
+			msg.numQAForTurn[0], msg.numQAForTurn[1], msg.numQAForTurn[2], msg.numQAForTurn[3], msg.numQAForTurn[4],
 
 			msg.gameStateTrigger, msg.currentInteractionState, msg.currentGameState,
 
@@ -168,7 +168,7 @@ class iSpyDataTracking:
 		elapsedTime = str(datetime.now() - self.game_start_time) if self.game_start_time else ""
 		isScalingUpDown = any(n == True for n in [data.isScalingUp,data.isScalingDown])
 
-		self.ispy_action_log_csv.write(','.join(map(str,[elapsedTime,str(datetime.now()), isScalingUpDown, data.pointerClick,data.isDragging,data.onPinch,object_name,data.speakingStage ])))
+		#self.ispy_action_log_csv.write(','.join(map(str,[elapsedTime,str(datetime.now()), isScalingUpDown, data.pointerClick,data.isDragging,data.onPinch,object_name,data.speakingStage ])))
 	
 	
 		

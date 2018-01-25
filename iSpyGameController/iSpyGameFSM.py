@@ -116,6 +116,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		self.kill_received = False # for stopping the update() thread
 
+		self.current_task_index = 0
+
 		# start a thread to check the game update
 		#self.t = threading.Thread(target=self.update)
 		#self.t.start()
@@ -166,6 +168,22 @@ class iSpyGameFSM: # pylint: disable=no-member
 					# let the game knows the task is completed
 					self.ros_node_mgr.send_ispy_cmd(TASK_COMPLETED)
 
+					print ("TASK COMPLETEEEEEEEEEEEEEEEEEE!!!!!!!!!!!!!!!")
+					
+					self.current_task_index += 1
+
+					print ("CURRENT TASK INDEX!!!!!!!!!!!!!!!!!!!")
+					print (self.current_task_index)
+
+					if self.current_task_index % 2 == 0 and self.current_task_index != 0: 
+
+						if self.current_task_index >= 10: 
+							self.current_task_index = 0
+
+						action_number = self.current_task_index / 2
+						self.interaction.start_task_end_behavior(action_number)
+
+
 				self.interaction.turn_taking()
 				
 			elif transition_msg.data == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
@@ -196,8 +214,11 @@ class iSpyGameFSM: # pylint: disable=no-member
 		Rospy callback for when we get ispy action from the unity game over ROS
 		"""
 
-		if self.FSM.state == gs.EXPLORATION_MODE or self.FSM.state == gs.WORD_DISPLAY: return# if the game is still in explore mode
-			
+		if self.FSM.state == gs.EXPLORATION_MODE or self.FSM.state == gs.WORD_DISPLAY: 
+		# if the game is still in explore mode
+			return
+
+
 		time.sleep(0.1) # wait for on_ispy_state_info_received() to finish and FSM to transition first
 		#self.interaction.stop_tracking_child_interaction() # start tracking the elapsed time of child's lack of tablet interaction
 

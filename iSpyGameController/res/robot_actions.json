@@ -161,8 +161,9 @@
             "ROBOT_SILENT_INTERESTED"
           ],
           "optional": {
-            "ROBOT_CUSTOM_SPEECH":0.3,
-            "Q_ROBOT_ASK_HELP":0.8
+            "ROBOT_CUSTOM_SPEECH":0.2,
+            "Q_ROBOT_ASK_HELP":0.4,
+            "REMINDER_SPEECH": 0.4
           }
         },
         "WRONG_OBJECT_CLICKED": {
@@ -200,8 +201,7 @@
             "ROBOT_SILENT_SAD"
           ],
           "optional":{
-            "Q_ROBOT_ASK_WHY_WRONG":0.5,
-            "ROBOT_CUSTOM_SPEECH":0.5
+            "Q_ROBOT_ASK_WHY_WRONG":0.7
           }
         }
       },
@@ -220,7 +220,8 @@
         },
         "TURN_STARTING": {
           "general": [
-            "ROBOT_SILENT_INTERESTED"
+            "ROBOT_SILENT_INTERESTED",
+            "REMINDER_SPEECH"
           ],
           "optional":{
              "HINT_SPEECH":0.1
@@ -231,7 +232,7 @@
             "LOOK_AT_TABLET"
           ],
           "original":{
-            "Q_ROBOT_WANT_LEARN":0.4,
+            "Q_ROBOT_WANT_LEARN":0.2,
             "ROBOT_CUSTOM_SPEECH": 0.5
           }
         },

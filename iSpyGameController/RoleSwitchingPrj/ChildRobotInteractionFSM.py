@@ -723,7 +723,7 @@ class ChildRobotInteractionFSM:
 				else:
 					continue
 
-		def _ros_publish_data(self,action="NA"):
+		def _ros_publish_data(self,action="NA", ispy_action=False):
 			'''
 			public ros data on child-robot interaction
 			'''
@@ -794,6 +794,11 @@ class ChildRobotInteractionFSM:
 			msg.numTouchAbsenceAlertPerTask = self.child_states.numTouchAbsenceAlertPerTask #######
 
 			msg.objectWordPronounced = self.child_states.objectWordPronounced
+
+			msg.ispyAction = ["", "", "", "", ""]
+			if ispy_action == True:
+				msg.ispyAction  = [str(self.game_controller.isDragging), str(self.game_controller.pointerClick), str(self.game_controller.onPinch), str(self.game_controller.isScalingUp), str(self.game_controller.isScalingDown)]
+
 
 
 			##############

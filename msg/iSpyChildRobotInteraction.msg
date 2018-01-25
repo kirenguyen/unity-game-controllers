@@ -68,6 +68,8 @@ int8 numTouchAbsenceAlertPerTask
 # whether the child pronoucnes the word to retrieve the object. 
 bool objectWordPronounced
 
+string[] ispyAction
+
 
 ###########
 

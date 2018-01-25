@@ -88,6 +88,7 @@ class AffdexAnalysis:
 		taskTurnIndex = self.gameController.interaction.current_task_turn_index
 
 		curr_robot_action = self.gameController.interaction.curr_robot_action
+		
 			
 		emotions_str = ','.join([str(i) for i in data.emotions])	
 		expressions_str = ','.join([str(i) for i in data.expressions])

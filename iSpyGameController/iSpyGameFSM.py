@@ -263,10 +263,17 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 
 		if self.interaction.state == ris.CHILD_TURN or self.interaction.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
-			if self.FSM.state == gs.MISSION_MODE: 
-				threading.Timer(0.5, self.interaction.start_tracking_child_interaction).start() # start tracking the elapsed time of child's lack of tablet interaction
+			pass
+			# if self.FSM.state == gs.MISSION_MODE: 
+			# 	threading.Timer(0.5, self.interaction.start_tracking_child_interaction).start() # start tracking the elapsed time of child's lack of tablet interaction
 
+		self.isDragging = ispy_action_msg.isDragging
+		self.pointerClick = ispy_action_msg.pointerClick
+		self.onPinch = ispy_action_msg.onPinch
+		self.isScalingUp = ispy_action_msg.isScalingUp
+		self.isScalingDown = ispy_action_msg.isScalingDown
 
+		self.interaction._ros_publish_data("NA",True)
 		
 			
 	def _speechace_analysis(self):

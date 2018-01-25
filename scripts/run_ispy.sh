@@ -10,7 +10,7 @@ xterm -bg grey -geometry 45x20+200+200 -T "USB Cam" -e bash -c "roslaunch usb_ca
 
 sleep 0.5s
 
-xterm -bg grey -geometry 45x20+300+550 -T "Affect Recognition" -e bash -c ./scripts/tega_cam_affect_analysis & 
+xterm -bg grey -geometry 45x20+300+550 -T "Affect Recognition" -e bash -c ./../../devel/lib/tega_cam_affect_analysis//tega_cam_affect_analysis & 
 
 sleep 0.5s
 

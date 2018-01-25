@@ -68,7 +68,9 @@ class iSpyDataTracking:
 
 			'robotClickedObj','clickedRightObject','clickedObjName',
 
-			'numTouchAbsenceAlertPerTask','objectWordPronounced' 
+			'numTouchAbsenceAlertPerTask','objectWordPronounced' ,
+
+			'isDraggin', 'pointerClick','onPinch','ScalingUp','isScalingDown'
 			
 			
 			])+'\n')
@@ -127,7 +129,9 @@ class iSpyDataTracking:
 
 			msg.robotClickedObj, msg.clickedRightObject, msg.clickedObjName, 
 
-			msg.numTouchAbsenceAlertPerTask, msg.objectWordPronounced 
+			msg.numTouchAbsenceAlertPerTask, msg.objectWordPronounced,
+
+			msg.ispyAction[0], msg.ispyAction[1], msg.ispyAction[2], msg.ispyAction[3], msg.ispyAction[4]
 			
 			]))
 

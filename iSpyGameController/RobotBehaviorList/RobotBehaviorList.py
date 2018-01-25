@@ -190,6 +190,26 @@ class RobotRolesBehaviorsMap:
                     return True
                 return False
 
+    def get_child_answer_type(self,asr_input):
+        '''
+        return bool for child answer to helping the robot
+        '''
+        
+        if self.current_question_query_path in self.question_answer_dict.keys():
+            if "no_response_" in asr_input: # no response from child
+                return "absence"
+            else:
+                yes_response = self.question_query["user_input"][0]
+                if any(m in asr_input for m in yes_response["en_US"]): # found child's answer
+                    return "positive"
+                no_response = self.question_query["user_input"][1]
+                print("no response:")
+                print(no_response)
+                if any(m in asr_input for m in yes_response["en_US"]): # found child's answer
+                    return "negative"
+                return "others"
+
+
     def get_question_type(self):
         if self.current_question_query_path in self.question_answer_dict.keys():
             return self.question_query['other']['type']

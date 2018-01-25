@@ -28,7 +28,9 @@ import random
 from unity_game_msgs.msg import iSpyChildRobotInteraction
 import threading
 from datetime import datetime
+
 import os
+import timestring
 
 
 ROOT_TEGA_SPEECH_FOLDER = 'roleswitching18/'
@@ -41,7 +43,7 @@ class ChildRobotInteractionFSM:
 		and ChildStates
 		'''
 
-		def __init__(self,ros_node_mgr,task_controller):
+		def __init__(self,ros_node_mgr,task_controller,game_controller):
 			# use hierachical FSM here. The python package can be found here: https://github.com/pytransitions/transitions
 			self.states = [ {'name': ris.ROBOT_TURN, 'children':[ris.QUESTION_ASKING,ris.LISTEN_CHILD_SPEECH_RESPONSE, ris.PARSE_CHILD_SPEECH_RESPONSE, ris.CHILD_HELP]}, {'name':ris.CHILD_TURN,'children':[ ris.NO_INTERACTION_1, ris.QUESTION_ASKING ,ris.LISTEN_CHILD_SPEECH_RESPONSE, ris.PARSE_CHILD_SPEECH_RESPONSE, ris.ROBOT_HELP]} ]
 			self.transitions = [
@@ -86,6 +88,8 @@ class ChildRobotInteractionFSM:
 
 			self.task_controller = task_controller
 
+			self.game_controller = game_controller
+
 			self.child_states = ChildStates()
 
 			self.agent_model = AgentModel()
@@ -112,6 +116,17 @@ class ChildRobotInteractionFSM:
 
 			self.asr_input = ""
 
+			self.current_task_turn_index = 0 # for the current task, current turn index
+
+			self.curr_robot_action = "NA"
+
+			self.turn_start_time = None
+
+			self.turn_end_time = None
+
+			self.turn_duration = ""
+
+			self.child_click_cancel_num = 0
 
 			# load tega speech json file
 			# parse tega_speech.json
@@ -135,13 +150,42 @@ class ChildRobotInteractionFSM:
 			else:
 				print("======WARNING: asr result publisher does not exist. Remember to start ros_asr.py======")
 
+		
+
+		# def on_exit_childTURN(self):
+			
+		# 	self.turn_end_time = datetime.now()
+		# 	print(self.turn_end_time)
+		# 	print(self.turn_start_time)
+		# 	self.turn_duration = str(self.turn_end_time - self.turn_start_time)
+		# 	self._ros_publish_data()
+
+		# def on_exit_robotTURN(self):
+		
+		# 	self.turn_end_time = datetime.now()
+		# 	self.turn_duration = str(self.turn_end_time - self.turn_start_time)
+			
+		# 	self._ros_publish_data()
+
 		def on_enter_childTURN(self):
+			self.turn_start_time = datetime.now()
+			self.turn_end_time = None
+			self.turn_duration = ""
+			self.current_task_turn_index += 1
+			
 			self.robot_clickedObj = "" # reset robot's clicked obj
+			self.virtual_action = ""
 			self._ros_publish_data()
 			threading.Timer(3.0, self.start_tracking_child_interaction).start()
 
 		def on_enter_robotTURN(self):
+			self.turn_start_time = datetime.now()
+			self.turn_end_time = None
+			self.turn_duration = ""
+			self.current_task_turn_index += 1
+		
 			self.robot_clickedObj = ""
+			self.virtual_action = ""
 			self._ros_publish_data()
 
 
@@ -160,11 +204,9 @@ class ChildRobotInteractionFSM:
 			self.listen_child_speech()
 
 		def on_enter_childTURN_robotHelp(self):
-			self.child_states.numChildAcceptHelp += 1
 			self._ros_publish_data()
 
 		def on_enter_robotTURN_childHelp(self):
-			self.child_states.numChildOfferHelp += 1
 			self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":"ROBOT_ASK_HELP","clicked_object":""}) # enable the child to interact with the tablet
 			self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, ROOT_TEGA_SPEECH_FOLDER + "general/others/child_help.wav") # "now you can span the screen around"
 			self._ros_publish_data()
@@ -305,9 +347,10 @@ class ChildRobotInteractionFSM:
 				return 
 
 			getattr(self, ris.Triggers.SPEECH_RECEIVED)()
-			
 
 			self.ros_node_mgr.stop_asr_listening()
+
+			self._ros_publish_data()
 
 			if data:
 
@@ -334,6 +377,7 @@ class ChildRobotInteractionFSM:
 
 
 			# get robot's contigent response based on child's speech content
+			self.child_states.update_qa_result(self.role_behavior_mapping.get_child_answer_type(self.asr_input),self.attempt) # update QA results to child states
 			action = self.role_behavior_mapping.get_robot_response_to_answer(self.asr_input) # action is based on child's answer
 			help_response = self.role_behavior_mapping.get_robot_response_to_help(self.asr_input) # check whether the child gives a positive answer
 			
@@ -349,7 +393,6 @@ class ChildRobotInteractionFSM:
 
 
 			if self.attempt == 0: # get child's response
-				self.child_states.update_qa_child_response(True) # as long as the child gives an answer, pass True
 				
 				if "HELP" in self.role_behavior_mapping.current_question_query_path and help_response: # robot asks the child to help find an object
 					# send a ros command to enable child's interaction with the tablet
@@ -373,12 +416,21 @@ class ChildRobotInteractionFSM:
 
 
 		def reset_turn_taking(self):
-
+			self.current_task_turn_index = 0
 			self.state = ris.CHILD_TURN
+			self.child_states.on_new_task_received() # reset some task-based variables in child's states
 			
 		def turn_taking(self):
 
-			
+			def _get_turn_duration():
+				self.turn_end_time = datetime.now()
+				self.turn_duration = str(self.turn_end_time - self.turn_start_time)
+				self._ros_publish_data()
+
+			_get_turn_duration()
+
+			self.child_click_cancel_num =0  # reset child's number of clicks and cancels each turn
+
 			if self.task_controller.task_in_progress:
 				# check whether it is robot's turn or child's turn in the game play
 				if ris.ROBOT_TURN in self.state:
@@ -431,17 +483,19 @@ class ChildRobotInteractionFSM:
 			if gameStateTrigger == gs.Triggers.TARGET_OBJECT_COLLECTED:
 				self._perform_robot_physical_actions(ras.PRONOUNCE_CORRECT)
 				self._perform_robot_physical_actions(ras.TURN_SWITCHING)
-				if self.state == ris.CHILD_TURN or self.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
-					self.child_states.update_child_turn_result(True) # the child finds the correct object
+				self.child_states.update_turn_result(self.state,True) # the child finds the correct object
 
+				if self.state == ris.CHILD_TURN or self.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
+					pass
 
 			elif gameStateTrigger  == gs.Triggers.NONTARGET_OBJECT_COLLECTED:
 				
 				self._perform_robot_physical_actions(ras.WRONG_OBJECT_FAIL)
 				self._perform_robot_physical_actions(ras.TURN_SWITCHING)
-				if self.state == ris.CHILD_TURN or self.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
-					self.child_states.update_child_turn_result(False) # the child finds the correct object
+				self.child_states.update_turn_result(self.state,False) # the child finds the correct object
 
+				if self.state == ris.CHILD_TURN or self.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
+					pass
 
 			elif gameStateTrigger  == gs.Triggers.OBJECT_CLICKED:
 				if self.state == ris.ROBOT_TURN or self.state == ris.CHILD_TURN+'_'+ris.ROBOT_HELP:
@@ -469,8 +523,12 @@ class ChildRobotInteractionFSM:
 					#print("START FREEZING ROBOT VIRTUAL ACTION. current state: "+self.state)
 					#pass		
 					threading.Thread(target=self._robot_virutal_action_wait).start()
-					
 
+			elif gameStateTrigger == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
+				if self.state == ris.CHILD_TURN or ris.CHILD_HELP in self.state:
+					self.child_click_cancel_num += 1 
+					
+			self._ros_publish_data()
 
 		def _robot_virutal_action_wait(self):
 			'''
@@ -530,22 +588,29 @@ class ChildRobotInteractionFSM:
 				self.physical_actions = physical_actions
 				self._perform_robot_physical_actions(ras.TURN_STARTING)
 				# wait until robot's actions for TURN_STARTED to complete. the robot first explores the scene
-				time.sleep(3)
-				if self.state == ris.ROBOT_TURN: self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_EXPLORE)
+				
+				if self.state == ris.ROBOT_TURN: 
+					time.sleep(3)
+					self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_EXPLORE)
 
 
 		def get_robot_general_response(self):
 			
-			
+			print("---get robot general response")
 			physical_actions = self.role_behavior_mapping.get_actions("BACKUP",self.state,'physical')
-			virtual_action = self.role_behavior_mapping.get_actions("BACKUP",self.state,'virtual')
+			self.virtual_action = self.role_behavior_mapping.get_actions("BACKUP",self.state,'virtual')
 
+			if self.virtual_action:
+				self.virtual_action = self.virtual_action[0]
 
 			if physical_actions:
 				self.physical_actions = physical_actions
 				self._perform_robot_physical_actions(ras.TURN_STARTING)
-			if virtual_action: 
-				self._perform_robot_virtual_actions(virtual_action[0])
+
+				# if self.state == ris.ROBOT_TURN: 
+				# 	time.sleep(3)
+				# 	self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_EXPLORE)
+			
 		
 		def start_task_end_behavior(self, action_number):
 			'''
@@ -662,26 +727,10 @@ class ChildRobotInteractionFSM:
 			'''
 			public ros data on child-robot interaction
 			'''
+
+			self.curr_robot_action = action
 	
 			msg = iSpyChildRobotInteraction()
-			
-			# current turn: child or robot?
-			msg.whoseTurn = self.state
-
-			# robot's current role: expert or novice?
-			msg.robotRole = self.role.name if not isinstance(self.role,str) else self.role
-
-			# robot's current behavior (action): question asking, feedback, hints? 
-			msg.robotBehavior= action
-
-			# robot's clicked object
-			msg.robotClickedObj = self.robot_clickedObj
-
-			# clicked object (either robot's or child's) right or wrong (bool)
-			msg.clickedRightObject  = self.clicked_right_obj 
-
-			# clicked object name (either robot's or child's)
-			msg.clickedObjName = self.clicked_obj_name 
 
 			# current game task index: 
 			msg.gameTask = self.task_controller.current_task_index 
@@ -689,71 +738,65 @@ class ChildRobotInteractionFSM:
 			# vocab word in the current game task
 			msg.taskVocab = self.task_controller.get_vocab_word()
 
-			# number of retrieved object for the given task
-			msg.numFinishedObjects = self.task_controller.num_finished_words
+			msg.taskStartTime = self.task_controller.get_task_time()['start']
 
-			# number of questions the robot asked
-			msg.numRobotQuestionsAsked = self.child_states.num_robot_questions_asked
+			msg.taskEndTime =  self.task_controller.get_task_time()['end']
+
+			msg.taskDuration = self.task_controller.get_task_time()['duration']
+
+			msg.taskTurnIndex = self.current_task_turn_index
+
+			# current turn: child or robot?
+			msg.whoseTurn = self.state
+
+			# robot's current role: expert or novice?
+			msg.robotRole = self.role.name if not isinstance(self.role,str) else self.role
+
+			msg.turnStartTime = str(self.turn_start_time) 
+
+			msg.turnEndTime = str(self.turn_end_time) 
+
+			msg.turnDuration = self.turn_duration
+
+			###############
+			
+			msg.numFinishedObjectsForTask = [self.task_controller.num_finished_words,self.child_states.numChildCorrectAttemptsCurrTask ]
+
+			#msg.numFinishedObjectsForTask[1] = 
+
+			msg.numTotalAttemptsForTask = [self.child_states.total_num_trials,self.child_states.numChildAttemptsCurrTask]
+
  
-			# number of questions the child answered
-			msg.numRobotQuestionsAnswered = self.child_states.num_robot_questions_answered
 
-			msg.childAnswerContent = self.asr_input
+			msg.numChildClickCancelForTurn = self.child_click_cancel_num 
 
-			# number of child's attempts of retrieving an object
-			msg.numChildAttemptsPerGame = self.child_states.current_num_trials
+			msg.numQAForTurn = [self.child_states.num_robot_questions_asked, self.child_states.pos_answers, 
+									self.child_states.neg_answers, self.child_states.other_answers,
+									self.child_states.no_answers_attempt1,self.child_states.no_answers_attempt2]
+  
 
-			# number of child's correct attempts (num of objs collected by the child)
-			msg.numChildCorrectAttemptsPerGame = self.child_states.current_num_correct_trials
-
-			# game state trigger (e.g., object clicked, object found, object pronounced)
 			msg.gameStateTrigger = self.gameStateTrigger
 
-			# how many yes/no questions
-			msg.numRobotYNQuestion = self.child_states.numRobotYNQuestion
-
-			# how many yes/no questions answered
-			msg.numRobotYNQuestionAnswered = self.child_states.numRobotYNQuestionAnswered
-
-			# how many open ended questions
-			msg.numRobotOpenQuestion = self.child_states.numRobotOpenQuestion
-
-			# how many open ended questions answered
-			msg.numRobotOpenQuestionAnswered = self.child_states.numRobotOpenQuestionAnswered
-
-			# no tablet touch alert 
-			msg.numTouchAbsenceAlertPerTask = self.child_states.numTouchAbsenceAlertPerTask
-
-			# current turn length
-			msg.current_turn_length = 0.0
-
-			# current interaction FSM state
 			msg.currentInteractionState = self.state
 
-			msg.childCurrAttemptCorrectness = self.child_states.childCurrAttemptCorrectness
+			msg.currentGameState = self.game_controller.FSM.state
 
-			msg.childPrevAttemptCorrectness = self.child_states.childPrevAttemptCorrectness
+			msg.robotBehavior = action
 
-			# whether the child pronoucnes the word to retrieve the object. 
+			msg.robotVirtualBehavior = str(self.virtual_action) if self.virtual_action else ""
+
+			msg.robotClickedObj = self.robot_clickedObj
+
+			msg.clickedRightObject = self.clicked_right_obj
+
+			msg.clickedObjName = self.clicked_obj_name 
+
+			msg.numTouchAbsenceAlertPerTask = self.child_states.numTouchAbsenceAlertPerTask #######
+
 			msg.objectWordPronounced = self.child_states.objectWordPronounced
 
-			# number of child's attempts for the current task so far
-			msg.numChildAttemptsCurrTask =  self.child_states.numChildAttemptsCurrTask
 
-			# number of child's correct attemps for the current task so far
-			msg.numChildCorrectAttemptsCurrTask = self.child_states.numChildCorrectAttemptsCurrTask 
-
-			# number of robot's helping behaviors
-			msg.numRobotOfferHelp = self.child_states.numRobotOfferHelp 
-
-			# number of times child accepts robot's help
-			msg.numChildAcceptHelp = self.child_states.numChildAcceptHelp
-
-			# number of times robot asks for help
-			msg.numRobotAskHelp = self.child_states.numRobotAskHelp
-
-			# number of times childs chooses to help
-			msg.numChildOfferHelp = self.child_states.numChildOfferHelp
+			##############
 
 			self.ros_node_mgr.pub_child_robot_interaction.publish(msg)
 
@@ -811,12 +854,17 @@ class ChildRobotInteractionFSM:
 			action = self.role_behavior_mapping.get_action_name(action) # get the correct name
 
 			if action == RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ:
+				print("----virtually click correct obj")
 				self.robot_clickedObj = self.task_controller.get_obj_for_robot(True)
 				
 			elif action == RobotBehaviors.VIRTUALLY_CLICK_WRONG_OBJ:
+				print("---virtually click wrong obj")
 				self.robot_clickedObj = self.task_controller.get_obj_for_robot(False)
+
+			elif action != RobotBehaviors.ROBOT_SAY_WORD:
+				self.robot_clickedObj = ""
 			
-			
+			print("-----get virtual action----: "+action+"---clicked obj: "+self.robot_clickedObj)
 			self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":action,"clicked_object":self.robot_clickedObj})
 			
 

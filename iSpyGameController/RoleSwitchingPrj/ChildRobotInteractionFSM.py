@@ -861,7 +861,7 @@ class ChildRobotInteractionFSM:
 				print("---virtually click wrong obj")
 				self.robot_clickedObj = self.task_controller.get_obj_for_robot(False)
 
-			elif action == RobotBehaviors.VIRTUALLY_EXPLORE
+			elif action == RobotBehaviors.VIRTUALLY_EXPLORE:
 				self.robot_clickedObj = ""
 			
 			print("-----get virtual action----: "+action+"---clicked obj: "+self.robot_clickedObj)

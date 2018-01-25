@@ -103,3 +103,5 @@ scripts/videos
 # data files for ispy game
 ispy_data_files/
 ispy_rosbag/
+
+scripts/tega_cam_affect_analysis

@@ -162,7 +162,7 @@
           ],
           "optional": {
             "ROBOT_CUSTOM_SPEECH":0.2,
-            "Q_ROBOT_ASK_HELP":0.4,
+            "Q_ROBOT_ASK_HELP":0.3,
             "REMINDER_SPEECH": 0.4
           }
         },
@@ -201,7 +201,7 @@
             "ROBOT_SILENT_SAD"
           ],
           "optional":{
-            "Q_ROBOT_ASK_WHY_WRONG":0.7
+            "Q_ROBOT_ASK_WHY_WRONG":0.3
           }
         }
       },
@@ -232,7 +232,7 @@
             "LOOK_AT_TABLET"
           ],
           "original":{
-            "Q_ROBOT_WANT_LEARN":0.2,
+            "Q_ROBOT_WANT_LEARN":0.3,
             "ROBOT_CUSTOM_SPEECH": 0.5
           }
         },
@@ -264,7 +264,7 @@
           ],
           "optional":{
             "ROBOT_CUSTOM_SPEECH":0.4,
-            "Q_ROBOT_ASK_WHY_CHOOSE_IT":0.5
+            "Q_ROBOT_ASK_WHY_CHOOSE_IT":0.3
           }
         },
         "RESULTS_RETURNED":{
@@ -348,9 +348,10 @@
 
         "WRONG_OBJECT_FAIL":{
           "general": [
-            "Q_ROBOT_ASK_WHY_WRONG"
+            
           ],
           "optional":{
+            "Q_ROBOT_ASK_WHY_WRONG": 0.3,
             "ROBOT_SILENT_SAD": 0.6
           }
         }

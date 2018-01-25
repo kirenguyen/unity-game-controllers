@@ -48,7 +48,7 @@ class iSpyDataTracking:
 		self.child_robot_interaction_csv.write(','.join([
 			'elapsedTimeFromGameStart','currentLocalTime',
 
-			'gameTask','vocab', 'taskStartTime','taskEndTime', 'taskDuration'
+			'gameTask','vocab', 'taskStartTime','taskEndTime', 'taskDuration',
 
 			'taskTurnIndex', 'whoseTurn', 'robotRole', 
 
@@ -60,11 +60,13 @@ class iSpyDataTracking:
 
 			'numChildClickCancelForTurn', # turn related
 
-			'numQsAskeddForTurn','numPositiveAnswerForTurn','numNegativeAnswerForTurn','numOtherAnswerForTurn','numNoAnswerForTurn', # turn related
+			'numQsAskeddForTurn','numPositiveAnswerForTurn','numNegativeAnswerForTurn','numOtherAnswerForTurn','numNoAnswerAttempt1ForTurn', 'numNoAnswerAttempt2ForTurn',# turn related
 
 			'gameStateTrigger','currentInteractionState','currentGameState',
 
-			'robotBehavior','robotClickedObj','clickedRightObject','clickedObjName',
+			'robotPhysicalBehavior', 'robotVirtualBehavior',
+
+			'robotClickedObj','clickedRightObject','clickedObjName',
 
 			'numTouchAbsenceAlertPerTask','objectWordPronounced' 
 			
@@ -97,7 +99,9 @@ class iSpyDataTracking:
 		'''
 		
 		# update the ispy action data frame
-		elapsedTime = str(datetime.now() - self.game_start_time)
+
+
+		elapsedTime = str(datetime.now() - self.game_start_time) if self.game_start_time else ""
 		content = ','.join(map(str,[
 			elapsedTime,str(datetime.now()),
 
@@ -113,11 +117,15 @@ class iSpyDataTracking:
 
 			msg.numChildClickCancelForTurn,
 
-			msg.numQAForTurn[0], msg.numQAForTurn[1], msg.numQAForTurn[2], msg.numQAForTurn[3], msg.numQAForTurn[4],
+			msg.numQAForTurn[0], msg.numQAForTurn[1], msg.numQAForTurn[2], 
+
+			msg.numQAForTurn[3], msg.numQAForTurn[4],  msg.numQAForTurn[5],
 
 			msg.gameStateTrigger, msg.currentInteractionState, msg.currentGameState,
 
-			msg.robotBehavior, msg.robotClickedObj, msg.clickedRightObject, msg.clickedObjName, 
+			msg.robotBehavior, msg.robotVirtualBehavior,
+
+			msg.robotClickedObj, msg.clickedRightObject, msg.clickedObjName, 
 
 			msg.numTouchAbsenceAlertPerTask, msg.objectWordPronounced 
 			

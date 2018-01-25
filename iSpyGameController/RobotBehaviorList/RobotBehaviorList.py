@@ -194,13 +194,15 @@ class RobotRolesBehaviorsMap:
         '''
         
         if self.current_question_query_path in self.question_answer_dict.keys():
-            if "no_response_" in child_help_response: # no response from child
+            if "no_response_" in asr_input: # no response from child
                 return "absence"
             else:
                 yes_response = self.question_query["user_input"][0]
                 if any(m in asr_input for m in yes_response["en_US"]): # found child's answer
                     return "positive"
                 no_response = self.question_query["user_input"][1]
+                print("no response:")
+                print(no_response)
                 if any(m in asr_input for m in yes_response["en_US"]): # found child's answer
                     return "negative"
                 return "others"

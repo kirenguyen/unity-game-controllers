@@ -51,6 +51,7 @@ string currentGameState
 # robot's current behavior (action): question asking, feedback, hints? 
 string robotBehavior
 
+string robotVirtualBehavior
 
 # robot's clicked object
 string robotClickedObj

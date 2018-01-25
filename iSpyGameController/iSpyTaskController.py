@@ -121,6 +121,9 @@ class iSpyTaskController():
 		#index = random.randint(0, len(self.available_quests)-1)
 		index = 0
 
+		self.current_task_index += 1 # update current task index
+
+
 		
 		task, task_category, task_attribute, prompt_audio_name = self.task_dict[self.available_quests[index]]
 

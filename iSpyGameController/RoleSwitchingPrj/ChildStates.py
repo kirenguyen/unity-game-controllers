@@ -49,7 +49,9 @@ class ChildStates:
 		
 		self.other_answers = 0 
 		
-		self.no_answers = 0
+		self.no_answers_attempt1 = 0
+
+		self.no_answers_attempt2 = 0
 
 
 	def on_new_task_received(self):
@@ -59,10 +61,15 @@ class ChildStates:
 		self.numTouchAbsenceAlertPerTask = 0
 		self.numChildAttemptsCurrTask = 0
 		self.numChildCorrectAttemptsCurrTask = 0
+		self.total_num_trials = 0
+		# QA related
+		self.pos_answers = 0 
+		self.neg_answers = 0
+		self.other_answers = 0 
+		self.no_answers_attempt1 = 0
+		self.no_answers_attempt2 = 0
 
 
-
-		
 	def set_num_available_objs(self,_num_available_target_objs):
 		self.num_available_target_objs = _num_available_target_objs	
 	
@@ -91,15 +98,17 @@ class ChildStates:
 		# elif "open-ended" == q_type:
 		# 	self.numRobotOpenQuestion += 1
 
-	def update_qa_result(self,category):
+	def update_qa_result(self,category,attempt):
 		if category == "positive":
 			self.pos_answers +=1
 		elif category == "negative":
 			self.neg_answers += 1
 		elif category == "others":
 			self.other_answers +=1
-		elif category == "absence":
-			self.no_answers +=1
+		elif category == "absence" and attempt == 1:
+			self.no_answers_attempt1 +=1
+		elif category == "absence" and attempt == 2:
+			self.no_answers_attempt2 +=1
 
 	# def update_qa_child_response(self,answered):
 	# 	'''

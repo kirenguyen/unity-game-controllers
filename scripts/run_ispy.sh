@@ -6,15 +6,15 @@ echo
 sleep 0.5s
 echo "I AM HERE!"
 
-xterm -geometry 45x20+200+200 -T "USB Cam" -e bash -c "roslaunch usb_cam usb_cam-test.launch" &
+xterm -bg grey -geometry 45x20+200+200 -T "USB Cam" -e bash -c "roslaunch usb_cam usb_cam-test.launch" &
 
 sleep 0.5s
 
-xterm -geometry 45x20+300+550 -T "Affect Recognition" -e bash -c ./scripts/tega_cam_affect_analysis & 
+xterm -bg grey -geometry 45x20+300+550 -T "Affect Recognition" -e bash -c ./scripts/tega_cam_affect_analysis & 
 
 sleep 0.5s
 
-xterm -geometry 45x20+300+550 -T "Speech Recognition" -e "python3 ../asr_google_cloud/src/ros_asr.py" &
+xterm -bg brown -geometry 45x20+300+550 -T "Speech Recognition" -e "python3 ../asr_google_cloud/src/ros_asr.py" &
 
 sleep 0.5s
 

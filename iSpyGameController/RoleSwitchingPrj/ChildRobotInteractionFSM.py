@@ -625,8 +625,8 @@ class ChildRobotInteractionFSM:
 
 			# send robot action depending on between mission 
 
-			time.sleep(5)
-			end_task_behavior_dict = {1: RobotBehaviors.ROBOT_HAPPY_DANCE, 2: RobotBehaviors.ROBOT_PLAY_MUSIC, 3: RobotBehaviors.ROBOT_HAPPY_DANCE, 4: RobotBehaviors.ROBOT_PLAY_MUSIC}
+			time.sleep(5.5)
+			end_task_behavior_dict = {1: RobotBehaviors.ROBOT_DANCE, 2: RobotBehaviors.ROBOT_PLAY_MUSIC, 3: RobotBehaviors.ROBOT_DANCE, 4: RobotBehaviors.ROBOT_PLAY_MUSIC}
 			self.ros_node_mgr.send_robot_cmd(end_task_behavior_dict[int(action_number)])
 
 

@@ -100,7 +100,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		self.results_handler = PronunciationUtils()
 
-		self.interaction = ChildRobotInteractionFSM(self.ros_node_mgr,self.task_controller)
+		self.interaction = ChildRobotInteractionFSM(self.ros_node_mgr,self.task_controller,self)
 
 		self.iSpyDataTracking = iSpyDataTracking(self.interaction,self.ros_node_mgr, participant_id, experimenter)
 
@@ -112,9 +112,11 @@ class iSpyGameFSM: # pylint: disable=no-member
 		# AlwaysMissionModeFSM(self.ros_node_mgr) # CompleteModeFSM() # AlwaysExploreModeFSM(self.ros_node_mgr)
 		self.FSM = AlwaysMissionModeFSM(self.ros_node_mgr,game_round)
 
-		self.affdexAnalysis = AffdexAnalysis(self.ros_node_mgr,game_round,participant_id,experimenter)
+		self.affdexAnalysis = AffdexAnalysis(self,self.ros_node_mgr,game_round,participant_id,experimenter)
 
 		self.kill_received = False # for stopping the update() thread
+
+		
 
 		# start a thread to check the game update
 		#self.t = threading.Thread(target=self.update)

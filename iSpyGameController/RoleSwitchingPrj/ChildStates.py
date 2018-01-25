@@ -16,10 +16,12 @@ class ChildStates:
 		self.correct_rate_arr = []
 
 		# number of child's attempts of retrieving an object
-		self.current_num_trials = 0
+		self.child_num_trials_for_task = 0
 
 		# number of child's correct attempts (num of objs collected by the child)
-		self.current_num_correct_trials = 0
+		self.child_num_correct_trials_for_task = 0
+
+		self.total_num_trials = 0 # total number of trials
 
 		# keep track of whose turn it is
 		self.current_turn = ""
@@ -31,39 +33,23 @@ class ChildStates:
 
 		self.child_answer_content = ""
 
-		self.child_turn_length = 0
 
-		self.numRobotYNQuestion = 0
-
-		# how many yes/no questions answered
-		self.numRobotYNQuestionAnswered = 0
-
-			# how many open ended questions
-		self.numRobotOpenQuestion = 0
-
-			# how many open ended questions answered
-		self.numRobotOpenQuestionAnswered = 0
-
-			# no tablet touch alert 
+		# no tablet touch alert 
 		self.numTouchAbsenceAlertPerTask = 0
 
-		self.childCurrAttemptCorrectness = False
 
-		self.childPrevAttemptCorrectness = False
-
-		self.numChildAttemptsCurrTask = 0
-
-		self.numChildCorrectAttemptsCurrTask = 0
-
-		self.numRobotOfferHelp = 0
-
-		self.numChildAcceptHelp = 0
-
-		self.numRobotAskHelp = 0
-
-		self.numChildOfferHelp = 0
+		
 
 		self.objectWordPronounced = False
+
+
+		self.pos_answers = 0 
+		
+		self.neg_answers = 0
+		
+		self.other_answers = 0 
+		
+		self.no_answers = 0
 
 
 	def on_new_task_received(self):
@@ -81,19 +67,17 @@ class ChildStates:
 		self.num_available_target_objs = _num_available_target_objs	
 	
 
-	def update_child_turn_result(self,correct):
+	def update_turn_result(self,whoseTurn,correct):
 		'''
 		update the current object retrieval result 
 		'''
-		self.childPrevAttemptCorrectness = self.childCurrAttemptCorrectness
-		self.childCurrAttemptCorrectness = correct
+		self.total_num_trials += 1
+		if whoseTurn == "childTURN":
+			self.child_num_trials_for_task += 1
+			if correct == True: # the child fails to find a correct target object 
+				self.child_num_correct_trials_for_task +=1
 
-		self.current_num_trials += 1
-		if correct == True:
-			# the child fails to find a correct target object 
-			self.current_num_correct_trials +=1
-			if self.num_available_target_objs != 0:
-				self.correct_rate_arr.append(float(self.current_num_trials / self.num_available_target_objs))
+			
 
 	def update_qa_info(self,q_type,q_cmd):
 		'''	
@@ -107,21 +91,26 @@ class ChildStates:
 		elif "open-ended" == q_type:
 			self.numRobotOpenQuestion += 1
 
-		if q_cmd == RobotBehaviors.Q_ROBOT_OFFER_HELP:
-			self.numRobotOfferHelp += 1
-		elif q_cmd == RobotBehaviors.Q_ROBOT_ASK_HELP:
-			self.numRobotAskHelp += 1
+	def update_qa_result(self,category):
+		if category == "positive":
+			self.pos_answers + =1
+		elif category == "negative":
+			self.neg_answers += 1
+		elif category == "others":
+			self.other_answers +=1
+		elif category == "absence":
+			self.no_answers +=1
 
-	def update_qa_child_response(self,answered):
-		'''
-		update: whether the child answers a given question or not
-		'''
-		if answered == True:
-			self.num_robot_questions_answered += 1
-			if self.current_q_type == "yes/no":
-				self.numRobotYNQuestionAnswered += 1
-			elif self.current_q_type == "open-ended":
-				self.numRobotOpenQuestionAnswered += 1
+	# def update_qa_child_response(self,answered):
+	# 	'''
+	# 	update: whether the child answers a given question or not
+	# 	'''
+	# 	if answered == True:
+	# 		self.num_robot_questions_answered += 1
+	# 		if self.current_q_type == "yes/no":
+	# 			self.numRobotYNQuestionAnswered += 1
+	# 		elif self.current_q_type == "open-ended":
+	# 			self.numRobotOpenQuestionAnswered += 1
 
 
 	def start_tracking_rewards(self,turn):

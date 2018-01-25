@@ -201,6 +201,9 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.wav_filename = speech_file
             print ("music: "+msg.wav_filename)
 
+        if command == RobotBehaviors.ROBOT_DANCE:
+            msg.motion = TegaAction.MOTION_DANCE
+
         ### ====== Tega Question Asking =================== ####
         if command == RobotBehaviors.Q_ROBOT_OFFER_HELP:
             PATH = ROOT_TEGA_SPEECH_FOLDER + "questions/"

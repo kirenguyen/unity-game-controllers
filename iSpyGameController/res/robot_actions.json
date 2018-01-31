@@ -148,7 +148,10 @@
           "general": [
             "LOOK_CENTER", 
             "ROBOT_CURIOUS"
-          ]
+          ],
+          "optional": {
+            "ROBOT_INDUCE_SPEECH": 0.3
+          }
         },
         "TURN_STARTING": {
           "general": [
@@ -216,7 +219,10 @@
           "general": [
             "ROBOT_SILENT_NOD",
             "LOOK_CENTER"
-          ]
+          ], 
+          "optional": {
+            "ROBOT_INDUCE_SPEECH": 0.4
+          }
         },
         "TURN_STARTING": {
           "general": [

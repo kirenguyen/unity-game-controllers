@@ -381,9 +381,15 @@ class ChildRobotInteractionFSM:
 			action = self.role_behavior_mapping.get_robot_response_to_answer(self.asr_input) # action is based on child's answer
 			help_response = self.role_behavior_mapping.get_robot_response_to_help(self.asr_input) # check whether the child gives a positive answer
 			
-			
-			if "ROBOT" in action:
+			if "REMINDER" in action:
+				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_TASK_END_RESPONSE, self.task_controller.get_vocab_word())
+			elif "ROBOT" in action:
 				self.ros_node_mgr.send_robot_cmd(action)
+				if action == "Q_ROBOT_TASK_END_ASSESSMENT":
+					assessment_file = str(self.task_controller.get_vocab_word()) + '_' + "assessment_result.txt"
+					with open(assessment_file, 'a') as file:
+						file.write(self.asr_input + '\n')
+					file.close()
 			else:
 				path = ROOT_TEGA_SPEECH_FOLDER + "questions/"
 				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, path+ action +".wav")
@@ -513,7 +519,7 @@ class ChildRobotInteractionFSM:
 			elif gameStateTrigger  == gs.Triggers.SAY_BUTTON_PRESSED:
 				if self.state == ris.CHILD_TURN or ris.CHILD_HELP in self.state:
 					self.ros_node_mgr.start_asr_listening() # start asr listening to check whether the child pronoucnes the child or not
-					threading.Timer(3.5, self.ros_node_mgr.stop_asr_listening).start() # checking for timeout 
+					threading.Timer(3.5, self.ros_node_mgr.stop_asr_listening()).start() # checking for timeout 
 				self._perform_robot_physical_actions(ras.OBJECT_PRONOUNCED)
 
 			elif gameStateTrigger == gs.Triggers.SCREEN_MOVED:
@@ -618,16 +624,22 @@ class ChildRobotInteractionFSM:
 			'''
 
 			print ("end of task celebration")
+
+			assessment = RobotBehaviors.Q_ROBOT_TASK_END_ASSESSMENT
+			self.ros_node_mgr.send_robot_cmd(assessment, self.task_controller.get_vocab_word())
+
 			action = RobotBehaviors.ROBOT_TASK_END_BEHAVIOR
 
 			# send command for between mission recordings 
-			self.ros_node_mgr.send_robot_cmd(action, action_number)
+			recording_number = action_number % 4 + 1
+			self.ros_node_mgr.send_robot_cmd(action, recording_number)
 
 			# send robot action depending on between mission 
 
 			time.sleep(5.5)
-			end_task_behavior_dict = {1: RobotBehaviors.ROBOT_DANCE, 2: RobotBehaviors.ROBOT_PLAY_MUSIC, 3: RobotBehaviors.ROBOT_DANCE, 4: RobotBehaviors.ROBOT_PLAY_MUSIC}
-			self.ros_node_mgr.send_robot_cmd(end_task_behavior_dict[int(action_number)])
+			behavior_number = action_number % 2 
+			end_task_behavior_dict = {0: RobotBehaviors.ROBOT_DANCE, 1: RobotBehaviors.ROBOT_PLAY_MUSIC}
+			self.ros_node_mgr.send_robot_cmd(end_task_behavior_dict[int(behavior_number)])
 
 
 		def _perform_robot_physical_actions(self,action_type):
@@ -831,7 +843,7 @@ class ChildRobotInteractionFSM:
 			getattr(self, ris.Triggers.ROBOT_QUESTION)() # trigger the FSM transition
 			
 
-			if question_cmd == RobotBehaviors.Q_END_OF_TURN:
+			if question_cmd == RobotBehaviors.Q_END_OF_TURN or question_cmd == RobotBehaviors.Q_ROBOT_TASK_END_ASSESSMENT:
 				self.ros_node_mgr.send_robot_cmd(question_cmd, self.task_controller.get_vocab_word())
 				self.child_states.update_qa_info("open_ended",question_cmd)
 			else:

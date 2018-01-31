@@ -72,6 +72,7 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
 
 
     ROBOT_CUSTOM_SPEECH = "ROBOT_CUSTOM_SPEECH"
+    ROBOT_INDUCE_SPEECH = "ROBOT_INDUCE_SPEECH"
 
     ### ============== Tega Speech for Role Switching Project ================== ###
     BEFORE_GAME_SPEECH = "ROBOT_BEFORE_GAME_SPEECH"
@@ -89,14 +90,17 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     Q_ROBOT_ASK_WHY_WRONG="Q_ROBOT_ASK_WHY_WRONG"
     Q_END_OF_TURN="Q_END_OF_TURN"
 
-    ## ===== no ispy action alert ===
+    ### ===== no ispy action alert === ###
     NO_ISPY_ACTION_ALERT = "NO_ISPY_ACTION_ALERT"
     ROBOT_TASK_END_BEHAVIOR = "ROBOT_TASK_END_BEHAVIOR"
+
+    ### ===== task end behaviors
     ROBOT_PLAY_MUSIC = "ROBOT_PLAY_MUSIC"
     ROBOT_DANCE = "ROBOT_DANCE"
+    ROBOT_TASK_END_RESPONSE = "ROBOT_TASK_END_RESPONSE"
 
-
-
+    Q_ROBOT_TASK_END_REMINDER = "Q_ROBOT_TASK_END_QUESTION"
+    Q_ROBOT_TASK_END_ASSESSMENT = "Q_ROBOT_TASK_END_ASSESSMENT"
 
 
 class RobotRoles(Enum):
@@ -225,7 +229,9 @@ class RobotRolesBehaviorsMap:
         print("CHILD ANSWER: "+child_answer)
         if self.current_question_query_path in self.question_answer_dict.keys():
             if "no_response_" in child_answer: # no response from child
-                return random.choice(self.question_query[child_answer])
+                if self.current_question_query_path != "Q_ROBOT_TASK_END_REMINDER" or child_answer != "no_response_1":
+                    return random.choice(self.question_query[child_answer])
+                return ""
             else:
                 for i in self.question_query["user_input"]:
                     if any(m in child_answer for m in i["en_US"]): # found child's answer

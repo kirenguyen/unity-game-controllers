@@ -179,12 +179,9 @@ class iSpyGameFSM: # pylint: disable=no-member
 					print ("CURRENT TASK INDEX!!!!!!!!!!!!!!!!!!!")
 					print (self.current_task_index)
 
-					if self.current_task_index % 2 == 0 and self.current_task_index != 0: 
+					if self.current_task_index != 0: 
 
-						if self.current_task_index >= 10: 
-							self.current_task_index = 0
-
-						action_number = self.current_task_index / 2
+						action_number = self.current_task_index 
 						self.interaction.start_task_end_behavior(action_number)
 
 

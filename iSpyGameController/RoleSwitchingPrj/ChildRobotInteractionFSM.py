@@ -364,7 +364,7 @@ class ChildRobotInteractionFSM:
 
 					self.child_answer_content = self.asr_input
 
-				if "REMINDER" in self.role_behavior_mapping.current_question_query_path:
+				if "END_REMINDER" in self.role_behavior_mapping.current_question_query_path:
 					self.start_task_end_assessment(self.task_number)
 					self.start_task_end_celebration(self.task_number)
 
@@ -416,11 +416,9 @@ class ChildRobotInteractionFSM:
 				print("INFO: QA finished\n")
 				getattr(self, ris.Triggers.QA_FINISHED)() # q & a activiity is done
 
-				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_TASK_END_RESPONSE, self.task_controller.get_vocab_word())
-
-				time.sleep(3)
-
-				if "REMINDER" in self.role_behavior_mapping.current_question_query_path:
+				if "END_REMINDER" in self.role_behavior_mapping.current_question_query_path:
+					time.sleep(2)
+					self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_TASK_END_RESPONSE, self.task_controller.get_vocab_word())
 					self.start_task_end_assessment(self.task_number)
 					self.start_task_end_celebration(self.task_number)
 
@@ -631,7 +629,7 @@ class ChildRobotInteractionFSM:
 
 		def start_task_end_celebration(self, action_number):
 
-			time.sleep(6.5)
+			time.sleep(7)
 
 			action = RobotBehaviors.ROBOT_TASK_END_BEHAVIOR
 
@@ -648,7 +646,7 @@ class ChildRobotInteractionFSM:
 
 		def start_task_end_assessment(self, action_number):
 
-			time.sleep(0.5)
+			time.sleep(3)
 
 			assessment = RobotBehaviors.Q_ROBOT_TASK_END_ASSESSMENT
 			self.ros_node_mgr.send_robot_cmd (assessment, self.task_controller.get_vocab_word())

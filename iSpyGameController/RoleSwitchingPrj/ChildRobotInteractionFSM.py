@@ -364,9 +364,9 @@ class ChildRobotInteractionFSM:
 
 					self.child_answer_content = self.asr_input
 
-				if "END_REMINDER" in self.role_behavior_mapping.current_question_query_path:
-					self.start_task_end_assessment(self.task_number)
-					self.start_task_end_celebration(self.task_number)
+				#if "END_REMINDER" in self.role_behavior_mapping.current_question_query_path and self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "positive":
+				#	self.start_task_end_assessment(self.task_number)
+				#	self.start_task_end_celebration(self.task_number)
 
 					#assessment_file = str(self.task_controller.get_vocab_word()) + '_' + "assessment_result.txt"
 					#print ("SAVE FILE!!!!!!!!")
@@ -408,6 +408,19 @@ class ChildRobotInteractionFSM:
 					print("INFO: helping action starts\n")
 					self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":self.role_behavior_mapping.current_action_name,"clicked_object":""})
 					getattr(self, ris.Triggers.HELP_TRIGGER)()
+				elif "END_REMINDER" in self.role_behavior_mapping.current_question_query_path:
+					# test for task end response 
+					if self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "negative" or self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "others":
+						print ("====== INCORRECT RESPONSE TO TASK END QUESTION ====== ")
+						time.sleep(2)
+						self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_TASK_END_RESPONSE, self.task_controller.get_vocab_word())
+					else:
+						print ("====== RESPOND [KEYWORD] TO TASK END QUESTION =======")
+					self.start_task_end_assessment(self.task_number)
+					self.start_task_end_celebration(self.task_number)
+					print("INFO: QA finished\n")
+					getattr(self, ris.Triggers.QA_FINISHED)()
+
 				else:
 					print("INFO: QA finished\n")
 					getattr(self, ris.Triggers.QA_FINISHED)() # q & a activiity is done
@@ -416,7 +429,9 @@ class ChildRobotInteractionFSM:
 				print("INFO: QA finished\n")
 				getattr(self, ris.Triggers.QA_FINISHED)() # q & a activiity is done
 
+				# if the question is test end response
 				if "END_REMINDER" in self.role_behavior_mapping.current_question_query_path:
+					print ("===== NO RESPONSE TO TASK END QUESTION ======")
 					time.sleep(2)
 					self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_TASK_END_RESPONSE, self.task_controller.get_vocab_word())
 					self.start_task_end_assessment(self.task_number)
@@ -646,7 +661,7 @@ class ChildRobotInteractionFSM:
 
 		def start_task_end_assessment(self, action_number):
 
-			time.sleep(3)
+			time.sleep(1.5)
 
 			assessment = RobotBehaviors.Q_ROBOT_TASK_END_ASSESSMENT
 			self.ros_node_mgr.send_robot_cmd (assessment, self.task_controller.get_vocab_word())

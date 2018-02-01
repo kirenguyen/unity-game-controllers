@@ -99,7 +99,7 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     ROBOT_DANCE = "ROBOT_DANCE"
     ROBOT_TASK_END_RESPONSE = "ROBOT_TASK_END_RESPONSE"
 
-    Q_ROBOT_TASK_END_REMINDER = "Q_ROBOT_TASK_END_QUESTION"
+    Q_ROBOT_TASK_END_REMINDER = "Q_ROBOT_TASK_END_REMINDER"
     Q_ROBOT_TASK_END_ASSESSMENT = "Q_ROBOT_TASK_END_ASSESSMENT"
 
 
@@ -229,9 +229,7 @@ class RobotRolesBehaviorsMap:
         print("CHILD ANSWER: "+child_answer)
         if self.current_question_query_path in self.question_answer_dict.keys():
             if "no_response_" in child_answer: # no response from child
-                if self.current_question_query_path != "Q_ROBOT_TASK_END_REMINDER" or child_answer != "no_response_1":
-                    return random.choice(self.question_query[child_answer])
-                return ""
+                return random.choice(self.question_query[child_answer])
             else:
                 for i in self.question_query["user_input"]:
                     if any(m in child_answer for m in i["en_US"]): # found child's answer

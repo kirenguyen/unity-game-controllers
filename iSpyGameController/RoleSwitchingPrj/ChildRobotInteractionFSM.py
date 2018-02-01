@@ -364,6 +364,16 @@ class ChildRobotInteractionFSM:
 
 					self.child_answer_content = self.asr_input
 
+				if "REMINDER" in self.role_behavior_mapping.current_question_query_path:
+					self.start_task_end_assessment(self.task_number)
+					self.start_task_end_celebration(self.task_number)
+
+					#assessment_file = str(self.task_controller.get_vocab_word()) + '_' + "assessment_result.txt"
+					#print ("SAVE FILE!!!!!!!!")
+					#with open(assessment_file, 'a') as file:
+					#	file.write(self.asr_input + '\n')
+					#file.close()
+
 				self.attempt = 0
 
 			else:
@@ -380,16 +390,9 @@ class ChildRobotInteractionFSM:
 			self.child_states.update_qa_result(self.role_behavior_mapping.get_child_answer_type(self.asr_input),self.attempt) # update QA results to child states
 			action = self.role_behavior_mapping.get_robot_response_to_answer(self.asr_input) # action is based on child's answer
 			help_response = self.role_behavior_mapping.get_robot_response_to_help(self.asr_input) # check whether the child gives a positive answer
-			
-			if "REMINDER" in action:
-				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_TASK_END_RESPONSE, self.task_controller.get_vocab_word())
-			elif "ROBOT" in action:
+
+			if "ROBOT" in action:
 				self.ros_node_mgr.send_robot_cmd(action)
-				if action == "Q_ROBOT_TASK_END_ASSESSMENT":
-					assessment_file = str(self.task_controller.get_vocab_word()) + '_' + "assessment_result.txt"
-					with open(assessment_file, 'a') as file:
-						file.write(self.asr_input + '\n')
-					file.close()
 			else:
 				path = ROOT_TEGA_SPEECH_FOLDER + "questions/"
 				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, path+ action +".wav")
@@ -412,6 +415,15 @@ class ChildRobotInteractionFSM:
 			elif self.attempt == 2: # child gives a response or the child reaches the max attempt
 				print("INFO: QA finished\n")
 				getattr(self, ris.Triggers.QA_FINISHED)() # q & a activiity is done
+
+				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_TASK_END_RESPONSE, self.task_controller.get_vocab_word())
+
+				time.sleep(3)
+
+				if "REMINDER" in self.role_behavior_mapping.current_question_query_path:
+					self.start_task_end_assessment(self.task_number)
+					self.start_task_end_celebration(self.task_number)
+
 				self.attempt = 0
 				
 			elif self.attempt == 1:
@@ -616,17 +628,10 @@ class ChildRobotInteractionFSM:
 				# if self.state == ris.ROBOT_TURN: 
 				# 	time.sleep(3)
 				# 	self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_EXPLORE)
-			
-		
-		def start_task_end_behavior(self, action_number):
-			'''
-			send between mission celebration behaviors 
-			'''
 
-			print ("end of task celebration")
+		def start_task_end_celebration(self, action_number):
 
-			assessment = RobotBehaviors.Q_ROBOT_TASK_END_ASSESSMENT
-			self.ros_node_mgr.send_robot_cmd(assessment, self.task_controller.get_vocab_word())
+			time.sleep(6.5)
 
 			action = RobotBehaviors.ROBOT_TASK_END_BEHAVIOR
 
@@ -640,6 +645,27 @@ class ChildRobotInteractionFSM:
 			behavior_number = action_number % 2 
 			end_task_behavior_dict = {0: RobotBehaviors.ROBOT_DANCE, 1: RobotBehaviors.ROBOT_PLAY_MUSIC}
 			self.ros_node_mgr.send_robot_cmd(end_task_behavior_dict[int(behavior_number)])
+
+		def start_task_end_assessment(self, action_number):
+
+			time.sleep(0.5)
+
+			assessment = RobotBehaviors.Q_ROBOT_TASK_END_ASSESSMENT
+			self.ros_node_mgr.send_robot_cmd (assessment, self.task_controller.get_vocab_word())
+			
+		
+		def start_task_end_behavior(self, action_number):
+			'''
+			send between mission celebration behaviors 
+			'''
+
+			print ("End of Task")
+
+			# task reminder at the end of mission 
+			self.task_number = action_number
+
+			reminder = RobotBehaviors.Q_ROBOT_TASK_END_REMINDER
+			self._robot_question_asking(reminder)
 
 
 		def _perform_robot_physical_actions(self,action_type):
@@ -702,6 +728,7 @@ class ChildRobotInteractionFSM:
 							break
 
 					if "Q_" in action: # action is a question asking action
+
 						self._robot_question_asking(action)
 						print(" robot question asking is done... break for action loop")
 						break
@@ -843,12 +870,11 @@ class ChildRobotInteractionFSM:
 			getattr(self, ris.Triggers.ROBOT_QUESTION)() # trigger the FSM transition
 			
 
-			if question_cmd == RobotBehaviors.Q_END_OF_TURN or question_cmd == RobotBehaviors.Q_ROBOT_TASK_END_ASSESSMENT:
+			if question_cmd == RobotBehaviors.Q_END_OF_TURN:
 				self.ros_node_mgr.send_robot_cmd(question_cmd, self.task_controller.get_vocab_word())
 				self.child_states.update_qa_info("open_ended",question_cmd)
 			else:
 				question_speech_file = self.role_behavior_mapping.get_robot_question(question_cmd)
-				print(question_speech_file)
 				self.child_states.update_qa_info(self.role_behavior_mapping.get_question_type(),question_cmd)
 				if question_speech_file == "":
 					return

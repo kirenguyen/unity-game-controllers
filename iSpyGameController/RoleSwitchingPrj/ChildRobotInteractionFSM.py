@@ -414,6 +414,8 @@ class ChildRobotInteractionFSM:
 						print ("====== INCORRECT RESPONSE TO TASK END QUESTION ====== ")
 						time.sleep(2)
 						self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_TASK_END_RESPONSE, self.task_controller.get_vocab_word())
+						self._wait_until_all_audios_done()
+						time.sleep(2)
 					else:
 						print ("====== RESPOND [KEYWORD] TO TASK END QUESTION =======")
 					self.start_task_end_assessment(self.task_number)

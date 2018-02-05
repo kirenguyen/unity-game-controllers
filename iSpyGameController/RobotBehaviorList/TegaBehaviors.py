@@ -197,12 +197,44 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
         if command == RobotBehaviors.ROBOT_PLAY_MUSIC:
             PATH = ROOT_TEGA_SPEECH_FOLDER + "general/music/"
             file = "music_"
-            speech_file = PATH + file + random.choice(["1", "2"]) + ".wav"
+            speech_file = PATH + file + random.choice(["1", "2", "3", "4", "5"]) + ".wav"
             msg.wav_filename = speech_file
             print ("music: "+msg.wav_filename)
 
         if command == RobotBehaviors.ROBOT_DANCE:
             msg.motion = TegaAction.MOTION_DANCE
+
+        ### ====== Tega End of Task Vocab Reminder ======== ####
+
+        if command == RobotBehaviors.Q_ROBOT_TASK_END_REMINDER:
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/word_learning/"
+            file = "word_reminder_"
+            speech_file = PATH + file + random.choice(["1", "2", "3"]) + ".wav"
+            msg.wav_filename = speech_file
+            print ("vocab reminder question: "+msg.wav_filename)
+
+        if command == RobotBehaviors.ROBOT_TASK_END_RESPONSE:
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/word_learning/"
+            vocab_word = args[0][0].lower()
+            speech_file = PATH + vocab_word + "_answer_" + random.choice(["1", "2"]) + ".wav"
+            msg.wav_filename = speech_file
+            print ("vocab reminder answer: "+msg.wav_filename)
+
+        if command == RobotBehaviors.Q_ROBOT_TASK_END_ASSESSMENT:
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/word_learning/"
+            vocab_word = args[0][0].lower()
+            speech_file = PATH + vocab_word + "_question_" + random.choice(["1", "2"]) + ".wav"
+            msg.wav_filename = speech_file
+            print ("vocab assessment: "+msg.wav_filename)
+
+        ### =========== Tega Speech Induction ============= ####
+
+        if command == RobotBehaviors.ROBOT_INDUCE_SPEECH:
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/induce_keyword/"
+            file = "induce_keyword_"
+            speech_file = PATH + file + random.choice(["1", "2", "3", "4", "5"]) + ".wav"
+            msg.wav_filename = speech_file
+            print ("induced speech: "+msg.wav_filename)
 
         ### ====== Tega Question Asking =================== ####
         if command == RobotBehaviors.Q_ROBOT_OFFER_HELP:

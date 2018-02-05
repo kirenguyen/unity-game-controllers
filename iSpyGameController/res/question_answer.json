@@ -141,6 +141,62 @@
     ]
   },
 
+
+  "Q_ROBOT_TASK_END_REMINDER":{
+    "question": ["word_reminder_1", "word_reminder_2", "word_reminder_3"],
+    "user_input":[
+      {
+        "en_US":["vehicle", "delighted", "soar", "minuscule", "crimson", "azure", "aquatic", "gigantic", "giant", "land", "garment", "recreational"],
+        "response":["response_g", "response_c","response_m", "response_a"]
+      },
+      {
+        "en_US":["no","dont know","don't know","don", "don't"],
+        "response":["response_i"]
+      }
+    ],
+    "other_input":[
+      "response_a"
+    ],
+    "other":{
+      "type": "open_ended",
+      "help": false
+    },
+    "no_response_1":[
+      "no_response_h","response_l"
+    ],
+    "no_response_2":[
+      "no_response_e","no_response_a"
+    ]
+  },
+
+
+  "Q_ROBOT_TASK_END_ASSESSMENT":{
+    "question": [],
+    "user_input":[
+      {
+        "en_US":["means", "mean"],
+        "response":["response_a", "response_g","response_n"]
+      },
+      {
+        "en_US":["no","dont know","don't know","don"],
+        "response":["response_i"]
+      }
+    ],
+    "other_input":[
+      "response_a"
+    ],
+    "other":{
+      "type": "open_ended",
+      "help": false
+    },
+    "no_response_1":[
+      "no_response_c", "response_l"
+    ],
+    "no_response_2":[
+      "no_response_e","no_response_a"
+    ]
+  },
+
   
 
   "end_turn/vehicle":{

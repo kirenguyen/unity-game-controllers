@@ -364,16 +364,6 @@ class ChildRobotInteractionFSM:
 
 					self.child_answer_content = self.asr_input
 
-				#if "END_REMINDER" in self.role_behavior_mapping.current_question_query_path and self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "positive":
-				#	self.start_task_end_assessment(self.task_number)
-				#	self.start_task_end_celebration(self.task_number)
-
-					#assessment_file = str(self.task_controller.get_vocab_word()) + '_' + "assessment_result.txt"
-					#print ("SAVE FILE!!!!!!!!")
-					#with open(assessment_file, 'a') as file:
-					#	file.write(self.asr_input + '\n')
-					#file.close()
-
 				self.attempt = 0
 
 			else:
@@ -415,14 +405,23 @@ class ChildRobotInteractionFSM:
 						time.sleep(2)
 						self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_TASK_END_RESPONSE, self.task_controller.get_vocab_word())
 						self._wait_until_all_audios_done()
-						time.sleep(2)
+						time.sleep(1)
 					else:
 						print ("====== RESPOND [KEYWORD] TO TASK END QUESTION =======")
 					self.start_task_end_assessment(self.task_number)
 					self.start_task_end_celebration(self.task_number)
 					print("INFO: QA finished\n")
 					getattr(self, ris.Triggers.QA_FINISHED)()
-
+				elif "INDUCE" in self.role_behavior_mapping.current_question_query_path:
+					if self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "negative" or self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "others":
+						print ("====== INCORRECT RESPONSE TO INDUCE SPEECH QUESTION ====== ")
+						time.sleep(2)
+						self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_INDUCE_SPEECH_RESPONSE, self.task_controller.get_vocab_word())
+						self._wait_until_all_audios_done()
+					else:
+						print ("====== RESPOND [KEYWORD] TO INDUCE SPEECH QUESTION =======")
+					print("INFO: QA finished\n")
+					getattr(self, ris.Triggers.QA_FINISHED)()
 				else:
 					print("INFO: QA finished\n")
 					getattr(self, ris.Triggers.QA_FINISHED)() # q & a activiity is done
@@ -442,8 +441,17 @@ class ChildRobotInteractionFSM:
 				self.attempt = 0
 				
 			elif self.attempt == 1:
-				print("INFO: RETRY QA\n")
-				getattr(self, ris.Triggers.RETRY_QA)()
+				if "INDUCE" in self.role_behavior_mapping.current_question_query_path:
+					print("INFO: QA finished\n")
+					getattr(self, ris.Triggers.QA_FINISHED)()
+					
+					if self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "absence": 
+						print ("===== NO RESPONSE TO INDUCE SPEECH QUESTION ======")
+						time.sleep(2)
+						self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_INDUCE_SPEECH_RESPONSE, self.task_controller.get_vocab_word())
+				else:
+					print("INFO: RETRY QA\n")
+					getattr(self, ris.Triggers.RETRY_QA)()
 	
 			self._ros_publish_data()	
 
@@ -525,7 +533,7 @@ class ChildRobotInteractionFSM:
 				
 				self._perform_robot_physical_actions(ras.WRONG_OBJECT_FAIL)
 				self._perform_robot_physical_actions(ras.TURN_SWITCHING)
-				self.child_states.update_turn_result(self.state,False) # the child finds the correct object
+				self.child_states.update_turn_result(self.state,False) # the child finds the incorrect object
 
 				if self.state == ris.CHILD_TURN or self.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
 					pass
@@ -565,7 +573,7 @@ class ChildRobotInteractionFSM:
 
 		def _robot_virutal_action_wait(self):
 			'''
-			create a thread. wait for all child-robot interaction is over before letting the robot click an obj
+			create a thread. wait for all child-robot interaction is over letting the robot click an obj
 			'''
 			while self.state != ris.ROBOT_TURN:
 				if self.state == ris.ROBOT_TURN:
@@ -646,7 +654,7 @@ class ChildRobotInteractionFSM:
 
 		def start_task_end_celebration(self, action_number):
 
-			time.sleep(7)
+			time.sleep(8)
 
 			action = RobotBehaviors.ROBOT_TASK_END_BEHAVIOR
 

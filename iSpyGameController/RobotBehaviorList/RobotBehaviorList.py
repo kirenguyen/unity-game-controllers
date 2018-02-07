@@ -72,7 +72,8 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
 
 
     ROBOT_CUSTOM_SPEECH = "ROBOT_CUSTOM_SPEECH"
-    ROBOT_INDUCE_SPEECH = "ROBOT_INDUCE_SPEECH"
+    Q_ROBOT_INDUCE_SPEECH = "Q_ROBOT_INDUCE_SPEECH"
+    ROBOT_INDUCE_SPEECH_RESPONSE = "ROBOT_INDUCE_SPEECH_RESPONSE"
 
     ### ============== Tega Speech for Role Switching Project ================== ###
     BEFORE_GAME_SPEECH = "ROBOT_BEFORE_GAME_SPEECH"

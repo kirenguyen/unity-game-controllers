@@ -204,6 +204,8 @@ class ChildRobotInteractionFSM:
 			self.listen_child_speech()
 
 		def on_enter_childTURN_robotHelp(self):
+			self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, ROOT_TEGA_SPEECH_FOLDER + "general/others/robot_help.wav") # "i'll help you then!"
+			self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ)
 			self._ros_publish_data()
 
 		def on_enter_robotTURN_childHelp(self):
@@ -395,9 +397,14 @@ class ChildRobotInteractionFSM:
 				
 				if "HELP" in self.role_behavior_mapping.current_question_query_path and help_response: # robot asks the child to help find an object
 					# send a ros command to enable child's interaction with the tablet
-					print("INFO: helping action starts\n")
-					self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":self.role_behavior_mapping.current_action_name,"clicked_object":""})
-					getattr(self, ris.Triggers.HELP_TRIGGER)()
+					if ris.ROBOT_HELP in self.state: 
+						print ("INFO: robot helping action starts\n")
+						self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":self.role_behavior_mapping.current_action_name,"clicked_object":RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ})
+						getattr(self, ris.Triggers.HELP_TRIGGER)()
+					else: 
+						print("INFO: child helping action starts\n")
+						self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":self.role_behavior_mapping.current_action_name,"clicked_object":""})
+						getattr(self, ris.Triggers.HELP_TRIGGER)()
 				elif "END_REMINDER" in self.role_behavior_mapping.current_question_query_path:
 					# test for task end response 
 					if self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "negative" or self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "others":

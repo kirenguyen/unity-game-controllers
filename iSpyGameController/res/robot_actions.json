@@ -387,7 +387,7 @@
         "SCREEN_MOVING": {
           "general": [
             "ROBOT_ENCOURAGING",
-            "Q_ROBOT_INDUCE_SPEECH"
+            "Q_ROBOT_OFFER_HELP"
           ]
         },
         "WRONG_OBJECT_CLICKED": {

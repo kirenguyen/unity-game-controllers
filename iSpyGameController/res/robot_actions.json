@@ -81,7 +81,8 @@
             "ROBOT_ATTENTION"
           ],
           "optional":{
-            "ROBOT_CUSTOM_SPEECH":0.7
+            "ROBOT_CUSTOM_SPEECH":0.7,
+            "Q_ROBOT_OFFER_HELP": 0.2
           }
         },
         "SCREEN_MOVING": {
@@ -114,7 +115,10 @@
           "general": [
             "LOOK_CENTER", 
             "ROBOT_ATTENTION"
-          ]
+          ],
+          "conditional":{
+            "ROBOT_SAY_WORD": 1.0
+          }
         },
         "PRONOUNCE_CORRECT":{
           "general": [
@@ -387,7 +391,7 @@
         "SCREEN_MOVING": {
           "general": [
             "ROBOT_ENCOURAGING",
-            "Q_ROBOT_OFFER_HELP"
+            "Q_ROBOT_INDUCE_SPEECH"
           ]
         },
         "WRONG_OBJECT_CLICKED": {

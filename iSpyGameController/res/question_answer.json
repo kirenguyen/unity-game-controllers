@@ -1,6 +1,6 @@
 {
   "Q_ROBOT_OFFER_HELP":{
-    "question": ["yes_no_question_4", "yes_no_question_5"],
+    "question": ["yes_no_question_4"],
     "user_input":[
       {
         "en_US":["yes","okay","ok","yeah","sure", "mhm"],

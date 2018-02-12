@@ -81,7 +81,8 @@
             "ROBOT_ATTENTION"
           ],
           "optional":{
-            "ROBOT_CUSTOM_SPEECH":0.7
+            "ROBOT_CUSTOM_SPEECH":0.7,
+            "Q_ROBOT_OFFER_HELP": 0.2
           }
         },
         "SCREEN_MOVING": {
@@ -114,7 +115,10 @@
           "general": [
             "LOOK_CENTER", 
             "ROBOT_ATTENTION"
-          ]
+          ],
+          "conditional":{
+            "ROBOT_SAY_WORD": 1.0
+          }
         },
         "PRONOUNCE_CORRECT":{
           "general": [
@@ -150,7 +154,7 @@
             "ROBOT_CURIOUS"
           ],
           "optional": {
-
+            "REMINDER_SPEECH": 0.2
           }
         },
         "TURN_STARTING": {
@@ -200,7 +204,7 @@
             "ROBOT_CUSTOM_SPEECH"
           ],
           "optional": {
-            "ROBOT_INDUCE_SPEECH": 0.3
+            "Q_ROBOT_INDUCE_SPEECH": 0.3
           }
         },
         "WRONG_OBJECT_FAIL":{
@@ -225,7 +229,7 @@
             "LOOK_CENTER"
           ], 
           "optional": {
-
+            "REMINDER_SPEECH": 0.2
           }
         },
         "TURN_STARTING": {
@@ -281,7 +285,7 @@
 
           ], 
           "optional":{
-            "ROBOT_INDUCE_SPEECH": 0.6
+            "Q_ROBOT_INDUCE_SPEECH": 0.6
           }
         },
         "WRONG_OBJECT_FAIL":{
@@ -387,7 +391,7 @@
         "SCREEN_MOVING": {
           "general": [
             "ROBOT_ENCOURAGING",
-            "ROBOT_INDUCE_SPEECH"
+            "Q_ROBOT_INDUCE_SPEECH"
           ]
         },
         "WRONG_OBJECT_CLICKED": {

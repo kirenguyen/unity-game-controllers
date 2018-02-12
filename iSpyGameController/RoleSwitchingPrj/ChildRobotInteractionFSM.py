@@ -204,6 +204,8 @@ class ChildRobotInteractionFSM:
 			self.listen_child_speech()
 
 		def on_enter_childTURN_robotHelp(self):
+			self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, ROOT_TEGA_SPEECH_FOLDER + "general/others/robot_help.wav") # "i'll help you then!"
+			self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ)
 			self._ros_publish_data()
 
 		def on_enter_robotTURN_childHelp(self):
@@ -220,7 +222,10 @@ class ChildRobotInteractionFSM:
 
 
 			def timeout_alert():
+				self.ros_node_mgr.stop_asr_listening()
 				print("====== time out alert==")
+				time.sleep(2.0)
+				print("====== after time out alert sleep.....")
 				# 6 seconds
 				if ris.LISTEN_CHILD_SPEECH_RESPONSE in self.state: 
 					self.on_tega_new_asr_result("")
@@ -233,7 +238,7 @@ class ChildRobotInteractionFSM:
 			self._wait_until_all_audios_done()
 			print("INFO: ASR start listening")
 			self.ros_node_mgr.start_asr_listening()
-			threading.Timer(6.0, timeout_alert).start() # checking for timeout 
+			threading.Timer(4.5, timeout_alert).start() # checking for timeout 
 			
 
 			
@@ -364,16 +369,6 @@ class ChildRobotInteractionFSM:
 
 					self.child_answer_content = self.asr_input
 
-				#if "END_REMINDER" in self.role_behavior_mapping.current_question_query_path and self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "positive":
-				#	self.start_task_end_assessment(self.task_number)
-				#	self.start_task_end_celebration(self.task_number)
-
-					#assessment_file = str(self.task_controller.get_vocab_word()) + '_' + "assessment_result.txt"
-					#print ("SAVE FILE!!!!!!!!")
-					#with open(assessment_file, 'a') as file:
-					#	file.write(self.asr_input + '\n')
-					#file.close()
-
 				self.attempt = 0
 
 			else:
@@ -405,9 +400,16 @@ class ChildRobotInteractionFSM:
 				
 				if "HELP" in self.role_behavior_mapping.current_question_query_path and help_response: # robot asks the child to help find an object
 					# send a ros command to enable child's interaction with the tablet
-					print("INFO: helping action starts\n")
-					self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":self.role_behavior_mapping.current_action_name,"clicked_object":""})
-					getattr(self, ris.Triggers.HELP_TRIGGER)()
+					print (" ----- ACTION NAME ----- ")
+					print (self.role_behavior_mapping.current_action_name)
+					if ris.ROBOT_HELP in self.state: 
+						print ("INFO: robot helping action starts\n")
+						self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ,"clicked_object":self.task_controller.get_obj_for_robot(True)})
+						getattr(self, ris.Triggers.HELP_TRIGGER)()
+					else: 
+						print("INFO: child helping action starts\n")
+						self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":self.role_behavior_mapping.current_action_name,"clicked_object":""})
+						getattr(self, ris.Triggers.HELP_TRIGGER)()
 				elif "END_REMINDER" in self.role_behavior_mapping.current_question_query_path:
 					# test for task end response 
 					if self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "negative" or self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "others":
@@ -415,14 +417,23 @@ class ChildRobotInteractionFSM:
 						time.sleep(2)
 						self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_TASK_END_RESPONSE, self.task_controller.get_vocab_word())
 						self._wait_until_all_audios_done()
-						time.sleep(2)
+						time.sleep(3)
 					else:
 						print ("====== RESPOND [KEYWORD] TO TASK END QUESTION =======")
 					self.start_task_end_assessment(self.task_number)
 					self.start_task_end_celebration(self.task_number)
 					print("INFO: QA finished\n")
 					getattr(self, ris.Triggers.QA_FINISHED)()
-
+				elif "INDUCE" in self.role_behavior_mapping.current_question_query_path:
+					if self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "negative" or self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "others":
+						print ("====== INCORRECT RESPONSE TO INDUCE SPEECH QUESTION ====== ")
+						time.sleep(2)
+						self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_INDUCE_SPEECH_RESPONSE, self.task_controller.get_vocab_word())
+						self._wait_until_all_audios_done()
+					else:
+						print ("====== RESPOND [KEYWORD] TO INDUCE SPEECH QUESTION =======")
+					print("INFO: QA finished\n")
+					getattr(self, ris.Triggers.QA_FINISHED)()
 				else:
 					print("INFO: QA finished\n")
 					getattr(self, ris.Triggers.QA_FINISHED)() # q & a activiity is done
@@ -442,8 +453,17 @@ class ChildRobotInteractionFSM:
 				self.attempt = 0
 				
 			elif self.attempt == 1:
-				print("INFO: RETRY QA\n")
-				getattr(self, ris.Triggers.RETRY_QA)()
+				if "INDUCE" in self.role_behavior_mapping.current_question_query_path:
+					print("INFO: QA finished\n")
+					getattr(self, ris.Triggers.QA_FINISHED)()
+					
+					if self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "absence": 
+						print ("===== NO RESPONSE TO INDUCE SPEECH QUESTION ======")
+						time.sleep(2)
+						self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_INDUCE_SPEECH_RESPONSE, self.task_controller.get_vocab_word())
+				else:
+					print("INFO: RETRY QA\n")
+					getattr(self, ris.Triggers.RETRY_QA)()
 	
 			self._ros_publish_data()	
 
@@ -514,6 +534,7 @@ class ChildRobotInteractionFSM:
 
 
 			if gameStateTrigger == gs.Triggers.TARGET_OBJECT_COLLECTED:
+				print ("TARGET_OBJECT_COLLECTED")
 				self._perform_robot_physical_actions(ras.PRONOUNCE_CORRECT)
 				self._perform_robot_physical_actions(ras.TURN_SWITCHING)
 				self.child_states.update_turn_result(self.state,True) # the child finds the correct object
@@ -525,16 +546,20 @@ class ChildRobotInteractionFSM:
 				
 				self._perform_robot_physical_actions(ras.WRONG_OBJECT_FAIL)
 				self._perform_robot_physical_actions(ras.TURN_SWITCHING)
-				self.child_states.update_turn_result(self.state,False) # the child finds the correct object
+				self.child_states.update_turn_result(self.state,False) # the child finds the incorrect object
 
 				if self.state == ris.CHILD_TURN or self.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
 					pass
 
 			elif gameStateTrigger  == gs.Triggers.OBJECT_CLICKED:
-				if self.state == ris.ROBOT_TURN or self.state == ris.CHILD_TURN+'_'+ris.ROBOT_HELP:
+				if self.state == ris.ROBOT_TURN:
 					self._perform_robot_physical_actions(ras.WRONG_OBJECT_CLICKED)
 
 					self._wait_until() # wait until robot is done speaking. then click and pronounce the word
+					self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_CLICK_SAY_BUTTON)
+
+				if self.state == ris.CHILD_TURN+'_'+ris.ROBOT_HELP:
+					print ("INFO: CHILD_TURN_ROBOT_HELP STATE")
 					self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_CLICK_SAY_BUTTON)
 
 				if (self.state == ris.CHILD_TURN or self.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP) and self.role == RobotRoles.EXPERT:
@@ -565,7 +590,7 @@ class ChildRobotInteractionFSM:
 
 		def _robot_virutal_action_wait(self):
 			'''
-			create a thread. wait for all child-robot interaction is over before letting the robot click an obj
+			create a thread. wait for all child-robot interaction is over letting the robot click an obj
 			'''
 			while self.state != ris.ROBOT_TURN:
 				if self.state == ris.ROBOT_TURN:
@@ -646,7 +671,7 @@ class ChildRobotInteractionFSM:
 
 		def start_task_end_celebration(self, action_number):
 
-			time.sleep(7)
+			time.sleep(8)
 
 			action = RobotBehaviors.ROBOT_TASK_END_BEHAVIOR
 
@@ -720,9 +745,20 @@ class ChildRobotInteractionFSM:
 				except:
 					optional_actions = {}
 
+				try:
+					conditional_actions = self.physical_actions[action_type]['conditional']
+				except:
+					conditional_actions = {}
+
 			
 				actions = { i:1.0 for i in general_actions}
 				actions.update(optional_actions)
+
+				if ris.ROBOT_HELP in self.state:
+					print ("ADD CONDITIONAL ACTION")
+					print ("ROBOT HELP")
+					actions.update(conditional_actions)
+
 
 				#speech_actions = self._get_tega_speech(action_type)
 

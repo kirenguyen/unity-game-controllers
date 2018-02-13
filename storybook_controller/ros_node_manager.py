@@ -8,12 +8,13 @@ agent and the tablet app.
 
 import rospy
 
-from msg import StorybookCommand
-from msg import StorybookGameInfo
-from msg import StorybookRobotCommand
+from unity_game_msgs.msg import StorybookCommand
+from unity_game_msgs.msg import StorybookGameInfo
+# from unity_game_msgs.msg import StorybookRobotCommand
 from jibo_msgs.msg import JiboAction
+from std_msgs.msg import Header  # standard ROS msg header
 
-from storybook_constants import *
+from storybook_controller.storybook_constants import *
 
 class ROSNodeManager(object):
   def __init__(self, name):
@@ -30,7 +31,7 @@ class ROSNodeManager(object):
     """
     Starts the storybook subscriber node.
     """
-    print "Starting storybook subscriber node."
+    print("Starting storybook subscriber node.")
     self.storybook_listener = rospy.Subscriber(STORYBOOK_TO_ROSCORE_TOPIC,
                                                StorybookGameInfo, callback)
 
@@ -38,14 +39,15 @@ class ROSNodeManager(object):
   #   """
   #   Starts the robot subscriber node.
   #   """
-  #   print "Starting storybook subscriber node."
+  #   print("Starting storybook subscriber node.")
   #   self.storybook_listener = rospy.Subscriber(ROBOT_TO_ROSCORE_TOPIC,
-  #                                              JiboStorybookLog, callback)
+  #                             No module named _thread
+  #               JiboStorybookLog, callback)
   def start_storybook_publisher(self):
     """
     Starts the storybook publisher node.
     """
-    print "Starting storybook publisher node."
+    print("Starting storybook publisher node.")
     self.storybook_publisher = rospy.Publisher(ROSCORE_TO_STORYBOOK_TOPIC,
                                                StorybookCommand, queue_size=10)
     # Spin at 10Hz, wait for subscribers.
@@ -56,7 +58,7 @@ class ROSNodeManager(object):
     """
     Starts the robot publisher node.
     """
-    print "Starting robot publisher node."
+    print("Starting robot publisher node.")
     self.robot_publisher = rospy.Publisher(ROSCORE_TO_STORYBOOK_TOPIC,
                                                JiboAction, queue_size=10)
     # Spin at 10Hz, wait for subscribers.
@@ -66,21 +68,22 @@ class ROSNodeManager(object):
   def send_storybook_command(self, command, *args):
     """
     Send a command to the storybook.
-    Args are any optional arguments.
+    Args are any optional arguments, as a serialized JSON string.
     """
 
     msg = StorybookCommand()
     msg.header = Header()
     msg.header.stamp = rospy.Time.now()
     msg.command = command
-    msg.params = args
+    if len(args) > 0:
+      msg.params = args[0]
     self.storybook_publisher.publish(msg)
     rospy.loginfo(msg)
 
   def send_robot_command(self, command, *args):
     """
     Send a command to the robot.
-    Args are any optional arguments.
+    Args are any optional arguments, as a serialized JSON string.
     """
 
     msg = JiboBehaviors.get_msg_from_behavior(command, args)

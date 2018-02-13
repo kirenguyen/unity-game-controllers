@@ -8,11 +8,12 @@ ROS topics, updating the student model, and sending commands to the robot agent
 """
 
 import transitions
+import json
 
 from unity_game_msgs.msg import StorybookCommand
-from unity_game_msgs.msg import StorybookLog
+from unity_game_msgs.msg import StorybookGameInfo
 
-from storybook_constants import *
+from storybook_controller.storybook_constants import *
 
 class StorybookFSM(object):
   def __init__(self, ros_node_manager, student_model):
@@ -38,9 +39,9 @@ class StorybookFSM(object):
       }
     ]
 
-    self.state_machine = transitions.machine(
-      self, states=self.states, transitions=self.transitions,
-      initial=self.initial_state)
+    # self.state_machine = transitions.Machine(
+    #   self, states=self.states, transitions=self.transitions,
+    #   initial=self.initial_state)
 
 
   def ros_message_handler(self, data):
@@ -48,8 +49,15 @@ class StorybookFSM(object):
     Define the callback function to pass to ROS node manager. This callback is
     called when the ROS node manager receives new data.
     """
-    print data
+    print("Received ROS message with data:\n", data)
+    params = {
+      "obj1": 1,
+      "obj2": 2
+    }
 
+    command = 4
+
+    self.ros.send_storybook_command(command, json.dumps(params))
 
     # CONCURRENCY WILL BE A HUGE PROBLEM FOR THIS
     #

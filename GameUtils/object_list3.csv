@@ -1,5 +1,5 @@
 key_object,word,object_type,object_vocab,attribute,color,animal,vehicle,emotion,action,aquatic,size,activity,cloth,land
-baby,baby,human,minor,young,,,,,soar,,,,,
+baby,baby,human,minor,young,,,,,soar,,minuscule,,,
 bird,bird,animal,omnivore,2legs:small:city,,omnivore,,,soar,,minuscule,,,
 bicycle,bicycle,vehicle,vehicle,2wheels:road,,,vehicle,,soar,,,,,
 boat,boat,vehicle,vehicle,water,crimson,,vehicle,,,,,,,
@@ -23,8 +23,8 @@ fish,fish,animal,omnivore,water:small,crimson:azure:blue,omnivore,,,,aquatic,min
 fishing,fishing,action,hobby,,crimson,,,delighted:happy,,,,recreational ,,
 flower,flower,inanimate,inanimate,purple:green:small,,,,,,,,,,
 forest,forest,landscape,landscape,,,,,,,,gigantic:giant,,,
-frog,frog,animal,carnivore:omnivore,4legs:small:water,,carnivore:omnivore,,happy,,,,,,
-giraffe,giraffe,animal,mammal:herbivore,4legs:large,,mammal:herbivore,,,,,,,,land
+frog,frog,animal,carnivore:omnivore,4legs:small:water,,carnivore:omnivore,,happy,,aquatic,,,,
+giraffe,giraffe,animal,mammal:herbivore,4legs:large,,mammal:herbivore,,,,,gigantic:giant,,,land
 goat,goat,animal,mammal:herbivore,4legs:farm:large,,mammal:herbivore,,,,,,,,land
 grandma,grandma,human,relatives,,azure:blue,,,,,,,,,
 grandpa,grandpa,human,relatives,,,,,,,,,,,
@@ -37,7 +37,7 @@ mother,mother,human,households:relatives,,,,,,,,,,,
 mountain,mountain,landscape,landscape,,,,,,,,gigantic:giant,,,
 mouse,mouse,animal,mammal:omnivore,4legs:small:city,,mammal:omnivore,,,,,minuscule,,,land
 pants,pants,inanimate,inanimate:apparel,blue,azure:blue,,,,,,,,garment,
-plane,plane,vehicle,vehicle,fly,crimson,,vehicle,,soar,,,,,
+plane,plane,vehicle,vehicle,fly,crimson,,vehicle,,soar,,gigantic:giant,,,
 rabbit,rabbit,animal,mammal:herbivore,4legs:farm:small,,mammal:herbivore,,,,,minuscule,,,land
 rooster,rooster,animal,omnivore,2legs:farm:small,,omnivore,,,,,,,,land
 running,running,action,cardio,,,,,,,,,recreational ,,
@@ -45,7 +45,7 @@ seal,seal,animal,mammal:carnivore,water:large,,mammal:carnivore,,,,aquatic,,,,
 seashell,seashell,inanimate,inanimate,purple,,,,,,,minuscule,,,
 sheep,sheep,animal,mammal:herbivore,4legs:large:farm,,mammal:herbivore,,,,,,,,land
 shirt,shirt,inanimate,inanimate:apparel,red,,,,,,,,,garment,
-sun,sun,inanimate,inanimate,large,,,,happy,,,,,,
+sun,sun,inanimate,inanimate,large,,,,happy,,,gigantic:giant,,,
 tractor,tractor,vehicle,vehicle:automobile,4wheels:road,crimson,,vehicle,,,,gigantic:giant,,,
 train,train,vehicle,vehicle:automobile:public,,,,vehicle,,,,gigantic:giant,,,
 waving,waving,action,hobby,,,,,delighted:happy,,,,,,

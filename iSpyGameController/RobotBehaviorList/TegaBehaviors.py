@@ -149,7 +149,7 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
         ### ============== Tega Speech for Role Switching Project ================== ###
         if command == RobotBehaviors.BEFORE_GAME_SPEECH:
             PATH = ROOT_TEGA_SPEECH_FOLDER + "general/before_game/"
-            file = "before_game_"+random.choice(["1","3"])+".wav"
+            file = "before_game_"+random.choice(["1", "3"])+".wav"
             msg.wav_filename = PATH + file
             msg.motion = TegaAction.MOTION_SILENT_HAPPY_WIGGLE
             print("before game speech wav: "+msg.wav_filename)
@@ -229,12 +229,19 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
 
         ### =========== Tega Speech Induction ============= ####
 
-        if command == RobotBehaviors.ROBOT_INDUCE_SPEECH:
+        if command == RobotBehaviors.Q_ROBOT_INDUCE_SPEECH:
             PATH = ROOT_TEGA_SPEECH_FOLDER + "general/induce_keyword/"
             file = "induce_keyword_"
             speech_file = PATH + file + random.choice(["1", "2", "3", "4", "5"]) + ".wav"
             msg.wav_filename = speech_file
             print ("induced speech: "+msg.wav_filename)
+
+        if command == RobotBehaviors.ROBOT_INDUCE_SPEECH_RESPONSE:
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/word_learning/"
+            vocab_word = args[0][0].lower()
+            speech_file = PATH + vocab_word + "_answer_" + random.choice(["2"]) + ".wav"
+            msg.wav_filename = speech_file
+            print ("induced speech answer: "+msg.wav_filename)
 
         ### ====== Tega Question Asking =================== ####
         if command == RobotBehaviors.Q_ROBOT_OFFER_HELP:

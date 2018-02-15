@@ -220,7 +220,7 @@ class iSpyTaskController():
 			self.task_duration = str(self.task_end_time - self.task_start_time)
 			self._reset_for_new_task()
 
-			self.current_task_index += 1
+			#self.current_task_index += 1
 
 	def get_current_answer_size(self):
 		pass

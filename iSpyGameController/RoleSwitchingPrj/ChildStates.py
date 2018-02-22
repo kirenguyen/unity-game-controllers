@@ -63,6 +63,7 @@ class ChildStates:
 		self.numChildCorrectAttemptsCurrTask = 0
 		self.total_num_trials = 0
 		# QA related
+		self.num_robot_questions_asked = 0
 		self.pos_answers = 0 
 		self.neg_answers = 0
 		self.other_answers = 0 

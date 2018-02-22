@@ -209,9 +209,7 @@ class RobotRolesBehaviorsMap:
                 if any(m in asr_input for m in yes_response["en_US"]): # found child's answer
                     return "positive"
                 no_response = self.question_query["user_input"][1]
-                print("no response:")
-                print(no_response)
-                if any(m in asr_input for m in yes_response["en_US"]): # found child's answer
+                if any(m in asr_input for m in no_response["en_US"]): # found child's answer
                     return "negative"
                 return "others"
 

@@ -381,7 +381,7 @@
           ],
           "exclusive":{
             "Q_ROBOT_INDUCE_SPEECH": 0.6,
-            "Q_ROBOT_OFFER_HELP": 0.8
+            "Q_ROBOT_OFFER_HELP": 0.7
           }
         },
         "WRONG_OBJECT_CLICKED": {

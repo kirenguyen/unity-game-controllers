@@ -60,7 +60,7 @@ class iSpyDataTracking:
 
 			'numChildClickCancelForTurn', # turn related
 
-			'numQsAskeddForTurn','numPositiveAnswerForTurn','numNegativeAnswerForTurn','numOtherAnswerForTurn','numNoAnswerAttempt1ForTurn', 'numNoAnswerAttempt2ForTurn',# turn related
+			'numQsAskeddForTask','numPositiveAnswerForTask','numNegativeAnswerForTask','numOtherAnswerForTask','numNoAnswerAttempt1ForTask', 'numNoAnswerAttempt2ForTask',# turn related
 
 			'gameStateTrigger','currentInteractionState','currentGameState',
 

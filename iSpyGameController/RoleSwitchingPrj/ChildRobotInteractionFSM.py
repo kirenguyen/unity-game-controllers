@@ -210,7 +210,8 @@ class ChildRobotInteractionFSM:
 			if self.continue_robot_help:
 				self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":"ROBOT_OFFER_HELP","clicked_object":""})
 				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, ROOT_TEGA_SPEECH_FOLDER + "general/others/robot_help.wav") # "i'll help you then!"
-				self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ,"clicked_object":self.task_controller.get_obj_for_robot(True)})
+				self.robot_clickedObj = self.task_controller.get_obj_for_robot(True)
+				self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ,"clicked_object":self.robot_clickedObj})
 				self.continue_robot_help = True
 			self._ros_publish_data()
 

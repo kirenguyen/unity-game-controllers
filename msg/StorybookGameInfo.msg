@@ -3,4 +3,10 @@
 
 Header header
 
+int8 message_type
+
 string message
+
+# Message types that can be received from the tablet app.
+int8 HELLO_WORLD= 0
+int8 SPEECH_ACE_RESULT = 1

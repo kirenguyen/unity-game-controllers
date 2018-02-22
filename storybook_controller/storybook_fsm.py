@@ -20,7 +20,10 @@ class StorybookFSM(object):
     self.ros = ros_node_manager
     self.student_model = student_model
 
-    self.ALLOWED_LOG_MESSAGES = []
+    self.ALLOWED_LOG_MESSAGES = [
+      StorybookGameInfo.HELLO_WORLD,
+      StorybookGameInfo.SPEECH_ACE_RESULT
+    ]
 
     self.states = []
     self.initial_state = None
@@ -50,14 +53,26 @@ class StorybookFSM(object):
     called when the ROS node manager receives new data.
     """
     print("Received ROS message with data:\n", data)
-    params = {
-      "obj1": 1,
-      "obj2": 2
-    }
-
-    command = 4
-
-    self.ros.send_storybook_command(command, json.dumps(params))
+    
+    if data.message_type in self.ALLOWED_LOG_MESSAGES:
+      if data.message_type == StorybookGameInfo.HELLO_WORLD:
+        print("Received hello world!")
+        # Sending back a dummy response.
+        params = {
+          "obj1": 1,
+          "obj2": 2
+        }
+        command = 4
+        self.ros.send_storybook_command(command, json.dumps(params))
+      elif data.message_type == StorybookGameInfo.SPEECH_ACE_RESULT:
+        speechace_result = json.loads(data.message)
+        print(speechace_result)
+        print(speechace_result["text_score"]["quality_score"])
+    else:
+      # Fail fast.
+      print("Unknown message type!")
+      sys.exit(1)
+  
 
     # CONCURRENCY WILL BE A HUGE PROBLEM FOR THIS
     #

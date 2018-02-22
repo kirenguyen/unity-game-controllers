@@ -503,7 +503,8 @@ class ChildRobotInteractionFSM:
 			self.current_task_turn_index = 0
 			self.state = ris.CHILD_TURN
 			self.child_states.on_new_task_received() # reset some task-based variables in child's states
-			
+			self.task_controller.num_finished_words = 0
+
 		def turn_taking(self):
 
 			def _get_turn_duration():

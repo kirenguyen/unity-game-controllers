@@ -232,7 +232,7 @@ class iSpyTaskController():
 		'''
 		self.target_list = []
 		self.nontarget_list = []
-		self.num_finished_words = 0
+		#self.num_finished_words = 0
 
 
 

@@ -43,6 +43,7 @@ class ROSNodeManager(object):
   #   self.storybook_listener = rospy.Subscriber(ROBOT_TO_ROSCORE_TOPIC,
   #                             No module named _thread
   #               JiboStorybookLog, callback)
+  
   def start_storybook_publisher(self):
     """
     Starts the storybook publisher node.

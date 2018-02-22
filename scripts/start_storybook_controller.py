@@ -30,6 +30,7 @@ def main(argv):
                           (fsm.ros_message_handler,))
   # thread.start_new_thread(ros_node_manager.start_robot_listener,
   #                         (fsm.ros_message_handler,))
+  thread.start_new_thread(fsm.process_main_event_queue, ())
   signal.signal(signal.SIGINT, signal_handler)
 
   # Spin and periodically check the state of the student model.

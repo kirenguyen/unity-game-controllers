@@ -9,6 +9,8 @@ ROS topics, updating the student model, and sending commands to the robot agent
 
 import transitions
 import json
+import queue
+import time
 
 from unity_game_msgs.msg import StorybookCommand
 from unity_game_msgs.msg import StorybookGameInfo
@@ -17,6 +19,11 @@ from storybook_controller.storybook_constants import *
 
 class StorybookFSM(object):
   def __init__(self, ros_node_manager, student_model):
+    # The FSM maintains a queue that ros messages are added to, so that
+    # different topics can send their events and they will be processed
+    # one at a time, in order.
+    self.event_queue = queue.Queue()
+
     self.ros = ros_node_manager
     self.student_model = student_model
 
@@ -46,15 +53,11 @@ class StorybookFSM(object):
     #   self, states=self.states, transitions=self.transitions,
     #   initial=self.initial_state)
 
-
-  def ros_message_handler(self, data):
-    """
-    Define the callback function to pass to ROS node manager. This callback is
-    called when the ROS node manager receives new data.
-    """
-    print("Received ROS message with data:\n", data)
-    
-    if data.message_type in self.ALLOWED_LOG_MESSAGES:
+  def process_main_event_queue(self):
+    while True:
+      # This call to get() will block the thread until something is there.
+      data = self.event_queue.get()
+      # Handle data.
       if data.message_type == StorybookGameInfo.HELLO_WORLD:
         print("Received hello world!")
         # Sending back a dummy response.
@@ -68,6 +71,21 @@ class StorybookFSM(object):
         speechace_result = json.loads(data.message)
         print(speechace_result)
         print(speechace_result["text_score"]["quality_score"])
+      # TODO: call queue.task_done() differenlty in each above case,
+      # because we might want to use a join in the future and block
+      # on all tasks being completed, for example waiting for a message
+      # to be sent and acknowledged before continuing on with execution.
+      self.event_queue.task_done()
+
+  def ros_message_handler(self, data):
+    """
+    Define the callback function to pass to ROS node manager. This callback is
+    called when the ROS node manager receives new data.
+    """
+    print("Received ROS message with data:\n", data)
+    
+    if data.message_type in self.ALLOWED_LOG_MESSAGES:
+      self.event_queue.put(data)
     else:
       # Fail fast.
       print("Unknown message type!")

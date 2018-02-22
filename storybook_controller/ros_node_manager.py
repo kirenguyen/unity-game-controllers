@@ -71,7 +71,6 @@ class ROSNodeManager(object):
     Send a command to the storybook.
     Args are any optional arguments, as a serialized JSON string.
     """
-
     msg = StorybookCommand()
     msg.header = Header()
     msg.header.stamp = rospy.Time.now()

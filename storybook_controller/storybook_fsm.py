@@ -66,11 +66,17 @@ class StorybookFSM(object):
           "obj2": 2
         }
         command = 4
-        self.ros.send_storybook_command(command, json.dumps(params))
+        self.ros.send_storybook_command(command, "")
       elif data.message_type == StorybookGameInfo.SPEECH_ACE_RESULT:
         speechace_result = json.loads(data.message)
-        print(speechace_result)
+        # print(speechace_result)
         print(speechace_result["text_score"]["quality_score"])
+        params = {
+          "obj1": 1,
+          "obj2": "hi"
+        }
+        command = 3
+        self.ros.send_storybook_command(command, json.dumps(params))
       # TODO: call queue.task_done() differenlty in each above case,
       # because we might want to use a join in the future and block
       # on all tasks being completed, for example waiting for a message

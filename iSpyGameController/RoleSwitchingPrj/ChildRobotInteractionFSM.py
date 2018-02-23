@@ -101,6 +101,8 @@ class ChildRobotInteractionFSM:
 			# robot's virtual actions on the tablet
 			self.virtual_action = ""
 
+			self.explore_action = ""
+
 			#self.robot_response = self.role_behavior_mapping.get_robot_general_responses()
 
 			self.role = "novice" #default to novice at the beginning (backup)
@@ -176,6 +178,7 @@ class ChildRobotInteractionFSM:
 			self.current_task_turn_index += 1
 			
 			self.robot_clickedObj = "" # reset robot's clicked obj
+			self.explore_action = ""
 			self.virtual_action = ""
 			self._ros_publish_data()
 			threading.Timer(3.0, self.start_tracking_child_interaction).start()
@@ -187,6 +190,7 @@ class ChildRobotInteractionFSM:
 			self.current_task_turn_index += 1
 		
 			self.robot_clickedObj = ""
+			self.explore_action = ""
 			self.virtual_action = ""
 			self._ros_publish_data()
 
@@ -594,7 +598,7 @@ class ChildRobotInteractionFSM:
 					elif self.role == RobotRoles.EXPERT:
 						self._perform_robot_physical_actions(ras.RIGHT_OBJECT_FOUND)
 
-					self._wait_until() # wait until robot is done speaking. then click and pronounce the word
+					#self._wait_until() # wait until robot is done speaking. then click and pronounce the word
 					self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_CLICK_SAY_BUTTON)
 
 				if self.state == ris.CHILD_TURN+'_'+ris.ROBOT_HELP:
@@ -677,9 +681,6 @@ class ChildRobotInteractionFSM:
 			if self.state == ris.ROBOT_TURN: self.role = get_next_robot_role()
 				
 			physical_actions = self.role_behavior_mapping.get_actions(self.role,self.state,'physical')
-			self.virtual_action = self.role_behavior_mapping.get_actions(self.role,self.state,'virtual')
-			if self.virtual_action:
-				self.virtual_action = self.virtual_action[0]
 
 			if physical_actions:
 				self.physical_actions = physical_actions
@@ -687,8 +688,13 @@ class ChildRobotInteractionFSM:
 				# wait until robot's actions for TURN_STARTED to complete. the robot first explores the scene
 				
 				if self.state == ris.ROBOT_TURN: 
+					self.explore_action = "VIRTUALLY_EXPLORE"
 					time.sleep(3)
 					self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_EXPLORE)
+
+			self.virtual_action = self.role_behavior_mapping.get_actions(self.role,self.state,'virtual')
+			if self.virtual_action:
+				self.virtual_action = self.virtual_action[0]
 
 
 		def get_robot_general_response(self):
@@ -908,7 +914,7 @@ class ChildRobotInteractionFSM:
 				else:
 					continue
 
-		def _ros_publish_data(self,action="NA", ispy_action=False):
+		def _ros_publish_data(self,action="NA", v_action = "", ispy_action=False):
 			'''
 			public ros data on child-robot interaction
 			'''
@@ -968,7 +974,12 @@ class ChildRobotInteractionFSM:
 
 			msg.robotBehavior = action
 
-			msg.robotVirtualBehavior = str(self.virtual_action) if self.virtual_action else ""
+			if self.virtual_action:
+				msg.robotVirtualBehavior =  str(self.virtual_action)
+			elif self.explore_action:
+				msg.robotVirtualBehavior = str(self.explore_action)
+			else:
+				msg.robotVirtualBehavior = ""
 
 			msg.robotClickedObj = self.robot_clickedObj
 
@@ -997,6 +1008,9 @@ class ChildRobotInteractionFSM:
 			'''
 			print("asr topic...")
 			print(self.asr_result_topic)
+			print ("publish ros data for question")
+			self._ros_publish_data(question_cmd)
+
 			self.check_existence_of_asr_rostopic()
 			self.continue_robot_help = True
 			if self.asr_result_topic == False: # if google asr shuts down, reopen it
@@ -1040,6 +1054,7 @@ class ChildRobotInteractionFSM:
 			'''
 			send the virtual action message via ROS to the tablet 
 			'''
+			self._ros_publish_data("NA", action)
 
 			action = self.role_behavior_mapping.get_action_name(action) # get the correct name
 

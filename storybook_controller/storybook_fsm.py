@@ -29,7 +29,9 @@ class StorybookFSM(object):
 
     self.ALLOWED_LOG_MESSAGES = [
       StorybookGameInfo.HELLO_WORLD,
-      StorybookGameInfo.SPEECH_ACE_RESULT
+      StorybookGameInfo.SPEECH_ACE_RESULT,
+      StorybookGameInfo.REQUEST_ROBOT_FEEDBACK,
+      StorybookGameInfo.WORD_TAPPED,
     ]
 
     self.states = []
@@ -61,11 +63,13 @@ class StorybookFSM(object):
       if data.message_type == StorybookGameInfo.HELLO_WORLD:
         print("Received hello world!")
         # Sending back a dummy response.
+        # Wait for a few seconds to ensure message not dropped.
+        time.sleep(3)
         params = {
           "obj1": 1,
           "obj2": 2
         }
-        command = 4
+        command = StorybookCommand.PING_TEST
         self.ros.send_storybook_command(command, "")
       elif data.message_type == StorybookGameInfo.SPEECH_ACE_RESULT:
         speechace_result = json.loads(data.message)
@@ -75,8 +79,13 @@ class StorybookFSM(object):
           "obj1": 1,
           "obj2": "hi"
         }
-        command = 3
+        command = StorybookCommand.PING_TEST
         self.ros.send_storybook_command(command, json.dumps(params))
+      elif data.message_type == StorybokGameInfo.REQUEST_ROBOT_FEEDBACK:
+        pass
+      elif data.message_type == StorybookGameInfo.WORD_TAPPED:
+        text = data.message
+        # TODO: do something with this data
       # TODO: call queue.task_done() differenlty in each above case,
       # because we might want to use a join in the future and block
       # on all tasks being completed, for example waiting for a message

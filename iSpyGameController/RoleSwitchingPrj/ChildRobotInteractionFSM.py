@@ -922,6 +922,10 @@ class ChildRobotInteractionFSM:
 			self.curr_robot_action = action
 	
 			msg = iSpyChildRobotInteraction()
+			
+			# add header
+			# msg.header = Header()
+        	# msg.header.stamp = rospy.Time.now()
 
 			# current game task index: 
 			msg.gameTask = self.task_controller.current_task_index 

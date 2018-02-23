@@ -276,4 +276,3 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         print("start child robot interaction publisher/subscriber")
         self.pub_child_robot_interaction = rospy.Publisher(DATA_CHILD_ROBOT_INTERACTION,iSpyChildRobotInteraction,queue_size=1)
         self.sub_child_robot_interacftion = rospy.Subscriber(DATA_CHILD_ROBOT_INTERACTION,iSpyChildRobotInteraction, on_interaction_data)
-        

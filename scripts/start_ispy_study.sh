@@ -7,8 +7,8 @@ list="p00 p01 p02 p03 p04 p05 p06 p07 p08 p09 p10 p11 p12 p13 p14 p15 p16 p17 p1
 
 if ! [[ $list =~ (^| )$1($| ) ]]; then
   echo "error: participant_id [$1] does not exist"
-  echo "Usage: ./startStudy.sh <participant_id> <experimenter_name> <study_phase>"
-  echo "./startStudy.sh p000 huili experiment"
+  echo "Usage: ./startStudy.sh <participant_id> <experimenter_name> <study_phase> <session number>"
+  echo "./startStudy.sh p000 huili experiment s01"
   exit
 fi
 
@@ -16,8 +16,8 @@ fi
 list="huili safinah calvin maggie soojung"
 if ! [[ $list =~ (^| )$2($| ) ]]; then
   echo "error: experimenter [$2] does not exist"
-  echo "Usage: ./startStudy.sh <participant_id> <experimenter_name> <study_phase>"
-  echo "./startStudy.sh p01 huili experiment"
+  echo "Usage: ./startStudy.sh <participant_id> <experimenter_name> <study_phase> <session number>"
+  echo "./startStudy.sh p01 huili experiment s01"
   exit
 fi
 
@@ -25,8 +25,17 @@ fi
 list="practice experiment"
 if ! [[ $list =~ (^| )$3($| ) ]]; then
   echo "error: study phase [$3] does not exist"
-  echo "Usage: ./startStudy.sh <participant_id> <experimenter_name> <study_phase>"
-  echo "./startStudy.sh p01 huili experiment"
+  echo "Usage: ./startStudy.sh <participant_id> <experimenter_name> <study_phase> <session number>"
+  echo "./startStudy.sh p01 huili experiment s01"
+  exit
+fi
+
+#check $4
+list="s01 s02"
+if ! [[ $list =~ (^| )$4($| ) ]]; then
+  echo "error: session number [$4] does not exist"
+  echo "Usage: ./startStudy.sh <participant_id> <experimenter_name> <study_phase> <session number>"
+  echo "./startStudy.sh p01 huili experiment s01"
   exit
 fi
 
@@ -35,9 +44,9 @@ mkdir -p log
 mkdir -p rosbag
 
 
-gnome-terminal --geometry 40x120+0+0 --title ">>>iSpy Game Study MAIN<<<" -e "./scripts/run_ispy.sh $1 $2 $3"
+gnome-terminal --geometry 40x120+0+0 --title ">>>iSpy Game Study MAIN<<<" -e "./scripts/run_ispy.sh $1 $2 $3 $4"
 
 if [ $3 = 'experiment' ]; then
   echo "start rosbag recording...."
-  ./scripts/rosbag_record.sh $1 $2 $3
+  ./scripts/rosbag_record.sh $1 $2 $3 $4
 fi

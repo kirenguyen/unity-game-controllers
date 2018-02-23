@@ -28,7 +28,7 @@ DELAY = 25
 
 class AffdexAnalysis:
 
-	def __init__(self,gameController,ros_node_mgr,game_round,p_id, experimenter):
+	def __init__(self,gameController,ros_node_mgr,game_round,p_id, experimenter, session_number):
 		self.gameController = gameController
 		self.ros_node_mgr = ros_node_mgr
 		self.ros_node_mgr.start_affdex_listener(self.on_affdex_data_received)
@@ -41,7 +41,7 @@ class AffdexAnalysis:
 		now = datetime.datetime.now()
 		date = now.isoformat()
 
-		self.csv_file_prefix = "ispy_data_files/affdex_data/affdex_log_"+p_id+"_"+experimenter+"_"+game_round+"_"+date+"_"
+		self.csv_file_prefix = "ispy_data_files/affdex_data/affdex_log_"+p_id+"_"+experimenter+"_"+game_round+"_"+session_number+"_"+date+"_"
 		self.start_time = '-'.join([str(i) for i in time.localtime()])
 		self.csv_file_name = self.csv_file_prefix+self.start_time+".csv"
 		self.file = open(self.csv_file_name, 'w')

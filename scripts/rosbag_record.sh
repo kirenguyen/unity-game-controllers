@@ -1,1 +1,1 @@
-rosbag record -o ispy_rosbag/$1_s$2_$4 -e /USBCam_image/compressed /tega /tega_state /android_audio /affdex_data /asr_result /data_child_robot_interaction /ispy_transition_state_topic /ispy_action_topic /usb_cam/image_raw/compressed /ispy_cmd_topic
+rosbag record -o ispy_rosbag/$1_$2_$4 -e /USBCam_image/compressed /tega /tega_state /android_audio /affdex_data /asr_result /data_child_robot_interaction /ispy_transition_state_topic /ispy_action_topic /usb_cam/image_raw/compressed /ispy_cmd_topic

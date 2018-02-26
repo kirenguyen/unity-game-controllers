@@ -37,7 +37,7 @@ class iSpyTaskController():
 
 
 		self.load_task_list(game_round)
-		self.load_object_list()
+		self.load_object_list(game_round)
 
 	def get_vocab_word(self):
 		return self.vocab_word
@@ -60,7 +60,8 @@ class iSpyTaskController():
 		# Ex:
 		# {1: ("What objects are related to weather?", object_type, weather)}
 		file_name =  '/../GameUtils/task_list_practice.csv' if game_round == "practice" else '/../GameUtils/task_list_experiment.csv'
-		
+		if game_round == "indoor":
+			file_name = '/../GameUtils/task_list_indoor.csv'
 
 		
 		with open(dir_path + file_name,'r') as csvfile:
@@ -78,7 +79,7 @@ class iSpyTaskController():
 
 
 
-	def load_object_list(self):
+	def load_object_list(self, game_round):
 		""" Loads the object_list csv file into a 2d array """
 		dir_path = os.path.dirname(os.path.realpath(__file__))
 		print (dir_path)
@@ -98,12 +99,19 @@ class iSpyTaskController():
 					self.object_dict[row[0]] = (row[1], row[2], row[3], row[4], row[5], row[6])
 		"""
 
+		# INDOOR : object_list_indoor.csv
+		# OUTDOOR : object_list3.csv
+		if game_round == "indoor":
+			filename = 'object_list_indoor.csv'
+		else:
+			filename = "object_list3.csv"
+
 		# What one row will look like
 		# {object: (word, object_type, object_vocab, attribute, color)}
 		# Ex:
 		# {'bicycle': ('bicycle', 'vehicle', 'vehicle', '2wheels:road', 'emerald')}
 		# WORKS WITH OBJECT_LIST2.CSV
-		with open(dir_path + '/../GameUtils/object_list3.csv','r') as csvfile:
+		with open(dir_path + '/../GameUtils/'+ filename,'r') as csvfile:
 			spamreader = csv.reader(csvfile)
 			for row in spamreader:
 				if row[0] != "" and row[0] != "key_object":

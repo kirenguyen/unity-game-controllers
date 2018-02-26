@@ -70,7 +70,7 @@ class iSpyDataTracking:
 
 			'numTouchAbsenceAlertPerTask','objectWordPronounced' ,
 
-			'isDraggin', 'pointerClick','onPinch','ScalingUp','isScalingDown'
+			'isDraggin', 'pointerClick','onPinch','isScalingUp','isScalingDown'
 			
 			
 			])+'\n')

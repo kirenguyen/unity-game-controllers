@@ -914,7 +914,7 @@ class ChildRobotInteractionFSM:
 				else:
 					continue
 
-		def _ros_publish_data(self,action="NA", v_action = "", ispy_action=False):
+		def _ros_publish_data(self,action="", v_action = "", ispy_action=False):
 			'''
 			public ros data on child-robot interaction
 			'''
@@ -1058,7 +1058,7 @@ class ChildRobotInteractionFSM:
 			'''
 			send the virtual action message via ROS to the tablet 
 			'''
-			self._ros_publish_data("NA", action)
+			self._ros_publish_data("", action)
 
 			action = self.role_behavior_mapping.get_action_name(action) # get the correct name
 

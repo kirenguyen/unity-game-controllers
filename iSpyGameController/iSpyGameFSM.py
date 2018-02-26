@@ -171,13 +171,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 				if not self.task_controller.task_in_progress:
 					# let the game knows the task is completed
 					self.ros_node_mgr.send_ispy_cmd(TASK_COMPLETED)
-
-					print ("TASK COMPLETEEEEEEEEEEEEEEEEEE!!!!!!!!!!!!!!!")
 					
 					self.current_task_index += 1
-
-					print ("CURRENT TASK INDEX!!!!!!!!!!!!!!!!!!!")
-					print (self.current_task_index)
 
 					if self.current_task_index != 0: 
 
@@ -270,7 +265,10 @@ class iSpyGameFSM: # pylint: disable=no-member
 		self.isScalingUp = ispy_action_msg.isScalingUp
 		self.isScalingDown = ispy_action_msg.isScalingDown
 
-		self.interaction._ros_publish_data("NA",True)
+		print ("------ ON ISPY ACTION RECEIVED ------")
+		print (ispy_action_msg)
+
+		self.interaction._ros_publish_data("","", True)
 		
 			
 	def _speechace_analysis(self):

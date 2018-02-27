@@ -58,7 +58,7 @@ class iSpyDataTracking:
 			
 			'numTotalAttemptsForTask','numChildTotalAttemptsForTask', # task related 
 
-			'numChildClickCancelForTurn', # turn related
+			'numChildClickCancelForTurn', 'numHintButtonPressedForTask', # turn related
 
 			'numQsAskeddForTask','numPositiveAnswerForTask','numNegativeAnswerForTask','numOtherAnswerForTask','numNoAnswerAttempt1ForTask', 'numNoAnswerAttempt2ForTask',# turn related
 
@@ -117,7 +117,7 @@ class iSpyDataTracking:
 
 			msg.numTotalAttemptsForTask[0],msg.numTotalAttemptsForTask[1],
 
-			msg.numChildClickCancelForTurn,
+			msg.numChildClickCancelForTurn, msg.numHintButtonPressedForTask, 
 
 			msg.numQAForTurn[0], msg.numQAForTurn[1], msg.numQAForTurn[2], 
 

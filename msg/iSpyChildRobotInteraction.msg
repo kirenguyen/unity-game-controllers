@@ -38,6 +38,8 @@ int8[] numTotalAttemptsForTask
 
 int8 numChildClickCancelForTurn
 
+int8 numHintButtonPressedForTask
+
 int8[] numQAForTurn 
 
 # game state trigger (e.g., object clicked, object found, object pronounced) 

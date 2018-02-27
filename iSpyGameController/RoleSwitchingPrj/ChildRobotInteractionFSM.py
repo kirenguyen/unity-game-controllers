@@ -130,6 +130,8 @@ class ChildRobotInteractionFSM:
 
 			self.child_click_cancel_num = 0
 
+			self.numHintButtonPressedForTask = 0
+
 			self.continue_robot_help = True
 
 			# load tega speech json file
@@ -500,7 +502,7 @@ class ChildRobotInteractionFSM:
 					print("INFO: RETRY QA\n")
 					getattr(self, ris.Triggers.RETRY_QA)()
 	
-			self._ros_publish_data()	
+			self._ros_publish_data()
 
 
 		def reset_turn_taking(self):
@@ -508,6 +510,7 @@ class ChildRobotInteractionFSM:
 			self.state = ris.CHILD_TURN
 			self.child_states.on_new_task_received() # reset some task-based variables in child's states
 			self.task_controller.num_finished_words = 0
+			self.numHintButtonPressedForTask = 0
 
 		def turn_taking(self):
 
@@ -964,6 +967,8 @@ class ChildRobotInteractionFSM:
  
 
 			msg.numChildClickCancelForTurn = self.child_click_cancel_num 
+
+			msg.numHintButtonPressedForTask = self.numHintButtonPressedForTask
 
 			msg.numQAForTurn = [self.child_states.num_robot_questions_asked, self.child_states.pos_answers, 
 									self.child_states.neg_answers, self.child_states.other_answers,

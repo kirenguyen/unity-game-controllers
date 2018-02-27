@@ -157,6 +157,9 @@ class iSpyGameFSM: # pylint: disable=no-member
 				self.interaction.turn_start_time = datetime.datetime.now()
 				self._run_game_task()
 
+			elif transition_msg.data == gs.Triggers.HINT_BUTTON_PRESSED:
+				self.interaction.numHintButtonPressedForTask += 1
+
 
 			elif transition_msg.data == gs.Triggers.OBJECT_CLICKED:
 				pass
@@ -264,9 +267,6 @@ class iSpyGameFSM: # pylint: disable=no-member
 		self.onPinch = ispy_action_msg.onPinch
 		self.isScalingUp = ispy_action_msg.isScalingUp
 		self.isScalingDown = ispy_action_msg.isScalingDown
-
-		print ("------ ON ISPY ACTION RECEIVED ------")
-		print (ispy_action_msg)
 
 		self.interaction._ros_publish_data("","", True)
 		

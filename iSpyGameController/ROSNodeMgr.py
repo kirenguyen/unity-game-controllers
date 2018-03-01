@@ -64,7 +64,8 @@ ROBOT_VIRTUAL_ACTIONS = 30
 BUTTON_DISABLED=31
 TASK_COMPLETED=32
 WHOSE_TURN = 33
-VALID_ISPY_COMMANDS = [WHOSE_TURN,TASK_COMPLETED,ROBOT_VIRTUAL_ACTIONS, RESET, SHOW_PRONOUNCIATION_PANEL, SHOW_PRONOUNCIATION_PANEL, SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, SEND_TASKS_TO_UNITY, GAME_FINISHED,BUTTON_DISABLED]
+SET_GAME_SCENE = 34
+VALID_ISPY_COMMANDS = [SET_GAME_SCENE, WHOSE_TURN,TASK_COMPLETED,ROBOT_VIRTUAL_ACTIONS, RESET, SHOW_PRONOUNCIATION_PANEL, SHOW_PRONOUNCIATION_PANEL, SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, SEND_TASKS_TO_UNITY, GAME_FINISHED,BUTTON_DISABLED]
 
 
 
@@ -177,6 +178,13 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
 
                 elif command == WHOSE_TURN:
                     msg.properties = json.dumps(args[0])
+
+                elif command == SET_GAME_SCENE:
+                    if (args[0]=="indoor"):
+                        gameScene = "indoor"
+                    else:
+                        gameScene = "outdoor"
+                    msg.properties = json.dumps(gameScene)
 
             # send message to tablet game
             if self.game_commander is None:

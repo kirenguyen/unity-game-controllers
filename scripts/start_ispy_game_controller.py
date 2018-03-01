@@ -43,10 +43,12 @@ def main():
     control = iSpyGameFSM.iSpyGameFSM(game_round,participant_id, experimenter)
     print("FSM Started!")
     thread.start_new_thread(control.ros_node_mgr.start_ispy_transition_listener, (control.on_ispy_state_info_received,))
-    
+
     thread.start_new_thread(control.ros_node_mgr.start_ispy_log_listener, (control.on_ispy_log_received,))
 
     signal.signal(signal.SIGINT, signal_handler) # for keyboard interrupt
+
+    control.ros_node_mgr.send_ispy_cmd(34,game_round) #SET_GAME_SCENE = 34
 
     control.ros_node_mgr.start_ispy_action_listener(control.on_ispy_action_received)
 

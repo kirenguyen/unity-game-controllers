@@ -66,7 +66,7 @@ GAME_FINISHED = 99
 BUTTON_DISABLED=31
 TASK_COMPLETED = 32
 VALID_ISPY_COMMANDS = [RESET, SHOW_PRONOUNCIATION_PANEL, SHOW_PRONOUNCIATION_PANEL, SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, SEND_TASKS_TO_UNITY, GAME_FINISHED,BUTTON_DISABLED]
-
+SET_GAME_SCENE = 34
 
 
 
@@ -351,7 +351,6 @@ class iSpyGameFSM: # pylint: disable=no-member
 				self.interaction.get_robot_general_response()
 				
 				t = threading.Timer(3.0,self.interaction.start_tracking_child_interaction).start()
-
 
 
 	

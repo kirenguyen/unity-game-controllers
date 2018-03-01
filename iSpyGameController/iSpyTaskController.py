@@ -138,7 +138,6 @@ class iSpyTaskController():
 		self.vocab_word = task_attribute
 
 		
-
 		# Delete the quest after it is chosen
 		del self.available_quests[index]
 

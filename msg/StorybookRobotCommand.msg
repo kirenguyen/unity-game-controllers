@@ -1,1 +1,0 @@
-# Message to send from controller to the robot in the storybook interaction.

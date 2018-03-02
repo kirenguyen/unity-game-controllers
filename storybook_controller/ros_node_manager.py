@@ -9,20 +9,24 @@ agent and the tablet app.
 import rospy
 
 from unity_game_msgs.msg import StorybookCommand
-from unity_game_msgs.msg import StorybookGameInfo
-# from unity_game_msgs.msg import StorybookRobotCommand
-from jibo_msgs.msg import JiboAction
-from std_msgs.msg import Header  # standard ROS msg header
+from unity_game_msgs.msg import StorybookInfo
+from std_msgs.msg import Header  # Standard ROS msg header
+from jibo_msgs.msg import JiboAction # Commands to Jibo
+from jibo_msgs.msg import JiboState # State from Jibo
+from jibo_msgs.msg import JiboAsr # ASR results from Jibo
 
 from storybook_controller.storybook_constants import *
+from storybook_controller.jibo_commands import JiboCommands
+from storybook_controller.jibo_commands import JiboStorybookBehaviors
 
 class ROSNodeManager(object):
   def __init__(self, name):
     self.node_name = name
     self.storybook_listener = None
     self.storybook_publisher = None
-    self.robot_listener = None
-    self.robot_publsher = None
+    self.jibo_state_listener = None
+    self.jibo_asr_listener = None
+    self.jibo_publisher = None
 
   def init_ros_node(self):
     rospy.init_node(self.node_name, anonymous=True)
@@ -33,17 +37,24 @@ class ROSNodeManager(object):
     """
     print("Starting storybook subscriber node.")
     self.storybook_listener = rospy.Subscriber(STORYBOOK_TO_ROSCORE_TOPIC,
-                                               StorybookGameInfo, callback)
+                                               StorybookInfo, callback)
 
-  # def start_robot_listener(self, callback):
-  #   """
-  #   Starts the robot subscriber node.
-  #   """
-  #   print("Starting storybook subscriber node.")
-  #   self.storybook_listener = rospy.Subscriber(ROBOT_TO_ROSCORE_TOPIC,
-  #                             No module named _thread
-  #               JiboStorybookLog, callback)
+  def start_jibo_state_listener(self, callback):
+    """
+    Starts the jibo state subscriber node.
+    """
+    print("Starting jibo state subscriber node.")
+    self.jibo_state_listener = rospy.Subscriber(JIBO_STATE_TOPIC,
+                                               JiboState, callback)
   
+  def start_jibo_asr_listener(self, callback):
+    """
+    Starts the jibo ASR subscriber node.
+    """
+    print("Starting jibo ASR subscriber node.")
+    self.jibo_asr_listener = rospy.Subscriber(JIBO_ASR_TOPIC,
+                                               JiboAsr, callback)
+
   def start_storybook_publisher(self):
     """
     Starts the storybook publisher node.
@@ -55,12 +66,12 @@ class ROSNodeManager(object):
     rate = rospy.Rate(10)
     rate.sleep()
 
-  def start_robot_publisher(self):
+  def start_jibo_publisher(self):
     """
     Starts the robot publisher node.
     """
     print("Starting robot publisher node.")
-    self.robot_publisher = rospy.Publisher(ROSCORE_TO_STORYBOOK_TOPIC,
+    self.jibo_publisher = rospy.Publisher(JIBO_ACTION_TOPIC,
                                                JiboAction, queue_size=10)
     # Spin at 10Hz, wait for subscribers.
     rate = rospy.Rate(10)
@@ -80,14 +91,13 @@ class ROSNodeManager(object):
     self.storybook_publisher.publish(msg)
     rospy.loginfo(msg)
 
-  def send_robot_command(self, command, *args):
+  def send_jibo_command(self, command, *args):
     """
     Send a command to the robot.
     Args are any optional arguments, as a serialized JSON string.
     """
-
-    msg = JiboBehaviors.get_msg_from_behavior(command, args)
-    self.storybook_publisher.publish(msg)
+    msg = JiboCommands.get_message_from_behavior(command, *args)
+    self.jibo_publisher.publish(msg)
     rospy.loginfo(msg)
 
 

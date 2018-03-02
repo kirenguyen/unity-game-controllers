@@ -22,14 +22,20 @@ def main(argv):
   student_model = StudentModel()
 
   fsm = StorybookFSM(ros_node_manager, student_model)
+  
   # Run the ROS isteners in separate threads.
-  # TODO: really need to think hard about how concurrency is going
-  # to mess with this...
+  # We force serialization by having all handlers add events to the
+  # task queue, and then executing events on the queue in order
+  # in a separate dedicated thread.
   ros_node_manager.start_storybook_publisher()
   thread.start_new_thread(ros_node_manager.start_storybook_listener,
-                          (fsm.ros_message_handler,))
-  # thread.start_new_thread(ros_node_manager.start_robot_listener,
-  #                         (fsm.ros_message_handler,))
+                          (fsm.storybook_ros_message_handler,))
+  ros_node_manager.start_jibo_publisher()
+  thread.start_new_thread(ros_node_manager.start_jibo_state_listener,
+                          (fsm.jibo_state_ros_message_handler,))
+  thread.start_new_thread(ros_node_manager.start_jibo_asr_listener,
+                          (fsm.jibo_asr_ros_message_handler,))
+  # Main event queue.
   thread.start_new_thread(fsm.process_main_event_queue, ())
   signal.signal(signal.SIGINT, signal_handler)
 

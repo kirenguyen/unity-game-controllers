@@ -13,9 +13,10 @@ import queue
 import time
 
 from unity_game_msgs.msg import StorybookCommand
-from unity_game_msgs.msg import StorybookGameInfo
+from unity_game_msgs.msg import StorybookInfo
 
 from storybook_controller.storybook_constants import *
+from storybook_controller.jibo_commands import JiboStorybookBehaviors
 
 class StorybookFSM(object):
   def __init__(self, ros_node_manager, student_model):
@@ -28,10 +29,10 @@ class StorybookFSM(object):
     self.student_model = student_model
 
     self.ALLOWED_LOG_MESSAGES = [
-      StorybookGameInfo.HELLO_WORLD,
-      StorybookGameInfo.SPEECH_ACE_RESULT,
-      StorybookGameInfo.REQUEST_ROBOT_FEEDBACK,
-      StorybookGameInfo.WORD_TAPPED,
+      StorybookInfo.HELLO_WORLD,
+      StorybookInfo.SPEECH_ACE_RESULT,
+      StorybookInfo.REQUEST_ROBOT_FEEDBACK,
+      StorybookInfo.WORD_TAPPED,
     ]
 
     self.states = []
@@ -60,18 +61,22 @@ class StorybookFSM(object):
       # This call to get() will block the thread until something is there.
       data = self.event_queue.get()
       # Handle data.
-      if data.message_type == StorybookGameInfo.HELLO_WORLD:
+      if data.message_type == StorybookInfo.HELLO_WORLD:
         print("Received hello world!")
         # Sending back a dummy response.
-        # Wait for a few seconds to ensure message not dropped.
-        time.sleep(3)
         params = {
           "obj1": 1,
           "obj2": 2
         }
         command = StorybookCommand.PING_TEST
+        # Wait for a little bit to ensure message not dropped.
+        time.sleep(1)
+        print("Sending ack")
         self.ros.send_storybook_command(command, "")
-      elif data.message_type == StorybookGameInfo.SPEECH_ACE_RESULT:
+        print("Sending message to Jibo")
+        self.ros.send_jibo_command(JiboStorybookBehaviors.EXPLAIN_WORD, "Hi Hanna, it worked!")
+      
+      elif data.message_type == StorybookInfo.SPEECH_ACE_RESULT:
         speechace_result = json.loads(data.message)
         # print(speechace_result)
         print(speechace_result["text_score"]["quality_score"])
@@ -81,23 +86,27 @@ class StorybookFSM(object):
         }
         command = StorybookCommand.PING_TEST
         self.ros.send_storybook_command(command, json.dumps(params))
-      elif data.message_type == StorybokGameInfo.REQUEST_ROBOT_FEEDBACK:
+      
+      elif data.message_type == StorybookInfo.REQUEST_ROBOT_FEEDBACK:
         pass
-      elif data.message_type == StorybookGameInfo.WORD_TAPPED:
+      
+      elif data.message_type == StorybookInfo.WORD_TAPPED:
         text = data.message
         # TODO: do something with this data
-      # TODO: call queue.task_done() differenlty in each above case,
+      
+      # TODO: Maybe call queue.task_done() differently in each above case,
       # because we might want to use a join in the future and block
       # on all tasks being completed, for example waiting for a message
       # to be sent and acknowledged before continuing on with execution.
       self.event_queue.task_done()
 
-  def ros_message_handler(self, data):
+  def storybook_ros_message_handler(self, data):
     """
-    Define the callback function to pass to ROS node manager. This callback is
-    called when the ROS node manager receives new data.
+    Define the callback function to pass to ROS node manager.
+    This callback is called when the ROS node manager receives a new
+    StorybookInfo message, which will be triggered by events in the storybook.
     """
-    print("Received ROS message with data:\n", data)
+    print("Received StorybookInfo message with data:\n", data)
     
     if data.message_type in self.ALLOWED_LOG_MESSAGES:
       self.event_queue.put(data)
@@ -105,14 +114,19 @@ class StorybookFSM(object):
       # Fail fast.
       print("Unknown message type!")
       sys.exit(1)
-  
 
-    # CONCURRENCY WILL BE A HUGE PROBLEM FOR THIS
-    #
-    # Need to define all of the callback functions for conditions and after
-    # functions.
-    #
-    # Triggers need to be called by name by other functions.
-    #
-    # Conditions with arguments are passed those arguments by the call to the
-    # trigger.
+  def jibo_state_ros_message_handler(self, data):
+    """
+    Define callback function for when ROS node manager receives a new
+    JiboState message, which will be at 10Hz.
+    """
+    if data.is_playing_sound:
+      print("playing sound:", data.tts_msg)
+
+
+  def jibo_asr_ros_message_handler(self, data):
+    """
+    Define callback function for when ROS node manager receives a new
+    JiboAsr message, which should be whenever someone says "Hey, Jibo! ..."
+    """
+    print("Received JiboAsr message with data:\n", data)

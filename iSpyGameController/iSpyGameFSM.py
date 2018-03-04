@@ -159,16 +159,13 @@ class iSpyGameFSM: # pylint: disable=no-member
 				self.interaction.turn_start_time = datetime.datetime.now()
 				self._run_game_task()
 
-<<<<<<< HEAD
-			if transition_msg.data == gs.Triggers.CONNECT_BUTTON_PRESSED:
+			elif transition_msg.data == gs.Triggers.CONNECT_BUTTON_PRESSED:
 				self.ros_node_mgr.send_ispy_cmd(34, self.game_round) #SET_GAME_SCNE = 34
 				print("CONNECT_BUTTON_PRESSED: game round is "+ self.game_round)
 				
-=======
 			elif transition_msg.data == gs.Triggers.HINT_BUTTON_PRESSED:
 				self.interaction.numHintButtonPressedForTask += 1
 
->>>>>>> af6e80c6346dc0dd52037e7dbd63b1f50722c70a
 
 			elif transition_msg.data == gs.Triggers.OBJECT_CLICKED:
 				pass

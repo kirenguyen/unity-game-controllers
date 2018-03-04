@@ -13,7 +13,7 @@ CSV_PATH = "ispy_data_files/"
 
 
 class iSpyDataTracking:
-	def __init__(self,childRobotFSM,ros_node_mgr,participant_id, experimenter):
+	def __init__(self,childRobotFSM,ros_node_mgr,participant_id, experimenter, session_number):
 
 		self.ros_node_mgr = ros_node_mgr
 		# create a pandas dataframe to store all interaction data based on timestamps
@@ -23,7 +23,7 @@ class iSpyDataTracking:
 		if not os.path.isdir("ispy_data_files/"): # check exitence of folders
 			os.makedirs("ispy_data_files/")
 
-		self._initialize_csvs(participant_id, experimenter)
+		self._initialize_csvs(participant_id, experimenter, session_number)
 
 		self.ros_node_mgr.start_child_robot_interaction_pub_sub(self.on_child_robot_interaction_data_received)
 		# create ros subscribers to published data
@@ -31,7 +31,7 @@ class iSpyDataTracking:
 
 		
 		
-	def _initialize_csvs(self,participant_id, experimenter):
+	def _initialize_csvs(self,participant_id, experimenter, session_number):
 
 		import datetime
 
@@ -42,7 +42,7 @@ class iSpyDataTracking:
 		# self.ispy_action_log_csv.write(','.join(['elapsedTime','localTime', 'isScalingUpDown',
 		# 	'pointerClick','isDragging','onPinch','clickedObjectName']))
 
-		self.child_robot_interaction_csv = open(CSV_PATH+"interaction_log_"+participant_id+"_"+experimenter+"_"+date+".csv","a") 
+		self.child_robot_interaction_csv = open(CSV_PATH+"interaction_log_"+participant_id+"_"+experimenter+"_"+session_number+"_"+date+".csv","a") 
 		
 
 		self.child_robot_interaction_csv.write(','.join([
@@ -58,9 +58,9 @@ class iSpyDataTracking:
 			
 			'numTotalAttemptsForTask','numChildTotalAttemptsForTask', # task related 
 
-			'numChildClickCancelForTurn', # turn related
+			'numChildClickCancelForTurn', 'numHintButtonPressedForTask', # turn related
 
-			'numQsAskeddForTurn','numPositiveAnswerForTurn','numNegativeAnswerForTurn','numOtherAnswerForTurn','numNoAnswerAttempt1ForTurn', 'numNoAnswerAttempt2ForTurn',# turn related
+			'numQsAskeddForTask','numPositiveAnswerForTask','numNegativeAnswerForTask','numOtherAnswerForTask','numNoAnswerAttempt1ForTask', 'numNoAnswerAttempt2ForTask',# turn related
 
 			'gameStateTrigger','currentInteractionState','currentGameState',
 
@@ -70,12 +70,12 @@ class iSpyDataTracking:
 
 			'numTouchAbsenceAlertPerTask','objectWordPronounced' ,
 
-			'isDraggin', 'pointerClick','onPinch','ScalingUp','isScalingDown'
+			'isDraggin', 'pointerClick','onPinch','isScalingUp','isScalingDown'
 			
 			
 			])+'\n')
 
-		# self.interaction_turn_csv = open(CSV_PATH+"interaction_turn_summary_"+participant_id+"_"+experimenter+"_"+date+".csv","a") 
+		# self.interaction_turn_csv = open(CSV_PATH+"interaction_turn_summary_"+participant_id+"_"+experimenter+"_"+session_number_"+date+".csv","a") 
 		# elf.interaction_turn_csv.write(','.join(['turn_index','elapsedTimeFromGameStart','localTime',
 		# 	'turnStartTime','turnEndTime', 
 		# 	'gameTask','vocab', 'whoseTurn', 
@@ -117,7 +117,7 @@ class iSpyDataTracking:
 
 			msg.numTotalAttemptsForTask[0],msg.numTotalAttemptsForTask[1],
 
-			msg.numChildClickCancelForTurn,
+			msg.numChildClickCancelForTurn, msg.numHintButtonPressedForTask, 
 
 			msg.numQAForTurn[0], msg.numQAForTurn[1], msg.numQAForTurn[2], 
 

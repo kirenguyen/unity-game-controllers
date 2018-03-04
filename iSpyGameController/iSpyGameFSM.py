@@ -78,7 +78,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 	"""
 
 
-	def __init__(self,game_round,participant_id, experimenter):
+	def __init__(self,game_round,participant_id, experimenter, session_number):
 
 		self.ros_node_mgr = ROSNodeMgr()
 		self.ros_node_mgr.init_ros_node()
@@ -104,7 +104,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		self.interaction = ChildRobotInteractionFSM(self.ros_node_mgr,self.task_controller,self)
 
-		self.iSpyDataTracking = iSpyDataTracking(self.interaction,self.ros_node_mgr, participant_id, experimenter)
+		self.iSpyDataTracking = iSpyDataTracking(self.interaction,self.ros_node_mgr, participant_id, experimenter, session_number)
 
 		# Bool stating whether or not the current mission is completed
 		self.mission_completed = True
@@ -114,7 +114,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		# AlwaysMissionModeFSM(self.ros_node_mgr) # CompleteModeFSM() # AlwaysExploreModeFSM(self.ros_node_mgr)
 		self.FSM = AlwaysMissionModeFSM(self.ros_node_mgr,game_round)
 
-		self.affdexAnalysis = AffdexAnalysis(self,self.ros_node_mgr,game_round,participant_id,experimenter)
+		self.affdexAnalysis = AffdexAnalysis(self,self.ros_node_mgr,game_round,participant_id,experimenter, session_number)
 
 		self.kill_received = False # for stopping the update() thread
 
@@ -157,6 +157,9 @@ class iSpyGameFSM: # pylint: disable=no-member
 				self.interaction.turn_start_time = datetime.datetime.now()
 				self._run_game_task()
 
+			elif transition_msg.data == gs.Triggers.HINT_BUTTON_PRESSED:
+				self.interaction.numHintButtonPressedForTask += 1
+
 
 			elif transition_msg.data == gs.Triggers.OBJECT_CLICKED:
 				pass
@@ -171,13 +174,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 				if not self.task_controller.task_in_progress:
 					# let the game knows the task is completed
 					self.ros_node_mgr.send_ispy_cmd(TASK_COMPLETED)
-
-					print ("TASK COMPLETEEEEEEEEEEEEEEEEEE!!!!!!!!!!!!!!!")
 					
 					self.current_task_index += 1
-
-					print ("CURRENT TASK INDEX!!!!!!!!!!!!!!!!!!!")
-					print (self.current_task_index)
 
 					if self.current_task_index != 0: 
 
@@ -270,7 +268,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		self.isScalingUp = ispy_action_msg.isScalingUp
 		self.isScalingDown = ispy_action_msg.isScalingDown
 
-		self.interaction._ros_publish_data("NA",True)
+		self.interaction._ros_publish_data("","", True)
 		
 			
 	def _speechace_analysis(self):

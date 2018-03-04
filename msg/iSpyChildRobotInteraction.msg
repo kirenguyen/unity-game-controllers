@@ -1,5 +1,5 @@
 # ROS Message (child robot interaction)
-
+# Header header
 
 # current game task index: 
 int8 gameTask 
@@ -37,6 +37,8 @@ int8[] numFinishedObjectsForTask
 int8[] numTotalAttemptsForTask
 
 int8 numChildClickCancelForTurn
+
+int8 numHintButtonPressedForTask
 
 int8[] numQAForTurn 
 

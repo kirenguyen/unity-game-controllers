@@ -48,7 +48,7 @@ def main():
 
     signal.signal(signal.SIGINT, signal_handler) # for keyboard interrupt
 
-    control.ros_node_mgr.send_ispy_cmd(34,game_round) #SET_GAME_SCENE = 34
+    # control.ros_node_mgr.send_ispy_cmd(34,game_round) #SET_GAME_SCENE = 34
 
     control.ros_node_mgr.start_ispy_action_listener(control.on_ispy_action_received)
 

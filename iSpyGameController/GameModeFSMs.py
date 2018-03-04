@@ -56,6 +56,7 @@ class AlwaysMissionModeFSM(BaseGameFSM):
 
 		self.states = [gs.GAME_START, gs.EXPLORATION_MODE,gs.MISSION_MODE,gs.PRONUNCIATION_PANEL,gs.PRONUNCIATION_RESULT,gs.WORD_DISPLAY]
 		self.transitions = [
+				{'trigger': gs.Triggers.CONNECT_BUTTON_PRESSED, 'source': gs.GAME_START, 'dest': gs.GAME_START},
 				{'trigger': gs.Triggers.START_BUTTON_PRESSED, 'source': gs.GAME_START, 'dest': gs.EXPLORATION_MODE},
 				{'trigger': gs.Triggers.TOPLEFT_BUTTON_PRESSED, 'source': gs.EXPLORATION_MODE, 'dest': gs.MISSION_MODE},
 				{'trigger': gs.Triggers.TOPLEFT_BUTTON_PRESSED, 'source': gs.MISSION_MODE, 'dest': gs.MISSION_MODE},

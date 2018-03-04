@@ -180,11 +180,8 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                     msg.properties = json.dumps(args[0])
 
                 elif command == SET_GAME_SCENE:
-                    if (args[0]=="indoor"):
-                        gameScene = "indoor"
-                    else:
-                        gameScene = "outdoor"
-                    msg.properties = json.dumps(gameScene)
+                    gameScene = json.dumps(args[0])
+                    msg.properties = gameScene
 
             # send message to tablet game
             if self.game_commander is None:

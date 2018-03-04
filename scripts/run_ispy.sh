@@ -19,5 +19,5 @@ xterm -bg brown -geometry 45x20+300+550 -T "Speech Recognition" -e "python3 ../a
 sleep 0.5s
 
 #./scripts/start_recording_linux.sh $1 $2
-python3 -m scripts.start_ispy_game_controller $3 $1 $2
+python3 -m scripts.start_ispy_game_controller $3 $1 $2 $4
 #xterm -geometry 120x40+200+0 -T "Main FSM" -e bash -c "python3 -m scripts.start_ispy_game_controller" $3 &

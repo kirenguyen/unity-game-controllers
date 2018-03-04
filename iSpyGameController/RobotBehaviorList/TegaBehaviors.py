@@ -232,7 +232,7 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
         if command == RobotBehaviors.Q_ROBOT_INDUCE_SPEECH:
             PATH = ROOT_TEGA_SPEECH_FOLDER + "general/induce_keyword/"
             file = "induce_keyword_"
-            speech_file = PATH + file + random.choice(["1", "2", "3", "4", "5"]) + ".wav"
+            speech_file = PATH + file + random.choice(["1", "3", "6"]) + ".wav"
             msg.wav_filename = speech_file
             print ("induced speech: "+msg.wav_filename)
 

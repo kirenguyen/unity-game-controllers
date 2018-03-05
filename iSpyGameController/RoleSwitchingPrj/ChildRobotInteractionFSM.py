@@ -969,7 +969,7 @@ class ChildRobotInteractionFSM:
 
 			msg.numChildClickCancelForTurn = self.child_click_cancel_num 
 
-			msg.numHintButtonPressedForTask = self.numHintButtonPressedForTask
+			#msg.numHintButtonPressedForTask = self.numHintButtonPressedForTask
 
 			msg.numQAForTurn = [self.child_states.num_robot_questions_asked, self.child_states.pos_answers, 
 									self.child_states.neg_answers, self.child_states.other_answers,

@@ -83,7 +83,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		self.ros_node_mgr = ROSNodeMgr()
 		self.ros_node_mgr.init_ros_node()
 
-		self.game_round = game_round
+		self.session_number = session_number
 
 		# Keeps track of the word the child is supposed to say
 		self.origText = ""
@@ -160,8 +160,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 				self._run_game_task()
 
 			elif transition_msg.data == gs.Triggers.CONNECT_BUTTON_PRESSED:
-				self.ros_node_mgr.send_ispy_cmd(34, self.game_round) #SET_GAME_SCNE = 34
-				print("CONNECT_BUTTON_PRESSED: game round is "+ self.game_round)
+				self.ros_node_mgr.send_ispy_cmd(34, self.session_number) #SET_GAME_SCNE = 34
+				print("CONNECT_BUTTON_PRESSED : "+self.session_number)
 				
 			elif transition_msg.data == gs.Triggers.HINT_BUTTON_PRESSED:
 				self.interaction.numHintButtonPressedForTask += 1

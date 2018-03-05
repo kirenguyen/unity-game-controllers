@@ -117,7 +117,7 @@ class iSpyDataTracking:
 
 			msg.numTotalAttemptsForTask[0],msg.numTotalAttemptsForTask[1],
 
-			msg.numChildClickCancelForTurn, msg.numHintButtonPressedForTask, 
+			msg.numChildClickCancelForTurn, #msg.numHintButtonPressedForTask, 
 
 			msg.numQAForTurn[0], msg.numQAForTurn[1], msg.numQAForTurn[2], 
 

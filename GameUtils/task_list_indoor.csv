@@ -1,8 +1,6 @@
 ,q,category,attribute,audio_file_name,task_script
-1,,object_vocab,garment,garment.wav,can you spy garments?
-2,,color,azure,azure.wav,can you spy objects in azure
-3,,color,amber,amber.wav,can you spy objects in amber
-5,,size,colossal,colossal.wav,can you spy colossal objects?
-6,,object_vocab,utensil,utensil.wav,can you spy utensils?
-7,,object_vocab,sanitation,sanitation.wav,can you spy objects for sanitation?
-8,,object_vocab,electronics,electronics.wav,can you spy electronics?
+1,,size,gigantic,gigantic.wav,Can you spy objects that are gigantic? 
+2,,object_vocab,garment,garment.wav,can you spy garments?
+3,,color,azure,azure.wav,can you spy objects in azure
+4,,size,minuscule,minuscule.wav,Can you spy objects that are minuscule? 
+5,,color,lavender,lavender.wav,Can you spy objects in lavender?

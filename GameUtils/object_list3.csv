@@ -1,7 +1,7 @@
 key_object,word,object_type,object_vocab,attribute,color,animal,vehicle,emotion,action,aquatic,size,activity,cloth,land
-baby,baby,human,minor,young,,,,,soar,,minuscule,,,
-bird,bird,animal,omnivore,2legs:small:city,,omnivore,,,soar,,minuscule,,,
-bicycle,bicycle,vehicle,vehicle,2wheels:road,,,vehicle,,soar,,,,,
+baby,baby,human,minor,young,,,,,,,minuscule,,,
+pigeon,pigeon,animal,omnivore,2legs:small:city,,omnivore,,,soar,,minuscule,,,
+bicycle,bicycle,vehicle,vehicle,2wheels:road,,,vehicle,,,,,,,
 boat,boat,vehicle,vehicle,water,crimson,,vehicle,,,,,,,
 bucket,bucket,inanimate,inanimate,blue:small,azure:blue,,,,,,,,,
 bus,bus,vehicle,vehicle:automobile:public,4wheels:road,azure:blue,,vehicle,,,,gigantic:giant,,,
@@ -50,3 +50,6 @@ tractor,tractor,vehicle,vehicle:automobile,4wheels:road,crimson,,vehicle,,,,giga
 train,train,vehicle,vehicle:automobile:public,,,,vehicle,,,,gigantic:giant,,,
 waving,waving,action,hobby,,,,,delighted:happy,,,,,,
 window,window,inanimate,inanimate,purple,azure:blue,,,,,,,,,
+bird,bird,,,,crimson,,,,soar,,minuscule,,,
+eagle,eagle,,,,,,,,soar,,,,,
+sleeping,sleeping,,,,,,,,,,,,,

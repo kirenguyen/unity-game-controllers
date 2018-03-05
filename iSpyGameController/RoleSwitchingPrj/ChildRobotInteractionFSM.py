@@ -43,7 +43,7 @@ class ChildRobotInteractionFSM:
 		and ChildStates
 		'''
 
-		def __init__(self,ros_node_mgr,task_controller,game_controller):
+		def __init__(self,ros_node_mgr,task_controller,game_controller,participant_id):
 			# use hierachical FSM here. The python package can be found here: https://github.com/pytransitions/transitions
 			self.states = [ {'name': ris.ROBOT_TURN, 'children':[ris.QUESTION_ASKING,ris.LISTEN_CHILD_SPEECH_RESPONSE, ris.PARSE_CHILD_SPEECH_RESPONSE, ris.CHILD_HELP]}, {'name':ris.CHILD_TURN,'children':[ ris.NO_INTERACTION_1, ris.QUESTION_ASKING ,ris.LISTEN_CHILD_SPEECH_RESPONSE, ris.PARSE_CHILD_SPEECH_RESPONSE, ris.ROBOT_HELP]} ]
 			self.transitions = [
@@ -112,7 +112,6 @@ class ChildRobotInteractionFSM:
 			self.ros_node_mgr.start_tega_state_listener(self.on_tega_state_received)
 
 			self.ros_node_mgr.start_tega_asr(self.on_tega_new_asr_result)
-
 			
 			self.tega_is_playing_sound = False
 
@@ -134,8 +133,10 @@ class ChildRobotInteractionFSM:
 
 			self.continue_robot_help = True
 
-			# load tega speech json file
-			# parse tega_speech.json
+			# load assigned condition the participant is in
+			subj_assign_dict = json.loads(open("iSpyGameController/res/participant_assignment.json").read())
+			self.subj_cond = subj_assign_dict[participant_id]
+
 			tega_speech_file = open("iSpyGameController/res/tega_speech.json")
 			self.tega_speech_dict = json.loads(tega_speech_file.read())
 
@@ -157,22 +158,6 @@ class ChildRobotInteractionFSM:
 			# else:
 			# 	print("======WARNING: asr result publisher does not exist. Remember to start ros_asr.py======")
 
-		
-
-		# def on_exit_childTURN(self):
-			
-		# 	self.turn_end_time = datetime.now()
-		# 	print(self.turn_end_time)
-		# 	print(self.turn_start_time)
-		# 	self.turn_duration = str(self.turn_end_time - self.turn_start_time)
-		# 	self._ros_publish_data()
-
-		# def on_exit_robotTURN(self):
-		
-		# 	self.turn_end_time = datetime.now()
-		# 	self.turn_duration = str(self.turn_end_time - self.turn_start_time)
-			
-		# 	self._ros_publish_data()
 
 		def on_enter_childTURN(self):
 			self.turn_start_time = datetime.now()
@@ -673,14 +658,23 @@ class ChildRobotInteractionFSM:
 				else:
 					continue
 
+
+
+
 		def get_turn_taking_actions(self):
 			'''
 			check the current interaction FSM to decide whether the robot should respond
 			then, use agent model to decide how the robot should respond if it needs to respond
 			'''
 			def get_next_robot_role():
-				next_action = random.choice([0,1])
-				return RobotRoles(next_action)
+				''' 3 conditions: fixed novice, fixed expert and adaptive role switching'''
+				cond_switcher = {
+					"expert":  RobotRoles(0),
+					"novice":	RobotRoles(1),
+					"adaptive": RobotRoles(random.choice([0,1])), 
+					"random":	RobotRoles(random.choice([0,1]))
+				}
+				return cond_switcher[self.subj_cond]
 			
 			if self.state == ris.ROBOT_TURN: self.role = get_next_robot_role()
 				

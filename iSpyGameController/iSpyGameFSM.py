@@ -78,7 +78,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 	"""
 
 
-	def __init__(self,game_round,participant_id, experimenter, session_number):
+	def __init__(self,participant_id, experimenter, session_number):
 
 		self.ros_node_mgr = ROSNodeMgr()
 		self.ros_node_mgr.init_ros_node()
@@ -100,11 +100,11 @@ class iSpyGameFSM: # pylint: disable=no-member
 		# Bool telling if the cmd message was heard from Unity
 		self.ros_node_mgr.message_received = False
 
-		self.task_controller = iSpyTaskController(game_round,session_number)
+		self.task_controller = iSpyTaskController(session_number)
 
 		self.results_handler = PronunciationUtils()
 
-		self.interaction = ChildRobotInteractionFSM(self.ros_node_mgr,self.task_controller,self)
+		self.interaction = ChildRobotInteractionFSM(self.ros_node_mgr,self.task_controller,self, participant_id)
 
 		self.iSpyDataTracking = iSpyDataTracking(self.interaction,self.ros_node_mgr, participant_id, experimenter, session_number)
 
@@ -114,9 +114,11 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		# choose which game FSM to call
 		# AlwaysMissionModeFSM(self.ros_node_mgr) # CompleteModeFSM() # AlwaysExploreModeFSM(self.ros_node_mgr)
-		self.FSM = AlwaysMissionModeFSM(self.ros_node_mgr,game_round)
+		self.FSM = AlwaysMissionModeFSM(self.ros_node_mgr,session_number)
 
-		self.affdexAnalysis = AffdexAnalysis(self,self.ros_node_mgr,game_round,participant_id,experimenter, session_number)
+
+		if session_number != "practice":
+			self.affdexAnalysis = AffdexAnalysis(self,self.ros_node_mgr,participant_id,experimenter, session_number)
 
 		self.kill_received = False # for stopping the update() thread
 

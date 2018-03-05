@@ -11,7 +11,7 @@ NUM_WORDS_THRESHOLD =4
 class iSpyTaskController():
 	"""docstring for iSpyTaskController"""
 
-	def __init__(self,game_round,session_number):
+	def __init__(self,session_number):
 		# List that will hold the names of the target objects
 		self.target_list = []
 
@@ -36,8 +36,8 @@ class iSpyTaskController():
 		self.task_duration = ""
 
 
-		self.load_task_list(game_round,session_number)
-		self.load_object_list(game_round,session_number)
+		self.load_task_list(session_number)
+		self.load_object_list(session_number)
 
 	def get_vocab_word(self):
 		return self.vocab_word
@@ -48,7 +48,7 @@ class iSpyTaskController():
 		'''
 		return {'start':str(self.task_start_time) , 'end': str(self.task_end_time), 'duration':self.task_duration}
 
-	def load_task_list(self,game_round,session_number):
+	def load_task_list(self,session_number):
 		""" Loads the task_list csv file into a 2d array """
 		dir_path = os.path.dirname(os.path.realpath(__file__))
 		print (dir_path)
@@ -59,9 +59,12 @@ class iSpyTaskController():
 		# {task_number: (task, category, attribute)}
 		# Ex:
 		# {1: ("What objects are related to weather?", object_type, weather)}
-		file_name =  '/../GameUtils/task_list_practice.csv' if game_round == "practice" else '/../GameUtils/task_list_experiment.csv'
-		if session_number == "s02":
-			file_name = '/../GameUtils/task_list_indoor.csv'
+		filename_dict = {
+			"practice": '/../GameUtils/task_list_practice.csv',
+			"s02": '/../GameUtils/task_list_experiment.csv',
+			"s01": '/../GameUtils/task_list_indoor.csv'
+			}
+		file_name = filename_dict.get(session_number)
 
 		
 		with open(dir_path + file_name,'r') as csvfile:
@@ -79,38 +82,17 @@ class iSpyTaskController():
 
 
 
-	def load_object_list(self, game_round,session_number):
+	def load_object_list(self, session_number):
 		""" Loads the object_list csv file into a 2d array """
 		dir_path = os.path.dirname(os.path.realpath(__file__))
 		print (dir_path)
 
 		self.object_dict= dict()
 
-		# What one row will look like
-		# {object: (word, color, size, object_type, location, attribute)}
-		# Ex:
-		# {'airplane': ('airplane', 'red', 'huge', 'sky', 'wings')}
-		"""
-		# WORKS WITH OBJECT_LIST.CSV
-		with open(dir_path + '/../GameUtils/object_list.csv','r') as csvfile:
-			spamreader = csv.reader(csvfile)
-			for row in spamreader:
-				if row[0] != "" and row[0] != "key_object":
-					self.object_dict[row[0]] = (row[1], row[2], row[3], row[4], row[5], row[6])
-		"""
-
 		# INDOOR : object_list_indoor.csv
 		# OUTDOOR : object_list3.csv
-		if session_number == "s02":
-			filename = 'object_list_indoor.csv'
-		else:
-			filename = "object_list3.csv"
+		filename = 'object_list_indoor.csv' if session_number == "s01" else "object_list3.csv"
 
-		# What one row will look like
-		# {object: (word, object_type, object_vocab, attribute, color)}
-		# Ex:
-		# {'bicycle': ('bicycle', 'vehicle', 'vehicle', '2wheels:road', 'emerald')}
-		# WORKS WITH OBJECT_LIST2.CSV
 		with open(dir_path + '/../GameUtils/'+ filename,'r') as csvfile:
 			spamreader = csv.reader(csvfile)
 			for row in spamreader:

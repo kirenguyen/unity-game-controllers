@@ -1,13 +1,7 @@
 ,q,category,attribute,audio_file_name,task_script
 1,,vehicle,vehicle,vehicle.wav,can you spy vehicles 
 2,,color,crimson,crimson.wav,can you spy objects in crimson
-3,,size,gigantic,gigantic.wav,can you spy objects that look gigantic
-4,,color,azure,azure.wav,can you spy objects in azure
+3,,action,soar,soar.wav,Can you spy objects that soar?
+4,,activity,recreational,recreational.wav,Can you spy people who are doing recreational activities?
 5,,aquatic,aquatic,aquatic.wav,can you spy aquatic animals
-6,,size,minuscule,minuscule.wav,can you spy objects that look minuscule
-7,,vehicle,vehicle,vehicle.wav,can you spy vehicles 
-8,,color,crimson,crimson.wav,can you spy objects in crimson
-9,,size,gigantic,gigantic.wav,can you spy objects that look gigantic
-10,,color,azure,azure.wav,can you spy objects in azure
-11,,aquatic,aquatic,aquatic.wav,can you spy aquatic animals
-12,,size,minuscule,minuscule.wav,can you spy objects that look minuscule
+6,,emotion,delighted,delighted.wav,Can you spy people who look delighted?

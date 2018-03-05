@@ -23,13 +23,9 @@ class iSpyDataTracking:
 		if not os.path.isdir("ispy_data_files/"): # check exitence of folders
 			os.makedirs("ispy_data_files/")
 
-		self._initialize_csvs(participant_id, experimenter, session_number)
-
-		self.ros_node_mgr.start_child_robot_interaction_pub_sub(self.on_child_robot_interaction_data_received)
-		# create ros subscribers to published data
-		#self.sub_child_robot_interaction = rospy.Subscriber()
-
-		
+		if session_number != "practice":
+			self._initialize_csvs(participant_id, experimenter, session_number)
+			self.ros_node_mgr.start_child_robot_interaction_pub_sub(self.on_child_robot_interaction_data_received)
 		
 	def _initialize_csvs(self,participant_id, experimenter, session_number):
 
@@ -103,6 +99,7 @@ class iSpyDataTracking:
 		# update the ispy action data frame
 
 
+
 		elapsedTime = str(datetime.now() - self.game_start_time) if self.game_start_time else ""
 		content = ','.join(map(str,[
 			elapsedTime,str(datetime.now()),
@@ -138,27 +135,6 @@ class iSpyDataTracking:
 		self.child_robot_interaction_csv.write(content+'\n')
 
 
-	# def on_interaction_turn_summary_data_received(self,msg):
-	# 	'''
-	# 	callback function. updated after each turn (either child or robot)
-	# 	'''
-		
-	# 	elapsedTime = str(datetime.now() - self.game_start_time)
-	# 	content = ','.join(map(str,[ msg.turnIndex, elapsedTime,str(datetime.now()),
-	# 		msg.turnStartTime, msg.turnEndTime,
-	# 		msg.gameTask, msg.taskVocab, msg.whoseTurn, 
-	# 		msg.turnLength, msg.robotRole, msg.clickedRightObject, msg.clickedObjName,
-	# 		msg.numFinishedObjects,
-	# 		msg.totalNumQsAsked,msg.totalNumQsAnswered,
-	# 		msg.numQsAskedArr,msg.numQsAnsweredArr,
-
-	# 		msg.numRobotOfferHelp,msg.numChildAcceptHelp, 
-	# 		msg.numRobotAskHelp, msg.numChildOfferHelp,
-
-	# 		msg.timeOnScreenDragging
-
-
-	# 		]))
 
 
 	def on_ispy_action_received(self,data):

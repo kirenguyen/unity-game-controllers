@@ -32,17 +32,16 @@ def main():
 
     try:
 
-        game_round = sys.argv[1] # practice or experiment
-        participant_id = sys.argv[2] # which participant
-        experimenter = sys.argv[3] # experimenter
-        session_number = sys.argv[4] # session number 
+        participant_id = sys.argv[1] # which participant
+        experimenter = sys.argv[2] # experimenter
+        session_number = sys.argv[3] # session number 
 
     except IndexError:
         usage()
         sys.exit()
 
     global control
-    control = iSpyGameFSM.iSpyGameFSM(game_round,participant_id, experimenter, session_number)
+    control = iSpyGameFSM.iSpyGameFSM(participant_id, experimenter, session_number)
     print("FSM Started!")
     thread.start_new_thread(control.ros_node_mgr.start_ispy_transition_listener, (control.on_ispy_state_info_received,))
 

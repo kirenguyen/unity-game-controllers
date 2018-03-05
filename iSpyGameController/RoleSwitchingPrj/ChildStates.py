@@ -15,9 +15,6 @@ class ChildStates:
 		# for a given turn: number of pronunciation trials / number of available clickable objects in the game
 		self.correct_rate_arr = []
 
-		
-
-	
 
 		self.total_num_trials = 0 # total number of trials
 
@@ -52,6 +49,7 @@ class ChildStates:
 		self.no_answers_attempt1 = 0
 
 		self.no_answers_attempt2 = 0
+
 
 
 	def on_new_task_received(self):

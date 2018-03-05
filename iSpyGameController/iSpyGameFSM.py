@@ -39,7 +39,7 @@ from .GameModeFSMs import AlwaysMissionModeFSM,CompleteModeFSM,AlwaysExploreMode
 
 from multiprocessing import Process
 
-import datetime
+import datetime 
 # from StudentModel import StudentModel
 
 if GlobalSettings.USE_ROS:
@@ -140,12 +140,30 @@ class iSpyGameFSM: # pylint: disable=no-member
 			if self.kill_received == True:
 				break
 
-	
+	def _reach_max_task_time(self): # if the condition is in "fixed novice": set a max elapsed time
+			if self.interaction.subj_cond != "novice": return
+			print("======= calculate elapsed time======")
+			max_elapsed_time = datetime.timedelta(seconds=1.5*60) # 5 mins
+			print(datetime.datetime.now())
+			print(self.task_controller.get_task_time()['start'])
+			if datetime.datetime.now() - self.task_controller.get_task_time()['start'] > max_elapsed_time:
+				if self.task_controller.num_finished_words <= 2: self.task_controller.reset_for_new_task()
+			else:
+				print("smaller than max")
+			print("=======================")
 
 	def on_ispy_state_info_received(self,transition_msg):
 		"""
 		Rospy Callback for when we get log messages from ispy game
 		"""
+		def check_task_completion():
+			if not self.task_controller.task_in_progress:
+				# let the game knows the task is completed
+				self.ros_node_mgr.send_ispy_cmd(TASK_COMPLETED)	
+				self.current_task_index += 1
+				if self.current_task_index != 0: 
+					action_number = self.current_task_index 
+					self.interaction.start_task_end_behavior(action_number)
 
 		#print("State Transition: "+transition_msg.data)
 
@@ -163,6 +181,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			elif transition_msg.data == gs.Triggers.CONNECT_BUTTON_PRESSED:
 				self.ros_node_mgr.send_ispy_cmd(34, self.session_number) #SET_GAME_SCNE = 34
+
 				print("CONNECT_BUTTON_PRESSED : "+self.session_number)
 				
 			elif transition_msg.data == gs.Triggers.HINT_BUTTON_PRESSED:
@@ -173,25 +192,15 @@ class iSpyGameFSM: # pylint: disable=no-member
 				pass
 		
 				
-			elif transition_msg.data == gs.Triggers.NONTARGET_OBJECT_COLLECTED:
+			elif transition_msg.data == gs.Triggers.NONTARGET_OBJECT_COLLECTED or transition_msg.data == gs.Triggers.TARGET_OBJECT_COLLECTED:
+				self._reach_max_task_time()
+				check_task_completion()
 				self.interaction.turn_taking()
 				
-
-			elif transition_msg.data == gs.Triggers.TARGET_OBJECT_COLLECTED:
-				# one of the target objects is successfully collected. give the turn to the other player now
-				if not self.task_controller.task_in_progress:
-					# let the game knows the task is completed
-					self.ros_node_mgr.send_ispy_cmd(TASK_COMPLETED)
-					
-					self.current_task_index += 1
-
-					if self.current_task_index != 0: 
-
-						action_number = self.current_task_index 
-						self.interaction.start_task_end_behavior(action_number)
-
-
-				self.interaction.turn_taking()
+			# elif transition_msg.data == gs.Triggers.TARGET_OBJECT_COLLECTED:
+			# 	self._reach_max_task_time()
+			# 	check_task_completion()
+			# 	self.interaction.turn_taking()
 				
 			elif transition_msg.data == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
 				if self.interaction.state == ris.CHILD_TURN: # when a new turn is child's, then start tracking the child's interaction

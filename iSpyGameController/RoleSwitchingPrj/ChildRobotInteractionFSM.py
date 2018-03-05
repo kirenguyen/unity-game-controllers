@@ -27,7 +27,7 @@ import random
 
 from unity_game_msgs.msg import iSpyChildRobotInteraction
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import os
 import timestring
@@ -146,17 +146,16 @@ class ChildRobotInteractionFSM:
 			'''
 			check whether google asr rostopic exists
 			'''
-			pass
-			# import rospy
-			# topics = rospy.get_published_topics()
-			# self.asr_result_topic = False
+			import rospy
+			topics = rospy.get_published_topics()
+			self.asr_result_topic = False
 
 			
-			# if '/asr_result' in [ i[0] for i in topics]:
-			# 	print("=========asr result publisher exists=========")
-			# 	self.asr_result_topic = True
-			# else:
-			# 	print("======WARNING: asr result publisher does not exist. Remember to start ros_asr.py======")
+			if '/asr_result' in [ i[0] for i in topics]:
+				print("=========asr result publisher exists=========")
+				self.asr_result_topic = True
+			else:
+				print("======WARNING: asr result publisher does not exist. Remember to start ros_asr.py======")
 
 
 		def on_enter_childTURN(self):
@@ -426,8 +425,8 @@ class ChildRobotInteractionFSM:
 					else:
 						print ("====== RESPOND [KEYWORD] TO TASK END QUESTION =======")
 					
-					if not self.task_controller.task_in_progress:
-						self.start_task_end_assessment(self.task_number)
+					# if not self.task_controller.task_in_progress:
+					# 	self.start_task_end_assessment(self.task_number)
 					if not self.task_controller.task_in_progress:
 						self.start_task_end_celebration(self.task_number)
 
@@ -576,7 +575,7 @@ class ChildRobotInteractionFSM:
 				self._perform_robot_physical_actions(ras.WRONG_OBJECT_FAIL)
 				self._perform_robot_physical_actions(ras.TURN_SWITCHING)
 				self.child_states.update_turn_result(self.state,False) # the child finds the incorrect object
-
+				
 				if self.state == ris.CHILD_TURN or self.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
 					pass
 
@@ -719,6 +718,9 @@ class ChildRobotInteractionFSM:
 			if self.task_controller.task_in_progress:
 				return
 
+			if action_number %2 ==0:
+				return 
+
 			print ("START TASK END CELEBRATION\n")
 
 			action = RobotBehaviors.ROBOT_TASK_END_BEHAVIOR
@@ -732,9 +734,9 @@ class ChildRobotInteractionFSM:
 				return
 
 			time.sleep(5.5)
-			behavior_number = action_number % 2 
+			behavior_number = random.randint(0,1)
 			end_task_behavior_dict = {0: RobotBehaviors.ROBOT_DANCE, 1: RobotBehaviors.ROBOT_PLAY_MUSIC}
-			self.ros_node_mgr.send_robot_cmd(end_task_behavior_dict[int(behavior_number)])
+			self.ros_node_mgr.send_robot_cmd(end_task_behavior_dict[behavior_number])
 
 		def start_task_end_assessment(self, action_number):
 
@@ -912,6 +914,9 @@ class ChildRobotInteractionFSM:
 				else:
 					continue
 
+
+		
+
 		def _ros_publish_data(self,action="", v_action = "", ispy_action=False):
 			'''
 			public ros data on child-robot interaction
@@ -931,9 +936,9 @@ class ChildRobotInteractionFSM:
 			# vocab word in the current game task
 			msg.taskVocab = self.task_controller.get_vocab_word()
 
-			msg.taskStartTime = self.task_controller.get_task_time()['start']
+			msg.taskStartTime = str(self.task_controller.get_task_time()['start'])
 
-			msg.taskEndTime =  self.task_controller.get_task_time()['end']
+			msg.taskEndTime =  str(self.task_controller.get_task_time()['end'])
 
 			msg.taskDuration = self.task_controller.get_task_time()['duration']
 

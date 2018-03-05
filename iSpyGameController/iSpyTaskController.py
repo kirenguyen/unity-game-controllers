@@ -46,7 +46,7 @@ class iSpyTaskController():
 		'''
 		get task start time, end time and duration
 		'''
-		return {'start':str(self.task_start_time) , 'end': str(self.task_end_time), 'duration':self.task_duration}
+		return {'start':self.task_start_time , 'end': self.task_end_time, 'duration':self.task_duration}
 
 	def load_task_list(self,session_number):
 		""" Loads the task_list csv file into a 2d array """
@@ -203,27 +203,23 @@ class iSpyTaskController():
 		self.num_finished_words = self.num_finished_words + 1
 
 		if self.num_finished_words == NUM_WORDS_THRESHOLD:
-			print("**update target list: task in progress false")
-			self.task_in_progress = False
-			self.task_end_time = datetime.datetime.now()
-			self.task_duration = str(self.task_end_time - self.task_start_time)
-			self._reset_for_new_task()
+			self.reset_for_new_task()
 
 			#self.current_task_index += 1
 
 	def get_current_answer_size(self):
 		pass
 
-	def _reset_for_new_task(self):
+	def reset_for_new_task(self):
 		'''
 		reset target list, nontarget list 
 		clear data of the last finished task for the new task
 		'''
+		self.task_in_progress = False
+		self.task_end_time = datetime.datetime.now()
+		self.task_duration = str(self.task_end_time - self.task_start_time)
 		self.target_list = []
 		self.nontarget_list = []
-		#self.num_finished_words = 0
-
-
 
 	'''
 	the following functions are for child robot interaction

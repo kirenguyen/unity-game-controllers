@@ -11,7 +11,7 @@ NUM_WORDS_THRESHOLD =4
 class iSpyTaskController():
 	"""docstring for iSpyTaskController"""
 
-	def __init__(self,game_round):
+	def __init__(self,game_round,session_number):
 		# List that will hold the names of the target objects
 		self.target_list = []
 
@@ -36,8 +36,8 @@ class iSpyTaskController():
 		self.task_duration = ""
 
 
-		self.load_task_list(game_round)
-		self.load_object_list(game_round)
+		self.load_task_list(game_round,session_number)
+		self.load_object_list(game_round,session_number)
 
 	def get_vocab_word(self):
 		return self.vocab_word
@@ -48,7 +48,7 @@ class iSpyTaskController():
 		'''
 		return {'start':str(self.task_start_time) , 'end': str(self.task_end_time), 'duration':self.task_duration}
 
-	def load_task_list(self,game_round):
+	def load_task_list(self,game_round,session_number):
 		""" Loads the task_list csv file into a 2d array """
 		dir_path = os.path.dirname(os.path.realpath(__file__))
 		print (dir_path)
@@ -60,7 +60,7 @@ class iSpyTaskController():
 		# Ex:
 		# {1: ("What objects are related to weather?", object_type, weather)}
 		file_name =  '/../GameUtils/task_list_practice.csv' if game_round == "practice" else '/../GameUtils/task_list_experiment.csv'
-		if game_round == "indoor":
+		if session_number == "s02":
 			file_name = '/../GameUtils/task_list_indoor.csv'
 
 		
@@ -79,7 +79,7 @@ class iSpyTaskController():
 
 
 
-	def load_object_list(self, game_round):
+	def load_object_list(self, game_round,session_number):
 		""" Loads the object_list csv file into a 2d array """
 		dir_path = os.path.dirname(os.path.realpath(__file__))
 		print (dir_path)
@@ -101,7 +101,7 @@ class iSpyTaskController():
 
 		# INDOOR : object_list_indoor.csv
 		# OUTDOOR : object_list3.csv
-		if game_round == "indoor":
+		if session_number == "s02":
 			filename = 'object_list_indoor.csv'
 		else:
 			filename = "object_list3.csv"

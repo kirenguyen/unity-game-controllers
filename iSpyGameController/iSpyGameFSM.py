@@ -100,7 +100,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		# Bool telling if the cmd message was heard from Unity
 		self.ros_node_mgr.message_received = False
 
-		self.task_controller = iSpyTaskController(game_round)
+		self.task_controller = iSpyTaskController(game_round,session_number)
 
 		self.results_handler = PronunciationUtils()
 

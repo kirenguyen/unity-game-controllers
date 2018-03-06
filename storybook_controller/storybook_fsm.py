@@ -11,6 +11,7 @@ import transitions
 import json
 import queue
 import time
+import sys
 
 from unity_game_msgs.msg import StorybookCommand
 from unity_game_msgs.msg import StorybookEvent
@@ -34,6 +35,7 @@ class StorybookFSM(object):
       StorybookEvent.SPEECH_ACE_RESULT,
       StorybookEvent.REQUEST_ROBOT_FEEDBACK,
       StorybookEvent.WORD_TAPPED,
+      StorybookEvent.SCENE_OBJECT_TAPPED
     ]
 
     self.states = []
@@ -93,10 +95,14 @@ class StorybookFSM(object):
         pass
       
       elif data.event_type == StorybookEvent.WORD_TAPPED:
-        text = data.message
+        message = json.loads(data.message)
+        jibo_tts = message["word"]
         # Tell Jibo to say this word.
-        self.ros.send_jibo_command(JiboStorybookBehaviors.EXPLAIN_WORD, text);
-      
+        self.ros.send_jibo_command(JiboStorybookBehaviors.EXPLAIN_WORD, jibo_tts);
+      elif data.event_type == StorybookEvent.SCENE_OBJECT_TAPPED:
+        message = json.loads(data.message)
+        print("Scene object tapped:", message["label"])
+
       # TODO: Maybe call queue.task_done() differently in each above case,
       # because we might want to use a join in the future and block
       # on all tasks being completed, for example waiting for a message
@@ -123,11 +129,9 @@ class StorybookFSM(object):
     """
     Define the callback function for StorybookPageInfo messages.
     """
-    print("Received StorybookPageInfo message with data:\n", data)
-
     # TODO: update our knowledge of which page we're on, etc.
     # Also might need to update student model with what current words are?
-
+    pass
 
   def storybook_state_ros_message_handler(self, data):
     """
@@ -136,9 +140,9 @@ class StorybookFSM(object):
     
     # TODO: Remove this after done testing stuff.
     if data.audio_playing:
-      print("Audio is playing in storybook")
+      print("Audio is playing in storybook:", data.audio_file)
 
-    # TODO: update fsm state
+    # TODO: update fsm state.
 
   def jibo_state_ros_message_handler(self, data):
     """
@@ -147,7 +151,7 @@ class StorybookFSM(object):
     """
     # TODO: this is just testing code, replace later.
     if data.is_playing_sound:
-      print("playing sound:", data.tts_msg)
+      print("Jibo tts ongoing:", data.tts_msg)
 
 
   def jibo_asr_ros_message_handler(self, data):

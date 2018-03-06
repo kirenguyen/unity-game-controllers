@@ -33,9 +33,9 @@ class StorybookFSM(object):
     self.STORYBOOK_EVENT_MESSAGES = [
       StorybookEvent.HELLO_WORLD,
       StorybookEvent.SPEECH_ACE_RESULT,
-      StorybookEvent.REQUEST_ROBOT_FEEDBACK,
       StorybookEvent.WORD_TAPPED,
-      StorybookEvent.SCENE_OBJECT_TAPPED
+      StorybookEvent.SCENE_OBJECT_TAPPED,
+      StorybookEvent.STANZA_SWIPED
     ]
 
     self.states = []
@@ -91,17 +91,19 @@ class StorybookFSM(object):
         command = StorybookCommand.PING_TEST
         self.ros.send_storybook_command(command, json.dumps(params))
       
-      elif data.event_type == StorybookEvent.REQUEST_ROBOT_FEEDBACK:
-        pass
-      
       elif data.event_type == StorybookEvent.WORD_TAPPED:
         message = json.loads(data.message)
         jibo_tts = message["word"]
         # Tell Jibo to say this word.
         self.ros.send_jibo_command(JiboStorybookBehaviors.EXPLAIN_WORD, jibo_tts);
+      
       elif data.event_type == StorybookEvent.SCENE_OBJECT_TAPPED:
         message = json.loads(data.message)
         print("Scene object tapped:", message["label"])
+
+      elif data.event_type == StorybookEvent.STANZA_SWIPED:
+        message = json.loads(data.message)
+        print("Stanza swiped:", message["index"], message["text"])
 
       # TODO: Maybe call queue.task_done() differently in each above case,
       # because we might want to use a join in the future and block

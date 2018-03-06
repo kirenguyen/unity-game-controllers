@@ -8,8 +8,8 @@ int8 event_type
 string message
 
 # Event types that can be received from the tablet app.
-int8 HELLO_WORLD = 0
-int8 SPEECH_ACE_RESULT = 1
-int8 REQUEST_ROBOT_FEEDBACK = 2
-int8 WORD_TAPPED = 3
-int8 SCENE_OBJECT_TAPPED = 4
+int8 HELLO_WORLD = 0 # There is no message.
+int8 SPEECH_ACE_RESULT = 1 # Message is json string of result
+int8 WORD_TAPPED = 2 # Message is {index: int, word: string}
+int8 SCENE_OBJECT_TAPPED = 3 # Message is {id: int, label: string}
+int8 STANZA_SWIPED = 4 # Message is {index: int, text: string}

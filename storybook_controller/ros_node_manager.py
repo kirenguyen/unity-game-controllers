@@ -54,78 +54,6 @@ class ROSNodeManager(object):
     rate = rospy.Rate(10)
     rate.sleep()
 
-  def start_storybook_event_listener(self, callback):
-    """
-    Starts the storybook event subscriber node.
-    """
-    print("Starting storybook event subscriber node.")
-    self.storybook_event_listener = rospy.Subscriber(STORYBOOK_EVENT_TOPIC,
-                                               StorybookEvent, callback)
-
-  def start_storybook_page_info_listener(self, callback):
-    """
-    Starts the storybook page info subscriber node.
-    """
-    print("Starting storybook page info subscriber node.")
-    self.storybook_page_info_listener = rospy.Subscriber(STORYBOOK_PAGE_INFO_TOPIC,
-                                               StorybookPageInfo, callback)
-
-  def start_storybook_state_listener(self, callback):
-    """
-    Starts the storybook state subscriber node.
-    """
-    print("Starting storybook subscriber node.")
-    self.storybook_state_listener = rospy.Subscriber(STORYBOOK_STATE_TOPIC,
-                                               StorybookState, callback)
-
-  def start_jibo_state_listener(self, callback):
-    """
-    Starts the jibo state subscriber node.
-    """
-    print("Starting Jibo state subscriber node.")
-    self.jibo_state_listener = rospy.Subscriber(JIBO_STATE_TOPIC,
-                                               JiboState, callback)
-  
-  def start_jibo_asr_listener(self, callback):
-    """
-    Starts the jibo ASR subscriber node.
-    """
-    print("Starting Jibo ASR subscriber node.")
-    self.jibo_asr_listener = rospy.Subscriber(JIBO_ASR_RESULT_TOPIC,
-                                               JiboAsrResult, callback)
-
-  def start_storybook_publisher(self):
-    """
-    Starts the storybook publisher node.
-    """
-    print("Starting storybook publisher node.")
-    self.storybook_publisher = rospy.Publisher(STORYBOOK_COMMAND_TOPIC,
-                                               StorybookCommand, queue_size=10)
-    # Spin at 10Hz, wait for subscribers.
-    rate = rospy.Rate(10)
-    rate.sleep()
-
-  def start_jibo_publisher(self):
-    """
-    Starts the JiboAction publisher node.
-    """
-    print("Starting Jibo action publisher node.")
-    self.jibo_publisher = rospy.Publisher(JIBO_ACTION_TOPIC,
-                                               JiboAction, queue_size=10)
-    # Spin at 10Hz, wait for subscribers.
-    rate = rospy.Rate(10)
-    rate.sleep()
-
-  def start_jibo_asr_publisher(self):
-    """
-    Starts the publisher for sending Jibo ASR commands.
-    """
-    print("Starting Jibo ASR publisher node.")
-    self.jibo_asr_publisher = rospy.Publisher(JIBO_ASR_COMMAND_TOPIC,
-                                              JiboAsrCommand, queue_size=10)
-    rate = rospy.Rate(10)
-    rate.sleep()
-
   def send_storybook_command(self, command, *args):
     """
     Send a command to the storybook.
@@ -137,7 +65,7 @@ class ROSNodeManager(object):
     msg.command = command
     if len(args) > 0:
       msg.params = args[0]
-    self.storybook_publisher.publish(msg)
+    self.publishers[STORYBOOK_COMMAND_TOPIC].publish(msg)
     rospy.loginfo(msg)
 
   def send_jibo_command(self, command, *args):
@@ -146,7 +74,7 @@ class ROSNodeManager(object):
     Args are any optional arguments, as a serialized JSON string.
     """
     msg = JiboCommandsBuilder.get_message_from_behavior(command, *args)
-    self.jibo_publisher.publish(msg)
+    self.publishers[JIBO_ACTION_TOPIC].publish(msg)
     rospy.loginfo(msg)
 
   def send_jibo_asr_command(self, command, heyjibo=True, continuous=True, rule=""):
@@ -158,7 +86,7 @@ class ROSNodeManager(object):
     only ones that are supported in jibo-rosbridge-receiver right now.
     """
     msg = JiboCommandsBuilder.get_jibo_asr_command(command, heyjibo, continuous, rule)
-    self.jibo_asr_publisher.publish(msg)
+    self.publishers[JIBO_ASR_COMMAND_TOPIC].publish(msg)
     rospy.loginfo(msg)
 
 

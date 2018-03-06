@@ -1,8 +1,16 @@
 from storybook_controller.storybook_fsm import StorybookFSM
 from storybook_controller.ros_node_manager import ROSNodeManager
 from storybook_controller.student_model import StudentModel
+from storybook_controller.storybook_constants import *
 
 from unity_game_msgs.msg import StorybookCommand
+from unity_game_msgs.msg import StorybookEvent
+from unity_game_msgs.msg import StorybookPageInfo
+from unity_game_msgs.msg import StorybookState
+from jibo_msgs.msg import JiboAction # Commands to Jibo
+from jibo_msgs.msg import JiboState # State from Jibo
+from jibo_msgs.msg import JiboAsrCommand # ASR commands to Jibo
+from jibo_msgs.msg import JiboAsrResult # ASR results from Jibo
 
 import argparse
 import signal
@@ -27,25 +35,26 @@ def main(argv):
   # We force serialization by having all handlers add events to the
   # task queue, and then executing events on the queue in order
   # in a separate dedicated thread.
-  ros_node_manager.start_storybook_publisher()
-  ros_node_manager.start_jibo_publisher()
-  ros_node_manager.start_jibo_asr_publisher()
 
-  thread.start_new_thread(ros_node_manager.start_storybook_event_listener,
-                          (fsm.storybook_event_ros_message_handler,))
+  ros_node_manager.start_publisher(STORYBOOK_COMMAND_TOPIC, StorybookCommand)
+  ros_node_manager.start_publisher(JIBO_ACTION_TOPIC, JiboAction)
+  ros_node_manager.start_publisher(JIBO_ASR_COMMAND_TOPIC, JiboAsrCommand)
 
-  thread.start_new_thread(ros_node_manager.start_storybook_page_info_listener,
-                          (fsm.storybook_page_info_ros_message_handler,))
+  thread.start_new_thread(ros_node_manager.start_listener, (
+    STORYBOOK_EVENT_TOPIC, StorybookEvent, fsm.storybook_event_ros_message_handler,))
 
-  thread.start_new_thread(ros_node_manager.start_storybook_state_listener,
-                          (fsm.storybook_state_ros_message_handler,))   
+  thread.start_new_thread(ros_node_manager.start_listener, (
+    STORYBOOK_PAGE_INFO_TOPIC, StorybookPageInfo, fsm.storybook_page_info_ros_message_handler,))
 
-  thread.start_new_thread(ros_node_manager.start_jibo_state_listener,
-                          (fsm.jibo_state_ros_message_handler,))
-  
-  thread.start_new_thread(ros_node_manager.start_jibo_asr_listener,
-                          (fsm.jibo_asr_ros_message_handler,))
-  
+  thread.start_new_thread(ros_node_manager.start_listener, (
+    STORYBOOK_STATE_TOPIC, StorybookState, fsm.storybook_state_ros_message_handler,))
+
+  thread.start_new_thread(ros_node_manager.start_listener, (
+    JIBO_STATE_TOPIC, JiboState, fsm.jibo_state_ros_message_handler,))
+
+  thread.start_new_thread(ros_node_manager.start_listener, (
+    JIBO_ASR_RESULT_TOPIC, JiboAsrResult, fsm.jibo_asr_ros_message_handler,))
+
   # Main event queue.
   thread.start_new_thread(fsm.process_main_event_queue, ())
   signal.signal(signal.SIGINT, signal_handler)

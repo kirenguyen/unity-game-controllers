@@ -109,7 +109,7 @@ class ROSNodeManager(object):
     """
     Starts the JiboAction publisher node.
     """
-    print("Starting jibo action publisher node.")
+    print("Starting Jibo action publisher node.")
     self.jibo_publisher = rospy.Publisher(JIBO_ACTION_TOPIC,
                                                JiboAction, queue_size=10)
     # Spin at 10Hz, wait for subscribers.

@@ -4,25 +4,27 @@
 Header header
 
 bool audio_playing
+string audio_file
 
-# The app is in a storybook and progressing through pages (as opposed to still in story selection).
-bool is_reading
-
-# Either EXPLORE_MODE or EVALUATE_MODE
+# Either NOT_READING or EXPLORE_MODE or EVALUATE_MODE, see below.
 int8 storybook_mode
 
 string current_story
 int8 num_pages
 
-# If evaluating or in playback, this will reflect the current stanza.
-int8 current_stanza_index
+# If in EVALUATE_MODE, this will reflect the current stanza.
+# Otherwise, it should be -1.
+int8 evaluating_stanza_index
 
+# Commented out because it's probably not necessary.
 # Optional, will be filled in during audio playback.
 # E.g. if the 5th word (0-indexed) is currently playing, this will be 5.
-int8 current_tinkertext_index
+# int8 current_tinkertext_index
 
-int8 EXPLORE_MODE = 0
-int8 EVAlUATE_MODE = 1
+# Constants for storybook_mode above.
+int8 NOT_READING = 0
+int8 EXPLORE_MODE = 1
+int8 EVAlUATE_MODE = 2
 
 #
 # Other properties that can be filled in later...

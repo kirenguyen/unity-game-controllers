@@ -28,13 +28,24 @@ def main(argv):
   # task queue, and then executing events on the queue in order
   # in a separate dedicated thread.
   ros_node_manager.start_storybook_publisher()
-  thread.start_new_thread(ros_node_manager.start_storybook_listener,
-                          (fsm.storybook_ros_message_handler,))
   ros_node_manager.start_jibo_publisher()
+  ros_node_manager.start_jibo_asr_publisher()
+
+  thread.start_new_thread(ros_node_manager.start_storybook_event_listener,
+                          (fsm.storybook_event_ros_message_handler,))
+
+  thread.start_new_thread(ros_node_manager.start_storybook_page_info_listener,
+                          (fsm.storybook_page_info_ros_message_handler,))
+
+  thread.start_new_thread(ros_node_manager.start_storybook_state_listener,
+                          (fsm.storybook_state_ros_message_handler,))   
+
   thread.start_new_thread(ros_node_manager.start_jibo_state_listener,
                           (fsm.jibo_state_ros_message_handler,))
+  
   thread.start_new_thread(ros_node_manager.start_jibo_asr_listener,
                           (fsm.jibo_asr_ros_message_handler,))
+  
   # Main event queue.
   thread.start_new_thread(fsm.process_main_event_queue, ())
   signal.signal(signal.SIGINT, signal_handler)

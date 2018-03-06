@@ -15,7 +15,11 @@ find_package(catkin REQUIRED COMPONENTS
  add_message_files(
    FILES
    StorybookCommand.msg
-   StorybookInfo.msg
+   StorybookEvent.msg
+   StorybookState.msg
+   StorybookPageInfo.msg
+   StorybookSceneObject.msg
+   StorybookTinkerText.msg
    TapGameCommand.msg
    TapGameRoundSummary.msg
    iSpyCommand.msg

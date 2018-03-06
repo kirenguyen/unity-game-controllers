@@ -3,11 +3,11 @@
 
 Header header
 
-int8 message_type
+int8 event_type
 
 string message
 
-# Message types that can be received from the tablet app.
+# Event types that can be received from the tablet app.
 int8 HELLO_WORLD= 0
 int8 SPEECH_ACE_RESULT = 1
 int8 REQUEST_ROBOT_FEEDBACK = 2

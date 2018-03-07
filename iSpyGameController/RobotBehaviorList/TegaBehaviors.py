@@ -168,7 +168,7 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             PATH = ROOT_TEGA_SPEECH_FOLDER + "general/hint/"
             vocab_word = args[0][0].lower()
             msg.wav_filename = PATH + vocab_word + "_hint.wav"
-            msg.motion = TegaAction.MOTION_POSE_SMILE
+            msg.motion = TegaAction.MOTION_SILENT_HAPPY_WIGGLE
             print("hint speech wav: "+msg.wav_filename)
 
         if command == RobotBehaviors.KEYWORD_DEFINITION_SPEECH:

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source ~/.bashrc
+
 echo $1, $2, $3, $4
 
 #check $1
@@ -35,8 +37,9 @@ mkdir -p log
 mkdir -p rosbag
 
 
-gnome-terminal --geometry 40x120+0+0 --title ">>>iSpy Game Study MAIN<<<" -e "./scripts/run_ispy.sh $1 $2 $3"
+gnome-terminal --geometry 40x120+0+0 --title ">>>iSpy Game Study MAIN<<<" -e "./scripts/run_ispy.sh $1 $2 $3" 
 
+echo $3
 if [ $3 != 'practice' ]; then
   echo "start rosbag recording...."
   ./scripts/rosbag_record.sh $1 $2 $3

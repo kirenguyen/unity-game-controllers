@@ -23,7 +23,7 @@ class AgentModel():
         self.role_space= list(RobotRoles)
         
         self.role_history=[]
-        RobotRolesBehaviorsMap()
+        #RobotRolesBehaviorsMap()
 
 
         # set up reinforcement learning here

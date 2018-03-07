@@ -72,6 +72,6 @@ bool objectWordPronounced
 
 string[] ispyAction
 
-
+string maxElapsedTime 
 ###########
 

@@ -43,7 +43,7 @@ class ChildRobotInteractionFSM:
 		and ChildStates
 		'''
 
-		def __init__(self,ros_node_mgr,task_controller,game_controller,participant_id):
+		def __init__(self,ros_node_mgr,task_controller,game_controller,participant_id,game_round):
 			# use hierachical FSM here. The python package can be found here: https://github.com/pytransitions/transitions
 			self.states = [ {'name': ris.ROBOT_TURN, 'children':[ris.QUESTION_ASKING,ris.LISTEN_CHILD_SPEECH_RESPONSE, ris.PARSE_CHILD_SPEECH_RESPONSE, ris.CHILD_HELP]}, {'name':ris.CHILD_TURN,'children':[ ris.NO_INTERACTION_1, ris.QUESTION_ASKING ,ris.LISTEN_CHILD_SPEECH_RESPONSE, ris.PARSE_CHILD_SPEECH_RESPONSE, ris.ROBOT_HELP]} ]
 			self.transitions = [
@@ -94,7 +94,7 @@ class ChildRobotInteractionFSM:
 
 			self.agent_model = AgentModel()
 
-			self.role_behavior_mapping = RobotRolesBehaviorsMap()
+			self.role_behavior_mapping = RobotRolesBehaviorsMap(game_round)
 
 			# robot's physical actions
 			self.physical_actions ={}
@@ -133,6 +133,10 @@ class ChildRobotInteractionFSM:
 
 			self.continue_robot_help = True
 
+			self.reset_elapsed_time = False;
+
+			self.elapsed = ""
+
 			# load assigned condition the participant is in
 			subj_assign_dict = json.loads(open("iSpyGameController/res/participant_assignment.json").read())
 			self.subj_cond = subj_assign_dict[participant_id]
@@ -157,6 +161,19 @@ class ChildRobotInteractionFSM:
 			else:
 				print("======WARNING: asr result publisher does not exist. Remember to start ros_asr.py======")
 
+		def on_child_max_elapsed_time(self):
+			''' max elapsed time for a child's turn'''
+			# print("!!!!on child max elapsed time....")
+			# print(ris.CHILD_TURN in self.state)
+			# print(self.reset_elapsed_time)
+			# if ris.CHILD_TURN in self.state and self.reset_elapsed_time == False:
+			# 	self.elapsed = "True"
+			# 	self._ros_publish_data()
+			# 	self.elapsed = ""
+			# 	self.reset_elapsed_time = True
+			# 	print("!!!!")
+			# 	self.turn_taking()
+			pass
 
 		def on_enter_childTURN(self):
 			self.turn_start_time = datetime.now()
@@ -169,6 +186,9 @@ class ChildRobotInteractionFSM:
 			self.virtual_action = ""
 			self._ros_publish_data()
 			threading.Timer(3.0, self.start_tracking_child_interaction).start()
+			threading.Timer(10.0, self.on_child_max_elapsed_time).start()
+			self.reset_elapsed_time = False
+
 
 		def on_enter_robotTURN(self):
 			self.turn_start_time = datetime.now()
@@ -180,6 +200,7 @@ class ChildRobotInteractionFSM:
 			self.explore_action = ""
 			self.virtual_action = ""
 			self._ros_publish_data()
+			
 
 
 		def on_enter_childTURN_listenChildSpeechResponse(self):
@@ -688,14 +709,11 @@ class ChildRobotInteractionFSM:
 					self.explore_action = "VIRTUALLY_EXPLORE"
 					time.sleep(3)
 					self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_EXPLORE)
-
 			self.virtual_action = self.role_behavior_mapping.get_actions(self.role,self.state,'virtual')
 			if self.virtual_action:
 				self.virtual_action = self.virtual_action[0]
 
-
 		def get_robot_general_response(self):
-			
 			print("---get robot general response")
 			physical_actions = self.role_behavior_mapping.get_actions("BACKUP",self.state,'physical')
 			self.virtual_action = self.role_behavior_mapping.get_actions("BACKUP",self.state,'virtual')
@@ -1000,12 +1018,14 @@ class ChildRobotInteractionFSM:
 
 			msg.objectWordPronounced = self.child_states.objectWordPronounced
 
+
+
 			msg.ispyAction = ["", "", "", "", ""]
 			if ispy_action == True:
 				msg.ispyAction  = [str(self.game_controller.isDragging), str(self.game_controller.pointerClick), str(self.game_controller.onPinch), str(self.game_controller.isScalingUp), str(self.game_controller.isScalingDown)]
 
 
-
+			msg.maxElapsedTime = self.elapsed
 			##############
 
 			self.ros_node_mgr.pub_child_robot_interaction.publish(msg)
@@ -1064,6 +1084,8 @@ class ChildRobotInteractionFSM:
 			send the virtual action message via ROS to the tablet 
 			'''
 			self._ros_publish_data("", action)
+
+			print("virtual action: "+action)
 
 			action = self.role_behavior_mapping.get_action_name(action) # get the correct name
 

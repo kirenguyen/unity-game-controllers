@@ -19,13 +19,14 @@ class iSpyDataTracking:
 		# create a pandas dataframe to store all interaction data based on timestamps
 		self.game_start_time = None
 		self.child_robot_FSM = childRobotFSM
+		self.session_number = session_number
 
 		if not os.path.isdir("ispy_data_files/"): # check exitence of folders
 			os.makedirs("ispy_data_files/")
 
-		if session_number != "practice":
+		if self.session_number != "practice":
 			self._initialize_csvs(participant_id, experimenter, session_number)
-			self.ros_node_mgr.start_child_robot_interaction_pub_sub(self.on_child_robot_interaction_data_received)
+		self.ros_node_mgr.start_child_robot_interaction_pub_sub(self.on_child_robot_interaction_data_received)
 		
 	def _initialize_csvs(self,participant_id, experimenter, session_number):
 
@@ -56,7 +57,7 @@ class iSpyDataTracking:
 
 			'numChildClickCancelForTurn', 'numHintButtonPressedForTask', # turn related
 
-			'numQsAskeddForTask','numPositiveAnswerForTask','numNegativeAnswerForTask','numOtherAnswerForTask','numNoAnswerAttempt1ForTask', 'numNoAnswerAttempt2ForTask',# turn related
+			'numQsAskeddForTask','numPositiveAnswerForTask','numNegativeAnswerForTask','numOtherAnswerForTask','numNoAnswerAttempt1ForTask',# turn related
 
 			'gameStateTrigger','currentInteractionState','currentGameState',
 
@@ -66,7 +67,9 @@ class iSpyDataTracking:
 
 			'numTouchAbsenceAlertPerTask','objectWordPronounced' ,
 
-			'isDraggin', 'pointerClick','onPinch','isScalingUp','isScalingDown'
+			'isDraggin', 'pointerClick','onPinch','isScalingUp','isScalingDown',
+
+			'maxElapsedTimeReached'
 			
 			
 			])+'\n')
@@ -97,7 +100,7 @@ class iSpyDataTracking:
 		'''
 		
 		# update the ispy action data frame
-
+		if self.session_number == "practice": return
 
 
 		elapsedTime = str(datetime.now() - self.game_start_time) if self.game_start_time else ""
@@ -128,7 +131,9 @@ class iSpyDataTracking:
 
 			msg.numTouchAbsenceAlertPerTask, msg.objectWordPronounced,
 
-			msg.ispyAction[0], msg.ispyAction[1], msg.ispyAction[2], msg.ispyAction[3], msg.ispyAction[4]
+			msg.ispyAction[0], msg.ispyAction[1], msg.ispyAction[2], msg.ispyAction[3], msg.ispyAction[4],
+
+			msg.maxElapsedTime 
 			
 			]))
 

@@ -135,14 +135,14 @@ class RobotRolesBehaviorsMap:
     '''
     mapping between robot's social role and robot's specific behaviors
     '''  
-    def __init__(self):
+    def __init__(self,game_round):
         # robot's actions during its turn
         self.robot_turn_mapping = {}
         # robot's actions during child's turn
         self.child_turn_mapping = {}
 
-
-        robot_actions_file = open("iSpyGameController/res/robot_actions.json")
+        action_file = "iSpyGameController/res/robot_actions_practice_round.json"if game_round == "practice" else "iSpyGameController/res/robot_actions.json" 
+        robot_actions_file = open(action_file)
         self.robot_actions_dict = json.loads(robot_actions_file.read())
 
         question_answer_file = open("iSpyGameController/res/question_answer.json")

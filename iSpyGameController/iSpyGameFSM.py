@@ -104,7 +104,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		self.results_handler = PronunciationUtils()
 
-		self.interaction = ChildRobotInteractionFSM(self.ros_node_mgr,self.task_controller,self, participant_id)
+		self.interaction = ChildRobotInteractionFSM(self.ros_node_mgr,self.task_controller,self, participant_id,session_number)
 
 		self.iSpyDataTracking = iSpyDataTracking(self.interaction,self.ros_node_mgr, participant_id, experimenter, session_number)
 
@@ -181,8 +181,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			elif transition_msg.data == gs.Triggers.CONNECT_BUTTON_PRESSED:
 				self.ros_node_mgr.send_ispy_cmd(34, self.session_number) #SET_GAME_SCNE = 34
-
 				print("CONNECT_BUTTON_PRESSED : "+self.session_number)
+				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_HAPPY_DANCE)
 				
 			elif transition_msg.data == gs.Triggers.HINT_BUTTON_PRESSED:
 				self.interaction.numHintButtonPressedForTask += 1
@@ -366,7 +366,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 				self.interaction.get_robot_general_response()
 				
 				t = threading.Timer(3.0,self.interaction.start_tracking_child_interaction).start()
-
+				threading.Timer(10.0, self.interaction.on_child_max_elapsed_time).start()
 
 	
 	

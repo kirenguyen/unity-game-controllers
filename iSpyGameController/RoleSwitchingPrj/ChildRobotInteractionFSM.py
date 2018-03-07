@@ -713,7 +713,7 @@ class ChildRobotInteractionFSM:
 
 		def start_task_end_celebration(self, action_number):
 
-			time.sleep(8)
+			time.sleep(7)
 
 			if self.task_controller.task_in_progress:
 				return

@@ -143,7 +143,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 	def _reach_max_task_time(self): # if the condition is in "fixed novice": set a max elapsed time
 			if self.interaction.subj_cond != "novice": return
 			print("======= calculate elapsed time======")
-			max_elapsed_time = datetime.timedelta(seconds=1.5*60) # 5 mins
+			max_elapsed_time = datetime.timedelta(seconds=5*60) # 5 mins
 			print(datetime.datetime.now())
 			print(self.task_controller.get_task_time()['start'])
 			if datetime.datetime.now() - self.task_controller.get_task_time()['start'] > max_elapsed_time:

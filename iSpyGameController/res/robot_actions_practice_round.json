@@ -21,7 +21,7 @@
             "LOOK_AT_TABLET"
           ],
           "exclusive":{
-            "Q_ROBOT_ASK_HELP":0.99,
+            "Q_ROBOT_ASK_HELP":0.99
           }
         },
         "WRONG_OBJECT_CLICKED": {

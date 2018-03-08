@@ -82,6 +82,7 @@ class iSpyRobotInteractionStates():
     class Triggers():
         CHILD_TURN_DONE="childTurnDone"
         ROBOT_TURN_DONE="robotTurnDone"
+        MAX_TIME="maxTime"
         HELP_TRIGGER="HelpTrigger"
         ROBOT_QUESTION="robotQuestion"
         QA_FINISHED="QAFinished"

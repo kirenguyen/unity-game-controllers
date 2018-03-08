@@ -49,6 +49,7 @@ class ChildRobotInteractionFSM:
 			self.transitions = [
 				{'trigger': ris.Triggers.CHILD_TURN_DONE, 'source': ris.CHILD_TURN, 'dest': ris.ROBOT_TURN },
 				{'trigger': ris.Triggers.ROBOT_TURN_DONE, 'source': ris.ROBOT_TURN, 'dest': ris.CHILD_TURN},
+				{'trigger': ris.Triggers.MAX_TIME, 'source': '*', 'dest': ris.ROBOT_TURN },
 
 				# help trigger. either robot asks for help. or child asks for help
 				{'trigger': ris.Triggers.HELP_TRIGGER, 'source':ris.CHILD_TURN+'_'+ris.PARSE_CHILD_SPEECH_RESPONSE, 'dest': ris.CHILD_TURN+'_'+ris.ROBOT_HELP},
@@ -172,7 +173,7 @@ class ChildRobotInteractionFSM:
 			# 	self.elapsed = ""
 			# 	self.reset_elapsed_time = True
 			# 	print("!!!!")
-			# 	self.turn_taking()
+			# 	self.turn_taking(max_time=True)
 			pass
 
 		def on_enter_childTURN(self):
@@ -518,7 +519,7 @@ class ChildRobotInteractionFSM:
 			self.task_controller.num_finished_words = 0
 			self.numHintButtonPressedForTask = 0
 
-		def turn_taking(self):
+		def turn_taking(self,max_time=False):
 
 			def _get_turn_duration():
 				self.turn_end_time = datetime.now()
@@ -530,26 +531,29 @@ class ChildRobotInteractionFSM:
 			self.child_click_cancel_num =0  # reset child's number of clicks and cancels each turn
 
 			if self.task_controller.task_in_progress:
-				# check whether it is robot's turn or child's turn in the game play
-				if ris.ROBOT_TURN in self.state:
-					# stop tracking the previous turn's rewards
-					rewards = self.child_states.stop_tracking_rewards(self.state)
+				if not max_time:
+					# check whether it is robot's turn or child's turn in the game play
+					if ris.ROBOT_TURN in self.state:
+						# stop tracking the previous turn's rewards
+						rewards = self.child_states.stop_tracking_rewards(self.state)
 
-					# then, next turn is child's 
-					getattr(self, ris.Triggers.ROBOT_TURN_DONE)() # convert the variabel to string, which is the name of the called function
-					self.child_states.start_tracking_rewards(self.state)
+						# then, next turn is child's 
+						getattr(self, ris.Triggers.ROBOT_TURN_DONE)() # convert the variabel to string, which is the name of the called function
+						self.child_states.start_tracking_rewards(self.state)
 
-				elif ris.CHILD_TURN in self.state:
+					elif ris.CHILD_TURN in self.state:
 
-					rewards = self.child_states.stop_tracking_rewards(self.state)
-					self.agent_model.onRewardsReceived(rewards) # update the RL model 
-					# then, next turn is robot's
-					getattr(self, ris.Triggers.CHILD_TURN_DONE)()
-					# start tracking rewards (engagement) for the robot's role during child's turn
-					self.child_states.start_tracking_rewards(self.state)
+						rewards = self.child_states.stop_tracking_rewards(self.state)
+						self.agent_model.onRewardsReceived(rewards) # update the RL model 
+						# then, next turn is robot's
+						getattr(self, ris.Triggers.CHILD_TURN_DONE)()
+						# start tracking rewards (engagement) for the robot's role during child's turn
+						self.child_states.start_tracking_rewards(self.state)
+				else:
+					getattr(self, ris.Triggers.MAX_TIME)()
 
-				
-				print("\n==========TURN TAKING===============: "+self.state+'\n')
+				print("============================================")
+				print("\n=================TURN TAKING===============: "+self.state+'\n')
 				# send the turn info (child/robot) to tablet via ROS
 
 				self.ros_node_mgr.send_ispy_cmd(iSpyCommand.WHOSE_TURN, {"whose_turn":self.state})
@@ -709,9 +713,14 @@ class ChildRobotInteractionFSM:
 					self.explore_action = "VIRTUALLY_EXPLORE"
 					time.sleep(3)
 					self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_EXPLORE)
-			self.virtual_action = self.role_behavior_mapping.get_actions(self.role,self.state,'virtual')
-			if self.virtual_action:
-				self.virtual_action = self.virtual_action[0]
+			virtual_action_dict = self.role_behavior_mapping.get_actions(self.role,self.state,'virtual')
+			if virtual_action_dict:
+				ran = random.uniform(0,1)
+				for key,val in virtual_action_dict.items():
+					if ran <= val:
+						self.virtual_action = key
+						break
+				self.virtual_action = virtual_action_dict.keys()[0] if not self.virtual_action else self.virtual_action
 
 		def get_robot_general_response(self):
 			print("---get robot general response")

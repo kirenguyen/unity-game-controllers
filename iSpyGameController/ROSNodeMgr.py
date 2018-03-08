@@ -188,7 +188,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 self.start_ispy_cmd_publisher()
 
 
-            if command == SEND_TASKS_TO_UNITY:
+            if command == SEND_TASKS_TO_UNITY or command == SET_GAME_SCENE:
                 counter = 0
                 self.message_received = False
                 # Keep sending the message until hearing that it was received

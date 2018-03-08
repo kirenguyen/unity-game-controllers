@@ -50,7 +50,7 @@
 
           ],
           "exclusive":{
-            "VOCAB_EXPLANATION_SPEECH":0.7,
+            "VOCAB_EXPLANATION_SPEECH":0.5,
             "ROBOT_CELEBRATION": 0.9
           }
         },
@@ -66,7 +66,7 @@
         }
       },
 
-      "virtual":["VIRTUALLY_CLICK_CORRECT_OBJ"]
+      "virtual":{"VIRTUALLY_CLICK_CORRECT_OBJ":1}
     },
     "childTURN": {
       "physical": {
@@ -93,7 +93,7 @@
             "LOOK_AT_TABLET"
           ],
           "exclusive":{
-            "KEYWORD_DEFINITION_SPEECH":0.4,
+            "KEYWORD_DEFINITION_SPEECH":0.3,
             "Q_ROBOT_OFFER_HELP": 0.6
           }
         },
@@ -206,7 +206,7 @@
         },
         "PRONOUNCE_CORRECT":{
           "general": [
-
+            "ROBOT_SILENT_HAPPY_DANCE"
           ]
         },
         "RESULTS_RETURNED":{
@@ -228,7 +228,10 @@
         }
       },
 
-      "virtual":["VIRTUALLY_CLICK_WRONG_OBJ"]
+      "virtual":{
+          "VIRTUALLY_CLICK_CORRECT_OBJ":0.3,
+          "VIRTUALLY_CLICK_WRONG_OBJ":1
+      }
     },
 
 

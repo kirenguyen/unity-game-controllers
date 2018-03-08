@@ -65,7 +65,7 @@
         }
       },
 
-      "virtual":["VIRTUALLY_CLICK_CORRECT_OBJ"]
+      "virtual":{"VIRTUALLY_CLICK_CORRECT_OBJ":1}
     },
     "childTURN": {
       "physical": {
@@ -148,7 +148,7 @@
         }
       },
 
-      "virtual":[]
+      "virtual":{}
     }
   },
 
@@ -223,7 +223,7 @@
         }
       },
 
-      "virtual":["VIRTUALLY_CLICK_WRONG_OBJ"]
+      "virtual":{"VIRTUALLY_CLICK_WRONG_OBJ":1}
     },
 
 
@@ -294,7 +294,7 @@
         }
       },
 
-      "virtual":[]
+      "virtual":{}
     }
   },
 
@@ -352,7 +352,7 @@
           ]
         }
       },
-      "virtual":[]
+      "virtual":{}
 
     },
     "childTURN": {
@@ -427,7 +427,7 @@
         }
       },
 
-      "virtual":[]
+      "virtual":{}
     }
   }
 

@@ -77,8 +77,8 @@ class StorybookFSM(object):
         print("Sending ack")
         self.ros.send_storybook_command(command, "")
         print("Sending message to Jibo")
-        self.ros.send_jibo_command(JiboStorybookBehaviors.EXPLAIN_WORD, "Hi Hanna, it worked!")
-        self.ros.send_jibo_asr_command(JiboAsrCommand.START_FINAL)
+        # self.ros.send_jibo_command(JiboStorybookBehaviors.EXPLAIN_WORD, "Sent ASR command")
+        # self.ros.send_jibo_asr_command(JiboAsrCommand.START)
 
       elif data.event_type == StorybookEvent.SPEECH_ACE_RESULT:
         speechace_result = json.loads(data.message)
@@ -161,8 +161,12 @@ class StorybookFSM(object):
     Define callback function for when ROS node manager receives a new
     JiboAsr message, which should be whenever someone says "Hey, Jibo! ..."
     """
+    if data.transcription == "":
+      return
+
     print("Received JiboAsrResult message with data:\n", data)
     if data.transcription == ASR_NOSPEECH:
       print("no speech")
     else:
       print("got transcription:", data.transcription)
+

@@ -57,6 +57,12 @@ def main(argv):
 
   # Main event queue.
   thread.start_new_thread(fsm.process_main_event_queue, ())
+
+  # TODO: should send this in response to something else happening, not right
+  # at the start? Or maybe it's ok, as long as we first start Jibo then
+  # start the controller. Hard to work out this protocol.
+  ros_node_manager.send_jibo_asr_command(JiboAsrCommand.START)
+
   signal.signal(signal.SIGINT, signal_handler)
 
   # Spin and periodically check the state of the student model.

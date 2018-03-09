@@ -32,15 +32,6 @@ class ROSNodeManager(object):
     self.subscribers = {}
     self.publishers = {}
 
-    self.storybook_publisher = None
-    self.jibo_publisher = None
-    self.jibo_asr_publisher = None
-    self.storybook_event_listener = None
-    self.storybook_page_info_listener = None
-    self.storybook_state_listener = None
-    self.jibo_state_listener = None
-    self.jibo_asr_listener = None
-
   def init_ros_node(self):
     rospy.init_node(self.node_name, anonymous=True)
 
@@ -77,12 +68,12 @@ class ROSNodeManager(object):
     self.publishers[JIBO_ACTION_TOPIC].publish(msg)
     rospy.loginfo(msg)
 
-  def send_jibo_asr_command(self, command, heyjibo=True, continuous=True, rule=""):
+  def send_jibo_asr_command(self, command, heyjibo=False, continuous=True, rule=""):
     """
     Sends a command to Jibo to tell it to start listening and to publish back
     ASR results.
 
-    Note that JiboAsrCommand.START_FINAL and JiboAsrCommand.STOP_FINAL are the
+    Note that JiboAsrCommand.START and JiboAsrCommand.STOP are the
     only ones that are supported in jibo-rosbridge-receiver right now.
     """
     msg = JiboCommandsBuilder.get_jibo_asr_command(command, heyjibo, continuous, rule)

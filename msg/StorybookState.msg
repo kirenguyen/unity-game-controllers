@@ -25,6 +25,7 @@ int8 evaluating_stanza_index
 int8 NOT_READING = 0
 int8 EXPLORE_MODE = 1
 int8 EVAlUATE_MODE = 2
+int8 POST_TEST = 3
 
 #
 # Other properties that can be filled in later...

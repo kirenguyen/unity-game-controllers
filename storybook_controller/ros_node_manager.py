@@ -33,7 +33,7 @@ class ROSNodeManager(object):
     self.publishers = {}
 
   def init_ros_node(self):
-    rospy.init_node(self.node_name, anonymous=True)
+    rospy.init_node(self.node_name, anonymous=False)
 
   def start_listener(self, topic, message_type, callback):
     print("Starting subscriber node for:", topic)

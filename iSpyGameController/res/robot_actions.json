@@ -185,8 +185,9 @@
           "general": [
 
           ],
-          "optional":{
-            "ROBOT_SILENT_PUZZLED": 0.7
+          "exclusive":{
+            "ROBOT_SILENT_PUZZLED": 0.5,
+            "NOVICE_ROLE_KEYWORD": 0.6
           }
         },
         "RIGHT_OBJECT_FOUND": {
@@ -195,7 +196,9 @@
           ],
           "exclusive":{
             "ROBOT_INTERESTED": 1.0,
-            "ROBOT_SILENT_PUZZLED": 0.3
+            "ROBOT_SILENT_PUZZLED": 0.3,
+            "NOVICE_ROLE_KEYWORD": 0.8
+
           }
         },
         "OBJECT_PRONOUNCED":{
@@ -229,7 +232,7 @@
       },
 
       "virtual":{
-          "VIRTUALLY_CLICK_CORRECT_OBJ":0.3,
+          "VIRTUALLY_CLICK_CORRECT_OBJ":0.4,
           "VIRTUALLY_CLICK_WRONG_OBJ":1
       }
     },
@@ -254,8 +257,8 @@
           ],
           "exclusive":{
             "REMINDER_SPEECH": 0.3,
-            "ROBOT_CUSTOM_SPEECH": 0.7,
-            "Q_ROBOT_WANT_LEARN": 0.9
+            "ROBOT_CUSTOM_SPEECH": 0.6,
+            "Q_ROBOT_INDUCE_SPEECH":0.9
           }
         },
         "WRONG_OBJECT_CLICKED": {
@@ -383,8 +386,7 @@
             "ROBOT_ENCOURAGING"
           ],
           "exclusive":{
-            "Q_ROBOT_INDUCE_SPEECH": 0.6,
-            "Q_ROBOT_OFFER_HELP": 0.7
+            "Q_ROBOT_INDUCE_SPEECH": 0.8
           }
         },
         "WRONG_OBJECT_CLICKED": {

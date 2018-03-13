@@ -71,6 +71,7 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     OBJECTS = "OBJECTS"
 
 
+    ROBOT_HINT_BUTTON_REMINDER = "ROBOT_HINT_BUTTON_REMINDER"
     ROBOT_CUSTOM_SPEECH = "ROBOT_CUSTOM_SPEECH"
     Q_ROBOT_INDUCE_SPEECH = "Q_ROBOT_INDUCE_SPEECH"
     ROBOT_INDUCE_SPEECH_RESPONSE = "ROBOT_INDUCE_SPEECH_RESPONSE"
@@ -81,6 +82,8 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     HINT_SPEECH = "HINT_SPEECH"
     KEYWORD_DEFINITION_SPEECH = "KEYWORD_DEFINITION_SPEECH"
     REMINDER_SPEECH = "REMINDER_SPEECH"
+
+    NOVICE_ROLE_KEYWORD = "NOVICE_ROLE_KEYWORD" 
 
 
    ### ====== Tega Question Asking =================== ####

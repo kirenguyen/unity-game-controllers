@@ -3,7 +3,7 @@
     "question": ["yes_no_question_4"],
     "user_input":[
       {
-        "en_US":["yes","okay","ok","yeah","sure", "mhm"],
+        "en_US":["yes","okay","ok","yeah","sure", "mhm","help me"],
         "response":["ROBOT_EXCITED", "response_a"]
       },
       {

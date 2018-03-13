@@ -232,6 +232,7 @@ class ChildRobotInteractionFSM:
 			print ("on_enter_robotTURN_childHelp")
 			self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":"ROBOT_ASK_HELP","clicked_object":""}) # enable the child to interact with the tablet
 			self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, ROOT_TEGA_SPEECH_FOLDER + "general/others/child_help.wav") # "now you can span the screen around"
+			self.virtual_action = ""
 			self._ros_publish_data()
 
 		def listen_child_speech(self):
@@ -596,13 +597,10 @@ class ChildRobotInteractionFSM:
 					pass
 
 			elif gameStateTrigger  == gs.Triggers.NONTARGET_OBJECT_COLLECTED:
-				
-				self._perform_robot_physical_actions(ras.WRONG_OBJECT_FAIL)
+				if not ris.CHILD_HELP in self.state:
+					self._perform_robot_physical_actions(ras.WRONG_OBJECT_FAIL)
 				self._perform_robot_physical_actions(ras.TURN_SWITCHING)
 				self.child_states.update_turn_result(self.state,False) # the child finds the incorrect object
-				
-				if self.state == ris.CHILD_TURN or self.state == ris.ROBOT_TURN+'_'+ris.CHILD_HELP:
-					pass
 
 			elif gameStateTrigger  == gs.Triggers.OBJECT_CLICKED:
 				if self.state == ris.ROBOT_TURN:
@@ -652,7 +650,8 @@ class ChildRobotInteractionFSM:
 				if self.state == ris.ROBOT_TURN:
 					break
 			self._wait_until()
-			self._perform_robot_virtual_action(self.virtual_action)
+			if self.state == ris.CHILD_TURN+'_'+ris.ROBOT_HELP or self.state == ris.ROBOT_TURN:
+				self._perform_robot_virtual_action(self.virtual_action)
 
 
 		def _wait_until(self):
@@ -740,7 +739,7 @@ class ChildRobotInteractionFSM:
 
 		def start_task_end_celebration(self, action_number):
 
-			time.sleep(7)
+			time.sleep(5)
 
 			if self.task_controller.task_in_progress:
 				return
@@ -870,7 +869,6 @@ class ChildRobotInteractionFSM:
 					return {final_action: 1.0}
 
 
-
 				# dict {[action, action]: prob} exclusive one happen or the other, with first having prob [0, 1] of happening
 				try:
 					exclusive_actions = self.physical_actions[action_type]['exclusive']
@@ -925,6 +923,8 @@ class ChildRobotInteractionFSM:
 								input_data = [self.task_controller.get_vocab_word(), self.robot_clickedObj]
 							elif action == RobotBehaviors.ROBOT_CUSTOM_SPEECH:
 								input_data = _get_tega_speech(action_type) # speech file name
+							elif action == RobotBehaviors.NOVICE_ROLE_KEYWORD:
+								input_data = self.task_controller.get_vocab_word()
 
 
 							self.ros_node_mgr.send_robot_cmd(action,input_data)
@@ -1094,7 +1094,7 @@ class ChildRobotInteractionFSM:
 			'''
 			self._ros_publish_data("", action)
 
-			print("virtual action: "+action)
+			print("++++++++++++++++++++++++++++++++virtual action: "+action)
 
 			action = self.role_behavior_mapping.get_action_name(action) # get the correct name
 

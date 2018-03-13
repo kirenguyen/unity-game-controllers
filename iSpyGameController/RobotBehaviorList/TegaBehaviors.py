@@ -138,12 +138,24 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
         if command == RobotBehaviors.ROBOT_SILENT_EXCITED:
             msg.motion = TegaAction.MOTION_SILENT_HAPPY_WIGGLE
 
-
         # Tega speech commands
+        if command == RobotBehaviors.ROBOT_HINT_BUTTON_REMINDER:
+            msg.wav_filename = ROOT_TEGA_SPEECH_FOLDER + "general/others/mission_reminder.wav"
+            msg.motion = TegaAction.MOTION_SILENT_PUZZLED
+            msg.enqueue = True
+
         if command == RobotBehaviors.ROBOT_CUSTOM_SPEECH:
             msg.wav_filename = args[0][0].lower()
             msg.enqueue = True
             print("custom speech: "+msg.wav_filename)
+
+        if command == RobotBehaviors.NOVICE_ROLE_KEYWORD:
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/novice_keyword/"
+            vocab_word = args[0][0].lower()
+            msg.wav_filename = PATH + "novice_"+ vocab_word + ".wav"
+            msg.motion = TegaAction.MOTION_SILENT_PUZZLED
+            msg.enqueue = True
+            print("novice keyword speech wav: "+msg.wav_filename)
 
 
         ### ============== Tega Speech for Role Switching Project ================== ###

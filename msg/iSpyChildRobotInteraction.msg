@@ -1,5 +1,5 @@
 # ROS Message (child robot interaction)
-# Header header
+Header header
 
 # current game task index: 
 int8 gameTask 

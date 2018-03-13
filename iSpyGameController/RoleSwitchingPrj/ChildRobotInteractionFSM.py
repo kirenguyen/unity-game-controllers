@@ -31,6 +31,7 @@ from datetime import datetime, timedelta
 
 import os
 import timestring
+import rospy
 
 
 ROOT_TEGA_SPEECH_FOLDER = 'roleswitching18/'
@@ -954,8 +955,8 @@ class ChildRobotInteractionFSM:
 			msg = iSpyChildRobotInteraction()
 			
 			# add header
-			# msg.header = Header()
-        	# msg.header.stamp = rospy.Time.now()
+			msg.header = Header()
+			msg.header.stamp = rospy.Time.now()
 
 			# current game task index: 
 			msg.gameTask = self.task_controller.current_task_index 

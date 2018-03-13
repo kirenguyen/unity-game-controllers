@@ -186,8 +186,8 @@
 
           ],
           "exclusive":{
-            "ROBOT_SILENT_PUZZLED": 0.5,
-            "NOVICE_ROLE_KEYWORD": 0.6
+            "ROBOT_SILENT_PUZZLED": 0.4,
+            "NOVICE_ROLE_KEYWORD": 0.8
           }
         },
         "RIGHT_OBJECT_FOUND": {
@@ -195,8 +195,7 @@
 
           ],
           "exclusive":{
-            "ROBOT_INTERESTED": 1.0,
-            "ROBOT_SILENT_PUZZLED": 0.3,
+            "ROBOT_INTERESTED": 0.3,
             "NOVICE_ROLE_KEYWORD": 0.8
 
           }

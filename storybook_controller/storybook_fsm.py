@@ -30,13 +30,24 @@ class StorybookFSM(object):
     self.ros = ros_node_manager
     self.student_model = student_model
 
+    # State information about what's going on in the story right now.
+    self.current_storybook_mode = None
+    self.current_story = None
+    self.current_page_number = None
+    self.current_stanza_index = None
+    self.current_tinker_texts = None
+    self.current_scene_objects = None
+    self.current_sentences = None
+
     self.STORYBOOK_EVENT_MESSAGES = [
       StorybookEvent.HELLO_WORLD,
       StorybookEvent.SPEECH_ACE_RESULT,
       StorybookEvent.WORD_TAPPED,
       StorybookEvent.SCENE_OBJECT_TAPPED,
-      StorybookEvent.STANZA_SWIPED
+      StorybookEvent.SENTENCE_SWIPED,
     ]
+
+    self.started = False;
 
     self.states = []
     self.initial_state = None
@@ -59,6 +70,8 @@ class StorybookFSM(object):
     #   self, states=self.states, transitions=self.transitions,
     #   initial=self.initial_state)
 
+  # TODO: consider getting rid of this and just handling everything via
+  # the FSM python logic stuff.
   def process_main_event_queue(self):
     while True:
       # This call to get() will block the thread until something is there.
@@ -75,35 +88,30 @@ class StorybookFSM(object):
         # Wait for a little bit to ensure message not dropped.
         time.sleep(1)
         print("Sending ack")
-        self.ros.send_storybook_command(command, "")
-        print("Sending message to Jibo")
+        self.ros.send_storybook_command(command, json.dumps(params))
+        # TODO: decide best place to send the ASR command.
         # self.ros.send_jibo_command(JiboStorybookBehaviors.EXPLAIN_WORD, "Sent ASR command")
-        # self.ros.send_jibo_asr_command(JiboAsrCommand.START)
 
       elif data.event_type == StorybookEvent.SPEECH_ACE_RESULT:
         speechace_result = json.loads(data.message)
-        # print(speechace_result)
-        print(speechace_result["text_score"]["quality_score"])
-        params = {
-          "obj1": 1,
-          "obj2": "hi"
-        }
-        command = StorybookCommand.PING_TEST
-        self.ros.send_storybook_command(command, json.dumps(params))
+        self.student_model.update_with_speechace_result(speechace_result)
       
       elif data.event_type == StorybookEvent.WORD_TAPPED:
         message = json.loads(data.message)
-        jibo_tts = message["word"]
+        word = message["word"]
+        self.student_model.update_with_word_tapped(word)
+        # TODO: if we asked a question, see if this tap was the correct answer.
+
         # Tell Jibo to say this word.
-        self.ros.send_jibo_command(JiboStorybookBehaviors.EXPLAIN_WORD, jibo_tts);
+        self.ros.send_jibo_command(JiboStorybookBehaviors.EXPLAIN_WORD, word, .5, .45);
       
       elif data.event_type == StorybookEvent.SCENE_OBJECT_TAPPED:
         message = json.loads(data.message)
         print("Scene object tapped:", message["label"])
 
-      elif data.event_type == StorybookEvent.STANZA_SWIPED:
+      elif data.event_type == StorybookEvent.SENTENCE_SWIPED:
         message = json.loads(data.message)
-        print("Stanza swiped:", message["index"], message["text"])
+        print("Sentence swiped:", message["index"], message["text"])
 
       # TODO: Maybe call queue.task_done() differently in each above case,
       # because we might want to use a join in the future and block
@@ -117,8 +125,7 @@ class StorybookFSM(object):
     This callback is called when the ROS node manager receives a new
     StorybookEvent message, which will be triggered by events in the storybook.
     """
-    print("Received StorybookEvent message with data:\n", data)
-    
+
     if data.event_type in self.STORYBOOK_EVENT_MESSAGES:
       self.event_queue.put(data)
     else:
@@ -161,12 +168,8 @@ class StorybookFSM(object):
     Define callback function for when ROS node manager receives a new
     JiboAsr message, which should be whenever someone says "Hey, Jibo! ..."
     """
-    if data.transcription == "":
+    if data.transcription == "" or data.transcription == ASR_NOSPEECH:
       return
 
-    print("Received JiboAsrResult message with data:\n", data)
-    if data.transcription == ASR_NOSPEECH:
-      print("no speech")
-    else:
-      print("got transcription:", data.transcription)
+    print("Got Jibo ASR transcription:", data.transcription)
 

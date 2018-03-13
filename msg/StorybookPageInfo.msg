@@ -6,7 +6,7 @@ Header header
 string story_name
 int8 page_number # 0 indexed: 0 is the title page.
 
-string[] stanzas
+string[] sentences
 
 StorybookSceneObject[] scene_objects
 StorybookTinkerText[] tinkertexts

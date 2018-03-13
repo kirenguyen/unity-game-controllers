@@ -52,6 +52,11 @@ class StudentModel(object):
 
     # TODO something more sophisticated given this score information?
 
+  def update_with_word_tapped(self, word):
+    """
+    Update model given that the child tapped on a certain word while exploring.
+    """
+
   def get_lowest_pronunciation_score_word(words):
     """
     Given an array of words (likely representing a sentence), return the word

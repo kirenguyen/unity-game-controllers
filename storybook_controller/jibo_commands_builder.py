@@ -14,7 +14,6 @@ class JiboCommandsBuilder(object):
 	
   @staticmethod
   def get_message_from_behavior(command, *args):
-    print("creating jibo message from behavior")
 
     msg = JiboAction()
     msg.header = Header()
@@ -26,6 +25,10 @@ class JiboCommandsBuilder(object):
       msg.do_lookat = False
       msg.do_sound_playback = False
       msg.tts_text = args[0]
+      if len(args) > 1:
+        msg.tts_duration_stretch = args[1]
+      if len(args) > 2:
+        msg.tts_pitch = args[2]
 
     return msg
 

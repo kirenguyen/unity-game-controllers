@@ -14,7 +14,7 @@ int8 num_pages
 
 # If in EVALUATE_MODE, this will reflect the current stanza.
 # Otherwise, it should be -1.
-int8 evaluating_stanza_index
+int8 evaluating_sentence_index
 
 # Commented out because it's probably not necessary.
 # Optional, will be filled in during audio playback.

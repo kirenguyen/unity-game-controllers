@@ -6,6 +6,7 @@ messages on subscribed topics, and publishes messages to both the robot
 agent and the tablet app.
 """
 
+import json
 import rospy
 
 from unity_game_msgs.msg import StorybookCommand
@@ -55,7 +56,10 @@ class ROSNodeManager(object):
     msg.header.stamp = rospy.Time.now()
     msg.command = command
     if len(args) > 0:
-      msg.params = args[0]
+      if type(args[0]) == str:
+        msg.params = args[0]
+      else:
+        msg.params = json.dumps(args[0])
     self.publishers[STORYBOOK_COMMAND_TOPIC].publish(msg)
     rospy.loginfo(msg)
 

@@ -20,6 +20,9 @@ class StudentModel(object):
     # Keep track of trend of overall scores per page.
     self.overall_quality_scores = []
 
+    # Current sentences on the page in evaluate mode.
+    self.sentences = []
+
     self.feedback_templates = [
       RobotFeedback(RobotFeedbackType.ASK_TO_CLICK, "Can you click on {} {} in the image?"),
       RobotFeedback(RobotFeedbackType.ASK_TO_PRONOUNCE, "Can you pronounce this word?")
@@ -56,6 +59,15 @@ class StudentModel(object):
     """
     Update model given that the child tapped on a certain word while exploring.
     """
+    pass
+
+  def is_child_turn(self, sentence_index):
+    return True
+
+  def update_current_sentences(self, sentences):
+    self.sentences = []
+    for sentence in sentences:
+      self.sentences.append(sentence.split())
 
   def get_lowest_pronunciation_score_word(words):
     """

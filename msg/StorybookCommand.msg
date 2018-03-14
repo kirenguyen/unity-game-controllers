@@ -10,7 +10,6 @@ int8 command
 string params
 
 int8 PING_TEST = 0 # Dummy message that simply pings the storybook.
-int8 HIGHLIGHT_WORD = 1 # Params is which index word to highlight
-int8 HIGHLIGHT_SCENE_OBJECT = 2 # Params is which id scene object to highlight
-int8 HIGHLIGHT_STANZA = 3 # Params is which index stanza to highlight
-
+int8 HIGHLIGHT_WORD = 1 # Params is {index:int}, word to highlight
+int8 HIGHLIGHT_SCENE_OBJECT = 2 # Params is {id: int}, scene object to highlight
+int8 HIGHLIGHT_NEXT_SENTENCE = 3 # Params is {index: int, child_turn: bool}, sentence to highlight and whether it's the child's turn

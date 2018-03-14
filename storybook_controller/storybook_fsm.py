@@ -15,7 +15,13 @@ import sys
 
 from unity_game_msgs.msg import StorybookCommand
 from unity_game_msgs.msg import StorybookEvent
-from jibo_msgs.msg import JiboAsrCommand
+from unity_game_msgs.msg import StorybookPageInfo
+from unity_game_msgs.msg import StorybookState
+
+from jibo_msgs.msg import JiboAction # Commands to Jibo
+from jibo_msgs.msg import JiboState # State from Jibo
+from jibo_msgs.msg import JiboAsrCommand # ASR commands to Jibo
+from jibo_msgs.msg import JiboAsrResult # ASR results from Jibo
 
 from storybook_controller.storybook_constants import *
 from storybook_controller.jibo_commands_builder import JiboStorybookBehaviors
@@ -33,11 +39,16 @@ class StorybookFSM(object):
     # State information about what's going on in the story right now.
     self.current_storybook_mode = None
     self.current_story = None
+    self.num_story_pages = None
     self.current_page_number = None
     self.current_stanza_index = None
-    self.current_tinker_texts = None
+    self.current_tinkertexts = None
     self.current_scene_objects = None
     self.current_sentences = None
+
+    self.reported_evaluating_sentence_index = None
+    self.storybook_audio_playing = None
+    self.storybook_audio_file = None
 
     self.STORYBOOK_EVENT_MESSAGES = [
       StorybookEvent.HELLO_WORLD,
@@ -88,7 +99,7 @@ class StorybookFSM(object):
         # Wait for a little bit to ensure message not dropped.
         time.sleep(1)
         print("Sending ack")
-        self.ros.send_storybook_command(command, json.dumps(params))
+        self.ros.send_storybook_command(command, params)
         # TODO: decide best place to send the ASR command.
         # self.ros.send_jibo_command(JiboStorybookBehaviors.EXPLAIN_WORD, "Sent ASR command")
 
@@ -138,20 +149,44 @@ class StorybookFSM(object):
     """
     Define the callback function for StorybookPageInfo messages.
     """
-    # TODO: update our knowledge of which page we're on, etc.
-    # Also might need to update student model with what current words are?
-    pass
+    # Update our knowledge of which page we're on, etc.
+    self.current_page_number = data.page_number
+    self.current_sentences = data.sentences
+    self.current_scene_objects = data.scene_objects
+    self.current_tinkertexts = data.tinkertexts
+
+    self.student_model.update_current_sentences(data.sentences)
+
+    # Begins the sentence highlighting for each stage.
+    if self.current_storybook_mode == StorybookState.EVALUATE_MODE and \
+        self.current_page_number > 0:
+      sentence_index = 0
+      child_turn = self.student_model.is_child_turn(sentence_index)
+      params = {
+        "index": sentence_index,
+        "child_turn": child_turn
+      }
+      self.ros.send_storybook_command(StorybookCommand.HIGHLIGHT_NEXT_SENTENCE, params)    
+
+    # TODO: also might need to update student model with what current words are?
+    # maybe only in evaluate mode though...
+
 
   def storybook_state_ros_message_handler(self, data):
     """
        Define the callback function for StorybookState messages.
     """
-    
+
+    self.current_storybook_mode = data.storybook_mode
+    self.current_story = data.current_story
+    self.reported_evaluating_sentence_index = data.evaluating_sentence_index
+    self.storybook_audio_playing = data.audio_playing
+    self.storybook_audio_file = data.audio_file
+
     # TODO: Remove this after done testing stuff.
     if data.audio_playing:
       print("Audio is playing in storybook:", data.audio_file)
 
-    # TODO: update fsm state.
 
   def jibo_state_ros_message_handler(self, data):
     """

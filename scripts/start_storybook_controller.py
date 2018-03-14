@@ -1,6 +1,7 @@
 from storybook_controller.storybook_fsm import StorybookFSM
 from storybook_controller.ros_node_manager import ROSNodeManager
 from storybook_controller.student_model import StudentModel
+from storybook_controller.jibo_commands_builder import JiboStorybookBehaviors
 from storybook_controller.storybook_constants import *
 
 from unity_game_msgs.msg import StorybookCommand
@@ -61,7 +62,9 @@ def main(argv):
   # TODO: should send this in response to something else happening, not right
   # at the start? Or maybe it's ok, as long as we first start Jibo then
   # start the controller. Hard to work out this protocol.
-  ros_node_manager.send_jibo_asr_command(JiboAsrCommand.START)
+  # ros_node_manager.send_jibo_asr_command(JiboAsrCommand.START)
+  time.sleep(10)
+  # ros_node_manager.send_jibo_command(JiboStorybookBehaviors.EXPLAIN_WORD, "hello", 1.0)
 
   signal.signal(signal.SIGINT, signal_handler)
 

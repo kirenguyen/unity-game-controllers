@@ -24,7 +24,7 @@ int8 evaluating_sentence_index
 # Constants for storybook_mode above.
 int8 NOT_READING = 0
 int8 EXPLORE_MODE = 1
-int8 EVAlUATE_MODE = 2
+int8 EVALUATE_MODE = 2
 int8 POST_TEST = 3
 
 #

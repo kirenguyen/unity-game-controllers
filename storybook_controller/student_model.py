@@ -21,7 +21,8 @@ class StudentModel(object):
     self.overall_quality_scores = []
 
     # Current sentences on the page in evaluate mode.
-    self.sentences = []
+    self.current_sentences = []
+    self.sentences_by_page_number = {}
 
     self.feedback_templates = [
       RobotFeedback(RobotFeedbackType.ASK_TO_CLICK, "Can you click on {} {} in the image?"),
@@ -33,6 +34,9 @@ class StudentModel(object):
     Updates the model given the result of a recent speechace analysis.
     """
     print("Updating with speech ace results!")
+    if "text_score" not in speechace_result:
+      print("--- Got speech ace results but no text score, likely speech was empty")
+      return
     text_score = speechace_result["text_score"]
     # Record overall quality score.
     self.overall_quality_scores.append(text_score["quality_score"])
@@ -64,10 +68,12 @@ class StudentModel(object):
   def is_child_turn(self, sentence_index):
     return True
 
-  def update_current_sentences(self, sentences):
-    self.sentences = []
+  def update_sentences(self, page_num, sentences):
+    self.sentences_by_page_number[page_num] = []
     for sentence in sentences:
-      self.sentences.append(sentence.split())
+      self.sentences_by_page_number[page_num].append(sentence.split())
+    self.current_sentences = self.sentences_by_page_number[page_num]
+    print("Sentences: " + str(self.sentences_by_page_number))
 
   def get_lowest_pronunciation_score_word(words):
     """

@@ -13,3 +13,4 @@ int8 PING_TEST = 0 # Dummy message that simply pings the storybook.
 int8 HIGHLIGHT_WORD = 1 # Params is {index:int}, word to highlight
 int8 HIGHLIGHT_SCENE_OBJECT = 2 # Params is {id: int}, scene object to highlight
 int8 HIGHLIGHT_NEXT_SENTENCE = 3 # Params is {index: int, child_turn: bool}, sentence to highlight and whether it's the child's turn
+int8 RECORD_AUDIO_AND_SPEECHACE = 4 # Params is empty

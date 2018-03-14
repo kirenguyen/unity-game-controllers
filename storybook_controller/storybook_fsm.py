@@ -155,7 +155,8 @@ class StorybookFSM(object):
     self.current_scene_objects = data.scene_objects
     self.current_tinkertexts = data.tinkertexts
 
-    self.student_model.update_current_sentences(data.sentences)
+    # Tell student model what sentences are on the page now.
+    self.student_model.update_sentences(data.page_number, data.sentences)
 
     # Begins the sentence highlighting for each stage.
     if self.current_storybook_mode == StorybookState.EVALUATE_MODE and \
@@ -166,10 +167,11 @@ class StorybookFSM(object):
         "index": sentence_index,
         "child_turn": child_turn
       }
-      self.ros.send_storybook_command(StorybookCommand.HIGHLIGHT_NEXT_SENTENCE, params)    
-
-    # TODO: also might need to update student model with what current words are?
-    # maybe only in evaluate mode though...
+      self.ros.send_storybook_command(StorybookCommand.HIGHLIGHT_NEXT_SENTENCE, params)
+      params = {
+        "index": sentence_index
+      }
+      self.ros.send_storybook_command(StorybookCommand.RECORD_AUDIO_AND_SPEECHACE, params)  
 
 
   def storybook_state_ros_message_handler(self, data):

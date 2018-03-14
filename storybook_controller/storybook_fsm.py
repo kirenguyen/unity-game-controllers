@@ -158,6 +158,13 @@ class StorybookFSM(object):
     # Tell student model what sentences are on the page now.
     self.student_model.update_sentences(data.page_number, data.sentences)
 
+    # TODO: remove this testing code for word and scene object highlighting.
+    if self.current_storybook_mode == StorybookState.EXPLORE_MODE and \
+        self.current_page_number > 0:
+      print("Sending storybook commands")
+      self.ros.send_storybook_command(StorybookCommand.HIGHLIGHT_WORD, {"index": 2})
+      self.ros.send_storybook_command(StorybookCommand.HIGHLIGHT_SCENE_OBJECT, {"id": 0})
+
     # Begins the sentence highlighting for each stage.
     if self.current_storybook_mode == StorybookState.EVALUATE_MODE and \
         self.current_page_number > 0:

@@ -18,7 +18,7 @@ class AffdexAnalysis:
 
 		self.inter_data_frame = 0
 		rospy.init_node('node_name')
-		rospy.Subscriber("affdex_data_2", AffdexFrameInfo, self.on_affdex_data_received)
+		rospy.Subscriber("affdex_data", AffdexFrameInfo, self.on_affdex_data_received)
 		#self.csv_file_prefix = "affdex_log_"+p_id+"_"+experimenter+"_"+game_round+"_"
 		self.csv_file_name = "affdex-outputs/"+rosbag_name.replace('bag','csv')
 		rospy.Subscriber("/ispy_cmd_topic",iSpyCommand,self.on_game_start)

@@ -5,7 +5,7 @@ sleep 1s
 
 
 sleep 1s #check the rostopic publishing rate
-gnome-terminal --geometry 40x120+0+0 --title ">>>AFFDEX ROSTOPIC PUBLISHING RATE<<<" -x bash -c "rostopic hz /affdex_data_2"
+gnome-terminal --geometry 40x120+0+0 --title ">>>AFFDEX ROSTOPIC PUBLISHING RATE<<<" -x bash -c "rostopic hz /affdex_data"
 sleep 1s
 #xterm -bg grey -geometry 45x20+200+200 -T "USB Cam" -e "python3 extract_affdex_data.py"
 python3 extract_affdex_data.py $1 # start the analysis

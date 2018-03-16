@@ -106,5 +106,5 @@ ispy_rosbag/
 
 scripts/tega_cam_affect_analysis
 
-scripts/ispy_scripts/affdex-outputs/
-scripts/ispy_scripts/rosbag_inputs/
+scripts/ispy_scripts/affdex-outputs/*
+scripts/ispy_scripts/rosbag_inputs/*

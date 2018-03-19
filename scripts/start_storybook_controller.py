@@ -62,9 +62,9 @@ def main(argv):
   # TODO: should send this in response to something else happening, not right
   # at the start? Or maybe it's ok, as long as we first start Jibo then
   # start the controller. Hard to work out this protocol.
-  # ros_node_manager.send_jibo_asr_command(JiboAsrCommand.START)
-  time.sleep(10)
-  # ros_node_manager.send_jibo_command(JiboStorybookBehaviors.EXPLAIN_WORD, "hello", 1.0)
+  time.sleep(4)
+  ros_node_manager.send_jibo_asr_command(JiboAsrCommand.START)
+  # ros_node_manager.send_jibo_command(JiboStorybookBehaviors.EXPLAIN_WORD, "hello this is a long sentence", .5, .4)
 
   signal.signal(signal.SIGINT, signal_handler)
 

@@ -36,6 +36,9 @@ class StorybookFSM(object):
     self.ros = ros_node_manager
     self.student_model = student_model
 
+    # State information about Jibo
+    self.jibo_tts_on = False
+
     # State information about what's going on in the story right now.
     self.current_storybook_mode = None
     self.current_story = None
@@ -60,8 +63,24 @@ class StorybookFSM(object):
 
     self.started = False;
 
-    self.states = []
-    self.initial_state = None
+    not_reading_states = ["APP_START"]
+    explore_states = ["BEGIN_EXPLORE", ]
+    evaluate_states = [
+      "BEGIN_EVALUATE", # After switching to evaluate mode.
+      "WAITING_FOR_STORY_LOAD", # After a story selected and is loading.
+      "WAITING_FOR_NEXT_PAGE", # After story loaded, waiting for page_info.
+      "WAITING_FOR_CHILD_AUDIO", # After a sentence has been shown.
+      "WAITING_FOR_END_PAGE_JIBO_QUESTION", # Wait for Jibo tts to finish.
+      "WAITING_FOR_END_PAGE_CHILD_RESPONSE", # Could be speech or tablet event.
+      "END_STORY", # Moved to the "The End" page, tell Jibo to ask a question,
+      "WAITING_FOR_END_STORY_CHILD_AUDIO", # Wait for child to respond.
+      "END_EVALUATE" # End evaluate mode. Idle until another mode is entered.
+    ]
+    post_test_states = ["BEGIN_PRE_POST_TEST"]
+
+    self.states = not_reading_states + explore_states + \
+                  evaluate_states + post_test_states 
+    self.initial_state = "APP_START"
     self.transitions = [
       {
         "trigger": "",
@@ -205,6 +224,14 @@ class StorybookFSM(object):
     # TODO: this is just testing code, replace later.
     if data.is_playing_sound:
       print("Jibo tts ongoing:", data.tts_msg)
+
+    if not data.is_playing_sound and self.jibo_tts_on:
+      # This is when the sound has just stopped.
+      # TODO: trigger the jibo_finish_tts() trigger.
+      pass
+
+    # Update state.
+    self.jibo_tts_on = data.is_playing_sound
 
 
   def jibo_asr_ros_message_handler(self, data):

@@ -522,13 +522,14 @@ class ChildRobotInteractionFSM:
 			self.numHintButtonPressedForTask = 0
 
 		def turn_taking(self,max_time=False):
-
 			def _get_turn_duration():
 				self.turn_end_time = datetime.now()
 				self.turn_duration = str(self.turn_end_time - self.turn_start_time)
 				self._ros_publish_data()
 
 			_get_turn_duration()
+
+
 
 			self.child_click_cancel_num =0  # reset child's number of clicks and cancels each turn
 
@@ -700,7 +701,11 @@ class ChildRobotInteractionFSM:
 				}
 				return cond_switcher[self.subj_cond]
 			
-			if self.state == ris.ROBOT_TURN: self.role = get_next_robot_role()
+			if self.state == ris.ROBOT_TURN: 
+				self.child_states.s1_total_turns += 1
+				self.role = get_next_robot_role()
+				if self.role == RobotRoles.EXPERT:
+					self.child_states.s2_prev_expert_roles +=1
 				
 			physical_actions = self.role_behavior_mapping.get_actions(self.role,self.state,'physical')
 

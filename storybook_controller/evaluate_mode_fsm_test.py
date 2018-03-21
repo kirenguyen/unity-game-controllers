@@ -27,7 +27,7 @@ class StorybookEvaluateFSM(object):
         "before":"jibo_stall_story_loading" # Keep this short.
       },
       {
-        "trigger":"storybook_downloaded", # At this point, we're on the title screen.
+        "trigger":"storybook_loaded", # At this point, we're on the title screen.
         "source": "WAITING_FOR_STORY_LOAD",
         "dest": "WAITING_FOR_STORY_LOAD",
         "before": "jibo_start_story",
@@ -87,7 +87,7 @@ class StorybookEvaluateFSM(object):
         "trigger":"child_end_page_response_complete",
         "source": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
         "dest": "END_STORY",
-        "after": ["tablet_end_story", "jibo_end_story"]
+        "after": ["tablet_go_to_end_page", "jibo_end_story"]
       },
       {
         "trigger": "jibo_finish_tts",
@@ -102,6 +102,12 @@ class StorybookEvaluateFSM(object):
         "source": "WAITING_FOR_END_STORY_CHILD_AUDIO",
         "dest": "END_EVALUATE",
         "after": "jibo_respond_to_end_story"
+      },
+      {
+        "trigger": "jibo_finish_tts",
+        "source": "END_EVALUATE",
+        "dest": "END_EVALUATE",
+        "after": "tablet_show_library_panel"
       },
       {
         "trigger": "begin_evaluate_mode",
@@ -123,8 +129,8 @@ class StorybookEvaluateFSM(object):
   def storybook_selected(self):
     print "trigger: storybook_selected"
 
-  def storybook_downloaded(self):
-    print "trigger: storybook_downloaded"
+  def storybook_loaded(self):
+    print "trigger: storybook_loaded"
 
   def page_info_received(self):
     print "trigger: page_info_received"
@@ -183,8 +189,8 @@ class StorybookEvaluateFSM(object):
   def send_end_page_prompt(self):
     print "action: send_end_page_prompt:"
 
-  def tablet_end_story(self):
-    print "action: tablet_end_story"
+  def tablet_go_to_end_page(self):
+    print "action: tablet_go_to_end_page"
 
   def jibo_end_story(self):
     print "action: jibo_end_story: 'Wow that was a great story, what was your favorite part?'"

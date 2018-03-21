@@ -29,6 +29,13 @@ class StudentModel(object):
       RobotFeedback(RobotFeedbackType.ASK_TO_PRONOUNCE, "Can you pronounce this word?")
     ]
 
+  def update_with_duration(self, duration, text):
+    """
+    Update model given that the given text took <duration> seconds for
+    the child to speak.
+    """
+    pass
+
   def update_with_speechace_result(self, speechace_result):
     """
     Updates the model given the result of a recent speechace analysis.
@@ -59,11 +66,44 @@ class StudentModel(object):
 
     # TODO something more sophisticated given this score information?
 
-  def update_with_word_tapped(self, word):
+  def update_with_correct_word_tapped(self, word):
     """
-    Update model given that the child tapped on a certain word while exploring.
+    Update model given that the child tapped on a word correctly.
     """
     pass
+
+  def update_with_incorrect_word_tapped(self, expected_word, word):
+    """
+    Update model given that the child tapped on <word> when asked to tap on
+    <expected_word>.
+    """
+    pass
+
+  def update_with_correct_scene_object_tapped(self, label):
+    """
+    Update model given that the child tapped on a scene object correctly.
+    """
+    pass
+
+
+  def update_with_incorrect_scene_object_tapped(self, expected_label, label):
+    """
+    Update model given that the child tapped on a scene object with label <label>
+    when asked to tap on an object with label <expected_label>
+    """
+    pass
+
+  def update_with_explore_word_tapped(self, word):
+    """
+    Update model given that child tapped on a word while in explore mode.
+    """
+    pass
+
+  def update_with_explore_scene_object_tapped(self, label):
+    """
+    Update model given that child tapped on a scene object with the given label
+    while in explore mode.
+    """
 
   def is_child_turn(self, sentence_index):
     return True
@@ -73,7 +113,7 @@ class StudentModel(object):
     for sentence in sentences:
       self.sentences_by_page_number[page_num].append(sentence.split())
     self.current_sentences = self.sentences_by_page_number[page_num]
-    print("Sentences: " + str(self.sentences_by_page_number))
+    # print("Sentences by page number: " + str(self.sentences_by_page_number))
 
   def get_lowest_pronunciation_score_word(words):
     """

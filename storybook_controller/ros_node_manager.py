@@ -61,7 +61,7 @@ class ROSNodeManager(object):
       else:
         msg.params = json.dumps(args[0])
     self.publishers[STORYBOOK_COMMAND_TOPIC].publish(msg)
-    rospy.loginfo(msg)
+    # rospy.loginfo(msg)
 
   def send_jibo_command(self, command, *args):
     """
@@ -70,7 +70,7 @@ class ROSNodeManager(object):
     """
     msg = JiboCommandsBuilder.get_message_from_behavior(command, *args)
     self.publishers[JIBO_ACTION_TOPIC].publish(msg)
-    rospy.loginfo(msg)
+    # rospy.loginfo(msg)
 
   def send_jibo_asr_command(self, command, heyjibo=False, continuous=True, rule=""):
     """
@@ -82,6 +82,6 @@ class ROSNodeManager(object):
     """
     msg = JiboCommandsBuilder.get_jibo_asr_command(command, heyjibo, continuous, rule)
     self.publishers[JIBO_ASR_COMMAND_TOPIC].publish(msg)
-    rospy.loginfo(msg)
+    # rospy.loginfo(msg)
 
 

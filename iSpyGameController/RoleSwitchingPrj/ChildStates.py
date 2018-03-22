@@ -1,5 +1,8 @@
 from GameUtils.GlobalSettings import iSpyRobotInteractionStates as ris
 from ..RobotBehaviorList.RobotBehaviorList import RobotBehaviors
+from .AgentModel import EnvBuilder
+from .AgentModel import Estimator
+from .AgentModel import QModel
 
 
 class ChildStates:
@@ -8,7 +11,13 @@ class ChildStates:
 	two parts: learning states and affective states
 	'''	
 
-	def __init__(self):
+	def __init__(self,child_id):
+		## RL model ##
+		self.rl_env = EnvBuilder(child_id)
+		self.rl_estimator = Estimator(self.rl_env)
+		self.rl_qmodel = QModel()
+		self.rl_qmodel.initialize_q_learning(self.rl_env, self.rl_estimator,[0.0,0.0,0.0],reset=True)
+
 		self.num_available_target_objs = 0
 
 		# metric for learning: 
@@ -50,7 +59,8 @@ class ChildStates:
 
 		self.no_answers_attempt2 = 0
 
-
+	def get_rl_state_features(self):
+		return []
 
 	def on_new_task_received(self):
 		'''

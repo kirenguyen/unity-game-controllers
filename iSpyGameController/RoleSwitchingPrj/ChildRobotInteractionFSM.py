@@ -3,7 +3,7 @@ import json
 
 #from transitions import Machine
 from transitions.extensions import HierarchicalMachine as Machine
-from .AgentModel import AgentModel
+
 
 from ..RobotBehaviorList.RobotBehaviorList import RobotBehaviors
 from ..RobotBehaviorList.RobotBehaviorList import RobotRoles
@@ -92,9 +92,9 @@ class ChildRobotInteractionFSM:
 
 			self.game_controller = game_controller
 
-			self.child_states = ChildStates()
+			self.child_states = ChildStates(participant_id)
 
-			self.agent_model = AgentModel()
+			
 
 			self.role_behavior_mapping = RobotRolesBehaviorsMap(game_round)
 
@@ -546,7 +546,7 @@ class ChildRobotInteractionFSM:
 					elif ris.CHILD_TURN in self.state:
 
 						rewards = self.child_states.stop_tracking_rewards(self.state)
-						self.agent_model.onRewardsReceived(rewards) # update the RL model 
+						#self.agent_model.onRewardsReceived(rewards) # update the RL model 
 						# then, next turn is robot's
 						getattr(self, ris.Triggers.CHILD_TURN_DONE)()
 						# start tracking rewards (engagement) for the robot's role during child's turn

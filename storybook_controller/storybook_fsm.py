@@ -25,6 +25,7 @@ from jibo_msgs.msg import JiboAsrCommand # ASR commands to Jibo
 from jibo_msgs.msg import JiboAsrResult # ASR results from Jibo
 
 from storybook_controller.storybook_constants import *
+from storybook_controller.robot_feedback import EndPageQuestionType
 from storybook_controller.jibo_commands_builder import JiboStorybookBehaviors
 
 class StorybookFSM(object):
@@ -64,9 +65,8 @@ class StorybookFSM(object):
     self.child_audio_finish_timeout_seconds = None
 
     # For when Jibo prompts the child at the end of a page.
-    self.expected_word_tapped = None
-    self.expected_scene_object_label = None
-    self.expected_scene_object_indexes = []
+    self.end_page_questions = []
+    self.end_page_question_idx = None
 
     # Useful to have a list of allowed messages, make sure no unknown messages.
     self.STORYBOOK_EVENT_MESSAGES = [
@@ -89,6 +89,7 @@ class StorybookFSM(object):
       "WAITING_FOR_CHILD_AUDIO", # After a sentence has been shown.
       "WAITING_FOR_END_PAGE_JIBO_QUESTION", # Wait for Jibo tts to finish.
       "WAITING_FOR_END_PAGE_CHILD_RESPONSE", # Could be speech or tablet event.
+      "WAITING_FOR_NEXT_PAGE_JIBO_INTERLUDE", # After end page child response.
       "END_STORY", # Moved to the "The End" page, tell Jibo to ask a question,
       "WAITING_FOR_END_STORY_CHILD_AUDIO", # Wait for child to respond.
       "END_EVALUATE" # End evaluate mode. Idle until another mode is entered.
@@ -159,9 +160,15 @@ class StorybookFSM(object):
       {
         "trigger":"child_end_page_response_complete",
         "source":"WAITING_FOR_END_PAGE_CHILD_RESPONSE",
-        "dest": "WAITING_FOR_NEXT_PAGE",
-        "after": ["tablet_next_page", "jibo_next_page"], # Show the next page button, or navigate to the next page if automatic.
+        "dest": "WAITING_FOR_NEXT_PAGE_JIBO_INTERLUDE",
+        "after": "jibo_next_page", # Jibo says something like 'Ok on to the next page!'
         "conditions": ["more_pages_available"]
+      },
+      {
+        "trigger": "jibo_finish_tts",
+        "source": "WAITING_FOR_NEXT_PAGE_JIBO_INTERLUDE",
+        "dest": "WAITING_FOR_NEXT_PAGE",
+        "after": "tablet_next_page" # Show the next page button, or navigate to the next page if automatic.
       },
       {
         "trigger":"child_end_page_response_complete",
@@ -256,7 +263,6 @@ class StorybookFSM(object):
       self.ros.send_storybook_command(command, params)
       # TODO: decide best place to send the ASR command.
       self.ros.send_jibo_asr_command(JiboAsrCommand.START)
-      self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Sent ASR command")
       # For now, automatically set mode as EVALUATE.
       params = {
         "mode": StorybookState.EVALUATE_MODE
@@ -280,38 +286,24 @@ class StorybookFSM(object):
       word = message["word"].lower()
       print("WORD_TAPPED message received, word is", word, "mode is ", self.current_storybook_mode,
         "state is", self.state)
-      # TODO: if we asked a question, see if this tap was the correct answer.
-      if self.current_storybook_mode == StorybookState.EVALUATE_MODE:
+      if self.in_evaluate_mode():
         if self.state == "WAITING_FOR_END_PAGE_CHILD_RESPONSE":
-          if word == self.expected_word_tapped:
-            print("Child got word correct!", word)
-            self.student_model.update_with_correct_word_tapped(word)
-          else:
-            print("Child got word incorrect!", self.expected_word_tapped, word)
-            self.student_model.update_with_incorrect_word_tapped(self.expected_word_tapped, word)
-          # Trigger!
-          self.child_end_page_response_complete()
-      elif self.current_storybook_mode == StorybookState.EXPLORE_MODE:
+          self.try_answer_question(EndPageQuestionType.WORD_TAP, word)
+      elif self.in_explore_mode():
         self.student_model.update_with_explore_word_tapped(word)
         # Tell Jibo to say this word.
         self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, word, .5, .45)
     
     elif data.event_type == StorybookEvent.SCENE_OBJECT_TAPPED:
       message = json.loads(data.message)
-      tapped_index = message["index"]
+      tapped_id = message["id"]
       label = message["label"]
       print("SCENE_OBJECT_TAPPED message received:", label)
 
-      if self.current_storybook_mode == StorybookState.EVALUATE_MODE:
+      if self.in_evaluate_mode():
         if self.state == "WAITING_FOR_END_PAGE_CHILD_RESPONSE":
-          if tapped_index in self.expected_scene_object_indexes:
-            print("Child got scene object correct!", label)
-            self.student_model.update_with_correct_scene_object_tapped(label)
-          else:
-            self.student_model.update_with_incorrect_scene_object_tapped(self.expected_scene_object_label, label)
-          # Trigger!
-          self.child_end_page_response_complete()
-      elif self.current_storybook_mode == StorybookState.EXPLORE_MODE:
+          self.try_answer_question(EndPageQuestionType.SCENE_OBJECT_TAP, label)
+      elif self.in_explore_mode():
         self.student_model.update_with_explore_scene_object_tapped(label)
         self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK,
           word, .5, .45)
@@ -368,15 +360,15 @@ class StorybookFSM(object):
     """
     Define the callback function for StorybookPageInfo messages.
     """
-    print("STORYBOOK_PAGE_INFO message received", data)
+    print("STORYBOOK_PAGE_INFO message received for page:", data.page_number)
     # Update our knowledge of which page we're on, etc.
     self.current_page_number = data.page_number
     self.current_sentences = data.sentences
     self.current_scene_objects = data.scene_objects
     self.current_tinkertexts = data.tinkertexts
 
-    # Hacky, but manually set evaluating_sentence_index to -1.
-    self.reported_evaluating_sentence_index = -1
+    # # Hacky, but manually set evaluating_sentence_index to -1.
+    # self.reported_evaluating_sentence_index = -1
 
     # Tell student model what sentences are on the page now.
     self.student_model.update_sentences(data.page_number, data.sentences)
@@ -433,9 +425,8 @@ class StorybookFSM(object):
     else:
       print("Got Jibo ASR transcription:", data.transcription)
       self.jibo_asr_empty = False
-      # TODO: if we asked a question, then this is likely the child's response.
       if self.state == "WAITING_FOR_END_PAGE_CHILD_RESPONSE":
-        self.child_end_page_response_complete()
+        self.try_answer_question(EndPageQuestionType.WORD_PRONOUNCE, data.transcription)
       # TODO: if we're in explore mode, this might be a question from the child,
       # and we'll need to respond to it accordingly.
 
@@ -463,12 +454,21 @@ class StorybookFSM(object):
 
   def child_end_page_response_complete(self):
     print("trigger: child_end_page_response_complete")
+    # Reset. TODO: maybe just want to increment the index in the future
+    # when we want to ask multiple questions.
+    self.end_page_questions = []
+    self.end_page_question_idx = None
 
   def jibo_finish_child_asr(self):
     print("trigger: jibo_finish_child_asr")
 
   def begin_evaluate_mode(self):
     print("trigger: begin_evaluate_mode")
+
+  # Not a real trigger.
+  def timer_expire(self):
+    print("timer expired!")
+    self.child_audio_timeout()
 
   """
   Actions
@@ -493,7 +493,7 @@ class StorybookFSM(object):
     print("action: jibo_start_story: ")
     self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
     self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK,
-      "Yay, it's time to start! I would love it if you would read to me! Every time a sentence appears, read it as best as you can.")
+      "Yay, it's time to start!") #" I would love it if you would read to me! Every time a sentence appears, read it as best as you can.")
 
   def tablet_next_page(self):
     print("action: tablet_next_page")
@@ -538,26 +538,23 @@ class StorybookFSM(object):
   def start_child_audio_timer(self):
     print("action: start_child_audio_timer")
     self.child_audio_evaluate_timer = threading.Timer(
-      self.CHILD_AUDIO_SILENCE_TIMEOUT_SECONDS, self.child_audio_timeout)
+      self.CHILD_AUDIO_SILENCE_TIMEOUT_SECONDS, self.timer_expire)
 
   def stop_child_audio_timer(self):
     print("action: stop_child_audio_timer")
     self.child_audio_evaluate_timer.cancel()
 
   def jibo_reprompt_child_audio(self):
-    print("action: jibo_reprompt_child_audio: 'Try to read the sentence.")
+    print("action: jibo_reprompt_child_audio")
     self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
     self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Come on, give it a try. It's tough, but you can do it! And don't forget to press the button to move on!")
 
   def send_end_page_prompt(self):
     print("action: send_end_page_prompt")
-    # TODO: Use student model to make a decision about what to do.
-    word = self.current_sentences[self.reported_evaluating_sentence_index].split()[0]
-    self.expected_word_tapped = word.lower()
-    # Will need to send jibo commands and storybook commands.
-    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Great job! I'm a little confused though, can you click on the word " + word + "?")
-    self.ros.send_jibo_command(JiboStorybookBehaviors.QUESTION_ANIM)
-
+    self.end_page_questions = self.student_model.get_end_page_questions()
+    self.end_page_question_idx = 0
+    self.end_page_questions[self.end_page_question_idx].ask_question(self.ros)
+   
   def tablet_go_to_end_page(self):
     print("action: tablet_go_to_end_page")
     self.ros.send_storybook_command(StorybookCommand.GO_TO_END_PAGE)
@@ -569,9 +566,10 @@ class StorybookFSM(object):
     self.ros.send_jibo_command(JiboStorybookBehaviors.QUESTION_ANIM)
 
   def jibo_respond_to_end_story(self):
-    print("action: jibo_respond_to_end_story: 'Cool, yeah, that was fun!")
+    print("action: jibo_respond_to_end_story")
     self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
-    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Hmm, yeah, that's interesting. That was fun! I hope we can read again some time.")
+    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Cool, yeah, that's an interesting point. That was fun really really fun!! I hope we can read again some time.")
+    self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_DANCE)
 
   """
   Conditions
@@ -602,3 +600,25 @@ class StorybookFSM(object):
     evaluate_mode = self.current_storybook_mode == StorybookState.EVALUATE_MODE
     print("condition: in_evaluate_mode:", evaluate_mode)
     return evaluate_mode
+
+
+  """
+  Helpers
+  """
+
+  def current_end_page_question(self):
+    """
+    Helper to return the current end_page_question.
+    """
+    if self.end_page_question_idx is None or self.end_page_question_idx < 0 or \
+    self.end_page_question_idx >= len(self.end_page_questions):
+      raise Exception("No end page question exists right now!")
+
+    return self.end_page_questions[self.end_page_question_idx]
+
+  def try_answer_question(self, question_type, query):
+    if question_type != self.current_end_page_question().question_type:
+      return
+    self.current_end_page_question().try_answer(query, self.student_model)
+    # Trigger!
+    self.child_end_page_response_complete()

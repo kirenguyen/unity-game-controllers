@@ -6,7 +6,7 @@ a word, and the belief that a student knows the meaning of that word. These
 beliefs are correlated but updated under different criteria.
 """
 
-from storybook_controller.robot_feedback import RobotFeedbackType, RobotFeedback
+import storybook_controller.robot_feedback as robot_feedback
 
 class StudentModel(object):
   def __init__(self):
@@ -23,11 +23,6 @@ class StudentModel(object):
     # Current sentences on the page in evaluate mode.
     self.current_sentences = []
     self.sentences_by_page_number = {}
-
-    self.feedback_templates = [
-      RobotFeedback(RobotFeedbackType.ASK_TO_CLICK, "Can you click on {} {} in the image?"),
-      RobotFeedback(RobotFeedbackType.ASK_TO_PRONOUNCE, "Can you pronounce this word?")
-    ]
 
   def update_with_duration(self, duration, text):
     """
@@ -93,6 +88,13 @@ class StudentModel(object):
     """
     pass
 
+  def update_with_correct_word_pronounced(self, word):
+    """
+    Update model given that the child was shown the text of a word and they
+    pronounced it correctly.
+    """
+    pass
+
   def update_with_explore_word_tapped(self, word):
     """
     Update model given that child tapped on a word while in explore mode.
@@ -106,6 +108,10 @@ class StudentModel(object):
     """
 
   def is_child_turn(self, sentence_index):
+    """
+    In a turn taking exercise, returns whether or not the child should be
+    asked to read the sentence at the given index.
+    """
     return True
 
   def update_sentences(self, page_num, sentences):
@@ -115,33 +121,53 @@ class StudentModel(object):
     self.current_sentences = self.sentences_by_page_number[page_num]
     # print("Sentences by page number: " + str(self.sentences_by_page_number))
 
-  def get_lowest_pronunciation_score_word(words):
+  def get_end_page_questions(self, max_num_questions=1):
+    """
+    Returns an array of at most max_num_questions EndPageQuestion objects.
+    """
+    # For now, just return one question, always asking child to tap on a word.
+    word = self.get_lowest_pronunciation_score_word()
+    return [robot_feedback.EndPageQuestionWordTap(word)]
+
+  def get_lowest_pronunciation_score_word(self, sentence_index=None):
     """
     Given an array of words (likely representing a sentence), return the word
     that the child performs the worst on.
     TODO: add in meaning/phonemes as well as simple average word scores.
     """
+    sentences = None
+    if sentence_index is None:
+      # Default is to use current sentences.
+      sentences = self.current_sentences
+    elif sentence_index < 0 or sentence_index >= len(self.sentences_by_page_number.keys()):
+      print("No such sentence_index")
+      raise Exception("No such sentence index", sentence_index, len(self.sentences_by_page_number.keys()))
+    else:
+      sentences = self.sentences_by_page_number[sentence_index]
+
+    words = []
+    for sentence in sentences:
+      words += sentence
     word_to_return = None
     lowest_score = 100
     for word in words:
       if word in self.word_scores:
-        if self.word_scores[word] < lowest_score:
-          lowest_score = self.word_scores[word]
+        avg_score = sum(self.word_scores[word]) * 1.0 / len(self.word_scores[word])
+        if avg_score < lowest_score:
+          lowest_score = avg_score
           word_to_return = word
     print("Found word with lowest score:", word_to_return, lowest_score)
+    if word_to_return is None:
+      print("No speechace results yet, choosing longest word")
+      max_length = max(map(len, words))
+      word_to_return = [w for w in words if len(w) == max_length][0]
+    print("Returning word:", word_to_return)
     return word_to_return
-
-
-  def get_feedback(self):
-    """
-    Returns feedback for the robot to give.
-    """
-    self.feedback_template[0].set_args("the", "dog")
-    return self.feedback_template[0]
 
   def plot_distribution(self):
     """
     Plot the current distribution.
     """
     print(self.word_scores)
+
 

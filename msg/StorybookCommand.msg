@@ -19,3 +19,4 @@ int8 SET_STORYBOOK_MODE = 6 # Params is {mode: int}, the new mode
 int8 NEXT_PAGE = 7 # Params is empty
 int8 GO_TO_END_PAGE = 8 # Params is empty
 int8 SHOW_LIBRARY_PANEL = 9 # Params is empty
+int8 HIGHLIGHT_ALL_SENTENCES = 10 # Params is empty

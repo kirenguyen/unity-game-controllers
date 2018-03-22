@@ -60,6 +60,8 @@ class ROSNodeManager(object):
         msg.params = args[0]
       else:
         msg.params = json.dumps(args[0])
+    else:
+      msg.params = ""
     self.publishers[STORYBOOK_COMMAND_TOPIC].publish(msg)
     # rospy.loginfo(msg)
 

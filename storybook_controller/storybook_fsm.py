@@ -194,7 +194,7 @@ class StorybookFSM(object):
         "trigger": "jibo_finish_tts",
         "source": "END_EVALUATE",
         "dest": "END_EVALUATE",
-        "after": "tablet_show_library_panel"
+        "after": ["begin_evaluate", "tablet_show_library_panel"]
       },
       {
         "trigger": "begin_evaluate_mode", # Can get rid of this and just read state?
@@ -262,6 +262,7 @@ class StorybookFSM(object):
       print("Sending ack")
       self.ros.send_storybook_command(command, params)
       # TODO: decide best place to send the ASR command.
+      self.ros.send_jibo_asr_command(JiboAsrCommand.STOP)
       self.ros.send_jibo_asr_command(JiboAsrCommand.START)
       # For now, automatically set mode as EVALUATE.
       params = {
@@ -372,6 +373,7 @@ class StorybookFSM(object):
 
     # Tell student model what sentences are on the page now.
     self.student_model.update_sentences(data.page_number, data.sentences)
+    self.student_model.update_scene_objects(data.scene_objects)
 
     # Trigger!
     self.page_info_received()
@@ -401,13 +403,13 @@ class StorybookFSM(object):
     # if data.is_playing_sound:
     #   print("Jibo tts ongoing:", data.tts_msg)
 
-    if not data.is_playing_sound and self.jibo_tts_on:
+    if self.jibo_tts_on and data.tts_msg == "":
       # This is when the sound has just stopped.
       # Trigger!
       self.jibo_finish_tts()
 
     # Update state.
-    self.jibo_tts_on = data.is_playing_sound
+    self.jibo_tts_on = (data.tts_msg != "")
 
   def jibo_asr_ros_message_handler(self, data):
     """
@@ -493,7 +495,7 @@ class StorybookFSM(object):
     print("action: jibo_start_story: ")
     self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
     self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK,
-      "Yay, it's time to start!") #" I would love it if you would read to me! Every time a sentence appears, read it as best as you can.")
+      "Great, it's time to start, I'm so excited! I would love it if you would read to me! Every time a sentence appears, read it as best as you can, then click the blue button to see the next sentence. Ready? Let's go!")
 
   def tablet_next_page(self):
     print("action: tablet_next_page")

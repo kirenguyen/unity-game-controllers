@@ -34,6 +34,11 @@ class EndPageQuestion(object):
   def ask_question_impl(self, ros_manager):
     raise NotImplementedError
 
+  ########################################
+  # TODO: add a mechanism for giving a hint, and a mechanism for responding
+  # to the child's response!!
+  ########################################
+
   def correct_answer(self):
     """
     Returns the expected correct answer to the question.
@@ -60,14 +65,14 @@ class EndPageQuestionWordTap(EndPageQuestion):
     # Make all words light up (instead of having past sentences be greyed out).
     ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_ALL_SENTENCES)
     # Will need to send jibo commands and storybook commands.
-    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Can you click on the word " + self.expected_word + "?")
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Great! Let me ask you a question, because I'm a bit confused. Can you click on the word " + self.expected_word + "?")
     ros_manager.send_jibo_command(JiboStorybookBehaviors.QUESTION_ANIM)
 
   def correct_answer(self):
     return self.expected_word
 
   def try_answer_impl(self, query, student_model):
-    correct = query.lower() == self.expected_word.lower()
+    correct = strip_punctuation(query.lower()) == strip_punctuation(self.expected_word.lower())
     if correct:
       print("Child got word correct!", query)
       student_model.update_with_correct_word_tapped(query)
@@ -76,19 +81,24 @@ class EndPageQuestionWordTap(EndPageQuestion):
       student_model.update_with_incorrect_word_tapped(self.expected_word, query)
     return correct
 
-class EndPageQuestionTypeSceneObjectTap(EndPageQuestion):
+class EndPageQuestionSceneObjectTap(EndPageQuestion):
   def __init__(self, label):
-    super(EndPageQuestionTypeSceneObjectTap, self).__init__(
+    super(EndPageQuestionSceneObjectTap, self).__init__(
       EndPageQuestionType.SCENE_OBJECT_TAP)
-    self.expected_label = label
+    self.expected_label = strip_punctuation(label.lower())
 
   def ask_question_impl(self, ros_manager):
-    pass
+    # Make all words light up (instead of having past sentences be greyed out).
+    ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_ALL_SENTENCES)
+    # Will need to send jibo commands and storybook commands.
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Awesome! Hmm, I need some help. Can you click on " + self.expected_label + " in the picture?")
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.QUESTION_ANIM)
 
   def correct_answer(self):
     return self.expected_label
 
   def try_answer_impl(self, query, student_model):
+    query = strip_punctuation(query.lower())
     correct = query in self.expected_label
     if correct:
       print("Child got scene object correct!", query)
@@ -98,9 +108,9 @@ class EndPageQuestionTypeSceneObjectTap(EndPageQuestion):
       student_model.update_with_incorrect_scene_object_tapped(self.expected_label, query)
     return correct
 
-class EndPageQuestionTypeWordPronounce(EndPageQuestion):
+class EndPageQuestionWordPronounce(EndPageQuestion):
   def __init__(self, word):
-    super(EndPageQuestionTypeWordPronounce, self).__init__(
+    super(EndPageQuestionWordPronounce, self).__init__(
       EndPageQUestionType.WORD_PRONOUNCE)
     self.expected_word = word
 

@@ -6,16 +6,26 @@ a word, and the belief that a student knows the meaning of that word. These
 beliefs are correlated but updated under different criteria.
 """
 
+import random
+import sys
 import storybook_controller.robot_feedback as robot_feedback
 
 class StudentModel(object):
   def __init__(self):
+    # Threshold above which we don't consider the word as a priority for improving,
+    # meaning that it is likely not to be asked about by Jibo.
+    self.GOOD_PRONOUNCE_THRESHOLD = 90.0 # Out of 100
+
     # Dictionary representing the vocabulary.
     # Choose dictionary instead of list for faster existence checks.
     self.vocabulary = {}
     
-    self.word_scores = {}
+    self.word_pronunciation_scores = {}
     self.phoneme_scores = {}
+    self.word_tap_scores = {} # Map word to array of ints where 1 means correct, 0 incorrect.
+    self.scene_object_tap_scores = {} # Map label to array of ints similar to above.
+    self.confused_word_pairs = [] # Array of tuples of expected word and child's (wrong) word.
+    self.confused_label_pairs = [] # Array of tuples of expected label and child's label.
 
     # Keep track of trend of overall scores per page.
     self.overall_quality_scores = []
@@ -23,6 +33,7 @@ class StudentModel(object):
     # Current sentences on the page in evaluate mode.
     self.current_sentences = []
     self.sentences_by_page_number = {}
+    self.current_scene_objects = []
 
   def update_with_duration(self, duration, text):
     """
@@ -46,9 +57,9 @@ class StudentModel(object):
     for word_score in text_score["word_score_list"]:
       # Convert all words to lowercase.
       word = word_score["word"].lower()
-      if word not in self.word_scores:
-        self.word_scores[word] = []
-      self.word_scores[word].append(word_score["quality_score"])
+      if word not in self.word_pronunciation_scores:
+        self.word_pronunciation_scores[word] = []
+      self.word_pronunciation_scores[word].append(word_score["quality_score"])
       # Record scores for each phoneme of each word.
       for phoneme_score in word_score["phone_score_list"]:
         phoneme = phoneme_score["phone"]
@@ -65,20 +76,27 @@ class StudentModel(object):
     """
     Update model given that the child tapped on a word correctly.
     """
-    pass
+    if word not in self.word_tap_scores:
+      self.word_tap_scores[word] = []
+    self.word_tap_scores[word].append(1)
 
   def update_with_incorrect_word_tapped(self, expected_word, word):
     """
     Update model given that the child tapped on <word> when asked to tap on
     <expected_word>.
     """
-    pass
+    if word not in self.word_tap_scores:
+      self.word_tap_scores[word] = []
+    self.word_tap_scores[word].append(0)
+    self.confused_word_pairs.append((expected_word, word))
 
   def update_with_correct_scene_object_tapped(self, label):
     """
     Update model given that the child tapped on a scene object correctly.
     """
-    pass
+    if label not in self.scene_object_tap_scores:
+      self.scene_object_tap_scores[label] = []
+    self.scene_object_tap_scores[label].append(1)
 
 
   def update_with_incorrect_scene_object_tapped(self, expected_label, label):
@@ -86,12 +104,22 @@ class StudentModel(object):
     Update model given that the child tapped on a scene object with label <label>
     when asked to tap on an object with label <expected_label>
     """
-    pass
+    if label not in self.scene_object_tap_scores:
+      self.scene_object_tap_scores[label] = []
+    self.scene_object_tap_scores[label].append(0)
+    self.confused_label_pairs.append((expected_label, label))
 
   def update_with_correct_word_pronounced(self, word):
     """
     Update model given that the child was shown the text of a word and they
     pronounced it correctly.
+    """
+    pass
+
+  def update_with_incorrect_word_pronounced(self, word):
+    """
+    Update model given that the child was shown the text of a word and they
+    pronounced it incorrectly.
     """
     pass
 
@@ -121,53 +149,116 @@ class StudentModel(object):
     self.current_sentences = self.sentences_by_page_number[page_num]
     # print("Sentences by page number: " + str(self.sentences_by_page_number))
 
+  def update_scene_objects(self, scene_objects):
+    self.current_scene_objects = scene_objects
+
   def get_end_page_questions(self, max_num_questions=1):
     """
     Returns an array of at most max_num_questions EndPageQuestion objects.
     """
-    # For now, just return one question, always asking child to tap on a word.
     word = self.get_lowest_pronunciation_score_word()
-    return [robot_feedback.EndPageQuestionWordTap(word)]
-
-  def get_lowest_pronunciation_score_word(self, sentence_index=None):
-    """
-    Given an array of words (likely representing a sentence), return the word
-    that the child performs the worst on.
-    TODO: add in meaning/phonemes as well as simple average word scores.
-    """
-    sentences = None
-    if sentence_index is None:
-      # Default is to use current sentences.
-      sentences = self.current_sentences
-    elif sentence_index < 0 or sentence_index >= len(self.sentences_by_page_number.keys()):
-      print("No such sentence_index")
-      raise Exception("No such sentence index", sentence_index, len(self.sentences_by_page_number.keys()))
+    use_word = random.random()
+    print("use word", use_word)
+    if word is not None and use_word < .5:
+      return [robot_feedback.EndPageQuestionWordTap(word)]
     else:
-      sentences = self.sentences_by_page_number[sentence_index]
+      label = self.get_scene_object_label_to_evaluate()
+      if label is None:
+        # Must ask for a word if no scene objects exist.
+        word = self.get_lowest_pronunciation_score_word(True)
+        return [robot_feedback.EndPageQuestionWordTap(word)]
+      else:
+        return [robot_feedback.EndPageQuestionSceneObjectTap(label)]
 
+  def get_lowest_pronunciation_score_word(self, force=False):
+    """
+    Return a word from a sentence on the current page that has a low
+    pronunciation score.
+
+    TODO: add in phonemes as well as simple average word scores.
+    Meaning will be handle by tapping.
+
+    If force=False, the returned word can be None if there is no evaluation yet or
+    if none of the words have a score lower than some threshold.
+
+    If force=True, the returned word will always be a valid word.
+    """
+    print("all scores:", self.word_pronunciation_scores)
+    print("current sentences", self.current_sentences)
     words = []
-    for sentence in sentences:
-      words += sentence
+    for sentence in self.current_sentences:
+      for w in sentence:
+        words.append(self.strip_punctuation(w.lower()))
     word_to_return = None
     lowest_score = 100
     for word in words:
-      if word in self.word_scores:
-        avg_score = sum(self.word_scores[word]) * 1.0 / len(self.word_scores[word])
+      if word in self.word_pronunciation_scores:
+        print("scores: ", self.word_pronunciation_scores[word])
+        avg_score = sum(self.word_pronunciation_scores[word]) * 1.0 / len(self.word_pronunciation_scores[word])
         if avg_score < lowest_score:
           lowest_score = avg_score
           word_to_return = word
     print("Found word with lowest score:", word_to_return, lowest_score)
-    if word_to_return is None:
-      print("No speechace results yet, choosing longest word")
-      max_length = max(map(len, words))
-      word_to_return = [w for w in words if len(w) == max_length][0]
-    print("Returning word:", word_to_return)
+    if word_to_return is None or lowest_score > self.GOOD_PRONOUNCE_THRESHOLD:
+      if force:
+        print("No speechace results yet, choosing longest word")
+        max_length = max(map(len, words))
+        word_to_return = [w for w in words if len(w) == max_length][0]
+        print("Longest word:", word_to_return)
+      else:
+        return None
     return word_to_return
+
+  def get_scene_object_label_to_evaluate(self, force_in_text=True):
+    """
+    Returns a label from the current scene objects on the page.
+
+    If force_in_text is True, can ONLY return labels that appear in the text.
+    """
+
+    # Give priority to words the child didn't get right before, and words
+    # we haven't asked the child to try yet. Or words the child confused before?
+    lowest_score = 1
+    label_to_return = None
+    not_asked = []
+    all_valid_labels = []
+    for scene_object in self.current_scene_objects:
+      if scene_object.in_text or not force_in_text:
+        label = scene_object.label
+        if label in self.scene_object_tap_scores:
+          # Percentage of correct responses.
+          score = sum(self.scene_object_tap_scores[label]) * 1.0 / len(self.scene_object_tap_scores[label])
+          if score < lowest_score:
+            lowest_score = score
+            label_to_return = label
+        else:
+          not_asked.append(label)
+        all_valid_labels.append(label)
+    if label_to_return is not None:
+      print("Found label with low score:", label_to_return, lowest_score)
+      return label_to_return
+    else:
+      # If there are no labels at all.
+      if len(all_valid_labels) == 0:
+        return None 
+      # If there are no labels that we haven't asked about, return a random
+      # label from the valid set.
+      if len(not_asked) == 0:
+        random_label = all_valid_labels[random.randint(0, len(all_valid_labels) - 1)]
+        print("Using random label:", random_label)
+        return random_label
+      # Otherwise, pick a label that we haven't asked about.
+      else:
+        # Note that randint is inclusive on both endpoints.
+        not_asked_label = not_asked[random.randint(0, len(not_asked)-1)]
+        print("Using a label that we haven't used before:", not_asked_label)
+        return not_asked_label
 
   def plot_distribution(self):
     """
     Plot the current distribution.
     """
-    print(self.word_scores)
+    print(self.word_pronunciation_scores)
 
-
+  def strip_punctuation(self, word):
+    return "".join([c for c in word if c.isalnum()])

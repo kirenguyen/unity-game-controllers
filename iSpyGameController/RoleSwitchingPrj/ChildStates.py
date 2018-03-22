@@ -42,7 +42,7 @@ class ChildStates:
 		self.numTouchAbsenceAlertPerTask = 0
 
 
-		self.numChildCorrectAttemptsCurrTask = 0
+		
 
 		self.numChildAttemptsCurrTask = 0
 
@@ -59,8 +59,38 @@ class ChildStates:
 
 		self.no_answers_attempt2 = 0
 
+		### for RL model: state features
+		self.s1_total_turns = 0
+		self.s2_prev_expert_roles = 0 
+		self.numChildCorrectAttemptsCurrTask = 0
+
+		### for RL model: rewards features
+		self.child_help = False
+		self.child_turn_success = False
+		self.child_success_rate = 0
+		self.consecutive_incorrect_attempts = 0
+		self.rl_reward_scores = 0
+
 	def get_rl_state_features(self):
 		return []
+		
+
+	def calculate_rl_rewards(self):
+		def novice_rewards(x):
+            reward_scores = 0
+            if self.child_help: reward_scores += 1
+            if self.child_turn_success and self.numChildCorrectAttemptsCurrTask <=2: reward_scores +=1
+            return reward_scores
+        def expert_rewards(x):
+            reward_scores = 0
+            if self.child_turn_success == True: reward_scores += 1 * self.consecutive_incorrect_attempts
+            if self.child_turn_success== True and self.child_success_rate >= 0.7: reward_scores += 1 
+            return reward_scores
+        def no_rewards(x):
+            return 'nan'
+        rewards_type = {RobotRoles.EXPERT:expert_rewards,RobotRoles.NOVICE:novice_rewards, 'novice':no_rewards,'expert':no_rewards}
+        self.rl_reward_scores = rewards_type[self.role](x) 
+
 
 	def on_new_task_received(self):
 		'''
@@ -118,17 +148,6 @@ class ChildStates:
 			self.no_answers_attempt1 +=1
 		elif category == "absence" and attempt == 2:
 			self.no_answers_attempt2 +=1
-
-	# def update_qa_child_response(self,answered):
-	# 	'''
-	# 	update: whether the child answers a given question or not
-	# 	'''
-	# 	if answered == True:
-	# 		self.num_robot_questions_answered += 1
-	# 		if self.current_q_type == "yes/no":
-	# 			self.numRobotYNQuestionAnswered += 1
-	# 		elif self.current_q_type == "open-ended":
-	# 			self.numRobotOpenQuestionAnswered += 1
 
 
 	def start_tracking_rewards(self,turn):

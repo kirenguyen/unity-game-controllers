@@ -9,7 +9,29 @@ beliefs are correlated but updated under different criteria.
 import random
 import sys
 import storybook_controller.robot_feedback as robot_feedback
+import nltk
 
+"""
+Set up phoneme information.
+"""
+
+# Takes about 6 seconds to load this.
+ARPABET = nltk.corpus.cmudict.dict()
+
+# These are the 39 phonemes we should expect to see.
+# Doesn't include stress, which is 0, 1 or 2 immediately following a phoneme.
+ARPABET_PHONEMES = [
+  "aa", "ae", "ah", "ao", "aw", "ay", "b", "ch", "d", "dh", "eh", "er", "ey",
+  "f", "g", "hh", "ih", "iy", "jh", "k", "l", "m", "n", "ng", "ow", "oy", "p",
+  "r", "s", "sh", "t", "th", "uh", "uw", "v", "w", "y", "z", "zh"
+]
+
+print("Loaded arpabet phonemes dict!")
+
+"""
+Updates model with inputs from SpeechACE and the child's answers to questions.
+Can be queried for appropriate questions Jibo should ask the child.
+"""
 class StudentModel(object):
   def __init__(self):
     # Threshold above which we don't consider the word as a priority for improving,
@@ -253,6 +275,19 @@ class StudentModel(object):
         not_asked_label = not_asked[random.randint(0, len(not_asked)-1)]
         print("Using a label that we haven't used before:", not_asked_label)
         return not_asked_label
+
+  """"
+  Helpers
+  """
+
+  def get_phonemes(self, word):
+    if word not in ARPABET:
+      return None
+    phonemes_raw = ARPABET[word][0]
+    # Remove stress and turn phonemes to lowercase.
+    phonemes = ["".join(filter(lambda c: c.isalpha(), p)).lower() \
+                for p in phonemes_raw]
+    return phonemes
 
   def plot_distribution(self):
     """

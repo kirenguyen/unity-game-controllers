@@ -147,7 +147,6 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
         if command == RobotBehaviors.ROBOT_CUSTOM_SPEECH:
             msg.wav_filename = args[0][0].lower()
             msg.enqueue = True
-            print("custom speech: "+msg.wav_filename)
 
         if command == RobotBehaviors.NOVICE_ROLE_KEYWORD:
             PATH = ROOT_TEGA_SPEECH_FOLDER + "general/novice_keyword/"
@@ -155,7 +154,6 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.wav_filename = PATH + "novice_"+ vocab_word + ".wav"
             msg.motion = TegaAction.MOTION_SILENT_PUZZLED
             msg.enqueue = True
-            print("novice keyword speech wav: "+msg.wav_filename)
 
 
         ### ============== Tega Speech for Role Switching Project ================== ###
@@ -174,7 +172,6 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             file = vocab_word+"_"+itype+"_explanation.wav"
             msg.wav_filename = PATH + file
             msg.motion = TegaAction.MOTION_SILENT_HAPPY_DANCE
-            print("vocab expla speech wav: "+msg.wav_filename)
 
         if command == RobotBehaviors.HINT_SPEECH:
             PATH = ROOT_TEGA_SPEECH_FOLDER + "general/hint/"
@@ -330,7 +327,6 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             speech_file_name = PATH + vocab_word + ".mp3"
             msg.wav_filename = speech_file_name
             msg.enqueue = True
-            print(speech_file_name)
 
 	   # Before pronunciation
         if command == RobotBehaviors.TRY_PRONOUNCE:

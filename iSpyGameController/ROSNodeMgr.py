@@ -120,10 +120,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         This function maps actions from the ActionSpace into actual ROS Msgs
         """
         
-        print("send robot cmd...")
-        print(command)
-        print("args...")
-        print(args)
+    
         if self.robot_commander is None:
             self.start_robot_publisher()
             time.sleep(.5)

@@ -1,5 +1,5 @@
 {
-"p00":  "novice",
+"p00":  "adaptive",
 "p01":	"novice",
 "p02":	"adaptive",
 "p03":	"expert",
@@ -63,7 +63,9 @@
 "p61":	"expert",
 "p62":	"expert",
 "p100":	"expert",
-"p101":	"random",
-"p102":	"expert",
-"p103":	"expert"
+"p103":	"random",
+"p102":	"random",
+"p110":	"random",
+"p111":	"random",
+"p200": "expert"
 }

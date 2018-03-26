@@ -112,7 +112,6 @@ class RobotRoles(Enum):
     contains a list of social roles that are avaiable to robot to perform
     '''
     EXPERT = 0
-    #COMPETENT = 1
     NOVICE = 1
 
 
@@ -173,7 +172,6 @@ class RobotRolesBehaviorsMap:
         '''
         get question query result 
         '''
-        print("question query path: "+question_query_path)
         self.current_question_query_path = question_query_path
         if question_query_path in self.question_answer_dict.keys():
             self.question_query = self.question_answer_dict[question_query_path]

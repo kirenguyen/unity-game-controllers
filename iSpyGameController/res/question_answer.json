@@ -3,7 +3,7 @@
     "question": ["yes_no_question_4"],
     "user_input":[
       {
-        "en_US":["yes","okay","ok","yeah","sure", "mhm","help me"],
+        "en_US":["yes","okay","ok","yeah","sure", "mhm","help me", "of course"],
         "response":["ROBOT_EXCITED", "response_a"]
       },
       {
@@ -59,7 +59,7 @@
     "question": ["yes_no_question_3","yes_no_question_1","response_e"],
     "user_input":[
       {
-        "en_US":["yes","okay","ok","yeah","sure", "mhm", "I'll try", "try", "maybe", "could be","can be"],
+        "en_US":["yes","okay","ok","yeah","sure", "mhm", "I'll try", "try", "maybe", "could be","can be", "help", "of course"],
 
         "response":["ROBOT_WINK", "response_h","response_g","response_k"]
       },

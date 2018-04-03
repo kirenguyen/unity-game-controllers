@@ -1,5 +1,5 @@
 ,q,category,attribute,audio_file_name,task_script
-1,,size,gigantic,gigantic.wav,Can you spy objects that are gigantic? 
+1,,size,gigantic,gigantic.wav,Can you spy objects that are gigantic?
 2,,object_vocab,garment,garment.wav,can you spy garments?
 3,,color,azure,azure.wav,can you spy objects in azure
 4,,size,minuscule,minuscule.wav,Can you spy objects that are minuscule? 

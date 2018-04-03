@@ -91,7 +91,7 @@ def read_pretrained_data():
 
 
 
-p_id = "p00"
+p_id = "p11"
 read_action_history(p_id)
 read_i_episdoe(p_id)
 read_regressor(p_id)

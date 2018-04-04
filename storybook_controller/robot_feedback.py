@@ -65,7 +65,7 @@ class EndPageQuestionWordTap(EndPageQuestion):
     # Make all words light up (instead of having past sentences be greyed out).
     ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_ALL_SENTENCES)
     # Will need to send jibo commands and storybook commands.
-    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Great! Let me ask you a question, because I'm a bit confused. Can you click on the word " + self.expected_word + "?")
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Great! Let me ask you a question. Can you tap the word " + self.expected_word + "?")
     ros_manager.send_jibo_command(JiboStorybookBehaviors.QUESTION_ANIM)
 
   def correct_answer(self):
@@ -91,7 +91,7 @@ class EndPageQuestionSceneObjectTap(EndPageQuestion):
     # Make all words light up (instead of having past sentences be greyed out).
     ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_ALL_SENTENCES)
     # Will need to send jibo commands and storybook commands.
-    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Awesome! Hmm, I need some help. Can you click on " + self.expected_label + " in the picture?")
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Awesome! I have a question for you. Can you tap on " + self.expected_label + " in the picture?")
     ros_manager.send_jibo_command(JiboStorybookBehaviors.QUESTION_ANIM)
 
   def correct_answer(self):

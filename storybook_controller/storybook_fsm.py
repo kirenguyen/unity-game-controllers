@@ -141,8 +141,9 @@ class StorybookFSM(object):
         "trigger":"child_sentence_audio_complete",
         "source":"WAITING_FOR_CHILD_AUDIO",
         "dest": "WAITING_FOR_CHILD_AUDIO",
+        "before":"stop_child_audio_timer",
         # "before":"", # TODO: allow Jibo to respond? "Good job!"
-        "after": ["tablet_show_next_sentence", "start_child_audio_timer"],
+        "after": ["start_child_audio_timer"], #"tablet_show_next_sentence" commented out
         "conditions": ["more_sentences_available"]
       },
       {
@@ -194,12 +195,13 @@ class StorybookFSM(object):
         "trigger": "jibo_finish_tts",
         "source": "END_EVALUATE",
         "dest": "END_EVALUATE",
-        "after": ["begin_evaluate", "tablet_show_library_panel"]
+        "after": ["begin_evaluate_mode", "tablet_show_library_panel"]
       },
       {
         "trigger": "begin_evaluate_mode", # Can get rid of this and just read state?
         "source": "*",
         "dest": "BEGIN_EVALUATE",
+        "after": ["tablet_set_evaluate_mode"]
       },
       # Catch all the triggers.
       {
@@ -317,6 +319,7 @@ class StorybookFSM(object):
       message = json.loads(data.message)
       print("RECORD_AUDIO_COMPLETE message for sentence", message["index"])
       # Trigger!
+      self.reported_evaluating_sentence_index = message["index"]
       self.child_sentence_audio_complete()
 
     elif data.event_type == StorybookEvent.STORY_SELECTED:
@@ -368,9 +371,6 @@ class StorybookFSM(object):
     self.current_scene_objects = data.scene_objects
     self.current_tinkertexts = data.tinkertexts
 
-    # # Hacky, but manually set evaluating_sentence_index to -1.
-    # self.reported_evaluating_sentence_index = -1
-
     # Tell student model what sentences are on the page now.
     self.student_model.update_sentences(data.page_number, data.sentences)
     self.student_model.update_scene_objects(data.scene_objects)
@@ -385,7 +385,9 @@ class StorybookFSM(object):
     self.current_storybook_mode = data.storybook_mode
     self.current_story = data.current_story
     self.num_story_pages = data.num_pages
-    self.reported_evaluating_sentence_index = data.evaluating_sentence_index
+    # Commented out because we just read it when the audio ends, since that's
+    # the only time it changes.
+    # self.reported_evaluating_sentence_index = data.evaluating_sentence_index
     self.storybook_audio_playing = data.audio_playing
     self.storybook_audio_file = data.audio_file
 
@@ -479,6 +481,10 @@ class StorybookFSM(object):
     print("action: tablet_show_library_panel")
     self.ros.send_storybook_command(StorybookCommand.SHOW_LIBRARY_PANEL)
 
+  def tablet_set_evaluate_mode(self):
+    print("action: tablet_set_evaluate_mode")
+    self.ros.send_storybook_command(StorybookCommand.SET_STORYBOOK_MODE, {"mode": StorybookState.EVALUATE_MODE})
+
   def jibo_stall_story_loading(self):
     pass
     # Commented out because the timing gets thrown off when there's a jibo_tts
@@ -495,10 +501,11 @@ class StorybookFSM(object):
     print("action: jibo_start_story: ")
     self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
     self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK,
-      "Great, it's time to start, I'm so excited! I would love it if you would read to me! Every time a sentence appears, read it as best as you can, then click the blue button to see the next sentence. Ready? Let's go!")
+      "Let's go")# "Great, it's time to start, I'm so excited! I would love it if you would read to me! Every time a sentence appears, read it as best as you can, then click the blue button to see the next sentence. Ready? Let's go!")
 
   def tablet_next_page(self):
     print("action: tablet_next_page")
+    self.reported_evaluating_sentence_index = -1
     self.ros.send_storybook_command(StorybookCommand.NEXT_PAGE)
 
   def jibo_next_page(self):
@@ -562,9 +569,9 @@ class StorybookFSM(object):
     self.ros.send_storybook_command(StorybookCommand.GO_TO_END_PAGE)
 
   def jibo_end_story(self):
-    print("action: jibo_end_story: 'Wow that was a great story, what was your favorite part?'")
+    print("action: jibo_end_story")
     self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
-    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Wow, what a great story, don't you think? What was your favorite part?")
+    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Wow, what a great story! I want to know, what was your favorite part?")
     self.ros.send_jibo_command(JiboStorybookBehaviors.QUESTION_ANIM)
 
   def jibo_respond_to_end_story(self):

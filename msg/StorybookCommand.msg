@@ -10,8 +10,8 @@ int8 command
 string params
 
 int8 PING_TEST = 0 # Dummy message that simply pings the storybook.
-int8 HIGHLIGHT_WORD = 1 # Params is {index:int}, word to highlight
-int8 HIGHLIGHT_SCENE_OBJECT = 2 # Params is {id: int}, scene object to highlight
+int8 HIGHLIGHT_WORD = 1 # Params is {indexes:[int]}, words to highlight
+int8 HIGHLIGHT_SCENE_OBJECT = 2 # Params is {ids: [int]}, scene objects to highlight
 int8 SHOW_NEXT_SENTENCE = 3 # Params is {index: int, child_turn: bool, record: bool}, sentence to highlight and whether it's the child's turn
 int8 START_RECORD = 4 # Params is empty. Starts recording without attempting to reshow the sentence.
 int8 CANCEL_RECORD = 5 # Params is empty

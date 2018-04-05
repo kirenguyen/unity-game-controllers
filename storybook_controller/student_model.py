@@ -16,17 +16,17 @@ Set up phoneme information.
 """
 
 # Takes about 6 seconds to load this.
-ARPABET = nltk.corpus.cmudict.dict()
+# ARPABET = nltk.corpus.cmudict.dict()
 
-# These are the 39 phonemes we should expect to see.
-# Doesn't include stress, which is 0, 1 or 2 immediately following a phoneme.
-ARPABET_PHONEMES = [
-  "aa", "ae", "ah", "ao", "aw", "ay", "b", "ch", "d", "dh", "eh", "er", "ey",
-  "f", "g", "hh", "ih", "iy", "jh", "k", "l", "m", "n", "ng", "ow", "oy", "p",
-  "r", "s", "sh", "t", "th", "uh", "uw", "v", "w", "y", "z", "zh"
-]
+# # These are the 39 phonemes we should expect to see.
+# # Doesn't include stress, which is 0, 1 or 2 immediately following a phoneme.
+# ARPABET_PHONEMES = [
+#   "aa", "ae", "ah", "ao", "aw", "ay", "b", "ch", "d", "dh", "eh", "er", "ey",
+#   "f", "g", "hh", "ih", "iy", "jh", "k", "l", "m", "n", "ng", "ow", "oy", "p",
+#   "r", "s", "sh", "t", "th", "uh", "uw", "v", "w", "y", "z", "zh"
+# ]
 
-print("Loaded arpabet phonemes dict!")
+# print("Loaded arpabet phonemes dict!")
 
 """
 Updates model with inputs from SpeechACE and the child's answers to questions.
@@ -156,6 +156,7 @@ class StudentModel(object):
     Update model given that child tapped on a scene object with the given label
     while in explore mode.
     """
+    pass
 
   def is_child_turn(self, sentence_index):
     """
@@ -182,15 +183,18 @@ class StudentModel(object):
     use_word = random.random()
     print("use word", use_word)
     if word is not None and use_word < .5:
-      return [robot_feedback.EndPageQuestionWordTap(word)]
+      indexes = get_word_indexes(word)
+      return [robot_feedback.EndPageQuestionWordTap(word, indexes)]
     else:
       label = self.get_scene_object_label_to_evaluate()
       if label is None:
         # Must ask for a word if no scene objects exist.
         word = self.get_lowest_pronunciation_score_word(True)
-        return [robot_feedback.EndPageQuestionWordTap(word)]
+        indexes = get_word_indexes(word)
+        return [robot_feedback.EndPageQuestionWordTap(word, indexes)]
       else:
-        return [robot_feedback.EndPageQuestionSceneObjectTap(label)]
+        ids = get_scene_object_ids(label)
+        return [robot_feedback.EndPageQuestionSceneObjectTap(label, ids)]
 
   def get_lowest_pronunciation_score_word(self, force=False):
     """
@@ -279,6 +283,24 @@ class StudentModel(object):
   """"
   Helpers
   """
+
+  def get_word_indexes(word):
+    # Go through all sentences and find the words that match.
+    indexes = []
+    i = 0
+    for sentence in self.current_sentences:
+      for w in sentence:
+        if strip_punctuation(w.lower()) == word:
+          indexes.append(i)
+        i += 1
+    return indexes
+
+  def get_scene_object_ids(label):
+    ids = []
+    for s in self.current_scene_objects:
+      if strip_punctuation(s.label.lower()) in label:
+        ids.append(s.id)
+    return ids
 
   def get_phonemes(self, word):
     if word not in ARPABET:

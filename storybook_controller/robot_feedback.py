@@ -22,6 +22,7 @@ class EndPageQuestion(object):
   def __init__(self, question_type):
     self.question_type = question_type
     self.asked = False
+    self.answered = False
     self.correct = False
 
   def ask_question(self, ros_manager):
@@ -50,16 +51,36 @@ class EndPageQuestion(object):
     Checks if the child's response to the question is correct.
     Returns True if correct. Also updates as necessary.
     """
+    self.answered = True
     self.correct = self.try_answer_impl(query, student_model)
     return self.correct
   
   def try_answer_impl(self, query, student_model):
     raise NotImplementedError
 
+  def respond_to_child(self, ros_manager):
+    """
+    Respond to the child depending on if they were correct or not.
+    """
+    if not self.answered:
+      raise Exception("Can't respond to child if no response")
+    if self.correct:
+      self.respond_to_child_correct_impl(ros_manager)
+    else:
+      self.respond_to_child_incorrect_impl(ros_manager)
+
+  def respond_to_child_correct_impl(self, ros_manager):
+    raise NotImplementedError
+
+  def respond_to_child_incorrect_impl(self, ros_manager):
+    raise NotImplementedError
+
+
 class EndPageQuestionWordTap(EndPageQuestion):
-  def __init__(self, word):
+  def __init__(self, word, indexes):
     super(EndPageQuestionWordTap, self).__init__(EndPageQuestionType.WORD_TAP)
     self.expected_word = strip_punctuation(word.lower())
+    self.expected_indexes = indexes
 
   def ask_question_impl(self, ros_manager):
     # Make all words light up (instead of having past sentences be greyed out).
@@ -81,11 +102,23 @@ class EndPageQuestionWordTap(EndPageQuestion):
       student_model.update_with_incorrect_word_tapped(self.expected_word, query)
     return correct
 
+  def respond_to_child_correct_impl(self, ros_manager):
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.HAPPY_DANCE)
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, "That's right! This is the word " + self.expected_word)
+    params = {"indexes": self.expected_indexes}
+    ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_WORD, params)
+
+  def respond_to_child_incorrect_impl(self, ros_manager):
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Nope, good try, but the word " + self.expected_word + " is this one!")
+    params = {"indexes": self.expected_indexes}
+    ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_WORD, params)
+
 class EndPageQuestionSceneObjectTap(EndPageQuestion):
-  def __init__(self, label):
+  def __init__(self, label, ids):
     super(EndPageQuestionSceneObjectTap, self).__init__(
       EndPageQuestionType.SCENE_OBJECT_TAP)
     self.expected_label = strip_punctuation(label.lower())
+    self.expected_ids = ids
 
   def ask_question_impl(self, ros_manager):
     # Make all words light up (instead of having past sentences be greyed out).
@@ -108,6 +141,17 @@ class EndPageQuestionSceneObjectTap(EndPageQuestion):
       student_model.update_with_incorrect_scene_object_tapped(self.expected_label, query)
     return correct
 
+  def respond_to_child_correct_impl(self, ros_manager):
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.HAPPY_DANCE)
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, "That's right! This is " + self.expected_word)
+    params = {"ids": self.expected_ids}
+    ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_SCENE_OBJECT, params)
+
+  def respond_to_child_incorrect_impl(self, ros_manager):
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Not quite. Actually, this is " + self.expected_word)
+    params = {"ids": self.expected_ids}
+    ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_SCENE_OBJECT, params)
+
 class EndPageQuestionWordPronounce(EndPageQuestion):
   def __init__(self, word):
     super(EndPageQuestionWordPronounce, self).__init__(
@@ -123,6 +167,12 @@ class EndPageQuestionWordPronounce(EndPageQuestion):
   def try_answer_impl(self, query, student_model):
     # TODO
     return query == self.expected_word
+
+  def respond_to_child_correct_impl(self, ros_manager):
+    pass
+
+  def respond_to_child_incorrect_impl(self, ros_manager):
+    pass
 
 ####################################################################
 

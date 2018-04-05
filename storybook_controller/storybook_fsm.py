@@ -89,6 +89,7 @@ class StorybookFSM(object):
       "WAITING_FOR_CHILD_AUDIO", # After a sentence has been shown.
       "WAITING_FOR_END_PAGE_JIBO_QUESTION", # Wait for Jibo tts to finish.
       "WAITING_FOR_END_PAGE_CHILD_RESPONSE", # Could be speech or tablet event.
+      "WAITING_FOR_END_PAGE_JIBO_RESPONSE", # Jibo gives corrections/comments.
       "WAITING_FOR_NEXT_PAGE_JIBO_INTERLUDE", # After end page child response.
       "END_STORY", # Moved to the "The End" page, tell Jibo to ask a question,
       "WAITING_FOR_END_STORY_CHILD_AUDIO", # Wait for child to respond.
@@ -159,8 +160,19 @@ class StorybookFSM(object):
         "dest": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
       },
       {
-        "trigger":"child_end_page_response_complete",
+        "trigger":"child_end_page_got_answer",
         "source":"WAITING_FOR_END_PAGE_CHILD_RESPONSE",
+        "dest":"WAITING_FOR_END_PAGE_JIBO_RESPONSE",
+      },
+      {
+        "trigger":"jibo_finish_tts",
+        "source":"WAITING_FOR_END_PAGE_JIBO_RESPONSE",
+        "dest":"WAITING_FOR_END_PAGE_JIBO_RESPONSE",
+        "after":"end_page_jibo_response_complete"
+      },
+      {
+        "trigger":"end_page_jibo_response_complete",
+        "source":"WAITING_FOR_END_PAGE_JIBO_RESPONSE",
         "dest": "WAITING_FOR_NEXT_PAGE_JIBO_INTERLUDE",
         "after": "jibo_next_page", # Jibo says something like 'Ok on to the next page!'
         "conditions": ["more_pages_available"]
@@ -172,8 +184,8 @@ class StorybookFSM(object):
         "after": "tablet_next_page" # Show the next page button, or navigate to the next page if automatic.
       },
       {
-        "trigger":"child_end_page_response_complete",
-        "source": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
+        "trigger":"end_page_jibo_response_complete",
+        "source": "WAITING_FOR_END_PAGE_JIBO_RESPONSE",
         "dest": "END_STORY",
         "after": ["tablet_go_to_end_page", "jibo_end_story"]
       },
@@ -456,12 +468,11 @@ class StorybookFSM(object):
   def jibo_finish_tts(self):
     print("trigger: jibo_finish_tts")
 
-  def child_end_page_response_complete(self):
-    print("trigger: child_end_page_response_complete")
-    # Reset. TODO: maybe just want to increment the index in the future
-    # when we want to ask multiple questions.
-    self.end_page_questions = []
-    self.end_page_question_idx = None
+  def child_end_page_got_answer(self):
+    print("trigger: child_end_page_got_answer")
+
+  def end_page_jibo_response_complete(self):
+    print("trigger: end_page_jibo_response_complete")
 
   def jibo_finish_child_asr(self):
     print("trigger: jibo_finish_child_asr")
@@ -485,6 +496,7 @@ class StorybookFSM(object):
     print("action: tablet_set_evaluate_mode")
     self.ros.send_storybook_command(StorybookCommand.SET_STORYBOOK_MODE, {"mode": StorybookState.EVALUATE_MODE})
 
+  # TODO: remove this, unnecessary, but need to update the transitions as well. 
   def jibo_stall_story_loading(self):
     pass
     # Commented out because the timing gets thrown off when there's a jibo_tts
@@ -535,6 +547,15 @@ class StorybookFSM(object):
       "record": should_record
     }
     self.ros.send_storybook_command(StorybookCommand.SHOW_NEXT_SENTENCE, params)
+    # TODO: remove after TESTING
+    # params = {
+    #   "ids": [0, 1]
+    # }
+    # self.ros.send_storybook_command(StorybookCommand.HIGHLIGHT_SCENE_OBJECT, params)
+    # params = {
+    #   "indexes": [0, 1]
+    # }
+    # self.ros.send_storybook_command(StorybookCommand.HIGHLIGHT_WORD, params)
 
   def tablet_begin_record(self):
     print("action: tablet_begin_record")
@@ -628,6 +649,14 @@ class StorybookFSM(object):
   def try_answer_question(self, question_type, query):
     if question_type != self.current_end_page_question().question_type:
       return
+
     self.current_end_page_question().try_answer(query, self.student_model)
     # Trigger!
-    self.child_end_page_response_complete()
+    self.child_end_page_got_answer()
+    # TODO: decide if we should send the response before or after triggering.
+    self.current_end_page_question().respond_to_child()
+
+    # Reset. TODO: maybe just want to increment the index in the future
+    # when we want to ask multiple questions.
+    self.end_page_questions = []
+    self.end_page_question_idx = None

@@ -61,7 +61,7 @@ class StorybookFSM(object):
     # Timer for when we're waiting for the child to read a sentence in
     # evaluate mode.
     self.child_audio_evaluate_timer = None
-    self.CHILD_AUDIO_SILENCE_TIMEOUT_SECONDS = 8 # Amount of time without any silence.
+    self.CHILD_AUDIO_SILENCE_TIMEOUT_SECONDS = 8 # Amount of time after detecting silence before reprompting a read.
     self.child_audio_finish_timeout_seconds = None
 
     # For when Jibo prompts the child at the end of a page.
@@ -124,6 +124,9 @@ class StorybookFSM(object):
         "trigger":"page_info_received",
         "source":"WAITING_FOR_NEXT_PAGE",
         "dest": "WAITING_FOR_CHILD_AUDIO",
+        # This action has really become more like start page, because it tells the
+        # storybook to show the first sentence, then the storybook handles showing
+        # subsequent sentences on its own.
         "after": ["tablet_show_next_sentence", "start_child_audio_timer"],
       },
       {
@@ -136,7 +139,22 @@ class StorybookFSM(object):
         "trigger":"jibo_finish_tts", # This trigger will be used a lot, but it will have different effects based on source state.
         "source":"WAITING_FOR_CHILD_AUDIO",
         "dest": "WAITING_FOR_CHILD_AUDIO",
-        "after": ["start_child_audio_timer", "tablet_begin_record"],
+        "after": ["tablet_begin_record"], # After Jibo finishes reprompting.
+        # TODO: commented out start_child_audio_timer
+      },
+      # Only start timer after there has been silence. Either child didn't press button
+      # or child didn't speak at all.
+      {
+        "trigger":"jibo_finish_child_asr",
+        "source":"WAITING_FOR_CHILD_AUDIO",
+        "dest":"WAITING_FOR_CHILD_AUDIO",
+        "after": ["start_child_audio_timer"]
+      },
+      {
+        "trigger":"jibo_got_new_asr", # When it goes from silence to not silence.
+        "source":"WAITING_FOR_CHILD_AUDIO",
+        "dest":"WAITING_FOR_CHILD_AUDIO",
+        "after":["stop_child_audio_timer"]
       },
       {
         "trigger":"child_sentence_audio_complete",
@@ -144,7 +162,7 @@ class StorybookFSM(object):
         "dest": "WAITING_FOR_CHILD_AUDIO",
         "before":"stop_child_audio_timer",
         # "before":"", # TODO: allow Jibo to respond? "Good job!"
-        "after": ["start_child_audio_timer"], #"tablet_show_next_sentence" commented out
+        # TODO commented out everything here, "after": ["start_child_audio_timer"], # Commented out tablet_show_next_sentence since tablet is responsible for that now.
         "conditions": ["more_sentences_available"]
       },
       {
@@ -163,12 +181,13 @@ class StorybookFSM(object):
         "trigger":"child_end_page_got_answer",
         "source":"WAITING_FOR_END_PAGE_CHILD_RESPONSE",
         "dest":"WAITING_FOR_END_PAGE_JIBO_RESPONSE",
+        "before":["jibo_end_page_response_to_child"]
       },
       {
         "trigger":"jibo_finish_tts",
         "source":"WAITING_FOR_END_PAGE_JIBO_RESPONSE",
         "dest":"WAITING_FOR_END_PAGE_JIBO_RESPONSE",
-        "after":"end_page_jibo_response_complete"
+        "after":["delay_after_end_page_jibo_response", "end_page_jibo_response_complete"]
       },
       {
         "trigger":"end_page_jibo_response_complete",
@@ -218,6 +237,11 @@ class StorybookFSM(object):
       # Catch all the triggers.
       {
         "trigger": "jibo_finish_tts",
+        "source": "*",
+        "dest": "="
+      },
+      {
+        "trigger": "jibo_got_new_asr",
         "source": "*",
         "dest": "="
       },
@@ -413,10 +437,6 @@ class StorybookFSM(object):
     Define callback function for when ROS node manager receives a new
     JiboState message, which will be at 10Hz.
     """
-    # TODO: this is just testing code, remove later.
-    # if data.is_playing_sound:
-    #   print("Jibo tts ongoing:", data.tts_msg)
-
     if self.jibo_tts_on and data.tts_msg == "":
       # This is when the sound has just stopped.
       # Trigger!
@@ -440,11 +460,21 @@ class StorybookFSM(object):
       self.jibo_asr_empty = True
     else:
       print("Got Jibo ASR transcription:", data.transcription)
+      if self.jibo_asr_empty:
+        # If this is start of a new set of transcriptions (meaning that
+        # previous state was silence).
+        # Trigger!
+        self.jibo_got_new_asr()
+      # Update state.
       self.jibo_asr_empty = False
+
+      # Handle the response received, depending on the state.
       if self.state == "WAITING_FOR_END_PAGE_CHILD_RESPONSE":
         self.try_answer_question(EndPageQuestionType.WORD_PRONOUNCE, data.transcription)
+      
       # TODO: if we're in explore mode, this might be a question from the child,
       # and we'll need to respond to it accordingly.
+      # Ideally will be able to just read the stop words and have simple cases.
 
 
   """
@@ -474,7 +504,12 @@ class StorybookFSM(object):
   def end_page_jibo_response_complete(self):
     print("trigger: end_page_jibo_response_complete")
 
+  def jibo_got_new_asr(self):
+    # When asr goes from silence to not silence.
+    print("trigger: jibo_got_new_asr")
+
   def jibo_finish_child_asr(self):
+    # When asr goes from not silence to silence.
     print("trigger: jibo_finish_child_asr")
 
   def begin_evaluate_mode(self):
@@ -501,6 +536,7 @@ class StorybookFSM(object):
     pass
     # Commented out because the timing gets thrown off when there's a jibo_tts
     # event from both story selected and story loaded.
+    #
     # if self.current_story_needs_download:
     #   print("action:jibo_stall_story_loading: 'Ooh I'm so excited, that's a good one!")
     #   self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
@@ -513,7 +549,7 @@ class StorybookFSM(object):
     print("action: jibo_start_story: ")
     self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
     self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK,
-      "Let's go")# "Great, it's time to start, I'm so excited! I would love it if you would read to me! Every time a sentence appears, read it as best as you can, then click the blue button to see the next sentence. Ready? Let's go!")
+      "Great, it's time to start, I'm so excited!") # I would love it if you would read to me! Every time a sentence appears, read it as best as you can, then click the blue button to see the next sentence. Ready? Let's go!")
 
   def tablet_next_page(self):
     print("action: tablet_next_page")
@@ -547,15 +583,6 @@ class StorybookFSM(object):
       "record": should_record
     }
     self.ros.send_storybook_command(StorybookCommand.SHOW_NEXT_SENTENCE, params)
-    # TODO: remove after TESTING
-    # params = {
-    #   "ids": [0, 1]
-    # }
-    # self.ros.send_storybook_command(StorybookCommand.HIGHLIGHT_SCENE_OBJECT, params)
-    # params = {
-    #   "indexes": [0, 1]
-    # }
-    # self.ros.send_storybook_command(StorybookCommand.HIGHLIGHT_WORD, params)
 
   def tablet_begin_record(self):
     print("action: tablet_begin_record")
@@ -569,6 +596,7 @@ class StorybookFSM(object):
     print("action: start_child_audio_timer")
     self.child_audio_evaluate_timer = threading.Timer(
       self.CHILD_AUDIO_SILENCE_TIMEOUT_SECONDS, self.timer_expire)
+    self.child_audio_evaluate_timer.start()
 
   def stop_child_audio_timer(self):
     print("action: stop_child_audio_timer")
@@ -585,6 +613,23 @@ class StorybookFSM(object):
     self.end_page_question_idx = 0
     self.end_page_questions[self.end_page_question_idx].ask_question(self.ros)
    
+  def jibo_end_page_response_to_child(self):
+    print("action: jibo_end_page_response_to_child")
+    # Delay before, otherwise seems too rushed.
+    time.sleep(1.5)
+    self.current_end_page_question().respond_to_child(self.ros)
+    print("done with end page response")
+    # Reset the current end page questions. TODO: maybe just want to increment the index in the future
+    # when we want to ask multiple questions.
+    self.end_page_questions = []
+    self.end_page_question_idx = None
+
+  def delay_after_end_page_jibo_response(self):
+    print("delay_after_end_page_jibo_response")
+    # Called after Jibo has finished saying its response.
+    # Without this, child doesn't have time to process the correct answer.
+    time.sleep(2)
+
   def tablet_go_to_end_page(self):
     print("action: tablet_go_to_end_page")
     self.ros.send_storybook_command(StorybookCommand.GO_TO_END_PAGE)
@@ -652,11 +697,5 @@ class StorybookFSM(object):
 
     self.current_end_page_question().try_answer(query, self.student_model)
     # Trigger!
+    print("About to trigger")
     self.child_end_page_got_answer()
-    # TODO: decide if we should send the response before or after triggering.
-    self.current_end_page_question().respond_to_child()
-
-    # Reset. TODO: maybe just want to increment the index in the future
-    # when we want to ask multiple questions.
-    self.end_page_questions = []
-    self.end_page_question_idx = None

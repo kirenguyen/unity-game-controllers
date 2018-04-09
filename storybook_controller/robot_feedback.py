@@ -3,6 +3,7 @@ This file contains classes used to generate feedback that the robot can
 give to the student.
 """
 from enum import Enum
+import time
 
 from unity_game_msgs.msg import StorybookCommand
 from storybook_controller.jibo_commands_builder import JiboStorybookBehaviors
@@ -48,7 +49,7 @@ class EndPageQuestion(object):
 
   def try_answer(self, query, student_model):
     """
-    Checks if the child's response to the question is correct.
+    Checks if the child's response (query) to the question is correct.
     Returns True if correct. Also updates as necessary.
     """
     self.answered = True
@@ -56,6 +57,9 @@ class EndPageQuestion(object):
     return self.correct
   
   def try_answer_impl(self, query, student_model):
+    """
+    Should be implemented in subclass.
+    """
     raise NotImplementedError
 
   def respond_to_child(self, ros_manager):
@@ -70,12 +74,20 @@ class EndPageQuestion(object):
       self.respond_to_child_incorrect_impl(ros_manager)
 
   def respond_to_child_correct_impl(self, ros_manager):
+    """
+    Should be implemented in subclass.
+    """
     raise NotImplementedError
 
   def respond_to_child_incorrect_impl(self, ros_manager):
+    """
+    Should be implemented in subclass.
+    """
     raise NotImplementedError
 
-
+"""
+Tap on a word.
+"""
 class EndPageQuestionWordTap(EndPageQuestion):
   def __init__(self, word, indexes):
     super(EndPageQuestionWordTap, self).__init__(EndPageQuestionType.WORD_TAP)
@@ -105,14 +117,19 @@ class EndPageQuestionWordTap(EndPageQuestion):
   def respond_to_child_correct_impl(self, ros_manager):
     ros_manager.send_jibo_command(JiboStorybookBehaviors.HAPPY_DANCE)
     ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, "That's right! This is the word " + self.expected_word)
+    time.sleep(2)
     params = {"indexes": self.expected_indexes}
     ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_WORD, params)
 
   def respond_to_child_incorrect_impl(self, ros_manager):
-    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Nope, good try, but the word " + self.expected_word + " is this one!")
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Nope, good try, but this is the word " + self.expected_word)
+    time.sleep(2)
     params = {"indexes": self.expected_indexes}
     ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_WORD, params)
 
+"""
+Tap on an object in the image.
+"""
 class EndPageQuestionSceneObjectTap(EndPageQuestion):
   def __init__(self, label, ids):
     super(EndPageQuestionSceneObjectTap, self).__init__(
@@ -138,41 +155,55 @@ class EndPageQuestionSceneObjectTap(EndPageQuestion):
       student_model.update_with_correct_scene_object_tapped(query)
     else:
       print("Child got scene object incorrect!", query, self.expected_label)
-      student_model.update_with_incorrect_scene_object_tapped(self.expected_label, query)
+      student_model.update_with_incorrect_scene_object_tapped(
+        self.expected_label, query)
     return correct
 
   def respond_to_child_correct_impl(self, ros_manager):
     ros_manager.send_jibo_command(JiboStorybookBehaviors.HAPPY_DANCE)
-    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, "That's right! This is " + self.expected_word)
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK,
+      "That's right! This is " + self.expected_label)
     params = {"ids": self.expected_ids}
     ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_SCENE_OBJECT, params)
 
   def respond_to_child_incorrect_impl(self, ros_manager):
-    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Not quite. Actually, this is " + self.expected_word)
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK,
+      "Not quite. Actually, this is " + self.expected_label)
     params = {"ids": self.expected_ids}
     ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_SCENE_OBJECT, params)
 
+"""
+Pronounce a word.
+"""
 class EndPageQuestionWordPronounce(EndPageQuestion):
-  def __init__(self, word):
+  def __init__(self, word, index):
     super(EndPageQuestionWordPronounce, self).__init__(
       EndPageQUestionType.WORD_PRONOUNCE)
     self.expected_word = word
+    self.expected_index = index
 
   def correct_answer(self):
     return self.expected_word
 
-  def ask_question_impl(self, ros_manager, student_model):
-    pass
+  def ask_question_impl(self, ros_manager):
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK,
+      "Can you pronounce this word for me?")
+    ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_WORD, params)
 
   def try_answer_impl(self, query, student_model):
-    # TODO
-    return query == self.expected_word
+    return query in self.expected_word
 
   def respond_to_child_correct_impl(self, ros_manager):
-    pass
+    params = {"indexes": [self.expected_index]}
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK,
+      "Ok, cool, yes the pronunciation of this word is " + self.expected_word)
+    ros_manager.send_storybook_command(Storybook.HIGHLIGHT_WORD, params)
 
   def respond_to_child_incorrect_impl(self, ros_manager):
-    pass
+    # We can't 100% trust ASR responses, so don't outright say if
+    # the child was correct or not, just give some acknowledgment
+    # and provide the correct answer.
+    self.respond_to_child_correct_impl(ros_manager)
 
 ####################################################################
 

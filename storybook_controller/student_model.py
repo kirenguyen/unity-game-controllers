@@ -183,17 +183,17 @@ class StudentModel(object):
     use_word = random.random()
     print("use word", use_word)
     if word is not None and use_word < .5:
-      indexes = get_word_indexes(word)
+      indexes = self.get_word_indexes(word)
       return [robot_feedback.EndPageQuestionWordTap(word, indexes)]
     else:
       label = self.get_scene_object_label_to_evaluate()
       if label is None:
         # Must ask for a word if no scene objects exist.
         word = self.get_lowest_pronunciation_score_word(True)
-        indexes = get_word_indexes(word)
+        indexes = self.get_word_indexes(word)
         return [robot_feedback.EndPageQuestionWordTap(word, indexes)]
       else:
-        ids = get_scene_object_ids(label)
+        ids = self.get_scene_object_ids(label)
         return [robot_feedback.EndPageQuestionSceneObjectTap(label, ids)]
 
   def get_lowest_pronunciation_score_word(self, force=False):
@@ -284,22 +284,25 @@ class StudentModel(object):
   Helpers
   """
 
-  def get_word_indexes(word):
+  def get_word_indexes(self, word):
     # Go through all sentences and find the words that match.
     indexes = []
     i = 0
     for sentence in self.current_sentences:
       for w in sentence:
-        if strip_punctuation(w.lower()) == word:
+        if self.strip_punctuation(w.lower()) == word:
           indexes.append(i)
         i += 1
+    print("get indexes", self.current_sentences, word, indexes)
     return indexes
 
-  def get_scene_object_ids(label):
+  def get_scene_object_ids(self, label):
     ids = []
+    stripped_label = self.strip_punctuation(label.lower())
     for s in self.current_scene_objects:
-      if strip_punctuation(s.label.lower()) in label:
+      if self.strip_punctuation(s.label.lower()) == stripped_label:
         ids.append(s.id)
+    print("get ids", self.current_scene_objects, label, ids)
     return ids
 
   def get_phonemes(self, word):

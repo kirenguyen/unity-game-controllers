@@ -78,6 +78,7 @@ class StorybookFSM(object):
       StorybookEvent.RECORD_AUDIO_COMPLETE,
       StorybookEvent.STORY_SELECTED,
       StorybookEvent.STORY_LOADED,
+      StorybookEvent.CHANGE_MODE
     ]
 
     not_reading_states = ["APP_START"]
@@ -229,10 +230,14 @@ class StorybookFSM(object):
         "after": ["begin_evaluate_mode", "tablet_show_library_panel"]
       },
       {
-        "trigger": "begin_evaluate_mode", # Can get rid of this and just read state?
+        "trigger": "begin_evaluate_mode",
         "source": "*",
-        "dest": "BEGIN_EVALUATE",
-        "after": ["tablet_set_evaluate_mode"]
+        "dest": "BEGIN_EVALUATE"
+      },
+      {
+        "trigger": "begin_explore_mode",
+        "source": "*",
+        "dest": "BEGIN_EXPLORE"
       },
       # Catch all the triggers.
       {
@@ -302,13 +307,6 @@ class StorybookFSM(object):
       # TODO: decide best place to send the ASR command.
       self.ros.send_jibo_asr_command(JiboAsrCommand.STOP)
       self.ros.send_jibo_asr_command(JiboAsrCommand.START)
-      # For now, automatically set mode as EVALUATE.
-      params = {
-        "mode": StorybookState.EVALUATE_MODE
-      }
-      self.ros.send_storybook_command(StorybookCommand.SET_STORYBOOK_MODE, params)
-      # Trigger!
-      self.begin_evaluate_mode()
 
     elif data.event_type == StorybookEvent.SPEECH_ACE_RESULT:
       print("SPEECH_ACE_RESULT message received")
@@ -371,10 +369,17 @@ class StorybookFSM(object):
       # Trigger!
       self.storybook_loaded()
 
-    elif data.event_type == StorybookEvent.EVALUATE_MODE_SELECTED:
-      print("EVALUATE_MODE_SELECTED message received")
-      # Trigger 
-      self.begin_evaluate_mode()
+    elif data.event_type == StorybookEvent.CHANGE_MODE:
+      print("CHANGE_MODE message received")
+      message = json.loads(data.message)
+      if int(message["mode"]) == StorybookState.EVALUATE_MODE:
+        # Trigger
+        print("New mode is EVALUATE")
+        self.begin_evaluate_mode()
+      elif int(message["mode"]) == StorybookState.EXPLORE_MODE:
+        # Trigger
+        print("New mode is EXPLORE")
+        self.begin_explore_mode()
 
 
   """
@@ -514,6 +519,9 @@ class StorybookFSM(object):
 
   def begin_evaluate_mode(self):
     print("trigger: begin_evaluate_mode")
+
+  def begin_explore_mode(self):
+    print("trigger: begin_explore_mode")
 
   # Not a real trigger.
   def timer_expire(self):

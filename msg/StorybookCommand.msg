@@ -15,7 +15,7 @@ int8 HIGHLIGHT_SCENE_OBJECT = 2 # Params is {ids: [int]}, scene objects to highl
 int8 SHOW_NEXT_SENTENCE = 3 # Params is {index: int, child_turn: bool, record: bool}, sentence to highlight and whether it's the child's turn
 int8 START_RECORD = 4 # Params is empty. Starts recording without attempting to reshow the sentence.
 int8 CANCEL_RECORD = 5 # Params is empty
-int8 SET_STORYBOOK_MODE = 6 # Params is {mode: int}, the new mode
+
 int8 NEXT_PAGE = 7 # Params is empty
 int8 GO_TO_END_PAGE = 8 # Params is empty
 int8 SHOW_LIBRARY_PANEL = 9 # Params is empty

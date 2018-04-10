@@ -16,4 +16,4 @@ int8 SENTENCE_SWIPED = 4 # Message is {index: int, text: string}
 int8 RECORD_AUDIO_COMPLETE = 5 # Message is the {index: int} of the sentence
 int8 STORY_SELECTED = 6 # Message is {needs_download: bool}
 int8 STORY_LOADED = 7 # Message is empty
-int8 EVALUATE_MODE_SELECTED = 8 # Message is empty
+int8 CHANGE_MODE = 8 # Message is empty

@@ -82,6 +82,7 @@ class ROSNodeManager(object):
     Note that JiboAsrCommand.START and JiboAsrCommand.STOP are the
     only ones that are supported in jibo-rosbridge-receiver right now.
     """
+    print("Sending jibo asr command")
     msg = JiboCommandsBuilder.get_jibo_asr_command(command, heyjibo, continuous, rule)
     self.publishers[JIBO_ASR_COMMAND_TOPIC].publish(msg)
     # rospy.loginfo(msg)

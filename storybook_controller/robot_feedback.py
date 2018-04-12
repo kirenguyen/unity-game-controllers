@@ -8,6 +8,8 @@ import time
 from unity_game_msgs.msg import StorybookCommand
 from storybook_controller.jibo_commands_builder import JiboStorybookBehaviors
 from storybook_controller.jibo_commands_builder import JiboCommandsBuilder
+from storybook_controller.jibo_statements import JiboStatements
+from storybook_controller.jibo_statements import JiboStatementType
 
 def strip_punctuation(word):
   return "".join([c for c in word if c.isalnum()])
@@ -30,16 +32,27 @@ class EndPageQuestion(object):
     """
     Sends necessary commands on ros_manager to ask the question.
     """
+    pre_question_prompt = None
+    if self.asked:
+      # This is the second type (at least) that we're asking the question.
+      pre_question_prompt = JiboStatements.get_statement(
+        JiboStatementType.PRE_END_PAGE_QUESTION_REPROMPT)
+    else:
+      pre_question_prompt = JiboStatements.get_statement(
+        JiboStatementType.PRE_END_PAGE_QUESTION)
+    self.ask_question_impl(ros_manager, pre_question_prompt)
     self.asked = True
-    self.ask_question_impl(ros_manager)
   
-  def ask_question_impl(self, ros_manager):
+  def ask_question_impl(self, ros_manager, pre_question_prompt):
     raise NotImplementedError
 
-  ########################################
-  # TODO: add a mechanism for giving a hint, and a mechanism for responding
-  # to the child's response!!
-  ########################################
+  ##################################################
+  ##################################################
+  #                                                #
+  # TODO: add a mechanism for giving a hint?       #
+  #                                                #
+  ##################################################
+  ##################################################
 
   def correct_answer(self):
     """
@@ -70,10 +83,8 @@ class EndPageQuestion(object):
     if not self.answered:
       raise Exception("Can't respond to child if no response")
     if self.correct:
-      print("respond_to_child_correct_impl")
       self.respond_to_child_correct_impl(ros_manager)
     else:
-      print("respond_to_child_correct_impl")
       self.respond_to_child_incorrect_impl(ros_manager)
 
   def respond_to_child_correct_impl(self, ros_manager):
@@ -97,11 +108,12 @@ class EndPageQuestionWordTap(EndPageQuestion):
     self.expected_word = strip_punctuation(word.lower())
     self.expected_indexes = indexes
 
-  def ask_question_impl(self, ros_manager):
+  def ask_question_impl(self, ros_manager, pre_question_prompt):
     # Make all words light up (instead of having past sentences be greyed out).
     ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_ALL_SENTENCES)
     # Will need to send jibo commands and storybook commands.
-    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Great! Let me ask you a question. Can you tap the word " + self.expected_word + "?")
+    jibo_text = pre_question_prompt + "Can you tap the word " + self.expected_word + "?"
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
     ros_manager.send_jibo_command(JiboStorybookBehaviors.QUESTION_ANIM)
 
   def correct_answer(self):
@@ -140,11 +152,12 @@ class EndPageQuestionSceneObjectTap(EndPageQuestion):
     self.expected_label = strip_punctuation(label.lower())
     self.expected_ids = ids
 
-  def ask_question_impl(self, ros_manager):
+  def ask_question_impl(self, ros_manager, pre_question_prompt):
     # Make all words light up (instead of having past sentences be greyed out).
     ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_ALL_SENTENCES)
     # Will need to send jibo commands and storybook commands.
-    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Awesome! I have a question for you. Can you tap on " + self.expected_label + " in the picture?")
+    jibo_text = pre_question_prompt + "Can you tap on " + self.expected_label + " in the picture?"
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
     ros_manager.send_jibo_command(JiboStorybookBehaviors.QUESTION_ANIM)
 
   def correct_answer(self):
@@ -190,9 +203,9 @@ class EndPageQuestionWordPronounce(EndPageQuestion):
   def correct_answer(self):
     return self.expected_word
 
-  def ask_question_impl(self, ros_manager):
-    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK,
-      "Can you pronounce this word for me?")
+  def ask_question_impl(self, ros_manager, pre_question_prompt):
+    jibo_text = pre_question_prompt + "Can you pronounce this word for me?"
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
     ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_WORD, params)
 
   def try_answer_impl(self, query, student_model):
@@ -209,33 +222,3 @@ class EndPageQuestionWordPronounce(EndPageQuestion):
     # the child was correct or not, just give some acknowledgment
     # and provide the correct answer.
     self.respond_to_child_correct_impl(ros_manager)
-
-####################################################################
-
-# TODO: this should be things like transitions for Jibo to say
-# between pages, before starting the story, after starting, after
-# a sentence, after child got something correct, etc.
-
-# Generic types of feedback to give.
-class RobotFeedbackType(Enum):
-  END_PAGE_PRE_QUESTION = 0 # Say something generically encouraging before asking the question(s).
-  PRAISE = 1
-
-class RobotFeedback(object):
-  def __init__(self, feedbackType, template):
-    self.feedbackType = feedbackType
-    self.template = template
-    self.args = None
-
-  def set_args(self, args):
-    self.args = args
-
-  def get_formatted_feedback(self):
-    """
-    Returns a string that is the template filled in with the arguments provided.
-    
-    The number of arguments should match the number of templated spots.
-    There can be 0 arguments, common in the case of feedback tha requires no
-    modification, such as "Good job"
-    """
-    return self.template.format(*self.args)

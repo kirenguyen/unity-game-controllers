@@ -61,7 +61,9 @@ class StorybookFSM(object):
     # evaluate mode.
     self.child_audio_evaluate_timer = None
     self.CHILD_AUDIO_SILENCE_TIMEOUT_SECONDS = 8 # Amount of time after detecting silence before reprompting a read.
-    self.child_audio_finish_timeout_seconds = None
+
+    self.child_end_page_question_timer = None
+    self.CHILD_END_PAGE_QUESTION_TIMEOUT_SECONDS = 8
 
     # For when Jibo prompts the child at the end of a page.
     self.end_page_questions = []
@@ -77,7 +79,8 @@ class StorybookFSM(object):
       StorybookEvent.RECORD_AUDIO_COMPLETE,
       StorybookEvent.STORY_SELECTED,
       StorybookEvent.STORY_LOADED,
-      StorybookEvent.CHANGE_MODE
+      StorybookEvent.CHANGE_MODE,
+      StorybookEvent.REPEAT_END_PAGE_QUESTION,
     ]
 
     not_reading_states = ["APP_START"]
@@ -171,18 +174,35 @@ class StorybookFSM(object):
         "source":"WAITING_FOR_CHILD_AUDIO",
         "dest": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
         "before":"stop_child_audio_timer",
-        "after": "send_end_page_prompt", # Could involve commands to Jibo and tablet.
+        "after": "send_end_page_prompt" # Could involve commands to Jibo and tablet.
       },
+      # Either Jibo is asking a question for the first time or is repeating it,
+      # regardless, we need to start the timer when Jibo's done talking.
       {
         "trigger":"jibo_finish_tts",
-        "source":"WAITING_FOR_END_PAGE_JIBO_QUESTION",
+        "source": ["WAITING_FOR_END_PAGE_JIBO_QUESTION", "WAITING_FOR_END_PAGE_CHILD_RESPONSE"],
         "dest": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
+        "after": "start_child_end_page_question_timer"
+      },
+      {
+        "trigger": "child_end_page_question_timeout",
+        "source": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
+        "dest": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
+        "after": "resend_end_page_prompt"
+      },
+      {
+        "trigger": "child_request_repeat_end_page_question",
+        "source": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
+        "dest": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
+        "before": "stop_child_end_page_question_timer",
+        "after": "resend_end_page_prompt"
       },
       {
         "trigger":"child_end_page_got_answer",
         "source":"WAITING_FOR_END_PAGE_CHILD_RESPONSE",
         "dest":"WAITING_FOR_END_PAGE_JIBO_RESPONSE",
-        "before":["jibo_end_page_response_to_child"]
+        "before":["stop_child_end_page_question_timer",
+                  "jibo_end_page_response_to_child"]
       },
       {
         "trigger":"jibo_finish_tts",
@@ -259,8 +279,12 @@ class StorybookFSM(object):
         "trigger": "page_info_received",
         "source": "*",
         "dest": "="
+      },
+      {
+        "trigger": "child_request_repeat_end_page_question",
+        "source": "*",
+        "dest": "="
       }
-
     ]
 
     self.transitions = self.not_reading_transitions + \
@@ -289,7 +313,7 @@ class StorybookFSM(object):
         # to be sent and acknowledged before continuing on with execution.
         self.event_queue.task_done()
       except queue.Empty:
-        time.sleep(.1)
+        time.sleep(.05)
 
   def process_storybook_event(self, data):
     if data.event_type == StorybookEvent.HELLO_WORLD:
@@ -379,13 +403,18 @@ class StorybookFSM(object):
       print("CHANGE_MODE message received")
       message = json.loads(data.message)
       if int(message["mode"]) == StorybookState.EVALUATE_MODE:
-        # Trigger
+        # Trigger!
         print("New mode is EVALUATE")
         self.begin_evaluate_mode()
       elif int(message["mode"]) == StorybookState.EXPLORE_MODE:
-        # Trigger
+        # Trigger!
         print("New mode is EXPLORE")
         self.begin_explore_mode()
+
+    elif data.event_type == StorybookEvent.REPEAT_END_PAGE_QUESTION:
+      print("REPEAT_END_PAGE_QUESTION message received")
+      # Trigger
+      self.child_request_repeat_end_page_question()
 
 
   """
@@ -509,6 +538,12 @@ class StorybookFSM(object):
   def jibo_finish_tts(self):
     print("trigger: jibo_finish_tts")
 
+  def child_end_page_question_timeout(self):
+    print("trigger: child_end_page_question_timeout")
+
+  def child_request_repeat_end_page_question(self):
+    print("trigger: child_request_repeat_end_page_question")
+
   def child_end_page_got_answer(self):
     print("trigger: child_end_page_got_answer")
 
@@ -529,10 +564,24 @@ class StorybookFSM(object):
   def begin_explore_mode(self):
     print("trigger: begin_explore_mode")
 
-  # Not a real trigger.
-  def timer_expire(self):
-    print("timer expired!")
+  # Timer handlers.
+  def child_audio_timer_expire_handler(self):
+    print("audio timer expired!")
+    # Trigger!
     self.child_audio_timeout()
+
+  def child_end_page_question_timer_expire_handler(self):
+    print("end page question timer expired!")
+    # Shouldn't need this check, but there might be a chance that
+    # the the timer gets started when jibo_finish_tts fires
+    # after Jibo's done responding to the child but the state
+    # hasn't changed yet.
+    if self.state in ["WAITING_FOR_END_PAGE_JIBO_QUESTION","WAITING_FOR_END_PAGE_CHILD_RESPONSE"]:
+      # Trigger!
+      self.child_end_page_question_timeout()
+    else:
+      print("Does this happen? Not in correct state when timer expires.")
+
 
   """
   Actions
@@ -595,7 +644,7 @@ class StorybookFSM(object):
   def start_child_audio_timer(self):
     print("action: start_child_audio_timer")
     self.child_audio_evaluate_timer = threading.Timer(
-      self.CHILD_AUDIO_SILENCE_TIMEOUT_SECONDS, self.timer_expire)
+      self.CHILD_AUDIO_SILENCE_TIMEOUT_SECONDS, self.child_audio_timer_expire_handler)
     self.child_audio_evaluate_timer.start()
 
   def stop_child_audio_timer(self):
@@ -613,6 +662,21 @@ class StorybookFSM(object):
     self.end_page_question_idx = 0
     self.end_page_questions[self.end_page_question_idx].ask_question(self.ros)
    
+  def start_child_end_page_question_timer(self):
+    print("action: start_child_end_page_question_timer")
+    self.child_end_page_question_timer = threading.Timer(
+      self.CHILD_END_PAGE_QUESTION_TIMEOUT_SECONDS,
+      self.child_end_page_question_timer_expire_handler)
+    self.child_end_page_question_timer.start()
+
+  def stop_child_end_page_question_timer(self):
+    print("action: stop_child_end_page_question_timer")
+    self.child_end_page_question_timer.cancel()
+
+  def resend_end_page_prompt(self):
+    print("action: resend_end_page_prompt")
+    self.end_page_questions[self.end_page_question_idx].ask_question(self.ros)
+
   def jibo_end_page_response_to_child(self):
     print("action: jibo_end_page_response_to_child")
     # Delay before, otherwise seems too rushed.

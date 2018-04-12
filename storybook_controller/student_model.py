@@ -28,8 +28,11 @@ Set up phoneme information.
 
 # print("Loaded arpabet phonemes dict!")
 
+
+"""
+Load stop words.
+"""
 STOP_WORDS = nltk.corpus.stopwords.words("english")
-print(STOP_WORDS)
 
 """
 Updates model with inputs from SpeechACE and the child's answers to questions.
@@ -208,7 +211,7 @@ class StudentModel(object):
         questions_to_return = [robot_feedback.EndPageQuestionSceneObjectTap(label, ids)]
     
     # Book keeping.
-    this.asked_questions += questions_to_return
+    self.asked_questions += questions_to_return
     return questions_to_return
 
   def get_lowest_pronunciation_score_word(self, force=False):

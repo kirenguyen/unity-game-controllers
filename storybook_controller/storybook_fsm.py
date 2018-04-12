@@ -46,7 +46,6 @@ class StorybookFSM(object):
     # State that changes once per story.
     self.current_storybook_mode = None
     self.current_story = None
-    self.current_story_needs_download = None
     self.num_story_pages = None
     # State that changes once per page.
     self.current_page_number = None
@@ -107,7 +106,8 @@ class StorybookFSM(object):
         "trigger":"storybook_selected", # After assets have downloaded 
         "source":"BEGIN_EVALUATE",
         "dest": "WAITING_FOR_STORY_LOAD",
-        "after":"jibo_stall_story_loading" # Keep this short.
+        # Optional spot to do stuff while page is loading, but ran
+        # into problems if Jibo talks due to timing issues with jibo_finish_tts.
       },
       {
         "trigger":"storybook_loaded", # At this point, we're on the title screen.
@@ -119,7 +119,7 @@ class StorybookFSM(object):
         "trigger":"jibo_finish_tts",
         "source": "WAITING_FOR_STORY_LOAD",
         "dest": "WAITING_FOR_NEXT_PAGE",
-        "after":"tablet_next_page" # Go to the first page.
+        "before":"tablet_next_page" # Go to the first page.
       },
       {
         "trigger":"page_info_received",
@@ -304,8 +304,9 @@ class StorybookFSM(object):
       time.sleep(1)
       print("Sending ack")
       self.ros.send_storybook_command(command, params)
-      # TODO: decide best place to send the ASR command.
+      # Start Jibo ASR (stop first to prevent multiple active listeners).
       self.ros.send_jibo_asr_command(JiboAsrCommand.STOP)
+      time.sleep(5)
       self.ros.send_jibo_asr_command(JiboAsrCommand.START)
 
     elif data.event_type == StorybookEvent.SPEECH_ACE_RESULT:
@@ -329,7 +330,8 @@ class StorybookFSM(object):
       elif self.in_explore_mode():
         self.student_model.update_with_explore_word_tapped(word)
         # Tell Jibo to say this word.
-        self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, word, .5, .45)
+        text_to_say = "That word is... " + word
+        self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, text_to_say, .5, .45)
     
     elif data.event_type == StorybookEvent.SCENE_OBJECT_TAPPED:
       message = json.loads(data.message)
@@ -342,8 +344,9 @@ class StorybookFSM(object):
           self.try_answer_question(EndPageQuestionType.SCENE_OBJECT_TAP, label)
       elif self.in_explore_mode():
         self.student_model.update_with_explore_scene_object_tapped(label)
+        text_to_say = "That is... " + word
         self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK,
-          word, .5, .45)
+          text_to_say, .5, .45)
 
     elif data.event_type == StorybookEvent.SENTENCE_SWIPED:
       message = json.loads(data.message)
@@ -359,8 +362,11 @@ class StorybookFSM(object):
     elif data.event_type == StorybookEvent.STORY_SELECTED:
       print("STORY_SELECTED message received")
       message = json.loads(data.message)
-      # If ture, then Jibo will say something to stall while story downloads.
-      self.current_story_needs_download = message["needs_download"]
+      # TODO: in the future can read message["needs_download"] to see if we
+      # potentially need to stall. But we already have a loading page on the
+      # tablet app and stalling could cause timing issues with jibo_finish_tts
+      # so just don't do any stalling for now.
+      
       # Trigger!
       self.storybook_selected()
 
@@ -538,20 +544,6 @@ class StorybookFSM(object):
   def tablet_set_evaluate_mode(self):
     print("action: tablet_set_evaluate_mode")
     self.ros.send_storybook_command(StorybookCommand.SET_STORYBOOK_MODE, {"mode": StorybookState.EVALUATE_MODE})
-
-  # TODO: remove this, unnecessary, but need to update the transitions as well. 
-  def jibo_stall_story_loading(self):
-    pass
-    # Commented out because the timing gets thrown off when there's a jibo_tts
-    # event from both story selected and story loaded.
-    #
-    # if self.current_story_needs_download:
-    #   print("action:jibo_stall_story_loading: 'Ooh I'm so excited, that's a good one!")
-    #   self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
-    #   self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK,
-    #     "Ooh I'm so excited!")
-    # else:
-    #   print("No need to stall!!")
 
   def jibo_start_story(self):
     print("action: jibo_start_story: ")

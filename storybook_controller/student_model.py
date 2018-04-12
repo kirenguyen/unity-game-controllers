@@ -28,6 +28,9 @@ Set up phoneme information.
 
 # print("Loaded arpabet phonemes dict!")
 
+STOP_WORDS = nltk.corpus.stopwords.words("english")
+print(STOP_WORDS)
+
 """
 Updates model with inputs from SpeechACE and the child's answers to questions.
 Can be queried for appropriate questions Jibo should ask the child.
@@ -37,6 +40,10 @@ class StudentModel(object):
     # Threshold above which we don't consider the word as a priority for improving,
     # meaning that it is likely not to be asked about by Jibo.
     self.GOOD_PRONOUNCE_THRESHOLD = 90.0 # Out of 100
+
+    # Higher decay increases how much having already asked a word
+    # affects the chance of asking it again.
+    self.REPEAT_DECAY_WEIGHT = 5.0 # Out of 100
 
     # Dictionary representing the vocabulary.
     # Choose dictionary instead of list for faster existence checks.
@@ -48,6 +55,9 @@ class StudentModel(object):
     self.scene_object_tap_scores = {} # Map label to array of ints similar to above.
     self.confused_word_pairs = [] # Array of tuples of expected word and child's (wrong) word.
     self.confused_label_pairs = [] # Array of tuples of expected label and child's label.
+
+    # Keep track of what we've asked.
+    self.asked_questions = []
 
     # Keep track of trend of overall scores per page.
     self.overall_quality_scores = []
@@ -182,19 +192,24 @@ class StudentModel(object):
     word = self.get_lowest_pronunciation_score_word()
     use_word = random.random()
     print("use word", use_word)
+    questions_to_return = None
     if word is not None and use_word < .5:
       indexes = self.get_word_indexes(word)
-      return [robot_feedback.EndPageQuestionWordTap(word, indexes)]
+      questions_to_return = [robot_feedback.EndPageQuestionWordTap(word, indexes)]
     else:
       label = self.get_scene_object_label_to_evaluate()
       if label is None:
         # Must ask for a word if no scene objects exist.
         word = self.get_lowest_pronunciation_score_word(True)
         indexes = self.get_word_indexes(word)
-        return [robot_feedback.EndPageQuestionWordTap(word, indexes)]
+        questions_to_return = [robot_feedback.EndPageQuestionWordTap(word, indexes)]
       else:
         ids = self.get_scene_object_ids(label)
-        return [robot_feedback.EndPageQuestionSceneObjectTap(label, ids)]
+        questions_to_return = [robot_feedback.EndPageQuestionSceneObjectTap(label, ids)]
+    
+    # Book keeping.
+    this.asked_questions += questions_to_return
+    return questions_to_return
 
   def get_lowest_pronunciation_score_word(self, force=False):
     """
@@ -214,20 +229,31 @@ class StudentModel(object):
     words = []
     for sentence in self.current_sentences:
       for w in sentence:
-        words.append(self.strip_punctuation(w.lower()))
+        formatted_w = self.strip_punctuation(w.lower())
+        if len(formatted_w) < 4 and formatted_w in STOP_WORDS:
+          # Skip short stop words.
+          pass
+        else:
+          words.append(formatted_w)
+
     word_to_return = None
-    lowest_score = 100
+    lowest_score = 100.0
     for word in words:
       if word in self.word_pronunciation_scores:
         print("scores: ", self.word_pronunciation_scores[word])
         avg_score = sum(self.word_pronunciation_scores[word]) * 1.0 / len(self.word_pronunciation_scores[word])
+        # Don't include words we've asked about recently.
+        # Based on heuristics. Make score higher (less likely to ask) the
+        # more we've already asked it.
+        weighted_score = avg_score + self.prev_times_asked_word(word) * self.REPEAT_DECAY_WEIGHT
         if avg_score < lowest_score:
           lowest_score = avg_score
           word_to_return = word
     print("Found word with lowest score:", word_to_return, lowest_score)
+    
     if word_to_return is None or lowest_score > self.GOOD_PRONOUNCE_THRESHOLD:
       if force:
-        print("No speechace results yet, choosing longest word")
+        print("No good words to choose from yet, choosing longest word")
         max_length = max(map(len, words))
         word_to_return = [w for w in words if len(w) == max_length][0]
         print("Longest word:", word_to_return)
@@ -319,6 +345,18 @@ class StudentModel(object):
     Plot the current distribution.
     """
     print(self.word_pronunciation_scores)
+
+  def prev_times_asked_word(self, word):
+    if word in self.word_tap_scores:
+      return len(self.word_tap_scores[word])
+    else:
+      return 0
+
+  def prev_times_asked_label(self, label):
+    if label in self.scene_object_tap_scores:
+      return len(self.scene_object_tap_scores[label])
+    else:
+      return 0
 
   def strip_punctuation(self, word):
     return "".join([c for c in word if c.isalnum()])

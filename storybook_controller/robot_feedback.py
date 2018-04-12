@@ -66,11 +66,14 @@ class EndPageQuestion(object):
     """
     Respond to the child depending on if they were correct or not.
     """
+    time.sleep(1.5)
     if not self.answered:
       raise Exception("Can't respond to child if no response")
     if self.correct:
+      print("respond_to_child_correct_impl")
       self.respond_to_child_correct_impl(ros_manager)
     else:
+      print("respond_to_child_correct_impl")
       self.respond_to_child_incorrect_impl(ros_manager)
 
   def respond_to_child_correct_impl(self, ros_manager):
@@ -163,12 +166,14 @@ class EndPageQuestionSceneObjectTap(EndPageQuestion):
     ros_manager.send_jibo_command(JiboStorybookBehaviors.HAPPY_DANCE)
     ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK,
       "That's right! This is " + self.expected_label)
+    time.sleep(2)
     params = {"ids": self.expected_ids}
     ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_SCENE_OBJECT, params)
 
   def respond_to_child_incorrect_impl(self, ros_manager):
     ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK,
       "Not quite. Actually, this is " + self.expected_label)
+    time.sleep(2)
     params = {"ids": self.expected_ids}
     ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_SCENE_OBJECT, params)
 

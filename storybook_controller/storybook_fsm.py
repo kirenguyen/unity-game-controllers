@@ -84,7 +84,12 @@ class StorybookFSM(object):
     ]
 
     not_reading_states = ["APP_START"]
-    explore_states = ["BEGIN_EXPLORE", ]
+    explore_states = [
+      "BEGIN_EXPLORE",
+      "EXPLORING_PAGE",
+      "END_EXPLORE"
+    ]
+
     evaluate_states = [
       "BEGIN_EVALUATE", # After switching to evaluate mode.
       "WAITING_FOR_STORY_LOAD", # After a story selected and is loading.
@@ -107,7 +112,7 @@ class StorybookFSM(object):
     self.evaluate_transitions = [
       {
         "trigger":"storybook_selected", # After assets have downloaded 
-        "source":"BEGIN_EVALUATE",
+        "source": ["BEGIN_EVALUATE", "BEGIN_EXPLORE"],
         "dest": "WAITING_FOR_STORY_LOAD",
         # Optional spot to do stuff while page is loading, but ran
         # into problems if Jibo talks due to timing issues with jibo_finish_tts.
@@ -117,12 +122,20 @@ class StorybookFSM(object):
         "source": "WAITING_FOR_STORY_LOAD",
         "dest": "WAITING_FOR_STORY_LOAD",
         "before": "jibo_start_story",
+        "conditions": ["in_evaluate_mode"]
       },
       {
         "trigger":"jibo_finish_tts",
         "source": "WAITING_FOR_STORY_LOAD",
         "dest": "WAITING_FOR_NEXT_PAGE",
-        "before":"tablet_next_page" # Go to the first page.
+        "before":"tablet_next_page", # Go to the first page.
+        "conditions": ["in_evaluate_mode"]
+      },
+      {
+        "trigger": "jibo_finish_tts",
+        "source": "WAITING_FOR_STORY_LOAD",
+        "dest": "EXPLORING_PAGE",
+        "conditions": ["in_explore_mode"]
       },
       {
         "trigger":"page_info_received",
@@ -132,6 +145,19 @@ class StorybookFSM(object):
         # storybook to show the first sentence, then the storybook handles showing
         # subsequent sentences on its own.
         "after": ["tablet_show_next_sentence", "start_child_audio_timer"],
+        "conditions": ["in_evaluate_mode"]
+      },
+      {
+        "trigger": "page_info_received",
+        "source": "EXPLORING_PAGE",
+        "dest": "EXPLORING_PAGE",
+        "unless": ["is_last_page"]
+      },
+      {
+        "trigger": "page_info_received",
+        "source": "EXPLORING_PAGE",
+        "dest": "END_STORY",
+        "after": ["jibo_end_story"]
       },
       {
         "trigger":"child_audio_timeout",
@@ -241,14 +267,32 @@ class StorybookFSM(object):
         "trigger": "jibo_finish_child_asr", 
         "source": "WAITING_FOR_END_STORY_CHILD_AUDIO",
         "dest": "END_EVALUATE",
-        "after": "jibo_respond_to_end_story"
+        "after": "jibo_respond_to_end_story",
+        "conditions": ["in_evaluate_mode"]
       },
       {
         "trigger": "jibo_finish_tts",
         "source": "END_EVALUATE",
         "dest": "END_EVALUATE",
-        "after": ["begin_evaluate_mode", "tablet_show_library_panel"]
+        "after": ["begin_evaluate_mode", "tablet_show_library_panel"],
+        "conditions": ["in_evaluate_mode"]
       },
+      # Copy of above two triggers for explore mode.
+      {
+        "trigger": "jibo_finish_child_asr", 
+        "source": "WAITING_FOR_END_STORY_CHILD_AUDIO",
+        "dest": "END_EXPLORE",
+        "after": "jibo_respond_to_end_story",
+        "conditions": ["in_explore_mode"]
+      },
+      {
+        "trigger": "jibo_finish_tts",
+        "source": "END_EXPLORE",
+        "dest": "END_EXPLORE",
+        "after": ["begin_explore_mode", "tablet_show_library_panel"],
+        "conditions": ["in_explore_mode"]
+      },
+      # Switching modes.
       {
         "trigger": "begin_evaluate_mode",
         "source": "*",
@@ -259,7 +303,8 @@ class StorybookFSM(object):
         "source": "*",
         "dest": "BEGIN_EXPLORE"
       },
-      # Catch all the triggers.
+      # Catch all the triggers that might be called without regard
+      # to the current state.
       {
         "trigger": "jibo_finish_tts",
         "source": "*",
@@ -346,15 +391,20 @@ class StorybookFSM(object):
     elif data.event_type == StorybookEvent.WORD_TAPPED:
       message = json.loads(data.message)
       word = message["word"].lower()
-      print("WORD_TAPPED message received, word is", word, "mode is ", self.current_storybook_mode,
+      phrase = message["phrase"].lower()
+      print("WORD_TAPPED message received, word is", word, "phrase is", phrase, 
         "state is", self.state)
       if self.in_evaluate_mode():
         if self.state == "WAITING_FOR_END_PAGE_CHILD_RESPONSE":
           self.try_answer_question(EndPageQuestionType.WORD_TAP, word)
       elif self.in_explore_mode():
         self.student_model.update_with_explore_word_tapped(word)
-        # Tell Jibo to say this word.
-        text_to_say = "That word is... " + word
+        # Tell Jibo to say this phrase.
+        text_to_say = None
+        if len(phrase) > 0:
+          text_to_say = "That says... " + phrase
+        else:
+          text_to_say = "That says... " + word
         self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, text_to_say, .5, .45)
     
     elif data.event_type == StorybookEvent.SCENE_OBJECT_TAPPED:
@@ -368,7 +418,7 @@ class StorybookFSM(object):
           self.try_answer_question(EndPageQuestionType.SCENE_OBJECT_TAP, label)
       elif self.in_explore_mode():
         self.student_model.update_with_explore_scene_object_tapped(label)
-        text_to_say = "That is... " + word
+        text_to_say = "That is... " + label
         self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK,
           text_to_say, .5, .45)
 
@@ -724,6 +774,11 @@ class StorybookFSM(object):
     available = self.current_page_number + 1 < self.num_story_pages
     print("condition: more_pages_available:", available)
     return available
+
+  def is_last_page(self):
+    last = self.current_page_number == self.num_story_pages
+    print("condition: is_last_page:", last)
+    return last
 
   def in_not_reading_mode(self):
     not_reading_mode = self.current_storybook_mode == StorybookState.NOT_READING

@@ -18,3 +18,4 @@ int8 STORY_SELECTED = 6 # Message is {needs_download: bool}
 int8 STORY_LOADED = 7 # Message is empty
 int8 CHANGE_MODE = 8 # Message is {mode: int}, modes defined in StorybookState
 int8 REPEAT_END_PAGE_QUESTION = 9 # Message is empty
+int8 END_STORY = 10 # Message is empty

@@ -57,6 +57,8 @@ class StorybookFSM(object):
     self.storybook_audio_playing = None
     self.storybook_audio_file = None
 
+    self.current_story_needs_download = None
+
     # Timer for when we're waiting for the child to read a sentence in
     # evaluate mode.
     self.child_audio_evaluate_timer = None
@@ -81,12 +83,14 @@ class StorybookFSM(object):
       StorybookEvent.STORY_LOADED,
       StorybookEvent.CHANGE_MODE,
       StorybookEvent.REPEAT_END_PAGE_QUESTION,
+      StorybookEvent.END_STORY, # Only received in explore mode.
     ]
 
     not_reading_states = ["APP_START"]
     explore_states = [
       "BEGIN_EXPLORE",
       "EXPLORING_PAGE",
+      # TODO: add states for asking questions, Jibo reading, etc.
       "END_EXPLORE"
     ]
 
@@ -112,10 +116,23 @@ class StorybookFSM(object):
     self.evaluate_transitions = [
       {
         "trigger":"storybook_selected", # After assets have downloaded 
-        "source": ["BEGIN_EVALUATE", "BEGIN_EXPLORE"],
+        "source": ["BEGIN_EVALUATE"],
         "dest": "WAITING_FOR_STORY_LOAD",
         # Optional spot to do stuff while page is loading, but ran
         # into problems if Jibo talks due to timing issues with jibo_finish_tts.
+      },
+      {
+        "trigger": "storybook_selected",
+        "source": ["BEGIN_EXPLORE"],
+        "dest": "WAITING_FOR_STORY_LOAD",
+        "after": "jibo_stall_before_story",
+        "conditions": ["in_explore_mode"]
+      },
+      {
+        "trigger": "jibo_finish_tts",
+        "source": "WAITING_FOR_STORY_LOAD",
+        "dest": "EXPLORING_PAGE",
+        "conditions": ["in_explore_mode"]
       },
       {
         "trigger":"storybook_loaded", # At this point, we're on the title screen.
@@ -132,12 +149,6 @@ class StorybookFSM(object):
         "conditions": ["in_evaluate_mode"]
       },
       {
-        "trigger": "jibo_finish_tts",
-        "source": "WAITING_FOR_STORY_LOAD",
-        "dest": "EXPLORING_PAGE",
-        "conditions": ["in_explore_mode"]
-      },
-      {
         "trigger":"page_info_received",
         "source":"WAITING_FOR_NEXT_PAGE",
         "dest": "WAITING_FOR_CHILD_AUDIO",
@@ -151,10 +162,9 @@ class StorybookFSM(object):
         "trigger": "page_info_received",
         "source": "EXPLORING_PAGE",
         "dest": "EXPLORING_PAGE",
-        "unless": ["is_last_page"]
       },
       {
-        "trigger": "page_info_received",
+        "trigger": "tablet_explore_end_story",
         "source": "EXPLORING_PAGE",
         "dest": "END_STORY",
         "after": ["jibo_end_story"]
@@ -289,7 +299,7 @@ class StorybookFSM(object):
         "trigger": "jibo_finish_tts",
         "source": "END_EXPLORE",
         "dest": "END_EXPLORE",
-        "after": ["begin_explore_mode", "tablet_show_library_panel"],
+        "after": ["begin_explore_mode"],
         "conditions": ["in_explore_mode"]
       },
       # Switching modes.
@@ -424,7 +434,7 @@ class StorybookFSM(object):
 
     elif data.event_type == StorybookEvent.SENTENCE_SWIPED:
       message = json.loads(data.message)
-      print("SENTENCE_WIPED message for ", message["index"], message["text"])
+      print("SENTENCE_SWIPED message for ", message["index"], message["text"])
 
     elif data.event_type == StorybookEvent.RECORD_AUDIO_COMPLETE:
       message = json.loads(data.message)
@@ -440,7 +450,8 @@ class StorybookFSM(object):
       # potentially need to stall. But we already have a loading page on the
       # tablet app and stalling could cause timing issues with jibo_finish_tts
       # so just don't do any stalling for now.
-      
+      self.current_story_needs_download = message["needs_download"]
+
       # Trigger!
       self.storybook_selected()
 
@@ -465,6 +476,11 @@ class StorybookFSM(object):
       print("REPEAT_END_PAGE_QUESTION message received")
       # Trigger
       self.child_request_repeat_end_page_question()
+
+    elif data.event_type == StorybookEvent.END_STORY:
+      print("END_STORY message received")
+      # Trigger
+      self.tablet_explore_end_story()
 
 
   """
@@ -594,6 +610,9 @@ class StorybookFSM(object):
   def child_request_repeat_end_page_question(self):
     print("trigger: child_request_repeat_end_page_question")
 
+  def tablet_explore_end_story(self):
+    print("trigger: tablet_explore_end_story")
+
   def child_end_page_got_answer(self):
     print("trigger: child_end_page_got_answer")
 
@@ -636,6 +655,13 @@ class StorybookFSM(object):
   """
   Actions
   """
+  def jibo_stall_before_story(self):
+    print("action: jibo_stall_before_story")
+    if self.current_story_needs_download:
+      self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
+      self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK,
+        "I have a feeling this is a good story! Let's go!")
+
   def tablet_show_library_panel(self):
     print("action: tablet_show_library_panel")
     self.ros.send_storybook_command(StorybookCommand.SHOW_LIBRARY_PANEL)
@@ -708,6 +734,9 @@ class StorybookFSM(object):
 
   def send_end_page_prompt(self):
     print("action: send_end_page_prompt")
+    # TODO: think about whether or not we should sleep here.
+    # I'm doing it because it gives more time for speechace results.
+    time.sleep(1.5)
     self.end_page_questions = self.student_model.get_end_page_questions()
     self.end_page_question_idx = 0
     self.end_page_questions[self.end_page_question_idx].ask_question(self.ros)
@@ -774,11 +803,6 @@ class StorybookFSM(object):
     available = self.current_page_number + 1 < self.num_story_pages
     print("condition: more_pages_available:", available)
     return available
-
-  def is_last_page(self):
-    last = self.current_page_number == self.num_story_pages
-    print("condition: is_last_page:", last)
-    return last
 
   def in_not_reading_mode(self):
     not_reading_mode = self.current_storybook_mode == StorybookState.NOT_READING

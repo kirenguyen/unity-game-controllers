@@ -137,8 +137,9 @@ class StorybookFSM(object):
       print("Sending ack")
       self.ros.send_storybook_command(command, params)
       # Start Jibo ASR (stop first to prevent multiple active listeners).
-      self.ros.send_jibo_asr_command(JiboAsrCommand.STOP)
-      self.ros.send_jibo_asr_command(JiboAsrCommand.START)
+      # Use actions.
+      self.stop_jibo_asr()
+      self.start_jibo_asr()
 
     elif data.event_type == StorybookEvent.SPEECH_ACE_RESULT:
       print("SPEECH_ACE_RESULT message received")
@@ -300,7 +301,7 @@ class StorybookFSM(object):
     self.num_story_pages = data.num_pages
     # Commented out because we just read it when the audio ends, since that's
     # the only time it changes.
-    # self.reported_evaluating_sentence_index = data.evaluating_sentence_index
+    self.reported_evaluating_sentence_index = data.evaluating_sentence_index
     self.storybook_audio_playing = data.audio_playing
     self.storybook_audio_file = data.audio_file
 
@@ -332,6 +333,17 @@ class StorybookFSM(object):
       self.jibo_asr_empty = True
     else:
       print("Got Jibo ASR transcription:", data.transcription)
+      self.jibo_got_new_asr()
+
+      # Check for "I don't know"
+      if data.slotAction == "idk":
+        self.asr_idk_received()
+      else:
+        # Handle the response received, depending on the state.
+        if self.state == "WAITING_FOR_END_PAGE_CHILD_RESPONSE":
+          self.try_answer_question(EndPageQuestionType.SPEECH_REQUESTED, data.transcription)
+
+      """ Commented out because we aren't continuously listening anymore.
       if self.jibo_asr_empty:
         # If this is start of a new set of transcriptions (meaning that
         # previous state was silence).
@@ -339,10 +351,7 @@ class StorybookFSM(object):
         self.jibo_got_new_asr()
       # Update state.
       self.jibo_asr_empty = False
-
-      # Handle the response received, depending on the state.
-      if self.state == "WAITING_FOR_END_PAGE_CHILD_RESPONSE":
-        self.try_answer_question(EndPageQuestionType.WORD_PRONOUNCE, data.transcription)
+      """
       
       # TODO: if we're in explore mode, this might be a question from the child,
       # and we'll need to respond to it accordingly.
@@ -352,13 +361,14 @@ class StorybookFSM(object):
   """
   Triggers
   """
+  def asr_idk_received(self):
+    print("trigger: asr_idk_received")
+
   def storybook_selected(self):
     print("trigger: storybook_selected")
-    print("state ", self.state)
 
   def storybook_loaded(self):
     print("trigger: storybook_loaded")
-    print("state ", self.state)
 
   def page_info_received(self):
     print("trigger: page_info_received")
@@ -529,14 +539,27 @@ class StorybookFSM(object):
   def jibo_reprompt_child_audio(self):
     print("action: jibo_reprompt_child_audio")
     self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
-    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Come on, give it a try. It's tough, but you can do it! And don't forget to press the button to move on!")
+    # TODO: if it's the second time or greater, tell them to say I don't know.
+    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Come on, give it a try. And don't forget to press the button to move on! But if you're really stuck, just say I don't know and I'll help you.")
+
+  def jibo_help_with_current_sentence(self):
+    """
+    When child expresses that they don't know how to read the current sentence.
+    """
+    print("action: jibo_help_with_current_sentence")
+    sentence = self.current_sentences[self.reported_evaluating_sentence_index]
+    # TODO: Use JiboStatements to vary the beginning of this text.
+    jibo_text = "No worries, let me help. This sentence says... " + sentence
+    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
 
   def send_end_page_prompt(self):
     print("action: send_end_page_prompt")
     # TODO: think about whether or not we should sleep here.
     # I'm doing it because it gives more time for speechace results.
+    # But Hae Won brought up that the latency makes it feel very unengaging.
+    # Maybe should try to have some filler text here to cover the delay.
     time.sleep(1.5)
-    self.end_page_questions = self.student_model.get_end_page_questions()
+    self.end_page_questions = self.student_model.get_end_page_questions(self.current_page_number)
     self.end_page_question_idx = 0
     self.end_page_questions[self.end_page_question_idx].ask_question(self.ros)
    
@@ -556,15 +579,18 @@ class StorybookFSM(object):
     self.end_page_questions[self.end_page_question_idx].ask_question(self.ros)
 
   def jibo_end_page_response_to_child(self):
+    """
+    For when child has attempted to answer the asked question.
+    """
     print("action: jibo_end_page_response_to_child")
-    # Delay before, otherwise seems too rushed.
-    time.sleep(1.5)
-    self.current_end_page_question().respond_to_child(self.ros)
-    print("done with end page response")
-    # Reset the current end page questions. TODO: maybe just want to increment the index in the future
-    # when we want to ask multiple questions.
-    self.end_page_questions = []
-    self.end_page_question_idx = None
+    self.jibo_end_page_respond_to_child_helper(False)
+
+  def jibo_end_page_response_to_child_idk(self):
+    """
+    For when the child expresses that they don't know the answer.
+    """
+    print("action: jibo_end_page_response_to_child_idk")
+    self.jibo_end_page_respond_to_child_helper(True)
 
   def delay_after_end_page_jibo_response(self):
     print("delay_after_end_page_jibo_response")
@@ -587,6 +613,16 @@ class StorybookFSM(object):
     self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
     self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Cool, yeah, that's an interesting point. That was fun really really fun!! I hope we can read again some time.")
     self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_DANCE)
+
+  # ASR Commands.
+  def start_jibo_asr(self):
+    print("action: start_jibo_asr")
+    rule = "TopRule = $* $IDK {%slotAction='idk'%} | ($CORRECT){%slotAction='correct'%} $*; IDK = ((dont know) | (not sure) | (unsure) | (need $* help)); CORRECT = (correct answer);"
+    self.ros.send_jibo_asr_command(JiboAsrCommand.START, rule)
+
+  def stop_jibo_asr(self):
+    print("action: stop_jibo_asr")
+    self.ros.send_jibo_asr_command(JiboAsrCommand.STOP)
 
   """
   Conditions
@@ -624,6 +660,10 @@ class StorybookFSM(object):
   """
 
   def responding_to_tablet_interactions(self):
+    """
+    Returns true if we should be responding to child interacting (tapping/swiping)
+    with the tablet.
+    """
     return self.state == "EXPLORING_PAGE"
 
   def current_end_page_question(self):
@@ -644,3 +684,14 @@ class StorybookFSM(object):
     # Trigger!
     print("About to trigger")
     self.child_end_page_got_answer()
+
+  def jibo_end_page_respond_to_child_helper(self, idk):
+    # Delay before, otherwise seems too rushed.
+    time.sleep(1.5)
+    self.current_end_page_question().respond_to_child(self.ros, idk)
+    print("done with end page response")
+
+    # Reset the current end page questions. TODO: maybe just want to increment the index in the future
+    # when we want to ask multiple questions.
+    self.end_page_questions = []
+    self.end_page_question_idx = None

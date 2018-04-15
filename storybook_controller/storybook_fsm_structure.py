@@ -20,6 +20,7 @@ class StorybookFSMStructure(object):
     "WAITING_FOR_STORY_LOAD", # After a story selected and is loading.
     "WAITING_FOR_NEXT_PAGE", # After story loaded, waiting for page_info.
     "WAITING_FOR_CHILD_AUDIO", # After a sentence has been shown.
+    "WAITING_FOR_JIBO_HELP_WITH_SENTENCE", # While Jibo is helping the child.
     "WAITING_FOR_END_PAGE_JIBO_QUESTION", # Wait for Jibo tts to finish.
     "WAITING_FOR_END_PAGE_CHILD_RESPONSE", # Could be speech or tablet event.
     "WAITING_FOR_END_PAGE_JIBO_RESPONSE", # Jibo gives corrections/comments.
@@ -218,28 +219,45 @@ class StorybookFSMStructure(object):
       "trigger":"jibo_finish_tts", # This trigger will be used a lot, but it will have different effects based on source state.
       "source":"WAITING_FOR_CHILD_AUDIO",
       "dest": "WAITING_FOR_CHILD_AUDIO",
-      "after": ["tablet_begin_record"], # After Jibo finishes reprompting.
-      # TODO: commented out start_child_audio_timer
+      "after": ["tablet_begin_record", "start_child_audio_timer",
+                "start_jibo_asr"], # After Jibo finishes prompting.
+    },
+    # When the child says they don't know when we're asking them to read a sentence.
+    {
+      "trigger": "asr_idk_received",
+      "source": "WAITING_FOR_CHILD_AUDIO",
+      "dest": "WAITING_FOR_JIBO_HELP_WITH_SENTENCE",
+      "before": ["stop_jibo_asr", "stop_child_audio_timer"],
+      "after": ["jibo_help_with_current_sentence"]
+    },
+    # Here, just go back to waiting for child_audio, then trigger child_read_audio_complete
+    # manually to go to the next sentence.
+    {
+      "trigger": "jibo_finish_tts",
+      "source": "WAITING_FOR_JIBO_HELP_WITH_SENTENCE",
+      "dest": "WAITING_FOR_CHILD_AUDIO",
+      "after": "child_read_audio_complete"
     },
     # Only start timer after there has been silence. Either child didn't press button
-    # or child didn't speak at all.
-    {
-      "trigger":"jibo_finish_child_asr",
-      "source":"WAITING_FOR_CHILD_AUDIO",
-      "dest":"WAITING_FOR_CHILD_AUDIO",
-      "after": ["start_child_audio_timer"]
-    },
+    # or child didn't speak at all. Commented out because we aren't constantly listening anymore.
+    # {
+    #   "trigger":"jibo_finish_child_asr",
+    #   "source":"WAITING_FOR_CHILD_AUDIO",
+    #   "dest":"WAITING_FOR_CHILD_AUDIO",
+    #   "after": ["start_child_audio_timer"]
+    # },
     {
       "trigger":"jibo_got_new_asr", # When it goes from silence to not silence.
       "source":"WAITING_FOR_CHILD_AUDIO",
       "dest":"WAITING_FOR_CHILD_AUDIO",
-      "after":["stop_child_audio_timer"]
+      "after":["stop_child_audio_timer"],
+      "conditions": ["in_evaluate_mode"]
     },
     {
       "trigger":"child_read_audio_complete",
       "source":"WAITING_FOR_CHILD_AUDIO",
       "dest": "WAITING_FOR_CHILD_AUDIO",
-      "before":"stop_child_audio_timer",
+      "before": ["stop_child_audio_timer", "stop_jibo_asr"],
       # "before":"", # TODO: allow Jibo to respond? "Good job!"
       # TODO commented out everything here, "after": ["start_child_audio_timer"], # Commented out tablet_show_next_sentence since tablet is responsible for that now.
       "conditions": ["more_sentences_available"]
@@ -248,7 +266,7 @@ class StorybookFSMStructure(object):
       "trigger":"child_read_audio_complete",
       "source":"WAITING_FOR_CHILD_AUDIO",
       "dest": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
-      "before":"stop_child_audio_timer",
+      "before": ["stop_child_audio_timer", "stop_jibo_asr"],
       "after": "send_end_page_prompt" # Could involve commands to Jibo and tablet.
     },
     # Either Jibo is asking a question for the first time or is repeating it,
@@ -257,7 +275,7 @@ class StorybookFSMStructure(object):
       "trigger":"jibo_finish_tts",
       "source": ["WAITING_FOR_END_PAGE_JIBO_QUESTION", "WAITING_FOR_END_PAGE_CHILD_RESPONSE"],
       "dest": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
-      "after": "start_child_end_page_question_timer"
+      "after": ["start_child_end_page_question_timer", "start_jibo_asr"]
     },
     {
       "trigger": "child_end_page_question_timeout",
@@ -269,14 +287,22 @@ class StorybookFSMStructure(object):
       "trigger": "child_request_repeat_end_page_question",
       "source": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
       "dest": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
-      "before": "stop_child_end_page_question_timer",
+      "before": ["stop_child_end_page_question_timer", "stop_jibo_asr"],
       "after": "resend_end_page_prompt"
+    },
+    # When the child says I don't know in response to being asked a question.
+    {
+      "trigger": "asr_idk_received",
+      "source": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
+      "dest": "WAITING_FOR_END_PAGE_JIBO_RESPONSE",
+      "before": ["stop_child_end_page_question_timer", "stop_jibo_asr"],
+      "after": "jibo_end_page_response_to_child_idk"
     },
     {
       "trigger":"child_end_page_got_answer",
       "source":"WAITING_FOR_END_PAGE_CHILD_RESPONSE",
       "dest":"WAITING_FOR_END_PAGE_JIBO_RESPONSE",
-      "before":["stop_child_end_page_question_timer",
+      "before":["stop_child_end_page_question_timer", "stop_jibo_asr"
                 "jibo_end_page_response_to_child"]
     },
     {

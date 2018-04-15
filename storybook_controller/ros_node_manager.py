@@ -74,7 +74,7 @@ class ROSNodeManager(object):
     self.publishers[JIBO_ACTION_TOPIC].publish(msg)
     # rospy.loginfo(msg)
 
-  def send_jibo_asr_command(self, command, heyjibo=False, continuous=True, rule=""):
+  def send_jibo_asr_command(self, command, rule="", heyjibo=False, continuous=True):
     """
     Sends a command to Jibo to tell it to start listening and to publish back
     ASR results.

@@ -70,6 +70,11 @@ class StudentModel(object):
     self.sentences_by_page_number = {}
     self.current_scene_objects = []
 
+    # TODO: remove when not hardcoding anymore.
+    # For hardcoding Henry's Happy Birthday questions.
+    self.henry_questions = []
+    self.setup_henry_questions()
+
   def update_with_duration(self, duration, text):
     """
     Update model given that the given text took <duration> seconds for
@@ -188,31 +193,36 @@ class StudentModel(object):
   def update_scene_objects(self, scene_objects):
     self.current_scene_objects = scene_objects
 
-  def get_end_page_questions(self, max_num_questions=1):
-    """
-    Returns an array of at most max_num_questions EndPageQuestion objects.
-    """
-    word = self.get_lowest_pronunciation_score_word()
-    use_word = random.random()
-    print("use word", use_word)
-    questions_to_return = None
-    if word is not None and use_word < .5:
-      indexes = self.get_word_indexes(word)
-      questions_to_return = [robot_feedback.EndPageQuestionWordTap(word, indexes)]
-    else:
-      label = self.get_scene_object_label_to_evaluate()
-      if label is None:
-        # Must ask for a word if no scene objects exist.
-        word = self.get_lowest_pronunciation_score_word(True)
-        indexes = self.get_word_indexes(word)
-        questions_to_return = [robot_feedback.EndPageQuestionWordTap(word, indexes)]
-      else:
-        ids = self.get_scene_object_ids(label)
-        questions_to_return = [robot_feedback.EndPageQuestionSceneObjectTap(label, ids)]
+  # Commented out to hard code questions for Henry's Happy Birthday.
+  # def get_end_page_questions(self, max_num_questions=1):
+  #   """
+  #   Returns an array of at most max_num_questions EndPageQuestion objects.
+  #   """
+  #   word = self.get_lowest_pronunciation_score_word()
+  #   use_word = random.random()
+  #   print("use word", use_word)
+  #   questions_to_return = None
+  #   if word is not None and use_word < .5:
+  #     indexes = self.get_word_indexes(word)
+  #     questions_to_return = [robot_feedback.EndPageQuestionWordTap(word, indexes)]
+  #   else:
+  #     label = self.get_scene_object_label_to_evaluate()
+  #     if label is None:
+  #       # Must ask for a word if no scene objects exist.
+  #       word = self.get_lowest_pronunciation_score_word(True)
+  #       indexes = self.get_word_indexes(word)
+  #       questions_to_return = [robot_feedback.EndPageQuestionWordTap(word, indexes)]
+  #     else:
+  #       ids = self.get_scene_object_ids(label)
+  #       questions_to_return = [robot_feedback.EndPageQuestionSceneObjectTap(label, ids)]
     
-    # Book keeping.
-    self.asked_questions += questions_to_return
-    return questions_to_return
+  #   # Book keeping.
+  #   self.asked_questions += questions_to_return
+  #   return questions_to_return
+
+
+  def get_end_page_questions(self, page_num):
+    return self.henry_questions[page_num]
 
   def get_lowest_pronunciation_score_word(self, force=False):
     """
@@ -363,3 +373,10 @@ class StudentModel(object):
 
   def strip_punctuation(self, word):
     return "".join([c for c in word if c.isalnum()])
+
+
+  def setup_henry_questions(self):
+    self.henry_questions[0] = [
+    ]
+
+    # TODO

@@ -19,3 +19,6 @@ int8 STORY_LOADED = 7 # Message is empty
 int8 CHANGE_MODE = 8 # Message is {mode: int}, modes defined in StorybookState
 int8 REPEAT_END_PAGE_QUESTION = 9 # Message is empty
 int8 END_STORY = 10 # Message is empty
+int8 RETURN_TO_LIBRARY_EARLY = 11 # Message is empty
+int8 CHILD_READ_STORY_START = 12 # Message is empty
+int8 JIBO_READ_STORY_REQUEST = 13 # Message is empty

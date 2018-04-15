@@ -72,7 +72,7 @@ class StudentModel(object):
 
     # TODO: remove when not hardcoding anymore.
     # For hardcoding Henry's Happy Birthday questions.
-    self.henry_questions = []
+    self.henry_questions = {}
     self.setup_henry_questions()
 
   def update_with_duration(self, duration, text):
@@ -376,7 +376,10 @@ class StudentModel(object):
 
 
   def setup_henry_questions(self):
-    self.henry_questions[0] = [
-    ]
+    # 29 pages in Henry story, page 1 is the first non-title page.
+    for i in range(29):
+      self.henry_questions[i] = [robot_feedback.EndPageQuestionChildSpeechRequested(
+        "What do you think of Henry?", "Henry is sad...", lambda ros: ros.send_storybook_command(1, {"indexes": [0]}))]
 
-    # TODO
+    self.henry_questions[2].append(robot_feedback.EndPageQuestionWordTap("donned", [6]))
+

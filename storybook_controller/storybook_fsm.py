@@ -136,10 +136,12 @@ class StorybookFSM(object):
       time.sleep(1)
       print("Sending ack")
       self.ros.send_storybook_command(command, params)
+
+      # Commented out because no longer listening all the time.
       # Start Jibo ASR (stop first to prevent multiple active listeners).
       # Use actions.
-      self.stop_jibo_asr()
-      self.start_jibo_asr()
+      # self.stop_jibo_asr()
+      # self.start_jibo_asr()
 
     elif data.event_type == StorybookEvent.SPEECH_ACE_RESULT:
       print("SPEECH_ACE_RESULT message received")
@@ -285,6 +287,10 @@ class StorybookFSM(object):
     self.current_scene_objects = data.scene_objects
     self.current_tinkertexts = data.tinkertexts
 
+    # Clear the end page questions, reset index to 0.
+    self.end_page_questions = []
+    self.end_page_question_idx = 0 
+
     # Tell student model what sentences are on the page now.
     self.student_model.update_sentences(data.page_number, data.sentences)
     self.student_model.update_scene_objects(data.scene_objects)
@@ -340,6 +346,8 @@ class StorybookFSM(object):
         self.asr_idk_received()
       else:
         # Handle the response received, depending on the state.
+        # TODO: might want to move this to where jibo_finish_child_asr is because =
+        # then we only respond when we're sure they're done talking...
         if self.state == "WAITING_FOR_END_PAGE_CHILD_RESPONSE":
           self.try_answer_question(EndPageQuestionType.SPEECH_REQUESTED, data.transcription)
 
@@ -349,9 +357,9 @@ class StorybookFSM(object):
         # previous state was silence).
         # Trigger!
         self.jibo_got_new_asr()
+      """
       # Update state.
       self.jibo_asr_empty = False
-      """
       
       # TODO: if we're in explore mode, this might be a question from the child,
       # and we'll need to respond to it accordingly.
@@ -414,7 +422,9 @@ class StorybookFSM(object):
   def begin_explore_mode(self):
     print("trigger: begin_explore_mode")
 
-  # Timer handlers.
+  """
+  Timer handlers.
+  """
   def child_audio_timer_expire_handler(self):
     print("audio timer expired!")
     # Trigger!
@@ -549,7 +559,12 @@ class StorybookFSM(object):
     print("action: jibo_help_with_current_sentence")
     sentence = self.current_sentences[self.reported_evaluating_sentence_index]
     # TODO: Use JiboStatements to vary the beginning of this text.
-    jibo_text = "No worries, let me help. This sentence says... " + sentence
+    post_response_prompt = None
+    if self.more_sentences_available():
+      post_response_prompt = "Ok, try the next sentence now..."
+    else:
+      post_response_prompt = "I hope that makes sense."
+    jibo_text = "No worries, let me help. This sentence says... " + sentence + ". " + post_response_prompt
     self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
 
   def send_end_page_prompt(self):
@@ -560,7 +575,6 @@ class StorybookFSM(object):
     # Maybe should try to have some filler text here to cover the delay.
     time.sleep(1.5)
     self.end_page_questions = self.student_model.get_end_page_questions(self.current_page_number)
-    self.end_page_question_idx = 0
     self.end_page_questions[self.end_page_question_idx].ask_question(self.ros)
    
   def start_child_end_page_question_timer(self):
@@ -596,7 +610,7 @@ class StorybookFSM(object):
     print("delay_after_end_page_jibo_response")
     # Called after Jibo has finished saying its response.
     # Without this, child doesn't have time to process the correct answer.
-    time.sleep(2)
+    time.sleep(1.5)
 
   def tablet_go_to_end_page(self):
     print("action: tablet_go_to_end_page")
@@ -637,6 +651,13 @@ class StorybookFSM(object):
   def more_pages_available(self):
     available = self.current_page_number + 1 < self.num_story_pages
     print("condition: more_pages_available:", available)
+    return available
+
+  def more_end_page_questions_available(self):
+    # At this point, the index has already been updated, so we just check if the
+    # current index is still in range.
+    available = self.end_page_question_idx < len(self.end_page_questions)
+    print("condition: more_end_page_questions_available:", available)
     return available
 
   def in_not_reading_mode(self):
@@ -689,9 +710,6 @@ class StorybookFSM(object):
     # Delay before, otherwise seems too rushed.
     time.sleep(1.5)
     self.current_end_page_question().respond_to_child(self.ros, idk)
-    print("done with end page response")
+    print("done with end page response, incrementing end_page_question_idx")
+    self.end_page_question_idx += 1
 
-    # Reset the current end page questions. TODO: maybe just want to increment the index in the future
-    # when we want to ask multiple questions.
-    self.end_page_questions = []
-    self.end_page_question_idx = None

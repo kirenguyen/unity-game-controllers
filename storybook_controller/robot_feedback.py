@@ -40,6 +40,9 @@ class EndPageQuestion(object):
     else:
       pre_question_prompt = JiboStatements.get_statement(
         JiboStatementType.PRE_END_PAGE_QUESTION)
+
+    # Make all words light up (instead of having past sentences be greyed out).
+    ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_ALL_SENTENCES)
     self.ask_question_impl(ros_manager, pre_question_prompt)
     self.asked = True
   
@@ -124,8 +127,6 @@ class EndPageQuestionWordTap(EndPageQuestion):
     self.expected_indexes = indexes
 
   def ask_question_impl(self, ros_manager, pre_question_prompt):
-    # Make all words light up (instead of having past sentences be greyed out).
-    ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_ALL_SENTENCES)
     # Will need to send jibo commands and storybook commands.
     jibo_text = pre_question_prompt + "Can you tap the word " + self.expected_word + "?"
     ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
@@ -175,8 +176,6 @@ class EndPageQuestionSceneObjectTap(EndPageQuestion):
     self.expected_ids = ids
 
   def ask_question_impl(self, ros_manager, pre_question_prompt):
-    # Make all words light up (instead of having past sentences be greyed out).
-    ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_ALL_SENTENCES)
     # Will need to send jibo commands and storybook commands.
     jibo_text = pre_question_prompt + "Can you tap on " + self.expected_label + " in the picture?"
     ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
@@ -223,13 +222,13 @@ class EndPageQuestionSceneObjectTap(EndPageQuestion):
 Pronounce a word.
 """
 class EndPageQuestionChildSpeechRequested(EndPageQuestion):
-  def __init__(self, question, response_test, extra_response_function):
+  def __init__(self, question, response_text, extra_response_function=None):
     """
     Parameter extra_response_function is added behavior on top of simply
     saying the response. The function should take as argument the ros manager.
     """
-    super(EndPageChildSpeechRequested, self).__init__(
-      EndPageQUestionType.SPEECH_REQUESTED)
+    super(EndPageQuestionChildSpeechRequested, self).__init__(
+      EndPageQuestionType.SPEECH_REQUESTED)
 
     self.open_ended_question = question
     self.response_text = response_text
@@ -246,9 +245,14 @@ class EndPageQuestionChildSpeechRequested(EndPageQuestion):
     return query in self.response_text
 
   def respond_to_child_impl(self, ros_manager, pre_response_prompt):
-    jibo_text = pre_response_prompt + self.response_text
+    # We won't know for sure if the child was right, so just start with
+    # something generic then state the correct response to make sure the
+    # point gets across.
+    generic_prompt = "Good thought."
+    jibo_text = generic_prompt + self.response_text
     ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
-    self.extra_response_function(ros_manager)
+    if self.extra_response_function is not None:
+      self.extra_response_function(ros_manager)
 
 
 class EndPageQuestionWordPronounce(EndPageQuestionChildSpeechRequested):

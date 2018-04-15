@@ -20,6 +20,7 @@ class StorybookFSMStructure(object):
     "WAITING_FOR_STORY_LOAD", # After a story selected and is loading.
     "WAITING_FOR_NEXT_PAGE", # After story loaded, waiting for page_info.
     "WAITING_FOR_CHILD_AUDIO", # After a sentence has been shown.
+    "WAITING_FOR_JIBO_REPROMPT_CHILD_AUDIO", # Waiting for Jibo to prompt child.
     "WAITING_FOR_JIBO_HELP_WITH_SENTENCE", # While Jibo is helping the child.
     "WAITING_FOR_END_PAGE_JIBO_QUESTION", # Wait for Jibo tts to finish.
     "WAITING_FOR_END_PAGE_CHILD_RESPONSE", # Could be speech or tablet event.
@@ -206,18 +207,18 @@ class StorybookFSMStructure(object):
       # This action has really become more like start page, because it tells the
       # storybook to show the first sentence, then the storybook handles showing
       # subsequent sentences on its own.
-      "after": ["tablet_show_next_sentence", "start_child_audio_timer"],
+      "after": ["tablet_show_next_sentence", "start_child_audio_timer", "start_jibo_asr"],
       "conditions": ["in_evaluate_mode"]
     },
     {
       "trigger":"child_audio_timeout",
       "source":"WAITING_FOR_CHILD_AUDIO",
-      "dest": "WAITING_FOR_CHILD_AUDIO",
+      "dest": "WAITING_FOR_JIBO_REPROMPT_CHILD_AUDIO",
       "before":["jibo_reprompt_child_audio", "tablet_stop_and_discard_record"],
     },
     {
       "trigger":"jibo_finish_tts", # This trigger will be used a lot, but it will have different effects based on source state.
-      "source":"WAITING_FOR_CHILD_AUDIO",
+      "source":"WAITING_FOR_JIBO_REPROMPT_CHILD_AUDIO",
       "dest": "WAITING_FOR_CHILD_AUDIO",
       "after": ["tablet_begin_record", "start_child_audio_timer",
                 "start_jibo_asr"], # After Jibo finishes prompting.
@@ -227,16 +228,22 @@ class StorybookFSMStructure(object):
       "trigger": "asr_idk_received",
       "source": "WAITING_FOR_CHILD_AUDIO",
       "dest": "WAITING_FOR_JIBO_HELP_WITH_SENTENCE",
-      "before": ["stop_jibo_asr", "stop_child_audio_timer"],
+      "before": ["stop_jibo_asr", "stop_child_audio_timer", "tablet_stop_and_discard_record"],
       "after": ["jibo_help_with_current_sentence"]
     },
-    # Here, just go back to waiting for child_audio, then trigger child_read_audio_complete
-    # manually to go to the next sentence.
+    # Here, either trigger the next sentence or go to the end page questions.
     {
       "trigger": "jibo_finish_tts",
       "source": "WAITING_FOR_JIBO_HELP_WITH_SENTENCE",
       "dest": "WAITING_FOR_CHILD_AUDIO",
-      "after": "child_read_audio_complete"
+      "after": ["tablet_show_next_sentence", "start_child_audio_timer", "start_jibo_asr"],
+      "conditions": ["more_sentences_available"]
+    },
+    {
+      "trigger": "jibo_finish_tts",
+      "source": "WAITING_FOR_JIBO_HELP_WITH_SENTENCE",
+      "dest": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
+      "after": "send_end_page_prompt"
     },
     # Only start timer after there has been silence. Either child didn't press button
     # or child didn't speak at all. Commented out because we aren't constantly listening anymore.
@@ -253,13 +260,12 @@ class StorybookFSMStructure(object):
       "after":["stop_child_audio_timer"],
       "conditions": ["in_evaluate_mode"]
     },
+    # This is only for when the done recording button is pressed, so don't touch the asr stuff.
     {
       "trigger":"child_read_audio_complete",
       "source":"WAITING_FOR_CHILD_AUDIO",
       "dest": "WAITING_FOR_CHILD_AUDIO",
-      "before": ["stop_child_audio_timer", "stop_jibo_asr"],
-      # "before":"", # TODO: allow Jibo to respond? "Good job!"
-      # TODO commented out everything here, "after": ["start_child_audio_timer"], # Commented out tablet_show_next_sentence since tablet is responsible for that now.
+      "before": ["stop_child_audio_timer"], # Commented out "stop_jibo_asr", "start_jibo_asr"], because timing is bad
       "conditions": ["more_sentences_available"]
     },
     {
@@ -273,20 +279,20 @@ class StorybookFSMStructure(object):
     # regardless, we need to start the timer when Jibo's done talking.
     {
       "trigger":"jibo_finish_tts",
-      "source": ["WAITING_FOR_END_PAGE_JIBO_QUESTION", "WAITING_FOR_END_PAGE_CHILD_RESPONSE"],
+      "source": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
       "dest": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
       "after": ["start_child_end_page_question_timer", "start_jibo_asr"]
     },
     {
       "trigger": "child_end_page_question_timeout",
       "source": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
-      "dest": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
+      "dest": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
       "after": "resend_end_page_prompt"
     },
     {
       "trigger": "child_request_repeat_end_page_question",
       "source": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
-      "dest": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
+      "dest": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
       "before": ["stop_child_end_page_question_timer", "stop_jibo_asr"],
       "after": "resend_end_page_prompt"
     },
@@ -302,7 +308,7 @@ class StorybookFSMStructure(object):
       "trigger":"child_end_page_got_answer",
       "source":"WAITING_FOR_END_PAGE_CHILD_RESPONSE",
       "dest":"WAITING_FOR_END_PAGE_JIBO_RESPONSE",
-      "before":["stop_child_end_page_question_timer", "stop_jibo_asr"
+      "before":["stop_child_end_page_question_timer", "stop_jibo_asr",
                 "jibo_end_page_response_to_child"]
     },
     {
@@ -311,6 +317,15 @@ class StorybookFSMStructure(object):
       "dest":"WAITING_FOR_END_PAGE_JIBO_RESPONSE",
       "after":["delay_after_end_page_jibo_response", "end_page_jibo_response_complete"]
     },
+    # If there are more questions, ask them.
+    {
+      "trigger": "end_page_jibo_response_complete",
+      "source": "WAITING_FOR_END_PAGE_JIBO_RESPONSE",
+      "dest": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
+      "after": "send_end_page_prompt",
+      "conditions": ["more_end_page_questions_available", "in_evaluate_mode"]
+    },
+    # If there aren't any more questions, check if there are more pages.
     {
       "trigger":"end_page_jibo_response_complete",
       "source":"WAITING_FOR_END_PAGE_JIBO_RESPONSE",
@@ -382,6 +397,11 @@ class StorybookFSMStructure(object):
     },
     {
       "trigger": "child_request_repeat_end_page_question",
+      "source": "*",
+      "dest": "="
+    },
+    {
+      "trigger": "asr_idk_received",
       "source": "*",
       "dest": "="
     }

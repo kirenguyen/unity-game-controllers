@@ -334,16 +334,30 @@ class StorybookFSMStructure(object):
       "conditions": ["more_pages_available", "in_evaluate_mode"]
     },
     {
-      "trigger": "jibo_finish_tts",
-      "source": "WAITING_FOR_NEXT_PAGE_JIBO_INTERLUDE",
-      "dest": "WAITING_FOR_NEXT_PAGE",
-      "after": "tablet_next_page" # Show the next page button, or navigate to the next page if automatic.
-    },
-    {
       "trigger":"end_page_jibo_response_complete",
       "source": "WAITING_FOR_END_PAGE_JIBO_RESPONSE",
       "dest": "END_STORY",
       "after": ["tablet_go_to_end_page", "jibo_end_story"]
+    },
+    # If there are no questions, go to the next page.
+    {
+      "trigger": "no_questions_go_to_next_page",
+      "source": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
+      "dest": "WAITING_FOR_NEXT_PAGE_JIBO_INTERLUDE",
+      "after": "jibo_next_page",
+      "conditions": ["more_pages_available", "in_evaluate_mode"]
+    },
+    {
+      "trigger": "no_questions_go_to_next_page",
+      "source": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
+      "dest": "END_STORY",
+      "after": ["tablet_go_to_end_page", "jibo_end_story"]
+    },
+    {
+      "trigger": "jibo_finish_tts",
+      "source": "WAITING_FOR_NEXT_PAGE_JIBO_INTERLUDE",
+      "dest": "WAITING_FOR_NEXT_PAGE",
+      "after": "tablet_next_page" # Show the next page button, or navigate to the next page if automatic.
     },
     {
       "trigger": "jibo_finish_tts",

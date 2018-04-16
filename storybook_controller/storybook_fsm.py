@@ -64,13 +64,13 @@ class StorybookFSM(object):
     # Timer for when we're waiting for the child to read a sentence in
     # evaluate mode.
     self.child_audio_evaluate_timer = None
-    self.CHILD_AUDIO_SILENCE_TIMEOUT_SECONDS = 8 # Amount of time after detecting silence before reprompting a read.
+    self.CHILD_AUDIO_SILENCE_TIMEOUT_SECONDS = 12 # Amount of time after detecting silence before reprompting a read.
 
     self.child_end_page_question_timer = None
-    self.CHILD_END_PAGE_QUESTION_TIMEOUT_SECONDS = 8
+    self.CHILD_END_PAGE_QUESTION_TIMEOUT_SECONDS = 12
 
     self.child_explore_page_timer = None
-    self.CHILD_EXPLORE_PAGE_TIMEOUT_SECONDS = 6
+    self.CHILD_EXPLORE_PAGE_TIMEOUT_SECONDS = 8
 
     # For when Jibo prompts the child at the end of a page.
     self.end_page_questions = []
@@ -408,6 +408,9 @@ class StorybookFSM(object):
   def end_page_jibo_response_complete(self):
     print("trigger: end_page_jibo_response_complete")
 
+  def no_questions_go_to_next_page(self):
+    print("trigger: no_questions_go_to_next_page")
+
   def jibo_got_new_asr(self):
     # When asr goes from silence to not silence.
     print("trigger: jibo_got_new_asr")
@@ -575,7 +578,11 @@ class StorybookFSM(object):
     # Maybe should try to have some filler text here to cover the delay.
     time.sleep(1.5)
     self.end_page_questions = self.student_model.get_end_page_questions(self.current_page_number)
-    self.end_page_questions[self.end_page_question_idx].ask_question(self.ros)
+    if len(self.end_page_questions) == 0:
+      # Trigger!
+      self.no_questions_go_to_next_page()
+    else:
+      self.end_page_questions[self.end_page_question_idx].ask_question(self.ros)
    
   def start_child_end_page_question_timer(self):
     print("action: start_child_end_page_question_timer")
@@ -631,8 +638,9 @@ class StorybookFSM(object):
   # ASR Commands.
   def start_jibo_asr(self):
     print("action: start_jibo_asr")
-    rule = "TopRule = $* $IDK {%slotAction='idk'%} | ($CORRECT){%slotAction='correct'%} $*; IDK = ((dont know) | (not sure) | (unsure) | (need $* help)); CORRECT = (correct answer);"
-    self.ros.send_jibo_asr_command(JiboAsrCommand.START, rule)
+    # Commented out because can't use apostrophes in the string representation
+    # rule = "TopRule = $* $IDK {%slotAction='idk'%} | ($CORRECT){%slotAction='correct'%} $*; IDK = ((dont know) | (not sure) | (unsure) | (need $* help)); CORRECT = (correct answer);"
+    self.ros.send_jibo_asr_command(JiboAsrCommand.START)
 
   def stop_jibo_asr(self):
     print("action: stop_jibo_asr")

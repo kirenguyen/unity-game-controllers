@@ -105,18 +105,6 @@ class EndPageQuestion(object):
     """
     raise NotImplementedError
 
-  # def respond_to_child_correct_impl(self, ros_manager):
-  #   """
-  #   Should be implemented in subclass.
-  #   """
-  #   raise NotImplementedError
-
-  # def respond_to_child_incorrect_impl(self, ros_manager):
-  #   """
-  #   Should be implemented in subclass.
-  #   """
-  #   raise NotImplementedError
-
 """
 Tap on a word.
 """
@@ -152,32 +140,23 @@ class EndPageQuestionWordTap(EndPageQuestion):
     params = {"indexes": self.expected_indexes}
     ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_WORD, params)
 
-  # def respond_to_child_correct_impl(self, ros_manager):
-  #   ros_manager.send_jibo_command(JiboStorybookBehaviors.HAPPY_DANCE)
-  #   ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, "That's right! This is the word " + self.expected_word)
-  #   time.sleep(2)
-  #   params = {"indexes": self.expected_indexes}
-  #   ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_WORD, params)
-
-  # def respond_to_child_incorrect_impl(self, ros_manager, idk=False):
-  #   ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Nope, good try, but this is the word " + self.expected_word)
-  #   time.sleep(2)
-  #   params = {"indexes": self.expected_indexes}
-  #   ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_WORD, params)
-
 """
 Tap on an object in the image.
 """
 class EndPageQuestionSceneObjectTap(EndPageQuestion):
-  def __init__(self, label, ids):
+  def __init__(self, label, ids, question_text=None, response_text=None):
     super(EndPageQuestionSceneObjectTap, self).__init__(
       EndPageQuestionType.SCENE_OBJECT_TAP)
     self.expected_label = strip_punctuation(label.lower())
     self.expected_ids = ids
+    self.question_text = question_text if question_text is not None \
+      else "Can you tap on " + self.expected_label + " in the picture?"
+    self.response_text = response_text if response_text is not None \
+      else ". This is " + self.expected_label
 
   def ask_question_impl(self, ros_manager, pre_question_prompt):
     # Will need to send jibo commands and storybook commands.
-    jibo_text = pre_question_prompt + "Can you tap on " + self.expected_label + " in the picture?"
+    jibo_text = pre_question_prompt + self.question_text
     ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
     ros_manager.send_jibo_command(JiboStorybookBehaviors.QUESTION_ANIM)
 
@@ -197,26 +176,12 @@ class EndPageQuestionSceneObjectTap(EndPageQuestion):
     return correct
 
   def respond_to_child_impl(self, ros_manager, pre_response_prompt):
-    jibo_text = pre_response_prompt + ". This is " + self.expected_label
+    jibo_text = pre_response_prompt + self.response_text
     ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
-    time.sleep(2)
+    time.sleep(1)
     params = {"ids": self.expected_ids}
+    print("sending scene object")
     ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_SCENE_OBJECT, params)
-
-  # def respond_to_child_correct_impl(self, ros_manager):
-  #   ros_manager.send_jibo_command(JiboStorybookBehaviors.HAPPY_DANCE)
-  #   ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK,
-  #     "That's right! This is " + self.expected_label)
-  #   time.sleep(2)
-  #   params = {"ids": self.expected_ids}
-  #   ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_SCENE_OBJECT, params)
-
-  # def respond_to_child_incorrect_impl(self, ros_manager, idk=False):
-  #   ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK,
-  #     "Not quite. Actually, this is " + self.expected_label)
-  #   time.sleep(2)
-  #   params = {"ids": self.expected_ids}
-  #   ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_SCENE_OBJECT, params)
 
 """
 Pronounce a word.
@@ -277,13 +242,3 @@ class EndPageQuestionWordPronounce(EndPageQuestionChildSpeechRequested):
     ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
     params = {"indexes": [self.expected_index]}
     ros_manager.send_storybook_command(Storybook.HIGHLIGHT_WORD, params)
-
-  # def respond_to_child_correct_impl(self, ros_manager, pre_response_prompt):
-  #   params = {"indexes": [self.expected_index]}
-  #   ros_manager.send_storybook_command(Storybook.HIGHLIGHT_WORD, params)
-
-  # def respond_to_child_incorrect_impl(self, ros_manager, pre_response_prompt):
-  #   # We can't 100% trust ASR responses, so don't outright say if
-  #   # the child was correct or not, just give some acknowledgment
-  #   # and provide the correct answer.
-  #   self.respond_to_child_correct_impl(ros_manager)

@@ -19,10 +19,9 @@ class JiboStatements(object):
   default_statement = "Hmm, cool!"
 
   pre_end_page_question_prompts = [
-    "Awesome! I have a question for you.",
+    "Awesome! I have a question.",
     "Great! Let me ask you a question.",
-    "Ok! Question time!",
-    "Nice, how about I ask you a question?"
+    "Nice, how about I ask you something?"
   ]
 
   pre_end_page_question_reprompts = [

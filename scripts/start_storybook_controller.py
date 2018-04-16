@@ -61,6 +61,11 @@ def main(argv):
 
   signal.signal(signal.SIGINT, signal_handler)
 
+  # TODO: remove after testing.
+  # Start Jibo ASR.
+  time.sleep(2)
+  fsm.stop_jibo_asr()
+
   # Spin and periodically check the state of the student model.
   # Don't plot too often, maybe like once every few seconds.
   while True:

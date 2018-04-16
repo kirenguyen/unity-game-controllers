@@ -63,8 +63,8 @@ def main(argv):
 
   # TODO: remove after testing.
   # Start Jibo ASR.
-  time.sleep(2)
-  fsm.stop_jibo_asr()
+  # time.sleep(2)
+  # fsm.start_jibo_asr()
 
   # Spin and periodically check the state of the student model.
   # Don't plot too often, maybe like once every few seconds.

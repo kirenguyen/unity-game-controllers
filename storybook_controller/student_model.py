@@ -8,8 +8,11 @@ beliefs are correlated but updated under different criteria.
 
 import random
 import sys
-import storybook_controller.robot_feedback as robot_feedback
 import nltk
+
+from unity_game_msgs.msg import StorybookCommand
+import storybook_controller.robot_feedback as robot_feedback
+
 
 """
 Set up phoneme information.
@@ -183,15 +186,27 @@ class StudentModel(object):
     """
     return True
 
-  def update_sentences(self, page_num, sentences):
+  def update_current_page(self, page_num, sentences, scene_objects):
     self.sentences_by_page_number[page_num] = []
     for sentence in sentences:
       self.sentences_by_page_number[page_num].append(sentence.split())
     self.current_sentences = self.sentences_by_page_number[page_num]
-    # print("Sentences by page number: " + str(self.sentences_by_page_number))
-
-  def update_scene_objects(self, scene_objects):
     self.current_scene_objects = scene_objects
+
+    # Use this to hardcode questions for the robot.
+    if page_num == 3:
+      self.henry_questions[page_num].append(robot_feedback.EndPageQuestionSceneObjectTap("spatula", self.get_scene_object_ids("spatula")))
+    elif page_num == 6:
+      self.henry_questions[page_num].append(robot_feedback.EndPageQuestionWordTap("bunting", self.get_word_indexes("bunting")))
+    elif page_num == 20:
+      self.henry_questions[page_num].append(robot_feedback.EndPageQuestionSceneObjectTap("bunting", self.get_scene_object_ids("bunting"), None, "This is a bunting. It's what's above the dining table!"))
+    elif page_num == 22:
+      self.henry_questions[page_num].append(robot_feedback.EndPageQuestionWordTap("helium", self.get_word_indexes("helium")))
+    elif page_num == 25:
+      self.henry_questions[page_num].append(robot_feedback.EndPageQuestionSceneObjectTap("zig-zag", self.get_scene_object_ids("zig-zag"), "Can you tap on the zig-zag lines in the picture? I think they're on the crocodile!"))
+    elif page_num == 26:
+      self.henry_questions[page_num].append(robot_feedback.EndPageQuestionWordtap("siren", self.get_word_indexes("siren")))
+    # print("Sentences by page number: " + str(self.sentences_by_page_number))
 
   # Commented out to hard code questions for Henry's Happy Birthday.
   # def get_end_page_questions(self, max_num_questions=1):
@@ -222,6 +237,8 @@ class StudentModel(object):
 
 
   def get_end_page_questions(self, page_num):
+    # Add in some specific questions.
+    
     return self.henry_questions[page_num]
 
   def get_lowest_pronunciation_score_word(self, force=False):
@@ -376,44 +393,36 @@ class StudentModel(object):
 
 
   def setup_henry_questions(self):
-    # 29 pages in Henry story, page 1 is the first non-title page.
-    for i in range(29):
-      self.henry_questions[i] = [robot_feedback.EndPageQuestionChildSpeechRequested(
-        "What do you think of Henry?", "Henry is sad...", lambda ros: ros.send_storybook_command(1, {"indexes": [0]}))]
-
-
+    # There are 29 pages in Henry story, page 1 is the first non-title page.
     # Hard code some questions.
     self.henry_questions[1] = []
-    self.henry_questions[2] = [robot_feedback.EndPageQuestionChildSpeechRequested("Can you explain the word 'donned' to me?", "Good thought. Donned means to put something on. Henry donned his slippers.")]
-    self.henry_questions[3] = [robot_feedback.EndPageQuestionChildSpeechRequested("What is a spatula?", "Hmm. A spatula is used in cooking. Henry's mom can use it to schoop, mix, or spread things while making the cake!"),
-                                robot_feedback.EndPageQuestionSceneObjectTap("spatula", self.get_scene_object_ids("spatula"))]
+    self.henry_questions[2] = [robot_feedback.EndPageQuestionChildSpeechRequested("Can you explain the word donned to me? The book says Henry donned his slippers.", "Good thought. Donned means to put something on. When its cold, I don my favorite hat!")]
+    self.henry_questions[3] = [robot_feedback.EndPageQuestionChildSpeechRequested("What is a spatula?", "I believe a spatula is used in cooking. Henry's mom can use it to scoop, mix, or spread things while making the cake!")]
     self.henry_questions[4] = [robot_feedback.EndPageQuestionChildSpeechRequested("What kind of cake did Henry want?", "I think Henry wants chocolate cake! But his mom says it should be vanilla. Vanilla is also good I guess.")]
     self.henry_questions[5] = []
-    self.henry_questions[6] = [robot_feedback.EndPageQuestionChildSpeechRequested("Do you know what bunting means?", "Good idea. Bunting is what's above the dining table in the picture. It's a decoration like a flag. For my birthday, I had a bunting that said 'Happy Birthday'!"),
-                                robot_feedback.EndPageQuestionWordTap("bunting", self.get_word_indexes("bunting"))]
+    self.henry_questions[6] = [robot_feedback.EndPageQuestionChildSpeechRequested("Do you know what bunting means?", "Ok. Bunting is what's above the dining table in the picture. It's a decoration like a flag. For my birthday, I had a bunting that said 'Happy Birthday'!")]
     self.henry_questions[7] = [robot_feedback.EndPageQuestionChildSpeechRequested("How do you think Henry feels right now?", "Yeah. Personally, I think Henry is nervous that he won't get any candy.")]
-    self.henry_questions[8] = [robot_feedback.EndPageQuestionChildSpeechRequested("What kind of pattern does Henry's favorite T-shirt have?", "Uh huh. Henry's favorite shirt has a zig zag pattern. Zig zag is a line that goes left, right left, right, just like a lighting bolt".),
+    self.henry_questions[8] = [robot_feedback.EndPageQuestionChildSpeechRequested("What kind of pattern does Henry's favorite T-shirt have?", "Henry's favorite shirt has a zig zag pattern. Zig zag is a line that goes left, right left, right, just like a lighting bolt"),
                                 robot_feedback.EndPageQuestionChildSpeechRequested("Can you tell me what unruly means?", "I think unruly is when something is a little wild or out of control. I have a friend whose hair is very unruly in the morning.")]
     self.henry_questions[9] = []
-    self.henry_questions[10] = [robot_feedback.EndPageQuestionChildSpeechRequested("What did Henry don?", "He donned a white shirt. He doesn't like it, but I think it looks good!")]
+    self.henry_questions[10] = [robot_feedback.EndPageQuestionChildSpeechRequested("What did Henry don?", "He donned a white shirt and a bow tie. Remember that don means to put on!")]
     self.henry_questions[11] = []
     self.henry_questions[12] = []
     self.henry_questions[13] = [robot_feedback.EndPageQuestionChildSpeechRequested("Do you think Henry liked getting a birthday kiss from Aunt Sue?", "Good thought. I'm not sure if Henry liked the big sticky red mark.")]
     self.henry_questions[14] = []
     self.henry_questions[15] = [robot_feedback.EndPageQuestionChildSpeechRequested("What do you think is in the big yellow box?", "I don't know what's in the box, but I'm excited to find out!")]
     self.henry_questions[16] = [robot_feedback.EndPageQuestionChildSpeechRequested("I love games, what's your favorite party game?", "Cool! My favorite party game is musical chairs.")]
-    self.henry_questions[17] = [robot_feedback.EndPageQuestionChildSpeechRequested("What does Henry look like with the tail on his back?", "Yup, his friends said he looks like a donkey. A donkey is an animal like the one in the picture.")]
+    self.henry_questions[17] = [robot_feedback.EndPageQuestionChildSpeechRequested("What does Henry look like with the tail on his back?", "Yup, his friends said he looks like a donkey. A donkey is an animal like the one in the picture. It's kind of like a horse. Some people use them to help pull carriages.")]
     self.henry_questions[18] = []
     self.henry_questions[19] = [robot_feedback.EndPageQuestionChildSpeechRequested("What does miserable mean?", "Good thought. Miserable means very unhappy and sad. Henry feels miserable because his birthday isn't going the way he wanted."),
-                                robot_feedback.EndPageQuestionChildSpeechRequested("What made the room unruly?", "I think the room was unruly because everyone was fighting for a chair, and everything got wild and out of order.")]
-    self.henry_questions[20] = [robot_feedback.EndPageQuestionSceneObjectTap("bunting", self.get_word_indexes("bunting"))]
-    self.henry_questions[21] = [robot_feedback.EndPageQuestionChildSpeechRequested("Why is Henry miserable about his birthday?", "Uh huh. I think Henry is having a bad birthday, so he's sad and miserable.")]  
-    self.henry_questions[22] = [robot_feedback.EndPageQuestionChildSpeechRequested("Do you know what helium is? Can you explain it to me?", "Helium is the gas that goes in balloons. It's what makes them stay floating instead of falling down.")]
-    self.henry_questions[23] = [robot_feedback.EndPageQuestionChildSpeechRequested("Mama used a spatula to cut the cake. Do you remember what else a spatula is used for?", "Yeah, a spatula is used for a variety of cooking tasks like scooping, mixing and spreading.")]
+                                robot_feedback.EndPageQuestionChildSpeechRequested("The book says the room became very unruly. What made the room unruly?", "I think the room was unruly because everyone was fighting for a chair, and everything got a little wild and out of order.")]
+    self.henry_questions[20] = []
+    self.henry_questions[21] = [robot_feedback.EndPageQuestionChildSpeechRequested("Why is Henry miserable about his birthday?", "Uh huh, yup. I think Henry is having a bad birthday, so he's sad and miserable.")]  
+    self.henry_questions[22] = [robot_feedback.EndPageQuestionChildSpeechRequested("Do you know what helium is? Can you explain it to me?", "I think helium is the gas that goes in balloons. It's what makes them stay floating instead of falling down. The helium balloons Henry's dad got look pretty!")]
+    self.henry_questions[23] = [robot_feedback.EndPageQuestionChildSpeechRequested("Mama used a spatula to cut the cake. Do you remember what else a spatula is used for?", "Yeah, a spatula is used for many cooking tasks like mixing and spreading.")]
     self.henry_questions[24] = []
-    self.henry_questions[25] = [robot_feedback.EndPageQuestionChildSpeechRequested("How that's a cool gift. Do you know what a raft is used for?", "A raft is something that you can float on in the water. I like floating on rafts at the swimming pool. Henry's new raft is shaped like a crocodile, so awesome."),
-                                robot_feedback.EndPageQuestionSceneObjectTap("zig-zag", self.get_scene_object_ids("zig-zag"), "Can you tap on the zig-zag lines in the picture? I think they're on the crocodile!")]
-    self.henry_questions[26] = [robot_feedback.EndPageQuestionChildSpeechRequested("What is a siren?", "Good idea. A siren is something on a police car or fire truck that makes a loud ringing noise to make people get out of the way.")]
+    self.henry_questions[25] = [robot_feedback.EndPageQuestionChildSpeechRequested("Wow that's a cool gift. Do you know what a raft is used for?", "A raft is something that you can float on in the water. I like floating on rafts at the swimming pool. Henry's new raft is shaped like a crocodile, so awesome.")]
+    self.henry_questions[26] = [robot_feedback.EndPageQuestionChildSpeechRequested("What is a siren?", "I think a siren is something on a police car or fire truck that makes a loud ringing noise to make people get out of the way. Sometimes the siren noises wake me up at night.")]
     self.henry_questions[27] = []
     self.henry_questions[28] = []
 

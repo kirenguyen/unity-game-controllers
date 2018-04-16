@@ -178,7 +178,7 @@ class EndPageQuestionSceneObjectTap(EndPageQuestion):
   def respond_to_child_impl(self, ros_manager, pre_response_prompt):
     jibo_text = pre_response_prompt + self.response_text
     ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
-    time.sleep(1)
+    time.sleep(2)
     params = {"ids": self.expected_ids}
     print("sending scene object")
     ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_SCENE_OBJECT, params)
@@ -215,6 +215,8 @@ class EndPageQuestionChildSpeechRequested(EndPageQuestion):
     # point gets across.
     generic_prompt = "Good thought."
     jibo_text = generic_prompt + self.response_text
+    # TODO: just for hardcoding...
+    jibo_text = self.response_text
     ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
     if self.extra_response_function is not None:
       self.extra_response_function(ros_manager)

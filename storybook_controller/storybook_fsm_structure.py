@@ -27,7 +27,7 @@ class StorybookFSMStructure(object):
     "WAITING_FOR_END_PAGE_JIBO_RESPONSE", # Jibo gives corrections/comments.
     "WAITING_FOR_NEXT_PAGE_JIBO_INTERLUDE", # After end page child response.
     "END_STORY", # Moved to the "The End" page, tell Jibo to ask a question,
-    "WAITING_FOR_CHILD_GENERIC_RESPONSE", # Wait for child to respond
+    "WAITING_FOR_END_STORY_CHILD_RESPONSE", # Wait for child to respond
                                           # (This can be anywhere not just end of story).
     "END_EVALUATE" # End evaluate mode, immediately go back to BEGIN_EVALUATE.
   ]
@@ -61,7 +61,7 @@ class StorybookFSMStructure(object):
       "trigger": "page_info_received",
       "source": "EXPLORING_PAGE",
       "dest": "EXPLORING_PAGE",
-      "after": ["start_child_explore_page_timer"]
+      # Commented out because explore mode does nothing right now. # "after": ["start_child_explore_page_timer"]
     },
     # Child will either read or ask Jibo to read.
     # If Jibo requested to read, then start reading.
@@ -152,13 +152,13 @@ class StorybookFSMStructure(object):
       "trigger": "tablet_explore_end_story",
       "source": "EXPLORING_PAGE",
       "dest": "END_STORY",
-      "after": ["jibo_end_story"]
+      "after": ["jibo_end_story", "start_jibo_asr"]
     },
     # The logic from END_STORY to WAITING_FOR_CHILD_GENERIC_RESPONSE is handled in evaluate
     # mode transitions. Basically wait for child to say something, generically respond.
     {
-      "trigger": "jibo_finish_child_asr",
-      "source": "WAITING_FOR_CHILD_GENERIC_RESPONSE",
+      "trigger": "jibo_got_new_asr",
+      "source": "WAITING_FOR_END_STORY_CHILD_RESPONSE",
       "dest": "END_EXPLORE",
       "after": "jibo_respond_to_end_story",
       "conditions": ["in_explore_mode"]
@@ -337,7 +337,7 @@ class StorybookFSMStructure(object):
       "trigger":"end_page_jibo_response_complete",
       "source": "WAITING_FOR_END_PAGE_JIBO_RESPONSE",
       "dest": "END_STORY",
-      "after": ["tablet_go_to_end_page", "jibo_end_story"]
+      "after": ["tablet_go_to_end_page", "jibo_end_story", "start_jibo_asr"]
     },
     # If there are no questions, go to the next page.
     {
@@ -351,7 +351,7 @@ class StorybookFSMStructure(object):
       "trigger": "no_questions_go_to_next_page",
       "source": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
       "dest": "END_STORY",
-      "after": ["tablet_go_to_end_page", "jibo_end_story"]
+      "after": ["tablet_go_to_end_page", "jibo_end_story", "start_jibo_asr"]
     },
     {
       "trigger": "jibo_finish_tts",
@@ -362,14 +362,14 @@ class StorybookFSMStructure(object):
     {
       "trigger": "jibo_finish_tts",
       "source": "END_STORY",
-      "dest": "WAITING_FOR_CHILD_GENERIC_RESPONSE"
+      "dest": "WAITING_FOR_END_STORY_CHILD_RESPONSE"
     },
     {
     # TODO: this will be a little tricky. Basically just listening for the child to say anything.
     # Don't want to cut off the child while she's speaking.
     # Can check for consecutive asr results from Jibo until one says NOSPEECH.
       "trigger": "jibo_finish_child_asr", 
-      "source": "WAITING_FOR_CHILD_GENERIC_RESPONSE",
+      "source": "WAITING_FOR_END_STORY_CHILD_RESPONSE",
       "dest": "END_EVALUATE",
       "after": "jibo_respond_to_end_story",
       "conditions": ["in_evaluate_mode"]

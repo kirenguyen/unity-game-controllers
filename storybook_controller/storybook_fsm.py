@@ -64,13 +64,13 @@ class StorybookFSM(object):
     # Timer for when we're waiting for the child to read a sentence in
     # evaluate mode.
     self.child_audio_evaluate_timer = None
-    self.CHILD_AUDIO_SILENCE_TIMEOUT_SECONDS = 12 # Amount of time after detecting silence before reprompting a read.
+    self.CHILD_AUDIO_SILENCE_TIMEOUT_SECONDS = 8 # Amount of time after detecting silence before reprompting a read.
 
     self.child_end_page_question_timer = None
-    self.CHILD_END_PAGE_QUESTION_TIMEOUT_SECONDS = 12
+    self.CHILD_END_PAGE_QUESTION_TIMEOUT_SECONDS = 8
 
     self.child_explore_page_timer = None
-    self.CHILD_EXPLORE_PAGE_TIMEOUT_SECONDS = 8
+    self.CHILD_EXPLORE_PAGE_TIMEOUT_SECONDS = 6
 
     # For when Jibo prompts the child at the end of a page.
     self.end_page_questions = []
@@ -292,8 +292,7 @@ class StorybookFSM(object):
     self.end_page_question_idx = 0 
 
     # Tell student model what sentences are on the page now.
-    self.student_model.update_sentences(data.page_number, data.sentences)
-    self.student_model.update_scene_objects(data.scene_objects)
+    self.student_model.update_current_page(data.page_number, data.sentences, data.scene_objects)
 
     # Trigger!
     self.page_info_received()
@@ -473,7 +472,7 @@ class StorybookFSM(object):
     print("action: jibo_start_story: ")
     self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
     self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK,
-      "Great, it's time to start, I'm so excited!") #" I would love it if you would read to me! Every time a sentence appears, read it as best as you can, then click the blue button to see the next sentence. ... Ready? Let's go!")
+      "Great, it's time to start, I'm so excited! I would love it if you would read to me! Every time a sentence appears, read it as best as you can, then click the blue button to see the next sentence. ... Ready? Let's go!")
 
   def start_child_explore_page_timer(self):
     print("action: start_child_explore_page_timer")
@@ -617,7 +616,8 @@ class StorybookFSM(object):
     print("delay_after_end_page_jibo_response")
     # Called after Jibo has finished saying its response.
     # Without this, child doesn't have time to process the correct answer.
-    time.sleep(1.5)
+    return
+    # time.sleep(1.5)
 
   def tablet_go_to_end_page(self):
     print("action: tablet_go_to_end_page")
@@ -715,9 +715,7 @@ class StorybookFSM(object):
     self.child_end_page_got_answer()
 
   def jibo_end_page_respond_to_child_helper(self, idk):
-    # Delay before, otherwise seems too rushed.
-    time.sleep(1.5)
     self.current_end_page_question().respond_to_child(self.ros, idk)
-    print("done with end page response, incrementing end_page_question_idx")
+    print("Done with end page response, idk was", idk, "incrementing end_page_question_idx")
     self.end_page_question_idx += 1
 

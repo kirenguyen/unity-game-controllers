@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+
+# NOTE: Requires ffmpeg and bag_tools (http://wiki.ros.org/bag_tools) to be installed to work
 import subprocess
 import glob
 
@@ -8,7 +10,7 @@ This script is intended to collect all of the experiment + post-test bags with p
 located in the ROSBAG_DATA_PATH, then turn them into mp4 movies
 """
 
-PARTICIPANT_IDS = ['p16', 'p17', 'p19', 'p21', 'p22', 'p23', 'p24']
+PARTICIPANT_IDS = ['p25', 'p28', 'p29', 'p30', 'p31', 'p32', 'p33', 'p37']
 #PARTICIPANT_IDS = ['p03', 'p05', 'p06', 'p08', 'p09', 'p11', 'p12', 'p15', 'p16', 'p17', 'p19', 'p21', 'p22', 'p23', 'p24']
 
 ROSBAG_DATA_PATH = "../rosbag/"

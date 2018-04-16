@@ -19,8 +19,13 @@ import sys
 import time
 import _thread as thread
 
+global fsm
+
 def signal_handler(signal, frame):
   print("Received signal, closing!")
+  print("Shutting off Jibo ASR")
+  global fsm
+  fsm.stop_jibo_asr()
   sys.exit()
 
 def main(argv):
@@ -30,6 +35,7 @@ def main(argv):
   ros_node_manager.init_ros_node()
   student_model = StudentModel()
 
+  global fsm
   fsm = StorybookFSM(ros_node_manager, student_model)
   
   # Run the ROS isteners in separate threads.
@@ -61,10 +67,10 @@ def main(argv):
 
   signal.signal(signal.SIGINT, signal_handler)
 
-  # TODO: remove after testing.
   # Start Jibo ASR.
-  # time.sleep(2)
-  # fsm.start_jibo_asr()
+  time.sleep(2)
+  rule = "TopRule = $* $WAKE {%slotAction='wake_up'%} $*; WAKE = (wake up);"
+  ros_node_manager.send_jibo_asr_command(JiboAsrCommand.START, rule, True, True)
 
   # Spin and periodically check the state of the student model.
   # Don't plot too often, maybe like once every few seconds.

@@ -36,7 +36,21 @@ class StorybookFSMStructure(object):
 
   initial_state = "APP_START"
 
-  not_reading_transitions = []
+  not_reading_transitions = [
+    {
+      "trigger": "wake_up_received",
+      "source": "APP_START",
+      "dest": "APP_START",
+      "after": "jibo_wake_up_and_welcome"
+    },
+    {
+      "trigger": "jibo_finish_tts",
+      "source": "APP_START",
+      "dest": "APP_START",
+      "after": "stop_jibo_asr"
+    }
+  ]
+
   explore_transitions = [
     {
       "trigger": "storybook_selected",

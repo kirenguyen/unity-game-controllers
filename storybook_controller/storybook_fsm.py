@@ -343,6 +343,8 @@ class StorybookFSM(object):
       # Check for "I don't know"
       if data.slotAction == "idk":
         self.asr_idk_received()
+      elif data.slotAction == "wake_up":
+        self.wake_up_received()
       else:
         # Handle the response received, depending on the state.
         # TODO: might want to move this to where jibo_finish_child_asr is because =
@@ -368,6 +370,9 @@ class StorybookFSM(object):
   """
   Triggers
   """
+  def wake_up_received(self):
+    print("trigger: wake_up_received")
+
   def asr_idk_received(self):
     print("trigger: asr_idk_received")
 
@@ -453,6 +458,12 @@ class StorybookFSM(object):
   """
   Actions
   """
+  def jibo_wake_up_and_welcome(self):
+    print("action: jibo_wake_up_and_welcome")
+    self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
+    jibo_text = "Oh hello! Sorry I must've been asleep. I don't think I've met you before, I'm Jibo! So, is it storytime now? Yay I love stories."
+    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
+
   def jibo_stall_before_story(self):
     print("action: jibo_stall_before_story")
     if self.current_story_needs_download:

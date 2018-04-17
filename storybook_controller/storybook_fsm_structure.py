@@ -207,6 +207,21 @@ class StorybookFSMStructure(object):
       "before": "jibo_start_story",
       "conditions": ["in_evaluate_mode"]
     },
+    # When we want to pick up from where we left off.
+    {
+      "trigger": "storybook_loaded_with_continue",
+      "source": "WAITING_FOR_STORY_LOAD",
+      "dest": "WAITING_FOR_STORY_LOAD",
+      "before": ["jibo_continue_story", "load_previous_stored_state"],
+      "conditions": ["in_evaluate_mode"]
+    },
+    {
+      "trigger": "jibo_finish_tts",
+      "source": "WAITING_FOR_STORY_LOAD",
+      "dest": "WAITING_FOR_NEXT_PAGE",
+      "before": "tablet_continue_from_stored_page",
+      "conditions": ["in_evaluate_mode", "continue_from_prev_state"]
+    },
     {
       "trigger":"jibo_finish_tts",
       "source": "WAITING_FOR_STORY_LOAD",

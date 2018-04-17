@@ -30,7 +30,7 @@ from storybook_controller.robot_feedback import EndPageQuestionType
 from storybook_controller.jibo_commands_builder import JiboStorybookBehaviors
 
 class StorybookFSM(object):
-  def __init__(self, ros_node_manager, student_model):
+  def __init__(self, ros_node_manager, student_model, participant_id, prev_saved_state):
     # The FSM maintains a queue that ros messages are added to, so that
     # different topics can send their events and they will be processed
     # one at a time, in order.
@@ -38,6 +38,10 @@ class StorybookFSM(object):
 
     self.ros = ros_node_manager
     self.student_model = student_model
+
+    self.participant_id = participant_id
+    self.prev_saved_state = prev_saved_state
+    self.should_continue_from_prev_state = False
 
     # State information about Jibo
     self.jibo_tts_on = False
@@ -64,10 +68,10 @@ class StorybookFSM(object):
     # Timer for when we're waiting for the child to read a sentence in
     # evaluate mode.
     self.child_audio_evaluate_timer = None
-    self.CHILD_AUDIO_SILENCE_TIMEOUT_SECONDS = 8 # Amount of time after detecting silence before reprompting a read.
+    self.CHILD_AUDIO_SILENCE_TIMEOUT_SECONDS = 30 # Amount of time after detecting silence before reprompting a read.
 
     self.child_end_page_question_timer = None
-    self.CHILD_END_PAGE_QUESTION_TIMEOUT_SECONDS = 8
+    self.CHILD_END_PAGE_QUESTION_TIMEOUT_SECONDS = 30
 
     self.child_explore_page_timer = None
     self.CHILD_EXPLORE_PAGE_TIMEOUT_SECONDS = 6
@@ -115,10 +119,6 @@ class StorybookFSM(object):
         data = self.event_queue.get_nowait()
         # Handle data.
         self.process_storybook_event(data)
-        # TODO: Maybe call queue.task_done() differently in each above case,
-        # because we might want to use a join in the future and block
-        # on all tasks being completed, for example waiting for a message
-        # to be sent and acknowledged before continuing on with execution.
         self.event_queue.task_done()
       except queue.Empty:
         time.sleep(.05)
@@ -126,22 +126,21 @@ class StorybookFSM(object):
   def process_storybook_event(self, data):
     if data.event_type == StorybookEvent.HELLO_WORLD:
       print("HELLO_WORLD message received")
-      # Sending back a dummy response.
-      params = {
-        "obj1": 1,
-        "obj2": 2
-      }
-      command = StorybookCommand.PING_TEST
+
       # Wait for a little bit to ensure message not dropped.
       time.sleep(1)
       print("Sending ack")
+      params = {
+        "participant_id": self.participant_id,
+        "story_name": ""
+      }
+      # If we were previously in evaluate mode, tell the app that so it
+      # knows to display the option to pick up where we left off.
+      if self.prev_saved_state is not None:
+        if self.prev_saved_state["storybook_mode"] == StorybookState.EVALUATE_MODE:
+          params["story_name"] = self.prev_saved_state["story_name"]
+      command = StorybookCommand.HELLO_WORLD_ACK
       self.ros.send_storybook_command(command, params)
-
-      # Commented out because no longer listening all the time.
-      # Start Jibo ASR (stop first to prevent multiple active listeners).
-      # Use actions.
-      # self.stop_jibo_asr()
-      # self.start_jibo_asr()
 
     elif data.event_type == StorybookEvent.SPEECH_ACE_RESULT:
       print("SPEECH_ACE_RESULT message received")
@@ -211,14 +210,17 @@ class StorybookFSM(object):
       self.explore_pages_read = {}
 
       # Trigger!
-      print("state", self.state)
       self.storybook_selected()
 
     elif data.event_type == StorybookEvent.STORY_LOADED:
       print("STORY_LOADED message received")
+      message = json.loads(data.message)
       # Trigger!
-      print("state", self.state)
-      self.storybook_loaded()
+      if message["continue_midway"]:
+        self.should_continue_from_prev_state = True
+        self.storybook_loaded_with_continue()
+      else:
+        self.storybook_loaded()
 
     elif data.event_type == StorybookEvent.CHANGE_MODE:
       print("CHANGE_MODE message received")
@@ -227,7 +229,6 @@ class StorybookFSM(object):
         # Trigger!
         print("New mode is EVALUATE")
         self.begin_evaluate_mode()
-        print("state ", self.state)
       elif int(message["mode"]) == StorybookState.EXPLORE_MODE:
         # Trigger!
         print("New mode is EXPLORE")
@@ -382,6 +383,9 @@ class StorybookFSM(object):
   def storybook_loaded(self):
     print("trigger: storybook_loaded")
 
+  def storybook_loaded_with_continue(self):
+    print("trigger: storybook_loaded_with_continue")
+
   def page_info_received(self):
     print("trigger: page_info_received")
 
@@ -425,9 +429,11 @@ class StorybookFSM(object):
 
   def begin_evaluate_mode(self):
     print("trigger: begin_evaluate_mode")
+    self.clear_current_story_info()
 
   def begin_explore_mode(self):
     print("trigger: begin_explore_mode")
+    self.clear_current_story_info()
 
   """
   Timer handlers.
@@ -461,7 +467,8 @@ class StorybookFSM(object):
   def jibo_wake_up_and_welcome(self):
     print("action: jibo_wake_up_and_welcome")
     self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
-    jibo_text = "Oh hello! Sorry I must've been asleep. I don't think I've met you before, I'm Jibo! So, is it storytime now? Yay I love stories."
+    jibo_text = "<style set='enthusiastic'> Oh hello! </style> Sorry I must've been asleep. I don't think I've met you before, <style set='enthusiastic'> I'm Jibo! So, is it storytime now? <break size='0.5'/> <style set='enthusiastic'> I love stories. </style>"
+
     self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
 
   def jibo_stall_before_story(self):
@@ -480,10 +487,23 @@ class StorybookFSM(object):
     self.ros.send_storybook_command(StorybookCommand.SET_STORYBOOK_MODE, {"mode": StorybookState.EVALUATE_MODE})
 
   def jibo_start_story(self):
-    print("action: jibo_start_story: ")
+    print("action: jibo_start_story")
     self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
     self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK,
-      "Great, it's time to start, I'm so excited! I would love it if you would read to me! Every time a sentence appears, read it as best as you can, then click the blue button to see the next sentence. ... Ready? Let's go!")
+      "<style set='enthusiastic'> Great, it's time to start, I'm so excited! I would love it if you would read to me! </style> Every time a sentence appears, read it as best as you can, then click the blue button to see the next sentence. <break size='1'/> Ready? Let's go!")
+
+  def jibo_continue_story(self):
+    print("action: jibo_continue_story")
+    self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
+    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK,
+      "<style set='confused'> I must have gotten confused. <break size='.7'/> </style> <style set='enthusiastic'> Let's pick up where we left off. Remember, read the sentences as they appear, and don't be afraid to ask for help. Let's go! </style>")
+
+  def load_previous_stored_state(self):
+    print("action: load_previous_stored_state")
+    # This restores any state that we need for the state machine and student model.
+    # For now, just print something.
+    # TODO
+    print("done loading previous stored state")
 
   def start_child_explore_page_timer(self):
     print("action: start_child_explore_page_timer")
@@ -512,6 +532,16 @@ class StorybookFSM(object):
     print("action: tablet_next_page")
     self.reported_evaluating_sentence_index = -1
     self.ros.send_storybook_command(StorybookCommand.NEXT_PAGE)
+
+  def tablet_continue_from_stored_page(self):
+    print("action: tablet_continue_from_stored_page")
+    self.reported_evaluating_sentence_index = -1
+    if self.prev_saved_state is None:
+      raise Exception("Impossible, requesting to continue from page when there is no saved state")
+    params = {
+      "page_number": self.prev_saved_state["page_number"]
+    }
+    self.ros.send_storybook_command(StorybookCommand.GO_TO_PAGE, params)
 
   def jibo_next_page(self):
     print("action: jibo_next_page")
@@ -679,6 +709,10 @@ class StorybookFSM(object):
     print("condition: more_end_page_questions_available:", available)
     return available
 
+  def continue_from_prev_state(self):
+    print("condition: should_continue_from_prev_state", self.should_continue_from_prev_state)
+    return self.should_continue_from_prev_state
+
   def in_not_reading_mode(self):
     not_reading_mode = self.current_storybook_mode == StorybookState.NOT_READING
     print("condition: in_not_reading_mode:", not_reading_mode)
@@ -698,6 +732,16 @@ class StorybookFSM(object):
   """
   Helpers
   """
+
+  def clear_current_story_info(self):
+    """
+    This way when we save our state we know if we were in the middle of reading a story
+    or not. If we don't clear this, then we can't tell if we were done or if were
+    actually paused on the last page of the story.
+    """
+    self.current_storybook_mode = None
+    self.current_story = None
+    self.current_page_number = None
 
   def responding_to_tablet_interactions(self):
     """

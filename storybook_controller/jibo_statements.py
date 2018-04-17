@@ -21,11 +21,18 @@ class JiboStatements(object):
   pre_end_page_question_prompts = [
     "Awesome! I have a question again.",
     "Let me ask you a question.",
-    "Nice, how about I ask you something?"
+    "Nice, how about I ask you something?",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
   ]
 
   pre_end_page_question_reprompts = [
-    "Here's the question again, and if you don't know just say I don't know and I'll help out: ",
+    "Here's the question again, and if you don't know just say <break size='.5'/> Hey Jibo, I need help <break size='.6'/> and I'll help out: ",
     "Ok, let me repeat the question, and if you're not sure just say so and I'll tell you what I think: ",
   ]
 

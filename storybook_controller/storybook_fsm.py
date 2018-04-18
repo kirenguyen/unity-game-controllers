@@ -82,6 +82,8 @@ class StorybookFSM(object):
     self.eos_timer = None
     self.EOS_TIMEOUT_SECONDS = 4
 
+    # We get ASR results incrementally, this should accumulate the results until
+    # we detect end of speech.
     self.streaming_transcription = ""
 
     # For when Jibo prompts the child at the end of a page.
@@ -329,6 +331,9 @@ class StorybookFSM(object):
       # This is when the sound has just stopped.
       # Trigger!
       self.jibo_finish_tts()
+
+    # Check that the last tts command we sent actually occured.
+    self.ros.report_jibo_tts_received(data.tts_msg)
 
     # Update state.
     self.jibo_tts_on = (data.tts_msg != "")

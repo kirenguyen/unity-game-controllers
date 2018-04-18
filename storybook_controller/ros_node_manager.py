@@ -8,6 +8,7 @@ agent and the tablet app.
 
 import json
 import rospy
+import threading
 
 from unity_game_msgs.msg import StorybookCommand
 from unity_game_msgs.msg import StorybookEvent
@@ -32,6 +33,11 @@ class ROSNodeManager(object):
     # Keyed by the topic.
     self.subscribers = {}
     self.publishers = {}
+
+    self.jibo_resend_tts_timer = None
+    self.JIBO_RESEND_TTS_TIMEOUT_SECONDS = 10
+    self.last_jibo_text = None
+
 
   def init_ros_node(self):
     rospy.init_node(self.node_name, anonymous=False)
@@ -72,6 +78,11 @@ class ROSNodeManager(object):
     """
     msg = JiboCommandsBuilder.get_message_from_behavior(command, *args)
     self.publishers[JIBO_ACTION_TOPIC].publish(msg)
+    if command == JiboStorybookBehaviors.SPEAK:
+      # Save the last text.
+      self.last_jibo_text = args[0]
+      # Start the timer, might need to retry.
+      self.start_jibo_resend_tts_timer()
     # rospy.loginfo(msg)
 
   def send_jibo_asr_command(self, command, rule="", heyjibo=False, incremental=True, continuous=True):
@@ -85,6 +96,29 @@ class ROSNodeManager(object):
     print("Sending jibo asr command")
     msg = JiboCommandsBuilder.get_jibo_asr_command(command, heyjibo, continuous, incremental, rule)
     self.publishers[JIBO_ASR_COMMAND_TOPIC].publish(msg)
+
     # rospy.loginfo(msg)
 
+  def start_jibo_resend_tts_timer(self):
+    # Stop it first.
+    self.stop_jibo_resend_tts_timer()
+    self.jibo_resend_tts_timer = threading.Timer(
+      self.JIBO_RESEND_TTS_TIMEOUT_SECONDS, self.jibo_resend_tts_timer_expire_handler)
+    self.jibo_resend_tts_timer.start()
 
+  def stop_jibo_resend_tts_timer(self):
+    if self.jibo_resend_tts_timer is not None and self.jibo_resend_tts_timer.is_alive():
+      self.jibo_resend_tts_timer.cancel()
+
+  def jibo_resend_tts_timer_expire_handler(self):
+    print("jibo resend tts timer expired, resending!")
+    self.send_jibo_command(JiboStorybookBehaviors.SPEAK, self.last_jibo_text)
+    self.start_jibo_resend_tts_timer()
+
+  def report_jibo_tts_received(self, received_text):
+    """
+    Controller tells ros manager what latest tts message was, so ros manager
+    can confirm the tts message was sent.
+    """
+    if received_text == self.last_jibo_text:
+      self.stop_jibo_resend_tts_timer()

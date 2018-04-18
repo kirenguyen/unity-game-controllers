@@ -395,7 +395,7 @@ class StudentModel(object):
     self.henry_questions[2] = [robot_feedback.EndPageQuestionChildSpeechRequested("Can you explain the word <break size='0.2'/> <duration stretch='1.3'> donned </duration> <break size='0.2'/> to me? The book says Henry donned his slippers.",
         "Good thought. Donned means to put something on. <break size='.5'/> When it's cold, I don my favorite hat!")]
     self.henry_questions[3] = [robot_feedback.EndPageQuestionChildSpeechRequested("<style set='confused'>What is a <duration stretch='1.2'> spatula </duration>?</style>",
-        "I believe a spatula is used in cooking. Henry's mom can use it to scoop, mix, or spread things while making the cake!")]
+        "So, I think a spatula is used in cooking. Henry's mom can use it to scoop, mix, or spread things while making the cake!")]
     self.henry_questions[4] = [robot_feedback.EndPageQuestionChildSpeechRequested("What kind of cake did Henry want?",
         "I think Henry wants chocolate cake! But his mom says it should be vanilla. <break size='.5'/> Vanilla is also good I guess.")]
     self.henry_questions[5] = []

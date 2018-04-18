@@ -100,6 +100,7 @@ def main(argv):
 
   signal.signal(signal.SIGINT, signal_handler)
 
+
   # If we are starting a new session, should have Jibo start asleep and let the child
   # wake Jibo up.
   if not args.continue_session:

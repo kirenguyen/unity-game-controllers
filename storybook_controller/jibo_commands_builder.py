@@ -65,7 +65,7 @@ class JiboCommandsBuilder(object):
     return msg
 
   @staticmethod
-  def get_jibo_asr_command(command, heyjibo, continuous, rule):
+  def get_jibo_asr_command(command, heyjibo, continuous, incremental, rule):
     msg = JiboAsrCommand()
     msg.header = Header()
     msg.header.stamp = rospy.Time.now()
@@ -73,6 +73,7 @@ class JiboCommandsBuilder(object):
     msg.command = command
     msg.heyjibo = heyjibo
     msg.continuous = continuous
+    msg.incremental = incremental
     msg.rule = rule
 
     return msg

@@ -29,6 +29,9 @@ from storybook_controller.storybook_constants import *
 from storybook_controller.robot_feedback import EndPageQuestionType
 from storybook_controller.jibo_commands_builder import JiboStorybookBehaviors
 
+from storybook_controller.jibo_statements import JiboStatements
+from storybook_controller.jibo_statements import JiboStatementType
+
 class StorybookFSM(object):
   def __init__(self, ros_node_manager, student_model, participant_id, prev_saved_state):
     # The FSM maintains a queue that ros messages are added to, so that
@@ -75,6 +78,11 @@ class StorybookFSM(object):
 
     self.child_explore_page_timer = None
     self.CHILD_EXPLORE_PAGE_TIMEOUT_SECONDS = 6
+
+    self.eos_timer = None
+    self.EOS_TIMEOUT_SECONDS = 4
+
+    self.streaming_transcription = ""
 
     # For when Jibo prompts the child at the end of a page.
     self.end_page_questions = []
@@ -138,7 +146,8 @@ class StorybookFSM(object):
       # knows to display the option to pick up where we left off.
       if self.prev_saved_state is not None:
         if self.prev_saved_state["storybook_mode"] == StorybookState.EVALUATE_MODE:
-          params["story_name"] = self.prev_saved_state["story_name"]
+          if self.prev_saved_state["page_number"] is not None and self.prev_saved_state["page_number"] > 0:
+            params["story_name"] = self.prev_saved_state["story_name"]
       command = StorybookCommand.HELLO_WORLD_ACK
       self.ros.send_storybook_command(command, params)
 
@@ -327,41 +336,35 @@ class StorybookFSM(object):
   def jibo_asr_ros_message_handler(self, data):
     """
     Define callback function for when ROS node manager receives a new
-    JiboAsr message, which should be whenever someone says "Hey, Jibo! ..."
+    JiboAsrResult message."
     """
     if data.transcription == "" or data.transcription == ASR_NOSPEECH:
       # If previous state says that Jibo ASR was still ongoing, then this is
-      # the point at which we can detect that the person is done speaking.
-      if not self.jibo_asr_empty:
-        # Trigger!
-        self.jibo_finish_child_asr()
-      # Update state.
-      self.jibo_asr_empty = True
+      # the point at which we can start detecting that the person is done speaking.
+      # if not self.jibo_asr_empty:
+      #   # Trigger!
+      #   self.start_eos_timer()
+      # # Update state.
+      # self.jibo_asr_empty = True
+      pass
     else:
       print("Got Jibo ASR transcription:", data.transcription)
-      self.jibo_got_new_asr()
+      self.asr_received()
+      # If we get nothing after a certain amount of time after this, then assume end of speech.
+      self.start_eos_timer()
 
       # Check for "I don't know"
       if data.slotAction == "idk":
         self.asr_idk_received()
+      elif data.slotAction == "help":
+        self.asr_help_received()
       elif data.slotAction == "wake_up":
         self.wake_up_received()
-      else:
-        # Handle the response received, depending on the state.
-        # TODO: might want to move this to where jibo_finish_child_asr is because =
-        # then we only respond when we're sure they're done talking...
-        if self.state == "WAITING_FOR_END_PAGE_CHILD_RESPONSE":
-          self.try_answer_question(EndPageQuestionType.SPEECH_REQUESTED, data.transcription)
 
-      """ Commented out because we aren't continuously listening anymore.
-      if self.jibo_asr_empty:
-        # If this is start of a new set of transcriptions (meaning that
-        # previous state was silence).
-        # Trigger!
-        self.jibo_got_new_asr()
-      """
+      self.streaming_transcription += data.transcription
+
       # Update state.
-      self.jibo_asr_empty = False
+      # self.jibo_asr_empty = False
       
       # TODO: if we're in explore mode, this might be a question from the child,
       # and we'll need to respond to it accordingly.
@@ -376,6 +379,9 @@ class StorybookFSM(object):
 
   def asr_idk_received(self):
     print("trigger: asr_idk_received")
+
+  def asr_help_received(self):
+    print("trigger: asr_help_received")
 
   def storybook_selected(self):
     print("trigger: storybook_selected")
@@ -419,9 +425,15 @@ class StorybookFSM(object):
   def no_questions_go_to_next_page(self):
     print("trigger: no_questions_go_to_next_page")
 
-  def jibo_got_new_asr(self):
+  def asr_received(self):
     # When asr goes from silence to not silence.
-    print("trigger: jibo_got_new_asr")
+    print("trigger: asr_received")
+    # Check for state and stop timers.
+    self.stop_eos_timer()
+    if self.state == "WAITING_FOR_CHILD_AUDIO":
+      self.start_child_audio_timer()
+    elif self.state == "WAITING_FOR_END_PAGE_CHILD_RESPONSE":
+      self.start_child_end_page_question_timer()
 
   def jibo_finish_child_asr(self):
     # When asr goes from not silence to silence.
@@ -455,6 +467,13 @@ class StorybookFSM(object):
     else:
       print("Does this happen? Not in correct state when timer expires.")
 
+
+  def eos_timer_expire_handler(self):
+    print("eos timer expired!")
+    self.jibo_finish_child_asr()
+
+    if self.state == "WAITING_FOR_END_PAGE_CHILD_RESPONSE":
+      self.try_answer_question(EndPageQuestionType.SPEECH_REQUESTED, self.streaming_transcription)
 
   def child_explore_page_timer_expire_handler(self):
     print("explore page timer expired!")
@@ -496,7 +515,7 @@ class StorybookFSM(object):
     print("action: jibo_continue_story")
     self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
     self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK,
-      "<style set='confused'> I must have gotten confused. <break size='.7'/> </style> <style set='enthusiastic'> Let's pick up where we left off. Remember, read the sentences as they appear, and don't be afraid to ask for help. Let's go! </style>")
+      "<style set='confused'> I must have gotten confused. <break size='.7'/> </style> <style set='enthusiastic'> Let's pick up where we left off. Remember, reed the sentences as they appear, and don't be afraid to ask for help. Let's go! </style>")
 
   def load_previous_stored_state(self):
     print("action: load_previous_stored_state")
@@ -579,21 +598,17 @@ class StorybookFSM(object):
     print("action: tablet_stop_and_discard_record") # No speechace should be sent, not uploaded to S3 either.
     self.ros.send_storybook_command(StorybookCommand.CANCEL_RECORD)
 
-  def start_child_audio_timer(self):
-    print("action: start_child_audio_timer")
-    self.child_audio_evaluate_timer = threading.Timer(
-      self.CHILD_AUDIO_SILENCE_TIMEOUT_SECONDS, self.child_audio_timer_expire_handler)
-    self.child_audio_evaluate_timer.start()
-
   def stop_child_audio_timer(self):
     print("action: stop_child_audio_timer")
+    # TODO: thinking about removing this timer entirely.
+    return
     self.child_audio_evaluate_timer.cancel()
 
   def jibo_reprompt_child_audio(self):
     print("action: jibo_reprompt_child_audio")
     self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
-    # TODO: if it's the second time or greater, tell them to say I don't know.
-    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Come on, give it a try. And don't forget to press the button to move on! But if you're really stuck, just say I don't know and I'll help you.")
+    # TODO: if it's the second time or greater, tell them to say I need help
+    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Come on, give it a try. And don't forget to press the button to move on! But if you're really stuck, just say <break size='.5'/> I need help <break size='.3'/> and I'll help you.")
 
   def jibo_help_with_current_sentence(self):
     """
@@ -602,12 +617,10 @@ class StorybookFSM(object):
     print("action: jibo_help_with_current_sentence")
     sentence = self.current_sentences[self.reported_evaluating_sentence_index]
     # TODO: Use JiboStatements to vary the beginning of this text.
-    post_response_prompt = None
-    if self.more_sentences_available():
-      post_response_prompt = "Ok, try the next sentence now..."
-    else:
-      post_response_prompt = "I hope that makes sense."
-    jibo_text = "No worries, let me help. This sentence says... " + sentence + ". " + post_response_prompt
+    pre_sentence_prompt = JiboStatements.get_statement(JiboStatementType.PRE_HELP_WITH_SENTENCE)
+    post_sentence_prompt = "<break size='.7'/> Now you try to read the sentence again! Go ahead."
+    # Make sure to say the sentence slowly!
+    jibo_text = pre_sentence_prompt + " This sentence says <break size='.5/>' <duration stretch='1.3'>" + sentence + ". </duration>" + post_sentence_prompt
     self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
 
   def send_end_page_prompt(self):
@@ -623,9 +636,14 @@ class StorybookFSM(object):
       self.no_questions_go_to_next_page()
     else:
       self.end_page_questions[self.end_page_question_idx].ask_question(self.ros)
-   
+
   def start_child_end_page_question_timer(self):
     print("action: start_child_end_page_question_timer")
+
+    # Stop timer first.
+    if self.child_end_page_question_timer is not None and self.child_end_page_question_timer.is_alive():
+      self.child_end_page_question_timer.cancel()
+
     self.child_end_page_question_timer = threading.Timer(
       self.CHILD_END_PAGE_QUESTION_TIMEOUT_SECONDS,
       self.child_end_page_question_timer_expire_handler)
@@ -653,13 +671,6 @@ class StorybookFSM(object):
     print("action: jibo_end_page_response_to_child_idk")
     self.jibo_end_page_respond_to_child_helper(True)
 
-  def delay_after_end_page_jibo_response(self):
-    print("delay_after_end_page_jibo_response")
-    # Called after Jibo has finished saying its response.
-    # Without this, child doesn't have time to process the correct answer.
-    return
-    # time.sleep(1.5)
-
   def tablet_go_to_end_page(self):
     print("action: tablet_go_to_end_page")
     self.ros.send_storybook_command(StorybookCommand.GO_TO_END_PAGE)
@@ -676,12 +687,33 @@ class StorybookFSM(object):
     self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Cool, yeah, that's an interesting point. That was fun really really fun!! I hope we can read again some time.")
     self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_DANCE)
 
-  # ASR Commands.
-  def start_jibo_asr(self):
-    print("action: start_jibo_asr")
+  def start_waiting_for_child_response(self):
+    print("action: start_waiting_for_child_response")
     # Commented out because can't use apostrophes in the string representation
     # rule = "TopRule = $* $IDK {%slotAction='idk'%} | ($CORRECT){%slotAction='correct'%} $*; IDK = ((dont know) | (not sure) | (unsure) | (need $* help)); CORRECT = (correct answer);"
-    self.ros.send_jibo_asr_command(JiboAsrCommand.START)
+    rule = "rules/storybook.fst" # This rule checks for variants of "I don't know"
+    self.ros.send_jibo_asr_command(JiboAsrCommand.START, rule)
+    self.start_child_end_page_question_timer()
+    # Every time we want to start listening for child response.
+    self.streaming_transcription = ""
+
+  def start_listening_for_child_read_sentence(self):
+    print("action: start_listening_for_child_read_sentence")
+    rule = "TopRule = $* $HELP {%slotAction='help'%} $*; HELP = (need help) | (please help) | (assist) | (tell me) | (need helpful);"
+    # Start ASR with Hey Jibo required, so that the child needs to explicitly ask for help.
+    self.ros.send_jibo_asr_command(JiboAsrCommand.START, rule, True)
+    self.start_child_audio_timer()
+    self.streaming_transcription = ""
+
+  def stop_waiting_for_child_response(self):
+    print("action: stop_waiting_for_child_response")
+    self.stop_jibo_asr()
+    self.stop_child_end_page_question_timer()
+
+  def stop_listening_for_child_read_sentence(self):
+    print("action: stop_listening_for_child_read_sentence")
+    self.stop_jibo_asr()
+    self.stop_child_audio_timer()
 
   def stop_jibo_asr(self):
     print("action: stop_jibo_asr")
@@ -732,6 +764,29 @@ class StorybookFSM(object):
   """
   Helpers
   """
+   
+  def start_eos_timer(self):
+    print("start eos timer")
+    if self.eos_timer is not None and self.eos_timer.is_alive():
+      self.eos_timer.cancel()
+    self.eos_timer = threading.Timer(
+      self.EOS_TIMEOUT_SECONDS, self.eos_timer_expire_handler)
+    self.eos_timer.start()
+
+  def stop_eos_timer(self):
+    self.eos_timer.cancel()
+
+  def start_child_audio_timer(self):
+    # TODO: I don't think we need this timer, we'll just wait for the kid to press button
+    # or ask for help.
+    return 
+    # Stop it first.
+    if self.child_audio_evaluate_timer is not None and self.child_audio_evaluate_timer.is_alive():
+      self.child_audio_evaluate_timer.cancel()
+
+    self.child_audio_evaluate_timer = threading.Timer(
+      self.CHILD_AUDIO_SILENCE_TIMEOUT_SECONDS, self.child_audio_timer_expire_handler)
+    self.child_audio_evaluate_timer.start()
 
   def clear_current_story_info(self):
     """

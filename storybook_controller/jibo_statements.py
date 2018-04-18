@@ -13,6 +13,7 @@ import random
 class JiboStatementType(Enum):
   PRE_END_PAGE_QUESTION = 0,
   PRE_END_PAGE_QUESTION_REPROMPT = 1
+  PRE_HELP_WITH_SENTENCE = 2
 
 class JiboStatements(object):
   # The more generic fallback statement.
@@ -32,13 +33,20 @@ class JiboStatements(object):
   ]
 
   pre_end_page_question_reprompts = [
-    "Here's the question again, and if you don't know just say <break size='.5'/> Hey Jibo, I need help <break size='.6'/> and I'll help out: ",
-    "Ok, let me repeat the question, and if you're not sure just say so and I'll tell you what I think: ",
+    "Here's the question again, and if you don't know just say <break size='.4'/> I don't know <break size='.4'/> and I'll help out: ",
+    "Ok, let me repeat the question, and if you're not sure just say <break size='.4'/> I don't know <break size='.4'/> and I'll tell you what I think: ",
+  ]
+
+  pre_help_with_sentence_prompts = [
+    "No worries, <break size='.3'/> let me help!",
+    "Ok, sure, <break size='.2'/> I think I can help.",
+    "I'm glad you asked. I'm happy to help!"
   ]
 
   type_to_statements_map = {
     JiboStatementType.PRE_END_PAGE_QUESTION: pre_end_page_question_prompts,
-    JiboStatementType.PRE_END_PAGE_QUESTION_REPROMPT: pre_end_page_question_reprompts
+    JiboStatementType.PRE_END_PAGE_QUESTION_REPROMPT: pre_end_page_question_reprompts,
+    JiboStatementType.PRE_HELP_WITH_SENTENCE: pre_help_with_sentence_prompts,
   }
 
   @staticmethod

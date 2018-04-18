@@ -140,7 +140,7 @@ class StorybookFSMStructure(object):
       "dest": "WAITING_FOR_CHILD_GENERIC_RESPONSE"
     },
     {
-      "trigger": "jibo_finish_child_asr",
+      "trigger": "jibo_finish_child_asr", # TODO: make this trigger be after there's been a certain amount of silence
       "source": "WAITING_FOR_CHILD_GENERIC_RESPONSE",
       "dest": "EXPLORING_PAGE",
       "conditions": ["in_explore_mode"]
@@ -166,12 +166,12 @@ class StorybookFSMStructure(object):
       "trigger": "tablet_explore_end_story",
       "source": "EXPLORING_PAGE",
       "dest": "END_STORY",
-      "after": ["jibo_end_story", "start_jibo_asr"]
+      "after": ["jibo_end_story", "start_waiting_for_child_response"]
     },
     # The logic from END_STORY to WAITING_FOR_CHILD_GENERIC_RESPONSE is handled in evaluate
     # mode transitions. Basically wait for child to say something, generically respond.
     {
-      "trigger": "jibo_got_new_asr",
+      "trigger": "jibo_finish_child_asr",
       "source": "WAITING_FOR_END_STORY_CHILD_RESPONSE",
       "dest": "END_EXPLORE",
       "after": "jibo_respond_to_end_story",
@@ -236,7 +236,7 @@ class StorybookFSMStructure(object):
       # This action has really become more like start page, because it tells the
       # storybook to show the first sentence, then the storybook handles showing
       # subsequent sentences on its own.
-      "after": ["tablet_show_next_sentence", "start_child_audio_timer", "start_jibo_asr"],
+      "after": ["tablet_show_next_sentence", "start_listening_for_child_read_sentence"],
       "conditions": ["in_evaluate_mode"]
     },
     {
@@ -249,15 +249,14 @@ class StorybookFSMStructure(object):
       "trigger":"jibo_finish_tts", # This trigger will be used a lot, but it will have different effects based on source state.
       "source":"WAITING_FOR_JIBO_REPROMPT_CHILD_AUDIO",
       "dest": "WAITING_FOR_CHILD_AUDIO",
-      "after": ["tablet_begin_record", "start_child_audio_timer",
-                "start_jibo_asr"], # After Jibo finishes prompting.
+      "after": ["tablet_begin_record", "start_listening_for_child_read_sentence"], # After Jibo finishes prompting.
     },
     # When the child says they don't know when we're asking them to read a sentence.
     {
-      "trigger": "asr_idk_received",
+      "trigger": "asr_help_received",
       "source": "WAITING_FOR_CHILD_AUDIO",
       "dest": "WAITING_FOR_JIBO_HELP_WITH_SENTENCE",
-      "before": ["stop_jibo_asr", "stop_child_audio_timer", "tablet_stop_and_discard_record"],
+      "before": ["stop_listening_for_child_read_sentence", "tablet_stop_and_discard_record"],
       "after": ["jibo_help_with_current_sentence"]
     },
     # Here, either trigger the next sentence or go to the end page questions.
@@ -265,43 +264,28 @@ class StorybookFSMStructure(object):
       "trigger": "jibo_finish_tts",
       "source": "WAITING_FOR_JIBO_HELP_WITH_SENTENCE",
       "dest": "WAITING_FOR_CHILD_AUDIO",
-      "after": ["tablet_show_next_sentence", "start_child_audio_timer", "start_jibo_asr"],
-      "conditions": ["more_sentences_available"]
+      "after": ["tablet_begin_record", "start_listening_for_child_read_sentence"],
     },
-    {
-      "trigger": "jibo_finish_tts",
-      "source": "WAITING_FOR_JIBO_HELP_WITH_SENTENCE",
-      "dest": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
-      "after": "send_end_page_prompt"
-    },
-    # Only start timer after there has been silence. Either child didn't press button
-    # or child didn't speak at all. Commented out because we aren't constantly listening anymore.
+    # Commented out, because we always have the child read the sentence again if they ask for help.
     # {
-    #   "trigger":"jibo_finish_child_asr",
-    #   "source":"WAITING_FOR_CHILD_AUDIO",
-    #   "dest":"WAITING_FOR_CHILD_AUDIO",
-    #   "after": ["start_child_audio_timer"]
+    #   "trigger": "jibo_finish_tts",
+    #   "source": "WAITING_FOR_JIBO_HELP_WITH_SENTENCE",
+    #   "dest": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
+    #   "after": "send_end_page_prompt"
     # },
-    {
-      "trigger":"jibo_got_new_asr", # When it goes from silence to not silence.
-      "source":"WAITING_FOR_CHILD_AUDIO",
-      "dest":"WAITING_FOR_CHILD_AUDIO",
-      "after":["stop_child_audio_timer"],
-      "conditions": ["in_evaluate_mode"]
-    },
     # This is only for when the done recording button is pressed, so don't touch the asr stuff.
     {
       "trigger":"child_read_audio_complete",
       "source":"WAITING_FOR_CHILD_AUDIO",
       "dest": "WAITING_FOR_CHILD_AUDIO",
-      "before": ["stop_child_audio_timer"], # Commented out "stop_jibo_asr", "start_jibo_asr"], because timing is bad
+      "before": ["start_listening_for_child_read_sentence"],
       "conditions": ["more_sentences_available"]
     },
     {
       "trigger":"child_read_audio_complete",
       "source":"WAITING_FOR_CHILD_AUDIO",
       "dest": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
-      "before": ["stop_child_audio_timer", "stop_jibo_asr"],
+      "before": ["stop_listening_for_child_read_sentence"],
       "after": "send_end_page_prompt" # Could involve commands to Jibo and tablet.
     },
     # Either Jibo is asking a question for the first time or is repeating it,
@@ -310,19 +294,20 @@ class StorybookFSMStructure(object):
       "trigger":"jibo_finish_tts",
       "source": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
       "dest": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
-      "after": ["start_child_end_page_question_timer", "start_jibo_asr"]
+      "after": ["start_waiting_for_child_response"]
     },
     {
       "trigger": "child_end_page_question_timeout",
       "source": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
       "dest": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
-      "after": "resend_end_page_prompt"
+      "after": "resend_end_page_prompt" # -> loops back to previous transition, where we wait for jibo_finish_tts then start waiting for answer
     },
+    # No button has been implemented for this yet.
     {
       "trigger": "child_request_repeat_end_page_question",
       "source": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
       "dest": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
-      "before": ["stop_child_end_page_question_timer", "stop_jibo_asr"],
+      "before": ["stop_waiting_for_child_response"],
       "after": "resend_end_page_prompt"
     },
     # When the child says I don't know in response to being asked a question.
@@ -330,28 +315,28 @@ class StorybookFSMStructure(object):
       "trigger": "asr_idk_received",
       "source": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
       "dest": "WAITING_FOR_END_PAGE_JIBO_RESPONSE",
-      "before": ["stop_child_end_page_question_timer", "stop_jibo_asr"],
-      "after": "jibo_end_page_response_to_child_idk"
+      "before": ["stop_waiting_for_child_response"],
+      "after": "jibo_end_page_response_to_child_idk" # -> loops back to where we wait for jibo_finish_tts then start waiting for answer
     },
     {
       "trigger":"child_end_page_got_answer",
       "source":"WAITING_FOR_END_PAGE_CHILD_RESPONSE",
       "dest":"WAITING_FOR_END_PAGE_JIBO_RESPONSE",
-      "before":["stop_child_end_page_question_timer", "stop_jibo_asr",
-                "jibo_end_page_response_to_child"]
+      "before":["stop_waiting_for_child_response"],
+      "after":["jibo_end_page_response_to_child"]
     },
     {
       "trigger":"jibo_finish_tts",
       "source":"WAITING_FOR_END_PAGE_JIBO_RESPONSE",
       "dest":"WAITING_FOR_END_PAGE_JIBO_RESPONSE",
-      "after":["delay_after_end_page_jibo_response", "end_page_jibo_response_complete"]
+      "after":["end_page_jibo_response_complete"]
     },
     # If there are more questions, ask them.
     {
       "trigger": "end_page_jibo_response_complete",
       "source": "WAITING_FOR_END_PAGE_JIBO_RESPONSE",
       "dest": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
-      "after": "send_end_page_prompt",
+      "after": "send_end_page_prompt", # -> loops back to waiting for jibo_finish_then waiting for an answer
       "conditions": ["more_end_page_questions_available", "in_evaluate_mode"]
     },
     # If there aren't any more questions, check if there are more pages.
@@ -366,9 +351,10 @@ class StorybookFSMStructure(object):
       "trigger":"end_page_jibo_response_complete",
       "source": "WAITING_FOR_END_PAGE_JIBO_RESPONSE",
       "dest": "END_STORY",
-      "after": ["tablet_go_to_end_page", "jibo_end_story", "start_jibo_asr"]
+      "after": ["tablet_go_to_end_page", "jibo_end_story"]
     },
-    # If there are no questions, go to the next page.
+    # Analogous to above 2 triggers, but skipping asking questions entirely.
+    # Either go to next page or go to end story.
     {
       "trigger": "no_questions_go_to_next_page",
       "source": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
@@ -380,7 +366,7 @@ class StorybookFSMStructure(object):
       "trigger": "no_questions_go_to_next_page",
       "source": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
       "dest": "END_STORY",
-      "after": ["tablet_go_to_end_page", "jibo_end_story", "start_jibo_asr"]
+      "after": ["tablet_go_to_end_page", "jibo_end_story"]
     },
     {
       "trigger": "jibo_finish_tts",
@@ -391,12 +377,10 @@ class StorybookFSMStructure(object):
     {
       "trigger": "jibo_finish_tts",
       "source": "END_STORY",
-      "dest": "WAITING_FOR_END_STORY_CHILD_RESPONSE"
+      "dest": "WAITING_FOR_END_STORY_CHILD_RESPONSE",
+      "after": "start_waiting_for_child_response"
     },
     {
-    # TODO: this will be a little tricky. Basically just listening for the child to say anything.
-    # Don't want to cut off the child while she's speaking.
-    # Can check for consecutive asr results from Jibo until one says NOSPEECH.
       "trigger": "jibo_finish_child_asr", 
       "source": "WAITING_FOR_END_STORY_CHILD_RESPONSE",
       "dest": "END_EVALUATE",
@@ -424,7 +408,7 @@ class StorybookFSMStructure(object):
       "dest": "="
     },
     {
-      "trigger": "jibo_got_new_asr",
+      "trigger": "asr_received",
       "source": "*",
       "dest": "="
     },
@@ -445,6 +429,11 @@ class StorybookFSMStructure(object):
     },
     {
       "trigger": "asr_idk_received",
+      "source": "*",
+      "dest": "="
+    },
+    {
+      "trigger": "asr_help_received",
       "source": "*",
       "dest": "="
     }

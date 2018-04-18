@@ -74,7 +74,7 @@ class ROSNodeManager(object):
     self.publishers[JIBO_ACTION_TOPIC].publish(msg)
     # rospy.loginfo(msg)
 
-  def send_jibo_asr_command(self, command, rule="", heyjibo=False, continuous=True):
+  def send_jibo_asr_command(self, command, rule="", heyjibo=False, incremental=True, continuous=True):
     """
     Sends a command to Jibo to tell it to start listening and to publish back
     ASR results.
@@ -83,7 +83,7 @@ class ROSNodeManager(object):
     only ones that are supported in jibo-rosbridge-receiver right now.
     """
     print("Sending jibo asr command")
-    msg = JiboCommandsBuilder.get_jibo_asr_command(command, heyjibo, continuous, rule)
+    msg = JiboCommandsBuilder.get_jibo_asr_command(command, heyjibo, continuous, incremental, rule)
     self.publishers[JIBO_ASR_COMMAND_TOPIC].publish(msg)
     # rospy.loginfo(msg)
 

@@ -18,7 +18,8 @@ def strip_punctuation(word):
 class EndPageQuestionType(Enum):
   WORD_TAP = 0,
   SCENE_OBJECT_TAP = 1,
-  SPEECH_REQUESTED = 2
+  SPEECH_REQUESTED = 2,
+  WORD_PRONUNCIATION = 3,
 
 # Base class for end of page questions.
 class EndPageQuestion(object):
@@ -246,11 +247,19 @@ class EndPageQuestionOpenEndedVerbalResponse(EndPageQuestion):
 
 
 class EndPageQuestionWordPronounce(EndPageQuestion):
-  def __init__(self, word, indexes):
+  def __init__(self, word, indexes, already_asked=False):
     super(EndPageQuestionWordPronounce, self).__init__(
-      EndPageQuestionType.SPEECH_REQUESTED)
+      EndPageQuestionType.WORD_PRONUNCIATION)
     self.expected_word = word
     self.expected_indexes = indexes
+    self.already_asked = already_asked
+
+  def clone_for_repronounce(self):
+    """
+    Returns a copy version of the question, with already_asked set to True,
+    but self.asked and self.answered and self.correct reset to blank.
+    """
+    return EndPageQuestionWordPronounce(self.expected_word, self.expected_indexes, True)
 
   def is_equal(self, other):
     return self.expected_word == other.expected_word
@@ -259,17 +268,21 @@ class EndPageQuestionWordPronounce(EndPageQuestion):
     return self.expected_word
 
   def ask_question_impl(self, ros_manager, pre_question_prompt):
-    jibo_text = pre_question_prompt + "Can you pronounce this word for me?"
+    jibo_text = "Can you pronounce the blue word for me?"
+    if not self.already_asked:
+      jibo_text = pre_question_prompt + jibo_text
     ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
     params = {"indexes": self.expected_indexes, "stay_on": True}
     ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_WORD, params)
 
   def try_answer_impl(self, query, student_model):
-    return query in self.expected_word
+    return query in self.expected_word or self.expected_word in query
 
   def respond_to_child_impl(self, ros_manager, pre_response_prompt):
     jibo_text = pre_response_prompt + "the pronunciation of this word is <break size='.4'/> <duration stretch='1.3'>" + \
       self.expected_word + " </duration>."
+    if not self.correct:
+      jibo_text += "<break size='.5'/> But, maybe we can try again."
     ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
     time.sleep(6)
     params = {"indexes": self.expected_indexes, "unhighlight": True}

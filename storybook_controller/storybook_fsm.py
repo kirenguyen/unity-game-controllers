@@ -481,6 +481,7 @@ class StorybookFSM(object):
 
     if self.state == "WAITING_FOR_END_PAGE_CHILD_RESPONSE":
       self.try_answer_question(EndPageQuestionType.SPEECH_REQUESTED, self.streaming_transcription)
+      self.try_answer_question(EndPageQuestionType.WORD_PRONUNCIATION, self.streaming_transcription)
 
   def child_explore_page_timer_expire_handler(self):
     print("explore page timer expired!")
@@ -814,15 +815,20 @@ class StorybookFSM(object):
       return
     print("answering question index", self.end_page_question_idx)
     self.current_end_page_question().try_answer(query, self.student_model)
-    # Get more questions.
-    # self.end_page_questions = self.student_model.get_end_page_questions(self.end_page_question_idx + 1)
-    # print("try answer question, got new questions, now length is ", len(self.end_page_questions), self.end_page_question_idx)
     # Trigger!
     self.child_end_page_got_answer()
 
   def jibo_end_page_respond_to_child_helper(self, idk):
-    print("respond to child helper, index is ", self.end_page_question_idx, len(self.end_page_questions))
+    # Update questions.
     self.end_page_questions = self.student_model.get_end_page_questions(self.end_page_question_idx + 1)
+    
+    # Add special case for pronunciation questions. If it was incorrect, add another question
+    # into the queue to be asked immediately after.
+    q = self.current_end_page_question()
+    if q.question_type = EndPageQuestionType.WORD_PRONUNCIATION:
+      if not q.correct and not q.already_asked:
+        self.end_page_questions.insert(self.end_page_question_idx + 1, q.cloen_for_repronounce())
+
     self.current_end_page_question().respond_to_child(self.ros, idk)
     print("Done with end page response, idk was", idk, "incrementing end_page_question_idx")
     self.end_page_question_idx += 1

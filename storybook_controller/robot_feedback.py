@@ -28,6 +28,19 @@ class EndPageQuestion(object):
     self.answered = False
     self.correct = False
 
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+    if self.question_type != other.question_type:
+      return False
+    return self.is_equal(other)
+
+  def __ne__(self, other):
+    return not self.__eq__(other)
+
+  def is_equal(self, other):
+    raise NotImplementedError
+
   def ask_question(self, ros_manager):
     """
     Sends necessary commands on ros_manager to ask the question.
@@ -114,6 +127,9 @@ class EndPageQuestionWordTap(EndPageQuestion):
     self.expected_word = strip_punctuation(word.lower())
     self.expected_indexes = indexes
 
+  def is_equal(self, other):
+    return self.expected_word == other.expected_word
+
   def ask_question_impl(self, ros_manager, pre_question_prompt):
     # Will need to send jibo commands and storybook commands.
     jibo_text = pre_question_prompt + "Can you tap the word " + self.expected_word + "?"
@@ -147,24 +163,26 @@ class EndPageQuestionSceneObjectTap(EndPageQuestion):
   def __init__(self, label, ids, question_text=None, response_text=None):
     super(EndPageQuestionSceneObjectTap, self).__init__(
       EndPageQuestionType.SCENE_OBJECT_TAP)
-    self.expected_label = strip_punctuation(label.lower())
+    self.expected_label = " ".join(map(lambda w: strip_punctuation(w.lower()), label.split(" ")))
     self.expected_ids = ids
     self.question_text = question_text if question_text is not None \
       else "Can you tap on " + self.expected_label + " in the picture?"
     self.response_text = response_text if response_text is not None \
       else ". This is " + self.expected_label
 
+  def is_equal(self, other):
+    return self.expected_label == other.expected_label
+
   def ask_question_impl(self, ros_manager, pre_question_prompt):
     # Will need to send jibo commands and storybook commands.
     jibo_text = pre_question_prompt + self.question_text
     ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
-    ros_manager.send_jibo_command(JiboStorybookBehaviors.QUESTION_ANIM)
 
   def correct_answer(self):
     return self.expected_label
 
   def try_answer_impl(self, query, student_model):
-    query = strip_punctuation(query.lower())
+    query = " ".join(map(lambda w: strip_punctuation(w.lower()), query.split(" ")))
     correct = query in self.expected_label
     if correct:
       print("Child got scene object correct!", query)
@@ -186,18 +204,23 @@ class EndPageQuestionSceneObjectTap(EndPageQuestion):
 """
 Pronounce a word.
 """
-class EndPageQuestionChildSpeechRequested(EndPageQuestion):
+class EndPageQuestionOpenEndedVerbalResponse(EndPageQuestion):
   def __init__(self, question, response_text, extra_response_function=None):
     """
     Parameter extra_response_function is added behavior on top of simply
     saying the response. The function should take as argument the ros manager.
     """
-    super(EndPageQuestionChildSpeechRequested, self).__init__(
+    super(EndPageQuestionOpenEndedVerbalResponse, self).__init__(
       EndPageQuestionType.SPEECH_REQUESTED)
 
     self.open_ended_question = question
     self.response_text = response_text
     self.extra_response_function = extra_response_function
+
+  def is_equal(self, other):
+    # Don't really need this function, we only compare to auto generated
+    # not open ended questions.
+    return self.open_ended_question == other.open_ended_question
 
   def correct_answer(self):
     return self.response_text
@@ -222,11 +245,15 @@ class EndPageQuestionChildSpeechRequested(EndPageQuestion):
       self.extra_response_function(ros_manager)
 
 
-class EndPageQuestionWordPronounce(EndPageQuestionChildSpeechRequested):
-  def __init__(self, question, word, index):
-    super(EndPageQuestionWordPronounce, self).__init__(question, "")
+class EndPageQuestionWordPronounce(EndPageQuestion):
+  def __init__(self, word, indexes):
+    super(EndPageQuestionWordPronounce, self).__init__(
+      EndPageQuestionType.SPEECH_REQUESTED)
     self.expected_word = word
-    self.expected_index = index
+    self.expected_indexes = indexes
+
+  def is_equal(self, other):
+    return self.expected_word == other.expected_word
 
   def correct_answer(self):
     return self.expected_word
@@ -234,13 +261,16 @@ class EndPageQuestionWordPronounce(EndPageQuestionChildSpeechRequested):
   def ask_question_impl(self, ros_manager, pre_question_prompt):
     jibo_text = pre_question_prompt + "Can you pronounce this word for me?"
     ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
+    params = {"indexes": self.expected_indexes, "stay_on": True}
     ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_WORD, params)
 
   def try_answer_impl(self, query, student_model):
     return query in self.expected_word
 
   def respond_to_child_impl(self, ros_manager, pre_response_prompt):
-    jibo_text = pre_response_prompt + "the pronunciation of this word is " + self.expected_word
+    jibo_text = pre_response_prompt + "the pronunciation of this word is <break size='.4'/> <duration stretch='1.3'>" + \
+      self.expected_word + " </duration>."
     ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
-    params = {"indexes": [self.expected_index]}
-    ros_manager.send_storybook_command(Storybook.HIGHLIGHT_WORD, params)
+    time.sleep(6)
+    params = {"indexes": self.expected_indexes, "unhighlight": True}
+    ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_WORD, params)

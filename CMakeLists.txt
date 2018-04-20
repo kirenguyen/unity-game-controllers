@@ -20,6 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
    StorybookPageInfo.msg
    StorybookSceneObject.msg
    StorybookTinkerText.msg
+   StorybookJiboPrompt.msg
    TapGameCommand.msg
    TapGameRoundSummary.msg
    iSpyCommand.msg

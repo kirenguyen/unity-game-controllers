@@ -100,13 +100,12 @@ def main(argv):
 
   signal.signal(signal.SIGINT, signal_handler)
 
-
   # If we are starting a new session, should have Jibo start asleep and let the child
   # wake Jibo up.
   if not args.continue_session:
     time.sleep(1)
     rule = "TopRule = $* $WAKE {%slotAction='wake_up'%} $*; WAKE = (wake up);"
-    ros_node_manager.send_jibo_asr_command(JiboAsrCommand.START, rule, True, True)
+    ros_node_manager.send_jibo_asr_command(JiboAsrCommand.START, rule, True)
 
   # Spin and periodically check the state of the student model.
   # Don't plot too often, maybe like once every few seconds.

@@ -40,7 +40,8 @@ class JiboStatements(object):
   pre_help_with_sentence_prompts = [
     "No worries, <break size='.3'/> let me help!",
     "Ok, sure, <break size='.2'/> I think I can help.",
-    "I'm glad you asked. I'm happy to help!"
+    "I'm glad you asked. I'm happy to help!",
+    "All right, no problem, let me give it a try",
   ]
 
   type_to_statements_map = {

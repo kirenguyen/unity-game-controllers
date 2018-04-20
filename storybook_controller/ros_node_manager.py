@@ -111,7 +111,7 @@ class ROSNodeManager(object):
       self.jibo_resend_tts_timer.cancel()
 
   def jibo_resend_tts_timer_expire_handler(self):
-    print("jibo resend tts timer expired, resending!")
+    print("jibo resend tts timer expired, resending: ", self.last_jibo_text)
     self.send_jibo_command(JiboStorybookBehaviors.SPEAK, self.last_jibo_text)
     self.start_jibo_resend_tts_timer()
 

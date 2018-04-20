@@ -384,7 +384,7 @@ class StorybookFSMStructure(object):
       "trigger": "jibo_finish_child_asr", 
       "source": "WAITING_FOR_END_STORY_CHILD_RESPONSE",
       "dest": "END_EVALUATE",
-      "after": "jibo_respond_to_end_story",
+      "after": ["jibo_respond_to_end_story", "stop_waiting_for_child_response"],
       "conditions": ["in_evaluate_mode"]
     },
     {

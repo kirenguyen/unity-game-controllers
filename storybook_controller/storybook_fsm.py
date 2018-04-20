@@ -80,7 +80,7 @@ class StorybookFSM(object):
     self.CHILD_EXPLORE_PAGE_TIMEOUT_SECONDS = 6
 
     self.eos_timer = None
-    self.EOS_TIMEOUT_SECONDS = 4
+    self.EOS_TIMEOUT_SECONDS = .5
 
     # We get ASR results incrementally, this should accumulate the results until
     # we detect end of speech.
@@ -303,8 +303,10 @@ class StorybookFSM(object):
     self.end_page_questions = []
     self.end_page_question_idx = 0 
 
+    print("got prompts: ", data.prompts)
+
     # Tell student model what sentences are on the page now.
-    self.student_model.update_current_page(data.page_number, data.sentences, data.scene_objects)
+    self.student_model.update_current_page(data.page_number, data.sentences, data.scene_objects, data.prompts)
 
     # Trigger!
     self.page_info_received()
@@ -490,17 +492,15 @@ class StorybookFSM(object):
   """
   def jibo_wake_up_and_welcome(self):
     print("action: jibo_wake_up_and_welcome")
-    self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
-    jibo_text = "<style set='enthusiastic'> Oh hello! </style> Sorry I must've been asleep. I don't think I've met you before, <style set='enthusiastic'> I'm Jibo! So, is it storytime now? <break size='0.5'/> <style set='enthusiastic'> I love stories. </style>"
+    jibo_text = "<style set='enthusiastic'> Oh hello! </style> <es cat='happy'/> Sorry I must've been asleep. I don't think I've met you before, <style set='enthusiastic'> I'm Jibo! So, is it storytime now? <break size='0.5'/> <style set='enthusiastic'> I love stories. </style>"
 
     self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
 
   def jibo_stall_before_story(self):
     print("action: jibo_stall_before_story")
     if self.current_story_needs_download:
-      self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
       self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK,
-        "I have a feeling this is a good story! Let's go!")
+        "I have a feeling this is a good story! <es cat='happy'/> Let's go!")
 
   def tablet_show_library_panel(self):
     print("action: tablet_show_library_panel")
@@ -512,15 +512,13 @@ class StorybookFSM(object):
 
   def jibo_start_story(self):
     print("action: jibo_start_story")
-    self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
     self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK,
-      "<style set='enthusiastic'> Great, it's time to start, I'm so excited! I would love it if you would read to me! </style> Every time a sentence appears, read it as best as you can, then click the blue button to see the next sentence. <break size='1'/> Ready? Let's go!")
+      "<style set='enthusiastic'> <es cat='happy'> Great, it's time to start, I'm so excited! </es> I would love it if you would read to me! </style> <break size='.3'/> Every time a sentence appears, read it as best as you can, then click the blue button to see the next sentence. <break size='1'/> Ready? Let's go!")
 
   def jibo_continue_story(self):
     print("action: jibo_continue_story")
-    self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
     self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK,
-      "<style set='confused'> I must have gotten confused. <break size='.7'/> </style> <style set='enthusiastic'> Let's pick up where we left off. Remember, reed the sentences as they appear, and don't be afraid to ask for help. Let's go! </style>")
+      "<style set='confused'> Oops, <break size='.3'/> <es cat='confused'> I must have gotten confused. </es> <break size='.7'/> </style> <style set='enthusiastic'> Let's pick up where we left off. Remember, reed the sentences as they appear, and don't be afraid to ask for help. Let's go! </style>")
 
   def load_previous_stored_state(self):
     print("action: load_previous_stored_state")
@@ -569,9 +567,8 @@ class StorybookFSM(object):
 
   def jibo_next_page(self):
     print("action: jibo_next_page")
-    self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
     self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK,
-      "Ok, moving on to the next page!")
+      "<es cat='happy'>Ok, moving on to the next page! </es>")
 
   def tablet_show_next_sentence(self):
     print("action: tablet_show_next_sentence")
@@ -611,9 +608,8 @@ class StorybookFSM(object):
 
   def jibo_reprompt_child_audio(self):
     print("action: jibo_reprompt_child_audio")
-    self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
     # TODO: if it's the second time or greater, tell them to say I need help
-    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Come on, give it a try. And don't forget to press the button to move on! But if you're really stuck, just say <break size='.5'/> I need help <break size='.3'/> and I'll help you.")
+    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "<es cat='happy'/>Come on, give it a try. And don't forget to press the button to move on! But if you're really stuck, just say <break size='.5'/> I need help <break size='.3'/> and I'll help you.")
 
   def jibo_help_with_current_sentence(self):
     """
@@ -625,17 +621,13 @@ class StorybookFSM(object):
     pre_sentence_prompt = JiboStatements.get_statement(JiboStatementType.PRE_HELP_WITH_SENTENCE)
     post_sentence_prompt = "<break size='.7'/> Now you try to read the sentence again! Go ahead."
     # Make sure to say the sentence slowly!
-    jibo_text = pre_sentence_prompt + " This sentence says <break size='.5/>' <duration stretch='1.3'>" + sentence + ". </duration>" + post_sentence_prompt
+    jibo_text = pre_sentence_prompt + " <break size='.5'/> This sentence says <break size='.8/>' <duration stretch='1.3'>" + sentence + ". </duration>" + post_sentence_prompt
     self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
 
   def send_end_page_prompt(self):
     print("action: send_end_page_prompt")
-    # TODO: think about whether or not we should sleep here.
-    # I'm doing it because it gives more time for speechace results.
-    # But Hae Won brought up that the latency makes it feel very unengaging.
-    # Maybe should try to have some filler text here to cover the delay.
-    time.sleep(1.5)
-    self.end_page_questions = self.student_model.get_end_page_questions(self.current_page_number)
+    if self.end_page_question_idx == 0:
+      self.end_page_questions = self.student_model.get_end_page_questions(prev_times_asked=0)
     if len(self.end_page_questions) == 0:
       # Trigger!
       self.no_questions_go_to_next_page()
@@ -682,15 +674,11 @@ class StorybookFSM(object):
 
   def jibo_end_story(self):
     print("action: jibo_end_story")
-    self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
-    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Wow, what a great story! I want to know, what was your favorite part?")
-    self.ros.send_jibo_command(JiboStorybookBehaviors.QUESTION_ANIM)
+    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "<style set='enthusiastic'> Wow! What a great story! </style? <break size='.5'/> <style set='curious'> I want to know, what was your favorite part? </style>")
 
   def jibo_respond_to_end_story(self):
     print("action: jibo_respond_to_end_story")
-    self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_ANIM)
-    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Cool, yeah, that's an interesting point. That was fun really really fun!! I hope we can read again some time.")
-    self.ros.send_jibo_command(JiboStorybookBehaviors.HAPPY_DANCE)
+    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Cool, <es cat='happy'/> yeah that's an interesting point. That was fun really really fun!! I hope we can read again some time.")
 
   def start_waiting_for_child_response(self):
     print("action: start_waiting_for_child_response")
@@ -706,7 +694,8 @@ class StorybookFSM(object):
     print("action: start_listening_for_child_read_sentence")
     rule = "TopRule = $* $HELP {%slotAction='help'%} $*; HELP = (need help) | (please help) | (assist) | (tell me) | (need helpful);"
     # Start ASR with Hey Jibo required, so that the child needs to explicitly ask for help.
-    self.ros.send_jibo_asr_command(JiboAsrCommand.START, rule, True)
+    # TODO: figure out why asking for Hey, Jibo doesn't work.
+    self.ros.send_jibo_asr_command(JiboAsrCommand.START, rule)
     self.start_child_audio_timer()
     self.streaming_transcription = ""
 
@@ -823,13 +812,17 @@ class StorybookFSM(object):
   def try_answer_question(self, question_type, query):
     if question_type != self.current_end_page_question().question_type:
       return
-
+    print("answering question index", self.end_page_question_idx)
     self.current_end_page_question().try_answer(query, self.student_model)
+    # Get more questions.
+    # self.end_page_questions = self.student_model.get_end_page_questions(self.end_page_question_idx + 1)
+    # print("try answer question, got new questions, now length is ", len(self.end_page_questions), self.end_page_question_idx)
     # Trigger!
-    print("About to trigger")
     self.child_end_page_got_answer()
 
   def jibo_end_page_respond_to_child_helper(self, idk):
+    print("respond to child helper, index is ", self.end_page_question_idx, len(self.end_page_questions))
+    self.end_page_questions = self.student_model.get_end_page_questions(self.end_page_question_idx + 1)
     self.current_end_page_question().respond_to_child(self.ros, idk)
     print("Done with end page response, idk was", idk, "incrementing end_page_question_idx")
     self.end_page_question_idx += 1

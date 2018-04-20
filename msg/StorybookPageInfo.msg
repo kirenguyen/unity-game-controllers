@@ -10,3 +10,4 @@ string[] sentences
 
 StorybookSceneObject[] scene_objects
 StorybookTinkerText[] tinkertexts
+StorybookJiboPrompt[] prompts

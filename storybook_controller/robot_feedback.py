@@ -110,7 +110,7 @@ class EndPageQuestion(object):
       if self.correct:
         pre_response_prompt = "Yup, nice job!"
       else:
-        pre_response_prompt = "Good try, but that's not quite right"
+        pre_response_prompt = "Good try, but that's not quite right. <break size='.2'/>"
     self.respond_to_child_impl(ros_manager, pre_response_prompt)
 
   def respond_to_child_impl(self, ros_manager, pre_response_prompt):
@@ -282,7 +282,10 @@ class EndPageQuestionWordPronounce(EndPageQuestion):
     jibo_text = pre_response_prompt + "the pronunciation of this word is <break size='.4'/> <duration stretch='1.3'>" + \
       self.expected_word + " </duration>."
     if not self.correct:
-      jibo_text += "<break size='.5'/> But, maybe we can try again."
+      if self.already_asked:
+        jibo_text += "<break size='.5/> No worries, let's continue."
+      else:
+        jibo_text += "<break size='.5'/> But, maybe we can try again."
     ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
     time.sleep(6)
     params = {"indexes": self.expected_indexes, "unhighlight": True}

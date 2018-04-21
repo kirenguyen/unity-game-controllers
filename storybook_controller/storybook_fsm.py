@@ -306,7 +306,7 @@ class StorybookFSM(object):
     print("got prompts: ", data.prompts)
 
     # Tell student model what sentences are on the page now.
-    self.student_model.update_current_page(data.page_number, data.sentences, data.scene_objects, data.prompts)
+    self.student_model.update_current_page(self.current_story, data.page_number, data.sentences, data.scene_objects, data.prompts)
 
     # Trigger!
     self.page_info_received()
@@ -821,13 +821,13 @@ class StorybookFSM(object):
   def jibo_end_page_respond_to_child_helper(self, idk):
     # Update questions.
     self.end_page_questions = self.student_model.get_end_page_questions(self.end_page_question_idx + 1)
-    
+
     # Add special case for pronunciation questions. If it was incorrect, add another question
     # into the queue to be asked immediately after.
     q = self.current_end_page_question()
-    if q.question_type = EndPageQuestionType.WORD_PRONUNCIATION:
+    if q.question_type == EndPageQuestionType.WORD_PRONUNCIATION:
       if not q.correct and not q.already_asked:
-        self.end_page_questions.insert(self.end_page_question_idx + 1, q.cloen_for_repronounce())
+        self.end_page_questions.insert(self.end_page_question_idx + 1, q.clone_for_repronounce())
 
     self.current_end_page_question().respond_to_child(self.ros, idk)
     print("Done with end page response, idk was", idk, "incrementing end_page_question_idx")

@@ -75,12 +75,15 @@ class StudentModel(object):
 
     # Target words.
     self.target_words = ["donned", "spatula", "unruly", "zig-zag", "bunting",
-                          "helium", "donkey", "raft", "siren", "miserable"]
+                          "helium", "donkey", "raft", "siren", "miserable", "kite", "plain",
+                          "jet", "fog", "cab", "jog"]
 
     # TODO: remove when not hardcoding anymore.
     # For hardcoding Henry's Happy Birthday questions.
     self.henry_questions = {}
     self.setup_henry_questions()
+    self.clifford_questions = {}
+    self.setup_clifford_questions()
 
   def update_with_duration(self, duration, text):
     """
@@ -190,8 +193,9 @@ class StudentModel(object):
     """
     return True
 
-  def update_current_page(self, page_num, sentences, scene_objects, prompts):
+  def update_current_page(self, story, page_num, sentences, scene_objects, prompts):
     self.page_num = page_num
+    self.story = story
     self.current_questions = []
     self.on_page_asked_word = []
     self.on_page_asked_labels = []
@@ -227,12 +231,18 @@ class StudentModel(object):
     gives enough time for speechace results to come in by the second time
     """
 
+    hardcoded = {}
+    hardcoded[self.page_num] = []
+    if self.story == "henrys_happy_birthday":
+      hardcoded = self.henry_questions
+    elif self.story == "clifford_and_the_jet":
+      hardcoded = self.clifford_questions
     # Preexisting questions exist, so first return those then generate new ones the second time.
-    if len(self.open_ended_prompts[self.page_num]) > 0:
+    if len(hardcoded[self.page_num]) > 0:
       if prev_times_asked == 0:
-        self.current_questions = self.open_ended_prompts[self.page_num]
+        self.current_questions = hardcoded[self.page_num]
       elif prev_times_asked == 1:
-        self.current_questions = self.open_ended_prompts[self.page_num] + self.get_additional_end_page_questions()
+        self.current_questions = hardcoded[self.page_num] + self.get_additional_end_page_questions()
     # No preexisting questions exist, so just generate new ones right now.
     else:
       if prev_times_asked == 0:
@@ -271,6 +281,8 @@ class StudentModel(object):
         self.on_page_asked_words += map(lambda w: w.expected_word, word_questions)
         return word_questions
       self.on_page_asked_labels += map(lambda s: s.expected_label, scene_object_questions)
+      print("added something to labels", self.on_page_asked_labels)
+
       return scene_object_questions
     
 
@@ -361,6 +373,7 @@ class StudentModel(object):
     for scene_object in self.current_scene_objects:
       if scene_object.in_text or not force_in_text:
         label = scene_object.label
+        label = " ".join(map(lambda w: self.strip_punctuation(w.lower()), label.split(" ")))
         print("Asked already", self.on_page_asked_labels)
         if label in self.on_page_asked_labels:
           continue
@@ -458,7 +471,9 @@ class StudentModel(object):
     self.henry_questions[3] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("<style set='confused'>What is a <duration stretch='1.2'> spatula </duration>?</style>",
         "So, I think a spatula is used in cooking. Henry's mom can use it to scoop, mix, or spread things while making the cake!")]
     self.henry_questions[4] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("What kind of cake did Henry want?",
-        "I think Henry wants chocolate cake! But his mom says it should be vanilla. <break size='.5'/> Vanilla is also good I guess.")]
+        "I think Henry wants chocolate cake! But his mom says it should be vanilla. <break size='.5'/> Vanilla is also good I guess."),
+                                robot_feedback.EndPageQuestionOpenEndedVerbalResponse("<style set='confused'> <duration stretch='1.2'> What does plain <break size='.2'/> mean? </duration> </style>",
+                                "I think <duration stretch='1.1'> plain </duration> <break size='.3'/> means boring or simple. Henry thinks vanilla cake is plain.")]
     self.henry_questions[5] = []
     self.henry_questions[6] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("Do you know what <break size='.2'/> <duration stretch='1.3'> bunting </duration> <break size='.2'/> means?",
         "Ok. Bunting is what's above the dining table in the picture. <break size='.5'/> It's a decoration like a flag. For my birthday, I had a bunting that said 'Happy Birthday'!")]
@@ -469,26 +484,49 @@ class StudentModel(object):
                                 robot_feedback.EndPageQuestionOpenEndedVerbalResponse("Can you tell me what <break size='.2'/> <duration stretch='1.3'> unruly </duration> <break size='.2'/> means?",
                                   "<style set='confident'> I think <duration stretch='1.2'> unruly </duration> is when something is a little wild or out of control. </style> <break size='.5'/> I have a friend whose hair is very unruly in the morning.")]
     self.henry_questions[9] = []
-    self.henry_questions[10] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("What did Henry's mom want him to <duration stretch='1.3'> don? </duration>", "Henry <duration stretch='1.2'> donned </duration> a white shirt. Remember that don means to put on! I don my bathing suit when I go to the beach")]
+    self.henry_questions[10] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("What did Henry's mom want him to <duration stretch='1.3'> don? </duration>",
+      "<duration stretch='1.2'> Henry donned a white shirt and a bowtie </duration>. <break size='.3'/>  Remember that don means to put on! <break size='.3'/> I don my swimsuit when I go to the beach")]
     self.henry_questions[11] = []
     self.henry_questions[12] = []
-    self.henry_questions[13] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("Do you think Henry liked getting a birthday kiss from Aunt Sue?", "Good thought. I'm not sure if Henry liked the big sticky red mark.")]
+    self.henry_questions[13] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("Do you think Henry liked getting a birthday kiss from Aunt Sue?",
+      "Good thought. I'm not sure if Henry liked the big sticky red mark.")]
     self.henry_questions[14] = []
-    self.henry_questions[15] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("What do you think is in the big yellow box?", "I don't know what's in the box, <style set='enthusiastic'> but I'm excited to find out! </style>")]
-    self.henry_questions[16] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("Oh I love games, what's your favorite party game?", "<style set='enthusiastic'> Cool! My favorite party game is musical chairs. </style> ")]
-    self.henry_questions[17] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("What does Henry look like with the tail on his back?", "<style set='confident'> His friends say he looks like a <break size='.3'/> donkey <break size='.3'/>. A <duration stretch='1.1'> donkey </duration> is an animal like the one in the picture. </style> It's kind of like a horse. Some people use donkeys to help move heavy things on farms.")]
+    self.henry_questions[15] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("What do you think is in the big yellow box?",
+      "I don't know what's in the box, <style set='enthusiastic'> but I'm excited to find out! </style>")]
+    self.henry_questions[16] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("Oh I love games, what's your favorite party game?",
+      "<style set='enthusiastic'> Cool! My favorite party game is musical chairs. </style> ")]
+    self.henry_questions[17] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("What does Henry look like with the tail on his back?",
+      "<style set='confident'> His friends say he looks like a <break size='.3'/> donkey <break size='.3'/>. A <duration stretch='1.1'> donkey </duration> is an animal like the one in the picture. </style> It's kind of like a horse. Some people use donkeys to help move heavy things on farms.")]
     self.henry_questions[18] = []
-    self.henry_questions[19] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("What does miserable mean?", "Good thought. <break size='.5'/> Miserable means very unhappy and sad. Henry feels miserable because his birthday isn't going the way he wanted."),
-                                robot_feedback.EndPageQuestionOpenEndedVerbalResponse("The book says the room became very <duration stretch='1.2'> unruly. </duration> <break size='.5'/> What made the room unruly?", "I think the room was unruly because everyone was fighting for a chair, and everything got a little wild and out of order.")]
+    self.henry_questions[19] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("What does miserable mean?",
+      "Good thought. <break size='.5'/> Miserable means very unhappy and sad. Henry feels miserable because his birthday isn't going the way he wanted."),
+                                robot_feedback.EndPageQuestionOpenEndedVerbalResponse("The book says the room became very <duration stretch='1.2'> unruly. </duration> <break size='.5'/> What made the room unruly?",
+                                  "I think the room was unruly because everyone was fighting for a chair, and everything got a little wild and out of order.")]
     self.henry_questions[20] = []
-    self.henry_questions[21] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("Why is Henry miserable about his birthday?", "Uh huh, yup. I think Henry is having a bad birthday, so he's sad and miserable.")]  
-    self.henry_questions[22] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("Do you know what <break size='.2'/> <duration stretch='1.3'> helium </duration> <break size='.2'/> is? Can you explain it to me?", "My teacher told me that <duration stretch='1.2'> helium </duration> is the gas that goes in balloons. <break size='.8'/> It's what makes them stay floating instead of falling down. The helium balloons Henry's dad got are very colorful!")]
-    self.henry_questions[23] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("Henry's mom used a <duration stretch='1.2'> spatula </duration> to cut the cake. Do you remember what else a spatula is used for?", "Yeah, a <duration stretch='1.1'> spatula </duration> is used for many cooking tasks like mixing and spreading.")]
-    self.henry_questions[24] = []
-    self.henry_questions[25] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("<style set='enthusiastic'> Wow that's a great gift. </style> <break size='.5'/> Do you know what a <break size='.2'/> <duration stretch='1.3'> raft </duration> <break size='.2'/> is?", "A raft is something that you can float on in the water. <break size='.5'/> <style set='enthusiastic'> I like floating on rafts at the swimming pool. </style> Henry's new raft is shaped like a crocodile.")]
-    self.henry_questions[26] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("What is <break size='.2'/> <duration stretch='1.3'> a siren? </duration> <break size='.2'/>", "I think a siren is something on a police car or fire truck that makes a loud ringing noise <break size='.2'/> to make people get out of the way. Sometimes <duration stretch='1.15'> siren </duration> noises wake me up at night.")]
+    self.henry_questions[21] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("Why is Henry miserable about his birthday?",
+      "Yup. I think Henry is having a bad birthday, because he didn't get the cake flavor he wanted and he didn't win any games, so he's sad and miserable.")]  
+    self.henry_questions[22] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("Do you know what <break size='.2'/> <duration stretch='1.3'> helium </duration> <break size='.2'/> is? Can you explain it to me?",
+      "My teacher told me that <duration stretch='1.2'> helium </duration> is the gas that goes in balloons. <break size='.8'/> It's what makes them stay floating instead of falling down. The helium balloons Henry's dad got are very colorful!")]
+    self.henry_questions[23] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("Henry's mom used a <duration stretch='1.2'> spatula </duration> to cut the cake. Do you remember what else a spatula is used for?",
+      "Yeah, a <duration stretch='1.1'> spatula </duration> is used for many cooking tasks like mixing and spreading.")]
+    self.henry_questions[24] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("<duration stretch='1.2'> Can you tell me what a kite </duration> is?",
+        "I think a <duration stretch='1.1'> kite is a toy that flies through the air when the wind blows it </duration>. <break size='.4'/> <style set='enthusiastic'> I like to fly kites, it's very fun! </style>")]
+    self.henry_questions[25] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("<style set='enthusiastic'> Wow that's a great gift. </style> <break size='.5'/> Do you know what a <break size='.2'/> <duration stretch='1.3'> raft </duration> <break size='.2'/> is?",
+      "A raft is something that you can float on in the water. <break size='.5'/> <style set='enthusiastic'> I like floating on rafts at the swimming pool. </style> Henry's new raft is shaped like a crocodile.")]
+    self.henry_questions[26] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("What is <break size='.2'/> <duration stretch='1.3'> a siren? </duration> <break size='.2'/>",
+      "I think a siren is something on a police car or fire truck that makes a loud ringing noise <break size='.2'/> to make people get out of the way. Sometimes <duration stretch='1.15'> siren </duration> noises wake me up at night.")]
     self.henry_questions[27] = []
     self.henry_questions[28] = []
 
-
+  def setup_clifford_questions(self):
+    self.clifford_questions[1] = []
+    self.clifford_questions[2] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("<duration stretch='1.15'> Why won't Jim's jet fly? </duration>",
+        "<style set='confident'> <duration stretch='1.2'> Jim will not fly because of the fog. The fog makes it hard to see. </duration> </style>")]
+    self.clifford_questions[3] = []
+    self.clifford_questions[4] = []
+    self.clifford_questions[5] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("What is a <break size='.3'/> <duration stretch='1.2'> cab? </duration> Can you explain it to me?",
+      "My teacher told me that a <break size='.3'/> cab is like a car. It helps take you from one place to another. <break size='.6'/> Here, Clifford is acting like a cab because he's picking up the family to take them somewhere.")]
+    self.clifford_questions[6] = []
+    self.clifford_questions[7] = []
+    self.clifford_questions[8] = []
 

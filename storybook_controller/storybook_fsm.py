@@ -156,12 +156,13 @@ class StorybookFSM(object):
     elif data.event_type == StorybookEvent.SPEECH_ACE_RESULT:
       print("SPEECH_ACE_RESULT message received")
       message = json.loads(data.message)
+      page_num = message["page_num"]
       sentence_index = message["index"]
       text = message["text"]
       duration = message["duration"]
       speechace_result = json.loads(message["speechace"])
       self.student_model.update_with_duration(duration, text)
-      self.student_model.update_with_speechace_result(speechace_result)
+      self.student_model.update_with_speechace_result(page_num, sentence_index, speechace_result)
     
     elif data.event_type == StorybookEvent.WORD_TAPPED:
       message = json.loads(data.message)
@@ -208,6 +209,10 @@ class StorybookFSM(object):
       self.reported_evaluating_sentence_index = message["index"]
       self.child_read_audio_complete()
 
+      if self.in_evaluate_mode():
+        if self.state == "WAITING_FOR_END_PAGE_CHILD_RESPONSE":
+          self.try_answer_question(EndPageQuestionType.REREAD_SENTENCE, self.streaming_transcription)
+
     elif data.event_type == StorybookEvent.STORY_SELECTED:
       print("STORY_SELECTED message received")
       message = json.loads(data.message)
@@ -216,6 +221,14 @@ class StorybookFSM(object):
       # tablet app and stalling could cause timing issues with jibo_finish_tts
       # so just don't do any stalling for now.
       self.current_story_needs_download = message["needs_download"]
+      
+      # Get target words for this story. If there are none, student model
+      # will use the hardcoded target words instead, but that is not good,
+      # after updating the Unity side, every story should have target words.
+      if "target_words" in message and len(message["target_words"]) > 0:
+        self.student_model.update_target_words(message["target_words"])
+      else:
+        self.student_model.update_target_words(None)
 
       # Clear the dictionary.
       self.explore_pages_read = {}
@@ -224,6 +237,9 @@ class StorybookFSM(object):
       self.storybook_selected()
 
     elif data.event_type == StorybookEvent.STORY_LOADED:
+      # Story loaded occurs after story selected, it means that any assets
+      # have successfully been loaded and the story is waiting on the
+      # title page ready to go.
       print("STORY_LOADED message received")
       message = json.loads(data.message)
       # Trigger!
@@ -375,7 +391,8 @@ class StorybookFSM(object):
       
       # TODO: if we're in explore mode, this might be a question from the child,
       # and we'll need to respond to it accordingly.
-      # Ideally will be able to just read the stop words and have simple cases.
+      # Ideally will be able to just read the slotAction from ASR and have
+      # simple cases to handle each one.
 
 
   """
@@ -675,7 +692,7 @@ class StorybookFSM(object):
 
   def jibo_end_story(self):
     print("action: jibo_end_story")
-    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "<style set='enthusiastic'> Wow! What a great story! </style? <break size='.5'/> <style set='curious'> I want to know, what was your favorite part? </style>")
+    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "<style set='enthusiastic'> Wow! What a great story! </style> <break size='.5'/> <style set='curious'> I want to know, what was your favorite part? </style>")
 
   def jibo_respond_to_end_story(self):
     print("action: jibo_respond_to_end_story")
@@ -683,17 +700,18 @@ class StorybookFSM(object):
 
   def start_waiting_for_child_response(self):
     print("action: start_waiting_for_child_response")
-    # Commented out because can't use apostrophes in the string representation
-    # rule = "TopRule = $* $IDK {%slotAction='idk'%} | ($CORRECT){%slotAction='correct'%} $*; IDK = ((dont know) | (not sure) | (unsure) | (need $* help)); CORRECT = (correct answer);"
     rule = "rules/storybook.fst" # This rule checks for variants of "I don't know"
     self.ros.send_jibo_asr_command(JiboAsrCommand.START, rule)
     self.start_child_end_page_question_timer()
     # Every time we want to start listening for child response.
     self.streaming_transcription = ""
+    # If the current question is waiting for re-read sentence, start the recording.
+    if self.current_end_page_question().question_type == EndPageQuestionType.REREAD_SENTENCE:
+      self.ros.send_storybook_command(StorybookCommand.START_RECORD, {})
 
   def start_listening_for_child_read_sentence(self):
     print("action: start_listening_for_child_read_sentence")
-    rule = "TopRule = $* $HELP {%slotAction='help'%} $*; HELP = (need help) | (please help) | (assist) | (tell me) | (need helpful);"
+    rule = "TopRule = $* $HELP {%slotAction='help'%} $*; HELP = (help me) | (you help) | (want help) | (need help) | (read for me) | (you read) | (read it) | (read this sentence) | (assist) | (tell me) | (need helpful);"
     # Start ASR with Hey Jibo required, so that the child needs to explicitly ask for help.
     # TODO: figure out why asking for Hey, Jibo doesn't work.
     self.ros.send_jibo_asr_command(JiboAsrCommand.START, rule)
@@ -704,6 +722,7 @@ class StorybookFSM(object):
     print("action: stop_waiting_for_child_response")
     self.stop_jibo_asr()
     self.stop_child_end_page_question_timer()
+    self.ros.send_storybook_command(StorybookCommand.CANCEL_RECORD, {})
 
   def stop_listening_for_child_read_sentence(self):
     print("action: stop_listening_for_child_read_sentence")

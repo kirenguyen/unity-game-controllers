@@ -44,7 +44,6 @@ def signal_handler(signal, frame):
   sys.exit()
 
 def main(argv):
-  # TODO: Parse arguments using argparse.
   parser = argparse.ArgumentParser()
   parser.add_argument("participant_id", type=str, help="Unique identifier of participant")
   parser.add_argument("--continue_session", "-c", action="store_true", help="If this flag is passed, Jibo will not need to be woken up at the beginning of the interaction")

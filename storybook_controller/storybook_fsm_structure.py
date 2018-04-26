@@ -99,7 +99,7 @@ class StorybookFSMStructure(object):
       "after": ["start_child_audio_timer"]
     },
     {
-      "trigger": "child_read_audio_complete",
+      "trigger": "child_read_audio_complete", # TODO: not sure if this is the correct trigger anymore, it's for when the done reading button is pressed.
       "source": "WAITING_FOR_CHILD_AUDIO",
       "dest": "EXPLORING_PAGE",
       "before": ["start_child_explore_page_timer"],
@@ -266,13 +266,6 @@ class StorybookFSMStructure(object):
       "dest": "WAITING_FOR_CHILD_AUDIO",
       "after": ["tablet_begin_record", "start_listening_for_child_read_sentence"],
     },
-    # Commented out, because we always have the child read the sentence again if they ask for help.
-    # {
-    #   "trigger": "jibo_finish_tts",
-    #   "source": "WAITING_FOR_JIBO_HELP_WITH_SENTENCE",
-    #   "dest": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
-    #   "after": "send_end_page_prompt"
-    # },
     # This is only for when the done recording button is pressed, so don't touch the asr stuff.
     {
       "trigger":"child_read_audio_complete",
@@ -302,7 +295,7 @@ class StorybookFSMStructure(object):
       "dest": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
       "after": "resend_end_page_prompt" # -> loops back to previous transition, where we wait for jibo_finish_tts then start waiting for answer
     },
-    # No button has been implemented for this yet.
+    # No button has been implemented for this yet, but just add a button and this will work.
     {
       "trigger": "child_request_repeat_end_page_question",
       "source": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
@@ -424,6 +417,16 @@ class StorybookFSMStructure(object):
     },
     {
       "trigger": "child_request_repeat_end_page_question",
+      "source": "*",
+      "dest": "="
+    },
+    {
+      "trigger": "child_end_page_got_answer",
+      "source": "WAITING_FOR_END_PAGE_JIBO_RESPONSE",
+      "dest": "="
+    },
+    {
+      "trigger": "child_read_audio_complete", # Whenever child presses blue button.
       "source": "*",
       "dest": "="
     },

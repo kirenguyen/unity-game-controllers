@@ -20,6 +20,7 @@ class EndPageQuestionType(Enum):
   SCENE_OBJECT_TAP = 1,
   SPEECH_REQUESTED = 2,
   WORD_PRONUNCIATION = 3,
+  REREAD_SENTENCE = 4,
 
 # Base class for end of page questions.
 class EndPageQuestion(object):
@@ -279,14 +280,63 @@ class EndPageQuestionWordPronounce(EndPageQuestion):
     return query in self.expected_word or self.expected_word in query
 
   def respond_to_child_impl(self, ros_manager, pre_response_prompt):
-    jibo_text = pre_response_prompt + "the pronunciation of this word is <break size='.4'/> <duration stretch='1.3'>" + \
+    jibo_text = "the pronunciation of this word is <break size='.4'/> <duration stretch='1.3'>" + \
       self.expected_word + " </duration>."
+    # If it's the second time getting it wrong, don't tell them that it's wrong again because
+    # that's discouraging.
+    if self.already_asked and not self.correct:
+      jibo_text = "Ok, I'll try again too. <break size='.2'/>" + jibo_text
+    # Otherwise, just add the normal pre_response_prompt.
+    else:
+      jibo_text = pre_response_prompt + jibo_text
+
     if not self.correct:
       if self.already_asked:
         jibo_text += "<break size='.5/> No worries, let's continue."
       else:
-        jibo_text += "<break size='.5'/> But, maybe we can try again."
+        jibo_text += "<break size='.5'/> Maybe we can try again."
+
     ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
     time.sleep(6)
     params = {"indexes": self.expected_indexes, "unhighlight": True}
     ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_WORD, params)
+
+class EndPageQuestionRereadSentence(EndPageQuestion):
+  def __init__(self, page_num, sentence_index, sentence_text_array, word_index_offset):
+    super(EndPageQuestionRereadSentence, self).__init__(
+      EndPageQuestionType.REREAD_SENTENCE)
+    self.page_num = page_num
+    self.sentence_index = sentence_index
+    self.sentence_text_array = sentence_text_array
+    # Figure out exactly which words are in this sentence,
+    # so we know which ones to highlight.
+    self.word_indexes = []
+    for i in range(word_index_offset, word_index_offset + len(sentence_text_array)):
+       self.word_indexes.append(i)
+
+  def is_equal(self, other):
+    return self.page_num == other.page_num and self.sentence_index == other.sentence_index
+
+  def correct_answer(self):
+    return self.sentence_text
+
+  def ask_question_impl(self, ros_manager, pre_question_prompt):
+    jibo_text = pre_question_prompt + "The blue sentence says <break size='.5'/> " + \
+                "<duration stretch='1.3'>" + " ".join(self.sentence_text_array) + "</duration>" + \
+                "<break size='.5'/> Can you read it again? And press the button when you're done. Go ahead."
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
+    params = {"indexes": self.word_indexes, "stay_on": True}
+    print("Indexes for sentence", self.sentence_index, "are:", self.word_indexes)
+    ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_WORD, params)
+
+  def try_answer_impl(self, query, student_model):
+    # Note that this will almost always be false, unless they say it 100% correct.
+    return query in " ".join(self.sentence_text_array)
+
+  def respond_to_child_impl(self, ros_manager, pre_response_prompt):
+    jibo_text = "All right, good job."
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
+    time.sleep(3)
+    params = {"indexes": self.word_indexes, "unhighlight": True}
+    ros_manager.send_storybook_command(StorybookCommand.HIGHLIGHT_WORD, params)
+

@@ -30,7 +30,7 @@ Set up phoneme information.
 # ]
 
 # print("Loaded arpabet phonemes dict!")
-
+# print(ARPABET["fog"][0])
 
 """
 Load stop words.
@@ -46,6 +46,7 @@ class StudentModel(object):
     # Threshold above which we don't consider the word as a priority for improving,
     # meaning that it is likely not to be asked about by Jibo.
     self.GOOD_PRONOUNCE_THRESHOLD = 90.0 # Out of 100
+    self.NEED_REREAD_THRESHOLD = 25.00 # Out of 100
 
     # Higher decay increases how much having already asked a word
     # affects the chance of asking it again.
@@ -58,14 +59,15 @@ class StudentModel(object):
     self.confused_word_pairs = [] # Array of tuples of expected word and child's (wrong) word.
     self.confused_label_pairs = [] # Array of tuples of expected label and child's label.
 
-    # Keep track of trend of overall scores per page.
-    self.overall_quality_scores = []
+    # Keep track of trend of overall scores per page and per sentence.
+    # Doubly nested map from page number to sentence index to score.
+    self.sentence_scores_by_page = {}
 
     # Current questions we've told the controller about for this page.
     self.current_questions = []
     self.on_page_asked_words = []
     self.on_page_asked_labels = []
-
+    # Open ended prompts for the current page.
     self.open_ended_prompts = {}
 
     # Current sentences on the page in evaluate mode.
@@ -74,9 +76,14 @@ class StudentModel(object):
     self.current_scene_objects = []
 
     # Target words.
-    self.target_words = ["donned", "spatula", "unruly", "zig-zag", "bunting",
+    self.hardcoded_target_words = ["donned", "spatula", "unruly", "zig-zag", "bunting",
                           "helium", "donkey", "raft", "siren", "miserable", "kite", "plain",
-                          "jet", "fog", "cab", "jog"]
+                          # Clifford and the Jet
+                          "jet", "fog", "cab", "jog",
+                          # The Hungry Toad
+                          "soap", "throat", "toaster", "coat", "foam", "boat", "groaned"]
+
+    self.target_words = self.hardcoded_target_words
 
     # TODO: remove when not hardcoding anymore.
     # For hardcoding Henry's Happy Birthday questions.
@@ -84,6 +91,71 @@ class StudentModel(object):
     self.setup_henry_questions()
     self.clifford_questions = {}
     self.setup_clifford_questions()
+    self.hungry_toad_questions = {}
+    self.setup_hungry_toad_questions()
+
+
+  def update_target_words(self, target_words):
+    if target_words is None:
+      self.target_words = self.hardcoded_target_words
+    else:
+      self.target_words = target_words
+
+  def update_current_page(self, story, page_num, sentences, scene_objects, prompts):
+    self.page_num = page_num
+    self.story = story
+    # Reset all page-level variables.
+    self.current_questions = []
+    self.on_page_asked_word = []
+    self.on_page_asked_labels = []
+    self.on_page_asked_sentence_indexes = []
+    self.sentences_by_page_number[page_num] = []
+    for sentence in sentences:
+      self.sentences_by_page_number[page_num].append(sentence.split())
+    self.current_sentences = self.sentences_by_page_number[page_num]
+    self.current_scene_objects = scene_objects
+    self.open_ended_prompts[page_num] = []
+    for p in prompts:
+      self.open_ended_prompts[page_num].append(robot_feedback.EndPageQuestionOpenEndedVerbalResponse(
+        p.question, p.response))
+    if page_num not in self.sentence_scores_by_page:
+      self.sentence_scores_by_page[page_num] = {}
+
+
+  def update_with_speechace_result(self, page_num, sentence_index, speechace_result):
+    """
+    Updates the model given the result of a recent speechace analysis.
+
+    Need page_num instead of just using self.page_num because sometimes the result could
+    be from a reread sentence question from the previous page and the response is just
+    delayed, so can't assume that the response is for the "current" page.
+    """
+    print("Updating with speech ace results!", "Page:", page_num, "Sentence:", sentence_index)
+    if "text_score" not in speechace_result:
+      print("--- Got speech ace results but no text score, likely speech was empty")
+      self.sentence_scores_by_page[page_num][sentence_index] = 0.0
+      return
+
+    text_score = speechace_result["text_score"]
+    
+    # Record sentence level score.
+    self.sentence_scores_by_page[page_num][sentence_index] = text_score["quality_score"]
+    
+    # Record scores for each word and for each phoneme.
+    for word_score in text_score["word_score_list"]:
+      # Convert all words to lowercase and remove punctuation
+      word = self.strip_punctuation(word_score["word"].lower())
+      if word not in self.word_pronunciation_scores:
+        self.word_pronunciation_scores[word] = []
+      self.word_pronunciation_scores[word].append(word_score["quality_score"])
+      # Record scores for each phoneme of the word.
+      for phoneme_score in word_score["phone_score_list"]:
+        phoneme = phoneme_score["phone"]
+        if phoneme not in self.phoneme_scores:
+          self.phoneme_scores[phoneme] = []
+        self.phoneme_scores[phoneme].append(phoneme_score["quality_score"])
+
+    self.plot_distribution()
 
   def update_with_duration(self, duration, text):
     """
@@ -91,36 +163,6 @@ class StudentModel(object):
     the child to speak.
     """
     pass
-
-  def update_with_speechace_result(self, speechace_result):
-    """
-    Updates the model given the result of a recent speechace analysis.
-    """
-    print("Updating with speech ace results!")
-    if "text_score" not in speechace_result:
-      print("--- Got speech ace results but no text score, likely speech was empty")
-      return
-    text_score = speechace_result["text_score"]
-    # Record overall quality score.
-    self.overall_quality_scores.append(text_score["quality_score"])
-    # Record scores for each word.
-    for word_score in text_score["word_score_list"]:
-      # Convert all words to lowercase.
-      word = self.strip_punctuation(word_score["word"].lower())
-      if word not in self.word_pronunciation_scores:
-        self.word_pronunciation_scores[word] = []
-      self.word_pronunciation_scores[word].append(word_score["quality_score"])
-      # Record scores for each phoneme of each word.
-      for phoneme_score in word_score["phone_score_list"]:
-        phoneme = phoneme_score["phone"]
-        if phoneme not in self.phoneme_scores:
-          self.phoneme_scores[phoneme] = []
-        self.phoneme_scores[phoneme].append(phoneme_score["quality_score"])
-
-
-    self.plot_distribution()
-
-    # TODO something more sophisticated given this score information?
 
   def update_with_correct_word_tapped(self, word):
     """
@@ -193,42 +235,11 @@ class StudentModel(object):
     """
     return True
 
-  def update_current_page(self, story, page_num, sentences, scene_objects, prompts):
-    self.page_num = page_num
-    self.story = story
-    self.current_questions = []
-    self.on_page_asked_word = []
-    self.on_page_asked_labels = []
-    self.sentences_by_page_number[page_num] = []
-    for sentence in sentences:
-      self.sentences_by_page_number[page_num].append(sentence.split())
-    self.current_sentences = self.sentences_by_page_number[page_num]
-    self.current_scene_objects = scene_objects
-    self.open_ended_prompts[page_num] = []
-    for p in prompts:
-      self.open_ended_prompts[page_num].append(robot_feedback.EndPageQuestionOpenEndedVerbalResponse(
-        p.question, p.response))
-
-    # # Use this to hardcode questions for the robot.
-    # if page_num == 3:
-    #   self.henry_questions[page_num].append(robot_feedback.EndPageQuestionSceneObjectTap("spatula", self.get_scene_object_ids("spatula")))
-    # elif page_num == 6:
-    #   self.henry_questions[page_num].append(robot_feedback.EndPageQuestionWordTap("bunting", self.get_word_indexes("bunting")))
-    # elif page_num == 20:
-    #   self.henry_questions[page_num].append(robot_feedback.EndPageQuestionSceneObjectTap("bunting", self.get_scene_object_ids("bunting"), None, "This is a bunting. It's what's above the dining table!"))
-    # elif page_num == 22:
-    #   self.henry_questions[page_num].append(robot_feedback.EndPageQuestionWordTap("helium", self.get_word_indexes("helium")))
-    # elif page_num == 25:
-    #   self.henry_questions[page_num].append(robot_feedback.EndPageQuestionSceneObjectTap("zig-zag", self.get_scene_object_ids("zig-zag"), "Can you tap on the zig-zag lines in the picture? I think they're on the crocodile!"))
-    # elif page_num == 26:
-    #   self.henry_questions[page_num].append(robot_feedback.EndPageQuestionWordtap("siren", self.get_word_indexes("siren")))
-
-
   def get_end_page_questions(self, prev_times_asked):
     """
     If prev_times_asked is 0, it's the first time we're asking for questions on this page.
     If it's 1, then it's the second time. We only support asking up to two times, which
-    gives enough time for speechace results to come in by the second time
+    gives enough time for all speechace results for that page to come in by the second time.
     """
 
     hardcoded = {}
@@ -237,18 +248,21 @@ class StudentModel(object):
       hardcoded = self.henry_questions
     elif self.story == "clifford_and_the_jet":
       hardcoded = self.clifford_questions
+    elif self.story == "the_hungry_toad":
+      hardcoded = self.hungry_toad_questions
     # Preexisting questions exist, so first return those then generate new ones the second time.
     if len(hardcoded[self.page_num]) > 0:
+      self.current_questions = hardcoded[self.page_num]
       if prev_times_asked == 0:
-        self.current_questions = hardcoded[self.page_num]
+        pass
       elif prev_times_asked == 1:
-        self.current_questions = hardcoded[self.page_num] + self.get_additional_end_page_questions()
+        self.current_questions += self.get_reread_sentence_questions() + self.get_additional_end_page_questions()
     # No preexisting questions exist, so just generate new ones right now.
     else:
       if prev_times_asked == 0:
-        self.current_questions = self.get_additional_end_page_questions()
+        self.current_questions = self.get_additional_end_page_questions() + self.get_reread_sentence_questions()
       elif prev_times_asked == 1:
-        self.current_questions = self.current_questions + self.get_additional_end_page_questions()
+        self.current_questions += self.get_reread_sentence_questions()
 
     return self.current_questions
 
@@ -266,31 +280,59 @@ class StudentModel(object):
 
     print("Getting additional end page questions...")
 
+    questions_to_return = []
+
     # 25% chance try to get scene object first, 75% try to get word first.
+    # TODO: have some way of comparing them and deciding which ones to use,
+    # instead of using this random thing.
     word_questions = self.try_get_word_questions()
     scene_object_questions = self.try_get_scene_object_questions()
     if random.random() < .25:
       if len(scene_object_questions) > 0:
         self.on_page_asked_labels += map(lambda s: s.expected_label, scene_object_questions)
         print("added something to labels", self.on_page_asked_labels)
-        return scene_object_questions
-      self.on_page_asked_words += map(lambda w: w.expected_word, word_questions)
-      return word_questions
+        questions_to_return += scene_object_questions
+      else:
+        self.on_page_asked_words += map(lambda w: w.expected_word, word_questions)
+        questions_to_return += word_questions
     else:
       if len(word_questions) > 0:
         self.on_page_asked_words += map(lambda w: w.expected_word, word_questions)
-        return word_questions
-      self.on_page_asked_labels += map(lambda s: s.expected_label, scene_object_questions)
-      print("added something to labels", self.on_page_asked_labels)
+        questions_to_return += word_questions
+      else:
+        self.on_page_asked_labels += map(lambda s: s.expected_label, scene_object_questions)
+        print("added something to labels", self.on_page_asked_labels)
+        questions_to_return += scene_object_questions
 
-      return scene_object_questions
-    
+    return questions_to_return    
+
+  def get_reread_sentence_questions(self):
+    """
+    Based on sentence level SpeechAce results, ask child to re-read sentences for which
+    their score was lower than some minimum threshold.
+
+    If only_last is True, only look for the last sentence because we've already checked
+    for the earlier ones in a previous call to get_reread_sentence_questions on this page.
+    """
+    reread_sentence_questions = []
+    print("Getting reread sentence questions")
+    word_index_offset = 0
+    for i in range(len(self.current_sentences)):
+      if i in self.sentence_scores_by_page[self.page_num] and \
+        self.sentence_scores_by_page[self.page_num][i] < self.NEED_REREAD_THRESHOLD:
+        if i not in self.on_page_asked_sentence_indexes:
+        # Create re-read sentence question.
+          reread_sentence_questions.append(robot_feedback.EndPageQuestionRereadSentence(
+            self.page_num, i, self.current_sentences[i], word_index_offset))
+      word_index_offset += len(self.current_sentences[i])
+    self.on_page_asked_sentence_indexes += map(lambda s: s.sentence_index, reread_sentence_questions)
+    return reread_sentence_questions
 
   def try_get_word_questions(self, force=False):
     word = self.get_word_for_question(force)
     if word is not None:
-      # 80% chance pronounce, 20% chance tap on word, vs. asking to pronounce that word.
-      if random.random() < .20:
+      # 50% chance pronounce, 50% chance tap on word, vs. asking to pronounce that word.
+      if random.random() < .50:
         return [robot_feedback.EndPageQuestionWordTap(word,
                 self.get_word_indexes(word))]
       else:
@@ -480,7 +522,7 @@ class StudentModel(object):
     self.henry_questions[7] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("How do you think Henry feels right now?",
         "Yeah. Personally, I think Henry is nervous that he won't get any candy.")]
     self.henry_questions[8] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("<style set='confused'> What kind of pattern does Henry's favorite T-shirt have? </style>",
-        "Henry's favorite shirt has a zig zag pattern. Zig zag is a line that goes left, right left, right, just like a lighting bolt!"),
+        "Henry's favorite shirt has a zig zag pattern. Zig zag is a line that goes left, right left, right, just like a lightning bolt!"),
                                 robot_feedback.EndPageQuestionOpenEndedVerbalResponse("Can you tell me what <break size='.2'/> <duration stretch='1.3'> unruly </duration> <break size='.2'/> means?",
                                   "<style set='confident'> I think <duration stretch='1.2'> unruly </duration> is when something is a little wild or out of control. </style> <break size='.5'/> I have a friend whose hair is very unruly in the morning.")]
     self.henry_questions[9] = []
@@ -519,14 +561,40 @@ class StudentModel(object):
     self.henry_questions[28] = []
 
   def setup_clifford_questions(self):
-    self.clifford_questions[1] = []
-    self.clifford_questions[2] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("<duration stretch='1.15'> Why won't Jim's jet fly? </duration>",
-        "<style set='confident'> <duration stretch='1.2'> Jim will not fly because of the fog. The fog makes it hard to see. </duration> </style>")]
+    self.clifford_questions[1] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("<duration stretch='1.1'> What is <break size='.2'/> a jet? </duration>",
+        "<duration stretch='1.2'>A jet is like a very fast plane, it is something you can fly! </duration>")]
+    self.clifford_questions[2] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("<duration stretch='1.2'> Why won't Jim's jet fly? </duration>",
+        "<style set='confident'> <duration stretch='1.2'> Jim will not fly the jet because of the fog. <break size='.2'/> The fog makes it hard to see. </duration> </style>")]
     self.clifford_questions[3] = []
     self.clifford_questions[4] = []
     self.clifford_questions[5] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("What is a <break size='.3'/> <duration stretch='1.2'> cab? </duration> Can you explain it to me?",
-      "My teacher told me that a <break size='.3'/> cab is like a car. It helps take you from one place to another. <break size='.6'/> Here, Clifford is acting like a cab because he's picking up the family to take them somewhere.")]
-    self.clifford_questions[6] = []
+      "My teacher told me that a <break size='.3'/> cab is like a car. It helps take you from one place to another, like a taxi <break size='.6'/> Here, Clifford is acting like a cab because he's picking up the family to take them somewhere.")]
+    self.clifford_questions[6] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("What does it mean to jog?",
+      "Jogging is like running. Clifford is jogging through the fog to carry the people away.")]
     self.clifford_questions[7] = []
     self.clifford_questions[8] = []
 
+  def setup_hungry_toad_questions(self):
+    self.hungry_toad_questions[1] = []
+    self.hungry_toad_questions[2] = []
+    self.hungry_toad_questions[3] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("<duration stretch='1.2'> What exactly is a throat? </duration>?",
+        "My teacher told me the throat is a body part right in your neck. It's for air and food to go through when you talk or eat.")]
+    self.hungry_toad_questions[4] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("What did Toad eat that he shouldn't have?",
+        "Toad ate some soap! And it got stuck in his throat. That's not good!")]
+    self.hungry_toad_questions[5] = []
+    self.hungry_toad_questions[6] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("<duration stretch='1.1'> Do you know what a toaster is? Can you tell me? </duration>",
+        "Yeah, I think a toaster is something you have in your kitchen to heat up bread into toast! I love eating toast with jam for breakfast!")]
+    self.hungry_toad_questions[7] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("What did the doctor do to help Toad?",
+        "I think the doctor made toad a list of things he's not supposed to eat. Hopefully that helps, let's see!")]
+    self.hungry_toad_questions[8] = []
+    self.hungry_toad_questions[9] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("<duration stretch='1.1'> Do you know what <break size='.2'/> foam is? Can you explain it to me? </duration>",
+        "My teacher told me that foam is a material that is light <break size='.2'/> and sometimes squishy. A foam football is much softer than a real football. I think people often use foam balls when they play dodgeball in school!")]
+    self.hungry_toad_questions[10] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("How do you think the doctor feels right now?",
+        "Yup, personally, I think the doctor is getting very upset. Toad won't stop eating things!")]
+    self.hungry_toad_questions[11] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("<duration stretch='1.05'> <style set='curious'> Do you know what a coat is? </style> </duration>",
+        "Yeah, a coat is like a jacket. In the winter, I need to wear my coat because it's so cold.")]
+    self.hungry_toad_questions[12] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("<duration stretch='1.1'> Do you know what <break size='.1'/> groaned <break size='.1'/> means? </duration>",
+        "I think groaned means to say something in a very annoyed way. The doctor groaned because Toad keeps eating things he shouldn't eat!")]
+    self.hungry_toad_questions[13] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("<duration stretch='1.1'> What is a rowboat? </duration>",
+        "<duration stretch='1.1'> A rowboat is a small boat that you sit in and use paddles to row. </duration> <style set='enthusiastic'> It's like the song row row row your boat! </style>")]
+    self.hungry_toad_questions[14] = []

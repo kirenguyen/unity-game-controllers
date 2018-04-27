@@ -287,7 +287,7 @@ class StorybookFSMStructure(object):
       "trigger":"jibo_finish_tts",
       "source": "WAITING_FOR_END_PAGE_JIBO_QUESTION",
       "dest": "WAITING_FOR_END_PAGE_CHILD_RESPONSE",
-      "after": ["start_waiting_for_child_response"]
+      "after": ["start_waiting_for_end_page_child_response"]
     },
     {
       "trigger": "child_end_page_question_timeout",

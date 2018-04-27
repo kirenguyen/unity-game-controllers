@@ -225,7 +225,7 @@ class StorybookFSM(object):
       # Get target words for this story. If there are none, student model
       # will use the hardcoded target words instead, but that is not good,
       # after updating the Unity side, every story should have target words.
-      if "target_words" in message and len(message["target_words"]) > 0:
+      if "target_words" in message and message["target_words"] is not None and len(message["target_words"]) > 0:
         self.student_model.update_target_words(message["target_words"])
       else:
         self.student_model.update_target_words(None)
@@ -612,7 +612,7 @@ class StorybookFSM(object):
 
   def tablet_begin_record(self):
     print("action: tablet_begin_record")
-    self.ros.send_storybook_command(StorybookCommand.START_RECORD)
+    self.ros.send_storybook_command(StorybookCommand.START_RECORD, {"index": self.reported_evaluating_sentence_index})
 
   def tablet_stop_and_discard_record(self):
     print("action: tablet_stop_and_discard_record") # No speechace should be sent, not uploaded to S3 either.
@@ -698,19 +698,27 @@ class StorybookFSM(object):
     print("action: jibo_respond_to_end_story")
     self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Cool, <es cat='happy'/> yeah that's an interesting point. That was fun really really fun!! I hope we can read again some time.")
 
-  def start_waiting_for_child_response(self):
-    print("action: start_waiting_for_child_response")
-    rule = "rules/storybook.fst" # This rule checks for variants of "I don't know"
-    self.ros.send_jibo_asr_command(JiboAsrCommand.START, rule)
-    self.start_child_end_page_question_timer()
-    # Every time we want to start listening for child response.
-    self.streaming_transcription = ""
+  def start_waiting_for_end_page_child_response(self):
+    # Does the same as start_waiting_for_child_response but also checks for
+    # what the end page question is so we can decide if we should start recording.
+    print("action: start_waiting_for_end_page_child_response")
+    self.start_waiting_for_child_response()
     # If the current question is waiting for re-read sentence, start the recording.
     if self.current_end_page_question().question_type == EndPageQuestionType.REREAD_SENTENCE:
       params = {
         "index": self.current_end_page_question().sentence_index
       }
       self.ros.send_storybook_command(StorybookCommand.START_RECORD, params)
+
+  def start_waiting_for_child_response(self):
+    # This action is for whenever Jibo says something that requires a verbal
+    # response from the child.
+    print("action: start_waiting_for_child_response")
+    rule = "rules/storybook.fst" # This rule checks for variants of "I don't know"
+    self.ros.send_jibo_asr_command(JiboAsrCommand.START, rule)
+    self.start_child_end_page_question_timer()
+    # Every time we want to start listening for child response.
+    self.streaming_transcription = ""
 
   def start_listening_for_child_read_sentence(self):
     print("action: start_listening_for_child_read_sentence")

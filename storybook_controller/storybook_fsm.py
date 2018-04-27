@@ -707,11 +707,14 @@ class StorybookFSM(object):
     self.streaming_transcription = ""
     # If the current question is waiting for re-read sentence, start the recording.
     if self.current_end_page_question().question_type == EndPageQuestionType.REREAD_SENTENCE:
-      self.ros.send_storybook_command(StorybookCommand.START_RECORD, {})
+      params = {
+        "index": self.current_end_page_question().sentence_index
+      }
+      self.ros.send_storybook_command(StorybookCommand.START_RECORD, params)
 
   def start_listening_for_child_read_sentence(self):
     print("action: start_listening_for_child_read_sentence")
-    rule = "TopRule = $* $HELP {%slotAction='help'%} $*; HELP = (help me) | (you help) | (want help) | (need help) | (read for me) | (you read) | (read it) | (read this sentence) | (assist) | (tell me) | (need helpful);"
+    rule = "TopRule = $* $HELP {%slotAction='help'%} $*; HELP = (help me) | (you help) | (some help) | (want help) | (need help) | (read for me) | (you read) | (read it) | (read this sentence) | (assist) | (tell me) | (need helpful);"
     # Start ASR with Hey Jibo required, so that the child needs to explicitly ask for help.
     # TODO: figure out why asking for Hey, Jibo doesn't work.
     self.ros.send_jibo_asr_command(JiboAsrCommand.START, rule)

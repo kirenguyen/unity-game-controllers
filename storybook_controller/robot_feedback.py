@@ -26,9 +26,12 @@ class EndPageQuestionType(Enum):
 class EndPageQuestion(object):
   def __init__(self, question_type):
     self.question_type = question_type
+    self.hint_exists = False
     self.asked = False
+    self.hint_given = False
     self.answered = False
     self.correct = False
+    self.should_ask_again_on_incorrect_answer = False # Only true for word pronunciation questions right now
 
   def __eq__(self, other):
     if not isinstance(other, self.__class__):
@@ -64,13 +67,26 @@ class EndPageQuestion(object):
   def ask_question_impl(self, ros_manager, pre_question_prompt):
     raise NotImplementedError
 
-  ##################################################
-  ##################################################
-  #                                                #
-  # TODO: add a mechanism for giving a hint?       #
-  #                                                #
-  ##################################################
-  ##################################################
+  def clone_for_ask_again(self):
+    if self.should_ask_again_on_incorrect_answer:
+      return self.clone_for_ask_again_impl()
+    else:
+      raise Exception("Should not be cloning a question that isn't meant to be repeated")
+
+  def clone_for_ask_again_impl(self, ros_manager):
+    raise NotImplementedError
+
+  def give_hint(self, ros_manager):
+    self.hint_given = True
+    if not self.hint_exists:
+      raise Exception("Cannot give hint, no hint exists")
+    else:
+      pre_hint_prompt = JiboStatements.get_statement(
+        JiboStatementType.PRE_END_PAGE_QUESTION_HINT)
+      self.give_hint_impl(ros_manager, pre_hint_prompt)
+
+  def give_hint_impl(self, ros_manager, pre_hint_prompt):
+    raise NotImplementedError
 
   def correct_answer(self):
     """
@@ -207,7 +223,7 @@ class EndPageQuestionSceneObjectTap(EndPageQuestion):
 Pronounce a word.
 """
 class EndPageQuestionOpenEndedVerbalResponse(EndPageQuestion):
-  def __init__(self, question, response_text, extra_response_function=None):
+  def __init__(self, question, response_text, hint_text=None, extra_response_function=None):
     """
     Parameter extra_response_function is added behavior on top of simply
     saying the response. The function should take as argument the ros manager.
@@ -217,6 +233,9 @@ class EndPageQuestionOpenEndedVerbalResponse(EndPageQuestion):
 
     self.open_ended_question = question
     self.response_text = response_text
+    self.hint_text = hint_text
+    if self.hint_text is not None:
+      self.hint_exists = True
     self.extra_response_function = extra_response_function
 
   def is_equal(self, other):
@@ -231,6 +250,10 @@ class EndPageQuestionOpenEndedVerbalResponse(EndPageQuestion):
     jibo_text = pre_question_prompt + self.open_ended_question
     ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
 
+  def give_hint_impl(self, ros_manager, pre_hint_prompt):
+    jibo_text = pre_hint_prompt + self.hint_text
+    ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
+
   def try_answer_impl(self, query, student_model):
     return query in self.response_text
 
@@ -240,7 +263,6 @@ class EndPageQuestionOpenEndedVerbalResponse(EndPageQuestion):
     # point gets across.
     generic_prompt = "Good thought."
     jibo_text = generic_prompt + self.response_text
-    # TODO: just for hardcoding...
     jibo_text = self.response_text
     ros_manager.send_jibo_command(JiboStorybookBehaviors.SPEAK, jibo_text)
     if self.extra_response_function is not None:
@@ -254,8 +276,9 @@ class EndPageQuestionWordPronounce(EndPageQuestion):
     self.expected_word = word
     self.expected_indexes = indexes
     self.already_asked = already_asked
+    self.should_ask_again_on_incorrect_answer = True
 
-  def clone_for_repronounce(self):
+  def clone_for_ask_again_impl(self):
     """
     Returns a copy version of the question, with already_asked set to True,
     but self.asked and self.answered and self.correct reset to blank.
@@ -292,7 +315,7 @@ class EndPageQuestionWordPronounce(EndPageQuestion):
 
     if not self.correct:
       if self.already_asked:
-        jibo_text += "<break size='.5/> No worries, let's continue."
+        jibo_text += "<break size='.5/> Let's continue."
       else:
         jibo_text += "<break size='.5'/> Maybe we can try again."
 

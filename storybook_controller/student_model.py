@@ -155,7 +155,7 @@ class StudentModel(object):
           self.phoneme_scores[phoneme] = []
         self.phoneme_scores[phoneme].append(phoneme_score["quality_score"])
 
-    self.plot_distribution()
+    # self.plot_distribution()
 
   def update_with_duration(self, duration, text):
     """
@@ -233,6 +233,9 @@ class StudentModel(object):
     In a turn taking exercise, returns whether or not the child should be
     asked to read the sentence at the given index.
     """
+    # For now, this is always True. What it actually does is just control the color
+    # of the text in the storybook. One color for child and another for Jibo, but
+    # it's always the child because haven't added Jibo's turn yet.
     return True
 
   def get_end_page_questions(self, prev_times_asked):
@@ -332,7 +335,7 @@ class StudentModel(object):
     word = self.get_word_for_question(force)
     if word is not None:
       # 50% chance pronounce, 50% chance tap on word, vs. asking to pronounce that word.
-      if random.random() < .50:
+      if random.random() < .5:
         return [robot_feedback.EndPageQuestionWordTap(word,
                 self.get_word_indexes(word))]
       else:
@@ -562,7 +565,7 @@ class StudentModel(object):
 
   def setup_clifford_questions(self):
     self.clifford_questions[1] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("<duration stretch='1.1'> What is <break size='.2'/> a jet? </duration>",
-        "<duration stretch='1.2'>A jet is like a very fast plane, it is something you can fly! </duration>")]
+        "<duration stretch='1.2'>A jet is like a very fast plane, it is something you can fly! </duration>", "Take a look at the picture. What is Jim flying?")]
     self.clifford_questions[2] = [robot_feedback.EndPageQuestionOpenEndedVerbalResponse("<duration stretch='1.2'> Why won't Jim's jet fly? </duration>",
         "<style set='confident'> <duration stretch='1.2'> Jim will not fly the jet because of the fog. <break size='.2'/> The fog makes it hard to see. </duration> </style>")]
     self.clifford_questions[3] = []

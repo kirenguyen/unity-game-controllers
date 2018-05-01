@@ -14,6 +14,7 @@ class JiboStatementType(Enum):
   PRE_END_PAGE_QUESTION = 0,
   PRE_END_PAGE_QUESTION_REPROMPT = 1
   PRE_HELP_WITH_SENTENCE = 2
+  PRE_END_PAGE_QUESTION_HINT = 3
 
 class JiboStatements(object):
   # The more generic fallback statement.
@@ -33,8 +34,8 @@ class JiboStatements(object):
   ]
 
   pre_end_page_question_reprompts = [
-    "Here's the question again, and if you don't know just say <break size='.4'/> I don't know <break size='.4'/> and I'll help out: ",
-    "Ok, let me repeat the question, and if you're not sure just say <break size='.4'/> I don't know <break size='.4'/> and I'll tell you what I think: ",
+    "Here's the question again, try to answer, but if you don't know just say <break size='.4'/> I don't know <break size='.4'/> and I'll help out: ",
+    "Ok, let me repeat the question. I want to hear your ideas, but if you're confused, say <break size='.4'/> I don't know <break size='.4'/> and I'll tell you what I think: ",
   ]
 
   pre_help_with_sentence_prompts = [
@@ -44,10 +45,22 @@ class JiboStatements(object):
     "All right, no problem, let me give it a try",
   ]
 
+  pre_end_page_question_hint_prompts = [
+    "Ok, let me give you a hint. <break size='.3/>",
+    "I think you can do it. Here's a small hint. <break size='.3'/>",
+    "Give it a try! I believe in you. <break size='.2'/>",
+    "",
+    "",
+    "",
+    "",
+    "",
+  ]
+
   type_to_statements_map = {
     JiboStatementType.PRE_END_PAGE_QUESTION: pre_end_page_question_prompts,
     JiboStatementType.PRE_END_PAGE_QUESTION_REPROMPT: pre_end_page_question_reprompts,
     JiboStatementType.PRE_HELP_WITH_SENTENCE: pre_help_with_sentence_prompts,
+    JiboStatementType.PRE_END_PAGE_QUESTION_HINT: pre_end_page_question_hint_prompts,
   }
 
   @staticmethod

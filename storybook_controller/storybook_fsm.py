@@ -362,6 +362,10 @@ class StorybookFSM(object):
     JiboAsrResult message."
     """
     if data.transcription == "" or data.transcription == ASR_NOSPEECH:
+      # Commented out because we no longer use this to detect end of speech,
+      # instead we just assume that when we get a result it's the entire response,
+      # because otherwise the delay is too long.
+      #
       # If previous state says that Jibo ASR was still ongoing, then this is
       # the point at which we can start detecting that the person is done speaking.
       # if not self.jibo_asr_empty:
@@ -373,16 +377,25 @@ class StorybookFSM(object):
     else:
       print("Got Jibo ASR transcription:", data.transcription)
       self.asr_received()
-      # If we get nothing after a certain amount of time after this, then assume end of speech.
-      self.start_eos_timer()
 
-      # Check for "I don't know"
+      # Check for "I don't know" and other key phrases.
       if data.slotAction == "idk":
         self.asr_idk_received()
       elif data.slotAction == "help":
         self.asr_help_received()
+      elif data.slotAction == "storybook_repeat":
+        self.asr_repeat_received()
       elif data.slotAction == "wake_up":
-        self.wake_up_received()
+        self.asr_wake_up_received()
+      else:
+        # If we get nothing after a certain amount of time after this, then assume end of speech
+        # for the resopnse, and not a special stop word.
+
+        # TODO: consider if this should actually be called outside of the switch statement,
+        # because otherwise we could get stuck with not recognizing end of speech
+        # if it has a stop word in it but we're not in the right fsm state to handle that
+        # stop word and then the system doesn't know what to do.
+        self.start_eos_timer()
 
       self.streaming_transcription += data.transcription
 
@@ -398,14 +411,17 @@ class StorybookFSM(object):
   """
   Triggers
   """
-  def wake_up_received(self):
-    print("trigger: wake_up_received")
+  def asr_wake_up_received(self):
+    print("trigger: asr_wake_up_received")
 
   def asr_idk_received(self):
     print("trigger: asr_idk_received")
 
   def asr_help_received(self):
     print("trigger: asr_help_received")
+
+  def asr_repeat_received(self):
+    print("trigger: asr_repeat_received")
 
   def storybook_selected(self):
     print("trigger: storybook_selected")
@@ -450,9 +466,9 @@ class StorybookFSM(object):
     print("trigger: no_questions_go_to_next_page")
 
   def asr_received(self):
-    # When asr goes from silence to not silence.
+    # When we get an asr result that isn't empty.
     print("trigger: asr_received")
-    # Check for state and stop timers.
+    # Check for state and restart timers.
     self.stop_eos_timer()
     if self.state == "WAITING_FOR_CHILD_AUDIO":
       self.start_child_audio_timer()
@@ -530,8 +546,8 @@ class StorybookFSM(object):
 
   def jibo_start_story(self):
     print("action: jibo_start_story")
-    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK,
-      "<style set='enthusiastic'> <es cat='happy'> Great, it's time to start, I'm so excited! </es> I would love it if you would read to me! </style> <break size='.3'/> Every time a sentence appears, read it as best as you can, then click the blue button to see the next sentence. <break size='1'/> Ready? Let's go!")
+    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Let's start now!")
+      # "<style set='enthusiastic'> <es cat='happy'> Great, it's time to start, I'm so excited! </es> I would love it if you would read to me! </style> <break size='.3'/> Every time a sentence appears, read it as best as you can, then click the blue button to see the next sentence. <break size='1'/> Ready? Let's go!")
 
   def jibo_continue_story(self):
     print("action: jibo_continue_story")
@@ -542,7 +558,7 @@ class StorybookFSM(object):
     print("action: load_previous_stored_state")
     # This restores any state that we need for the state machine and student model.
     # For now, just print something.
-    # TODO
+    # TODO: implement this!
     print("done loading previous stored state")
 
   def start_child_explore_page_timer(self):
@@ -610,9 +626,13 @@ class StorybookFSM(object):
     }
     self.ros.send_storybook_command(StorybookCommand.SHOW_NEXT_SENTENCE, params)
 
-  def tablet_begin_record(self):
-    print("action: tablet_begin_record")
-    self.ros.send_storybook_command(StorybookCommand.START_RECORD, {"index": self.reported_evaluating_sentence_index})
+  def tablet_begin_record_for_current_sentence(self):
+    print("action: tablet_begin_record_for_current_sentence")
+    params = {
+      "index": self.reported_evaluating_sentence_index,
+      "oneshot": False
+    }
+    self.ros.send_storybook_command(StorybookCommand.START_RECORD, params)
 
   def tablet_stop_and_discard_record(self):
     print("action: tablet_stop_and_discard_record") # No speechace should be sent, not uploaded to S3 either.
@@ -650,6 +670,7 @@ class StorybookFSM(object):
       # Trigger!
       self.no_questions_go_to_next_page()
     else:
+      print("asking question index", self.end_page_question_idx)
       self.end_page_questions[self.end_page_question_idx].ask_question(self.ros)
 
   def start_child_end_page_question_timer(self):
@@ -670,6 +691,7 @@ class StorybookFSM(object):
 
   def resend_end_page_prompt(self):
     print("action: resend_end_page_prompt")
+    print("asking question index", self.end_page_question_idx)
     self.end_page_questions[self.end_page_question_idx].ask_question(self.ros)
 
   def jibo_end_page_response_to_child(self):
@@ -681,10 +703,21 @@ class StorybookFSM(object):
 
   def jibo_end_page_response_to_child_idk(self):
     """
-    For when the child expresses that they don't know the answer.
+    For when the child expresses that they don't know the answer (and we've already given a hint).
     """
     print("action: jibo_end_page_response_to_child_idk")
     self.jibo_end_page_respond_to_child_helper(True)
+
+  def jibo_end_page_give_hint(self):
+    """
+    The first time that the child has said I don't know.
+    """
+    print("action: jibo_end_page_give_hint")
+    q = self.current_end_page_question()
+    if not q.hint_given:
+      q.give_hint(self.ros)
+    else:
+      raise Exception("Should not be trying to give hint twice.")
 
   def tablet_go_to_end_page(self):
     print("action: tablet_go_to_end_page")
@@ -706,7 +739,8 @@ class StorybookFSM(object):
     # If the current question is waiting for re-read sentence, start the recording.
     if self.current_end_page_question().question_type == EndPageQuestionType.REREAD_SENTENCE:
       params = {
-        "index": self.current_end_page_question().sentence_index
+        "index": self.current_end_page_question().sentence_index,
+        "oneshot": True
       }
       self.ros.send_storybook_command(StorybookCommand.START_RECORD, params)
 
@@ -765,6 +799,16 @@ class StorybookFSM(object):
     available = self.end_page_question_idx < len(self.end_page_questions)
     print("condition: more_end_page_questions_available:", available)
     return available
+
+  def hint_available_and_not_given(self):
+    """
+    Returns true if a hint exists for the current end page question,
+    and the hint has not already been given.
+    """
+    q = self.current_end_page_question()
+    result = q.hint_exists and not q.hint_given
+    print("condition: hint_available_and_not_given:", result)
+    return result
 
   def continue_from_prev_state(self):
     print("condition: should_continue_from_prev_state", self.should_continue_from_prev_state)
@@ -849,17 +893,26 @@ class StorybookFSM(object):
     self.child_end_page_got_answer()
 
   def jibo_end_page_respond_to_child_helper(self, idk):
-    # Update questions.
+    """
+    Helper to handle whena  child attempts to respond to a question, or has said "idk"
+    more than once.
+
+    Argument idk is True if the child has said "idk" for the second time.
+    """
+
+    # Update the questions now that the student model has had some time to get back
+    # the SpeechAce results.
     self.end_page_questions = self.student_model.get_end_page_questions(self.end_page_question_idx + 1)
 
     # Add special case for pronunciation questions. If it was incorrect, add another question
     # into the queue to be asked immediately after.
     q = self.current_end_page_question()
-    if q.question_type == EndPageQuestionType.WORD_PRONUNCIATION:
-      if not q.correct and not q.already_asked:
-        self.end_page_questions.insert(self.end_page_question_idx + 1, q.clone_for_repronounce())
+    if q.should_ask_again_on_incorrect_answer:
+      if idk or (not q.correct and not q.already_asked):
+        self.end_page_questions.insert(self.end_page_question_idx + 1, q.clone_for_ask_again())
 
     self.current_end_page_question().respond_to_child(self.ros, idk)
-    print("Done with end page response, idk was", idk, "incrementing end_page_question_idx")
+    print("Done with end page response, incrementing end_page_question_idx")
     self.end_page_question_idx += 1
+
 

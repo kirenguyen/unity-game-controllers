@@ -95,11 +95,22 @@ class StudentModel(object):
     self.setup_hungry_toad_questions()
 
 
+  def update_with_prev_saved_state(self, saved_state):
+    if saved_state is None:
+      print("Cannot load from prev state, is None")
+    self.word_pronunciation_scores = saved_state["word_pronunciation_scores"]
+    self.word_tap_scores = saved_state["word_tap_scores"]
+    self.scene_object_tap_scores = saved_state["scene_object_tap_scores"]
+    print("Student model loaded saved state!")
+    self.plot_distribution()
+
   def update_target_words(self, target_words):
+    print("Updating target words!")
     if target_words is None:
       self.target_words = self.hardcoded_target_words
     else:
       self.target_words = target_words
+    print("target words:", self.target_words)
 
   def update_current_page(self, story, page_num, sentences, scene_objects, prompts):
     self.page_num = page_num
@@ -116,8 +127,9 @@ class StudentModel(object):
     self.current_scene_objects = scene_objects
     self.open_ended_prompts[page_num] = []
     for p in prompts:
+      print("prompt", p.question, p.response, p.hint)
       self.open_ended_prompts[page_num].append(robot_feedback.EndPageQuestionOpenEndedVerbalResponse(
-        p.question, p.response))
+        p.question, p.response, p.hint))
     if page_num not in self.sentence_scores_by_page:
       self.sentence_scores_by_page[page_num] = {}
 

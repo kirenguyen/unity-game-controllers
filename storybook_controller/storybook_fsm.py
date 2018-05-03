@@ -242,11 +242,12 @@ class StorybookFSM(object):
       # title page ready to go.
       print("STORY_LOADED message received")
       message = json.loads(data.message)
-      # Trigger!
       if message["continue_midway"]:
         self.should_continue_from_prev_state = True
+        # Trigger!
         self.storybook_loaded_with_continue()
       else:
+        # Trigger!
         self.storybook_loaded()
 
     elif data.event_type == StorybookEvent.CHANGE_MODE:
@@ -554,12 +555,10 @@ class StorybookFSM(object):
     self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK,
       "<style set='confused'> Oops, <break size='.3'/> <es cat='confused'> I must have gotten confused. </es> <break size='.7'/> </style> <style set='enthusiastic'> Let's pick up where we left off. Remember, reed the sentences as they appear, and don't be afraid to ask for help. Let's go! </style>")
 
-  def load_previous_stored_state(self):
-    print("action: load_previous_stored_state")
+  def load_previous_saved_state(self):
+    print("action: load_previous_saved_state")
     # This restores any state that we need for the state machine and student model.
-    # For now, just print something.
-    # TODO: implement this!
-    print("done loading previous stored state")
+    self.student_model.update_with_prev_saved_state(self.prev_saved_state)
 
   def start_child_explore_page_timer(self):
     print("action: start_child_explore_page_timer")

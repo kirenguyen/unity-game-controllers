@@ -212,7 +212,7 @@ class StorybookFSMStructure(object):
       "trigger": "storybook_loaded_with_continue",
       "source": "WAITING_FOR_STORY_LOAD",
       "dest": "WAITING_FOR_STORY_LOAD",
-      "before": ["jibo_continue_story", "load_previous_stored_state"],
+      "before": ["jibo_continue_story", "load_previous_saved_state"],
       "conditions": ["in_evaluate_mode"]
     },
     {

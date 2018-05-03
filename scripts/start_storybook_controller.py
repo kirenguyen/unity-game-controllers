@@ -35,7 +35,10 @@ def signal_handler(signal, frame):
   saved_state = {
     "storybook_mode": fsm.current_storybook_mode,
     "story_name": fsm.current_story,
-    "page_number": fsm.current_page_number
+    "page_number": fsm.current_page_number,
+    "word_pronunciation_scores": fsm.student_model.word_pronunciation_scores,
+    "word_tap_scores": fsm.student_model.word_tap_scores,
+    "scene_object_tap_scores": fsm.student_model.scene_object_tap_scores
   }
   saved_state_string = json.dumps(saved_state)
   f = open(SAVED_STATE_PATH, "w")

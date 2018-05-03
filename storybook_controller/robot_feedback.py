@@ -223,7 +223,7 @@ class EndPageQuestionSceneObjectTap(EndPageQuestion):
 Pronounce a word.
 """
 class EndPageQuestionOpenEndedVerbalResponse(EndPageQuestion):
-  def __init__(self, question, response_text, hint_text=None, extra_response_function=None):
+  def __init__(self, question, response_text, hint_text="", extra_response_function=None):
     """
     Parameter extra_response_function is added behavior on top of simply
     saying the response. The function should take as argument the ros manager.
@@ -234,7 +234,7 @@ class EndPageQuestionOpenEndedVerbalResponse(EndPageQuestion):
     self.open_ended_question = question
     self.response_text = response_text
     self.hint_text = hint_text
-    if self.hint_text is not None:
+    if self.hint_text is not None and self.hint_text != "":
       self.hint_exists = True
     self.extra_response_function = extra_response_function
 

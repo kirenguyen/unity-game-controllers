@@ -547,8 +547,8 @@ class StorybookFSM(object):
 
   def jibo_start_story(self):
     print("action: jibo_start_story")
-    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "Let's start now!")
-      # "<style set='enthusiastic'> <es cat='happy'> Great, it's time to start, I'm so excited! </es> I would love it if you would read to me! </style> <break size='.3'/> Every time a sentence appears, read it as best as you can, then click the blue button to see the next sentence. <break size='1'/> Ready? Let's go!")
+    self.ros.send_jibo_command(JiboStorybookBehaviors.SPEAK, "let's go")
+      # "<style set='enthusiastic'> <es cat='happy'> Great, it's time to start!</es> I would love it if you would read to me! </style> <break size='.3'/> Every time a sentence appears, read it as best as you can, then click the blue button to see the next sentence. <break size='1'/> Ready? Let's go!")
 
   def jibo_continue_story(self):
     print("action: jibo_continue_story")

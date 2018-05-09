@@ -3,3 +3,4 @@
 
 string question
 string response
+string hint

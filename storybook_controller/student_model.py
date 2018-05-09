@@ -257,17 +257,21 @@ class StudentModel(object):
     gives enough time for all speechace results for that page to come in by the second time.
     """
 
-    hardcoded = {}
-    hardcoded[self.page_num] = []
+    # Decide if we're using hardcoded questions or the questions provided by a user of
+    # the authoring interface.
+    prompts = {}
     if self.story == "henrys_happy_birthday":
-      hardcoded = self.henry_questions
+      prompts = self.henry_questions
     elif self.story == "clifford_and_the_jet":
-      hardcoded = self.clifford_questions
+      prompts = self.clifford_questions
     elif self.story == "the_hungry_toad":
-      hardcoded = self.hungry_toad_questions
+      prompts = self.hungry_toad_questions
+    else:
+      prompts = self.open_ended_prompts
+
     # Preexisting questions exist, so first return those then generate new ones the second time.
-    if len(hardcoded[self.page_num]) > 0:
-      self.current_questions = hardcoded[self.page_num]
+    if len(prompts[self.page_num]) > 0:
+      self.current_questions = prompts[self.page_num]
       if prev_times_asked == 0:
         pass
       elif prev_times_asked == 1:

@@ -142,7 +142,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 	def _reach_max_task_time(self): # if the condition is in "fixed novice": set a max elapsed time
 			if self.interaction.subj_cond != "novice": return
-			print("======= calculate elapsed time======")
+			
 			max_elapsed_time = datetime.timedelta(seconds=4.5*60) # 5 mins
 			max_elapsed_time2 = datetime.timedelta(seconds=6.5*60) # 5 mins
 			if datetime.datetime.now() - self.task_controller.get_task_time()['start'] > max_elapsed_time:
@@ -268,9 +268,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 	
 			speakingStage(ispy_action_msg.speakingStage)
 
-
-		print("+++++++++++++++++++++++++ action message received!!!!")
-		print(ispy_action_msg)
+		print("\n")
 		# Evaluates the action message
 		msg_evaluator(ispy_action_msg)
 
@@ -297,8 +295,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		'''
 		speech ace analysis
 		'''
-		print("+++++++++speech analay!!")
-		print(self.origText)
+		print("+++++speech analay: {}".format(self.origText))
 		# If given a word to evaluate and done recording send the information to speechace
 		if self.origText and self.recorder.has_recorded % 2 == 0 and self.recorder.has_recorded != 0:
 			# If you couldn't find the android audio topic, automatically pass
@@ -307,9 +304,6 @@ class iSpyGameFSM: # pylint: disable=no-member
 			print("clicked object is: "+self.origText)
 
 			self.correct_obj = self.task_controller.isTarget(self.origText) 
-			print("target list:")
-			print(self.task_controller.target_list)
-			print("is target: "+str(self.correct_obj))
 			
 			
 			if not self.recorder.valid_recording:
@@ -366,6 +360,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 			if task == None:
 			
 				self.ros_node_mgr.send_ispy_cmd(GAME_FINISHED)
+				self.interaction.child_states.done()
 			else:
 				self.ros_node_mgr.send_ispy_cmd(SEND_TASKS_TO_UNITY, task)
 				self.interaction.reset_turn_taking()

@@ -42,5 +42,5 @@ gnome-terminal --geometry 40x120+0+0 --title ">>>iSpy Game Study MAIN<<<" -e "./
 echo $3
 if [ $3 != 'practice' ]; then
   echo "start rosbag recording...."
-  ./scripts/rosbag_record.sh $1 $2 $3
+  ./scripts/ispy_rosbag_record.sh $1 $2 $3
 fi

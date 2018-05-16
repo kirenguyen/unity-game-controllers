@@ -14,7 +14,7 @@ import datetime
 
 class AffdexAnalysis:
 
-	def __init__(self,rosbag_name):
+	def __init__(self,rosbag_name,session_number,interaction_log):
 
 		self.inter_data_frame = 0
 		rospy.init_node('node_name')
@@ -37,8 +37,18 @@ class AffdexAnalysis:
 		self.frame_number = 0
 		self.game_start_time = None
 		self.time_diff = 0
+		self.interaction_log = True if "true" in interaction_log else False
 
 		self.transition_state_start_time = None
+
+		participant_id = rosbag_name.split('_')[0]
+		experimenter= rosbag_name.split('_')[1]
+		date_info = rosbag_name.split('__')[1].split('.')[0].replace("-",":")
+		if self.interaction_log:
+			print("interaction log is true")
+			self._initialize_csvs(participant_id, experimenter, session_number,date_info)
+		else:
+			print("interaction log is false")
 
 		subprocess.call("./tega_cam_affect_analysis", shell=True)
 
@@ -54,9 +64,101 @@ class AffdexAnalysis:
 			print(self.transition_state_start_time)
 		
 
+	def _initialize_csvs(self,participant_id, experimenter, session_number,date_info):
+		import datetime
+
+		now = datetime.datetime.now()
+		date = now.isoformat()
+
+		# self.ispy_action_log_csv = open(CSV_PATH + "ispy_action_log.csv","a") 
+		# self.ispy_action_log_csv.write(','.join(['elapsedTime','localTime', 'isScalingUpDown',
+		# 	'pointerClick','isDragging','onPinch','clickedObjectName']))
+		INTERACTION_OUTPUTS ="interaction_outputs/"
+		self.child_robot_interaction_csv = open(INTERACTION_OUTPUTS+"interaction_log_"+participant_id+"_"+experimenter+ ":"+date_info+"_"+session_number+"_"+date+".csv","a") 
+		
+
+		self.child_robot_interaction_csv.write(','.join([
+			'elapsedTimeFromGameStart','currentLocalTime',
+
+			'gameTask','vocab', 'taskStartTime','taskEndTime', 'taskDuration',
+
+			'taskTurnIndex', 'whoseTurn', 'robotRole', 
+
+			'turnStartTime','turnEndTime','turnDuration',
+
+			'numCollectedObjectsForTask', 'numChildCollectedObjectsForTask', # task related
+			
+			'numTotalAttemptsForTask','numChildTotalAttemptsForTask', # task related 
+
+			'numChildClickCancelForTurn', 'numHintButtonPressedForTask', # turn related
+
+			'numQsAskeddForTask','numPositiveAnswerForTask','numNegativeAnswerForTask','numOtherAnswerForTask','numNoAnswerAttempt1ForTask',# turn related
+
+			'gameStateTrigger','currentInteractionState','currentGameState',
+
+			'robotPhysicalBehavior', 'robotVirtualBehavior',
+
+			'robotClickedObj','clickedRightObject','clickedObjName',
+
+			'numTouchAbsenceAlertPerTask','objectWordPronounced' ,
+
+			'isDraggin', 'pointerClick','onPinch','isScalingUp','isScalingDown',
+
+			'maxElapsedTimeReached'
+			
+			
+			])+'\n')
+
+	def on_child_robot_interaction_data_received(self,msg):
+		'''
+		callback function. called by ros node manager when child-robot interaction data are received
+		write the data to csv file
+		'''
+		print("msg!!!")
+		print(msg)
+
+		elapsedTime = str(datetime.now() - self.game_start_time) if self.game_start_time else ""
+		content = ','.join(map(str,[
+			elapsedTime,str(datetime.now()),
+
+			msg.gameTask, msg.taskVocab,  msg.taskStartTime, msg.taskEndTime, msg.taskDuration,  # task related 
+
+			msg.taskTurnIndex, msg.whoseTurn, msg.robotRole, 
+
+			msg.turnStartTime, msg.turnEndTime, msg.turnDuration,
+
+			msg.numFinishedObjectsForTask[0], msg.numFinishedObjectsForTask[1], # turn related 
+
+			msg.numTotalAttemptsForTask[0],msg.numTotalAttemptsForTask[1],
+
+			msg.numChildClickCancelForTurn, #msg.numHintButtonPressedForTask, 
+
+			msg.numQAForTurn[0], msg.numQAForTurn[1], msg.numQAForTurn[2], 
+
+			msg.numQAForTurn[3], msg.numQAForTurn[4],  msg.numQAForTurn[5],
+
+			msg.gameStateTrigger, msg.currentInteractionState, msg.currentGameState,
+
+			msg.robotBehavior, msg.robotVirtualBehavior,
+
+			msg.robotClickedObj, msg.clickedRightObject, msg.clickedObjName, 
+
+			msg.numTouchAbsenceAlertPerTask, msg.objectWordPronounced,
+
+			msg.ispyAction[0], msg.ispyAction[1], msg.ispyAction[2], msg.ispyAction[3], msg.ispyAction[4],
+
+			msg.maxElapsedTime 
+			
+			]))
+
+		self.child_robot_interaction_csv.write(content+'\n')
+
 
 	def on_inter_data(self,data):
 		self.inter_data_frame += 1
+		print("on inter data")
+		if self.interaction_log:
+			self.on_child_robot_interaction_data_received(data)
 
 	def on_game_start(self,data):
 		if self.time_diff == 0:
@@ -122,6 +224,10 @@ class AffdexAnalysis:
 		self.file.write(line+'\n')
 
 if __name__ == "__main__":
+	print(sys.argv)
 	rosbag_name = sys.argv[1]
+	session_number = sys.argv[2]
+	interaction_log = sys.argv[3]
+	print(interaction_log)
 	print("rosbag name: {}".format(rosbag_name))
-	aff = AffdexAnalysis(rosbag_name)
+	aff = AffdexAnalysis(rosbag_name,session_number,interaction_log)

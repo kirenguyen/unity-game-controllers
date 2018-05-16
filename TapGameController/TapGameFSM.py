@@ -271,8 +271,8 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
            # If you couldn't actually record, automatically fail            
             if not self.recorder.valid_recording:
                 self.letters = list(self.current_round_word)
-                self.passed = ['0'] * len(self.letters)
-                self.scores = [0] * len(self.letters)
+                self.passed = ['1'] * len(self.letters)
+                self.scores = [100] * len(self.letters)
 
                 print ("NO RECORDING SO YOU AUTOMATICALLY FAIL")
                 self.audio_file = 'None'
@@ -294,8 +294,8 @@ class TapGameFSM: # pylint: disable=no-member, too-many-instance-attributes
                         print(self.scores)
                 else:
                     self.letters = list(self.current_round_word)
-                    self.passed = ['0'] * len(self.letters)
-                    self.scores = [0] * len(self.letters)
+                    self.passed = ['1'] * len(self.letters)
+                    self.scores = [100] * len(self.letters)
                     print('NO RECORDING, SO YOU AUTO-FAIL!!')
 
             self.player_pronounce_eval()

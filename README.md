@@ -1,22 +1,25 @@
 # Unity Game Controllers
 ---------------------
 
-This repository contains the Controllers, Models, and various Utilities for Unity-backed game environments.
+This repository is a codebase for research on Agents and Robots interacting with Humans via Unity-backed games
+The overall architecture is very similar to a Model-View-Controller architecture [(MVC)](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller). 
 
-The overall architecture is a Model-View-Controller architecture [(MVC)](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller).
+**Models** include the Game State, Student, and Agent Models.
 
-The **Models** include the Game State, implemented in Python and closely coupled with ROS. Models of a Student and Agent can also be found here.
+**Views** are implemented in C# and the Unity framework, running on the Tablet. Examples include the [Tap Game](https://github.com/mitmedialab/tap-game-unity)
 
-The **View** is implemented in C# and the Unity framework, running on the Tablet.
+**Controllers** include game logic, and are implemented in Python and closely coupled with ROS.
 
-The **Controller** includes agent decision-making algorithm and game logic, implemented in Python and closely coupled with ROS.
-
-In addition, we have a number of **Sensors** that provide real-time interactive features to **Models**
-
+In addition, we also plan to support a number of **Sensors** that provide real-time interactive features to **Models**
 
 
 Basics
 --------------
+This repository contains:
+
+- Controllers, Models, and various Utility functions for managing different Unity games.
+- ROS message definitions for communicating with the Unity implemented games via RosBridge.
+- Launch scripts and experiment infrastructure for setting up an interaction, logging, cleaning, and analyzing data. 
 
 This project is based on a best-practices template Python project which integrates several different tools. It saves you work by setting up a number of things like style-checking, unit testing, data generation, etc. with a [Make](https://en.wikipedia.org/wiki/Make_(software))-based worflow.
 
@@ -24,18 +27,30 @@ If you are new to Python or new to creating Python projects, see Kenneth Reitz's
 
 Project Setup
 ---------------
+## Tools
 
-### System Dependencies
+We recommend using [PyCharm](https://www.jetbrains.com/pycharm/download/#section=linux) as your primary editor for large Python projects like this one. Sublime Text is OK for quick edits, but PyCharm gives you the full power of static analysis, environment management, style checking, and an integrated terminal etc. in an attractive all-in-one package.
 
-This project was built and tested on Ubuntu 14.04, with a full desktop installation of ROS Indigo
+## Installation
 
-We recommend using Anaconda with Python 2.7 as your default system-wide Python environment (for ROS) and creating an Anaconda with Python 3.6 virtual env to execute the controller code [see here for details](https://uoa-eresearch.github.io/eresearch-cookbook/recipe/2014/11/20/conda/).
+This project was built and tested on Ubuntu 16.04, with a full desktop installation of ROS Indigo
 
-**All Python code should be Python 3 compatible.**
+We recommend using Python 2.7 as your default system-wide Python environment (for ROS) and creating a virtual environment with Python 3.6 virtual env to execute the controller code
+
+**All Python code should be written in Python 3!**
+
+### Create and source virtualenv
+
+If you haven't done this yet, set up and source a python3 virtual env with:
+`mkdir -p ~/python-virtualenvs`
+`virtualenv -p $(which python3) ~/python-virtualenvs/unity-game-controllers --system-site-packages`
+
+Then, activate it with
+`source ~/python-virtualenvs/unity-game-controllers/bin/activate`
 
 ### Install the project's non-python development and runtime requirements::	
 	
-	UBUNTU 14.04 System dependencies
+	UBUNTU 16.04 System dependencies
 	$ sudo apt-get install portaudio19-dev
 	$ sudo apt-get install xdotool
 	$ sudo apt-get install wmctrl
@@ -51,10 +66,8 @@ We recommend using Anaconda with Python 2.7 as your default system-wide Python e
 	# External catkin repos necessary for message passing and other functions
 	# Clone these to ~/catkin_ws/src, then run "catkin_make" from ~/catkin_ws
 	$ https://github.com/bosch-ros-pkg/usb_cam.git
-	$ https://github.com/mitmedialab/unity_game_msgs.git
 	$ https://github.com/mitmedialab/r1d1_msgs.git (to communicate w Tega)
 	$ https://github.com/mitmedialab/jibo_msgs.git (to communicate w Jibo)
-
 
 ### Install the project's python development and runtime requirements::
 
@@ -66,20 +79,17 @@ We recommend using Anaconda with Python 2.7 as your default system-wide Python e
 ## Running a Unity Game Controller
 ---------------
 
-To run a Unity Game Controller, there are three major components of the back-end system
 
-- A ROSCore. Manages all communication between nodes in the network. 
-	- Create one in a new terminal by running `$ roscore`; requires successful install of ROS)
-- ROSBridge Webserver: Handles communication between tablet and ROSCore
-	- Create one in a new terminal by running `$ roslaunch rosbridge_server rosbridge_websocket.launch`; Requires install of Rosbridge (not included with regular ROS Desktop install), above.
-- *GameController (any
+0. Activate the virtualenv
+```bashrc
+source ~/python-virtualenvs/unity-game-controllers/bin/activate
+```
+1. Start `roscore` and `rosbridge` *# do not switch to a different terminal window until done loading*
+```bashrc
+$ ./scripts/startROS.sh
+```
 
-### Tap Game
--------------
-
-After installing the dependencies, you can launch the Rosbridge Webserver and ROSCore together by running `$ ./scripts/startROS.sh`
-
-Then, you can run the TapGame Controller by running the following script in a  Python 3 environment:
+2. Start a game controller. E.g., you can run the TapGame Controller by running the following script:
 
 `$ python -m scripts.start_tap_game_controller [participant_id] [experimenter] [experiment_phase]`
 
@@ -88,26 +98,6 @@ e.g.
 `$ python -m scripts.start_tap_game_controller p01 sam experiment`
 
 You can test the tap game in `practice` or `posttest` mode, by passing those arguments in as the `experiment_phase`
-
-### ISpy Game
--------------
-
-After installing the dependencies, you can launch the Rosbridge Webserver and ROSCore together by running `$ ./scripts/startROS.sh`
-
-Then, you can run the iSpyGame Controller by running the following script in a  Python 3 environment:
-
-`$ python -m scripts.start_ispy_game_controller`
-
-
-### ROSbag analysis
--------------------
-
-You'll need to install `ffmpeg` for some of the functionality contained here.
-
-Follow these instructions: https://www.faqforge.com/linux/how-to-install-ffmpeg-on-ubuntu-14-04/
-
-Also clone and make from source the officially supported ROS bag tools: https://github.com/srv/srv_tools
-
 
 Troubleshooting:
 ------------------

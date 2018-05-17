@@ -4,6 +4,7 @@ import pickle
 import subprocess
 
 affdex_dir = "affdex-outputs"
+rosbag_input_dir = 'rosbag_inputs'
 #os.path.exists()
 remaining_rosbags=""
 
@@ -23,6 +24,14 @@ s1_rosbags = [i[0] for i in s1]
 s2_rosbags = [i[0] for i in s2]
 all_bags = [i+".bag" for i in s1_rosbags + s2_rosbags]
 
+def remove_downloaded_bags():
+    bags_tmp = all_bags
+    for ibag in bags_tmp:
+        print("ibag: {}".format(ibag))
+        if os.path.isfile(rosbag_input_dir+'/'+ibag):
+            all_bags.remove(ibag)
+
+
 rosbags_dict = {i[0]+".bag":i[1]+".csv" for i in s1+s2}
 
 
@@ -35,11 +44,14 @@ import httplib2
 from oauth2client.file import Storage
 from apiclient.discovery import build
 from oauth2client.client import OAuth2WebServerFlow
+import json
 
 # Copy your credentials from the console
 # https://console.developers.google.com. click credentials. create oauth2 ID
-CLIENT_ID = '380833764831-853pp7su2msc7tk57erulgbdgrl63ea1.apps.googleusercontent.com'
-CLIENT_SECRET = 'nUlM-TbacZD5ZxWyexWQlLv9'
+
+drive_info = json.load(open("/home/huilichen/.google_drive_info.json"))
+CLIENT_ID = drive_info["CLIENT_ID"]
+CLIENT_SECRET = drive_info["CLIENT_SECRET"]
 
 
 OAUTH_SCOPE = 'https://www.googleapis.com/auth/drive'
@@ -136,14 +148,16 @@ for item in list_files(drive_service):
     	# os.system("echo "+msg + " >> rosbag_downloading_error_report.txt")
     	pass
 
-if success == True:
-	# delete the current participant
-	try:
-		del remaining_rosbags[next_participant]
-		pickle.dump( remaining_rosbags , open( "remaining_rosbags.p", "wb" ))
-	except:
-		print("failed to delte participant: {}".format(next_participant))
-		os.system("echo \"ERROR: failed to delete "+next_participant+">> rosbag_downloading_error_report.txt")
+
+##### delete the current participant from the remaining rosbags
+# if success == True:
+# 	# delete the current participant
+# 	try:
+# 		del remaining_rosbags[next_participant]
+# 		pickle.dump( remaining_rosbags , open( "remaining_rosbags.p", "wb" ))
+# 	except:
+# 		print("failed to delte participant: {}".format(next_participant))
+# 		os.system("echo \"ERROR: failed to delete "+next_participant+">> rosbag_downloading_error_report.txt")
     
 
 

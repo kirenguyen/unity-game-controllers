@@ -13,6 +13,10 @@
 
 5. add the following to your `./bashrc` for ROS IP
 	* `export ROS_IP=$(/sbin/ip -o -4 addr list eth0 | awk '{print $4}' | cut -d/ -f1)`
+
+6. Download `git` to both Mac and Ubuntu using `sudo apt-get install git`
+
+7. The default storage size of your ubuntu is 20GB. Use the following video to learn how to increase the size of your vmware partitions to 60GB. [video link](https://www.youtube.com/watch?v=99ImE9ZlX2s)
  
 ### 1. CITI Training
 

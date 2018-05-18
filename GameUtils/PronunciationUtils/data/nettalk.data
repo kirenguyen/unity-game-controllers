@@ -1635,6 +1635,7 @@ bat	b@t	>1<	0
 batch	b@-C-	>1<<<	0
 bate	bet-	>1<<	0
 bath	b@T-	>1<<	0
+bathtub	b@T-t^b	>1<<>0<	0
 bathe	beD--	>1<<<	0
 bathetic	bxT-EtIk	>0>>1<0<	0
 bathhouse	b@T-hW-s-	>1<<>2<<<	0
@@ -5055,6 +5056,7 @@ diffuse	dIf-Ys-	>0<>1<<	0
 dig	dIg	>1<	0
 digest	dAJEst	>1>2<<	0
 digest	dAJEst	>0>1<<	0
+digging	dIgIG-	>1<0<<	0
 digit	dIJxt	>1<0<	0
 digitalis	dIJxt@lxs	>2<0>1<0<	0
 dignified	dIgnxfA-d	>1<>0>2<<	0
@@ -7027,6 +7029,7 @@ friar	frA-R	>>10<	0
 fricassee	frIkxs-i-	>>1<0<>2<	0
 friction	frIkS-xn	>>1<>0<<	0
 friday	frAde-	>>1<0<	0
+fridge	frIJ--	>>1<<<	0
 friedcake	frA-dkek-	>>1<<>2<<	0
 friend	fr-End	>>1<<<	0
 frieze	fri-z-	>>1<<<	0
@@ -9705,6 +9708,7 @@ july	JUlA	>0>1	0
 jumble	J^mbL-	>1<>>0	0
 jumbo	J^mbo	>1<>0	0
 jump	J^mp	>1<<	0
+jumping	J^mpIG-	>1<<0<<	0
 junco	J^Gko	>1<>0	0
 junction	J^GkS-xn	>1<<>0<<	0
 juncture	J^GkC-R-	>1<<>0<<	0
@@ -12667,6 +12671,7 @@ pail	pe-l	>1<<	0
 pain	pe-n	>1<<	0
 painstaking	pe-nstekIG-	>1<<>>2>0<<	0
 paint	pe-nt	>1<<<	0
+painting	pe-ntIG-	>1<<<0<<	0
 pair	p@-r	>1<<	0
 paisley	pe-zli-	>1<<>0<	0
 pajamas	pxJamxz	>0>1<0<	0
@@ -16468,6 +16473,7 @@ socialize	soSx-lAz-	>1>0>>2<<	0
 society	sxsAxti	>0>10<0	0
 sociology	soSialxJi	>2>01<0>0	0
 sock	sak-	>1<<	0
+socks	sak-s	>1<<	0
 socket	sak-xt	>1<<0<	0
 sod	sad	>1<	0
 soda	sodx	>1<0	0
@@ -18267,6 +18273,7 @@ treaty	tri-ti	>>1<<0	0
 treble	trEbL-	>>1<>0	0
 trebly	trEbli	>>1<>0	0
 tree	tri-	>>1<	0
+trees	tri-z	>>1<<	0
 trefoil	trifO-l	>>1>2<<	0
 trek	trEk	>>1<	0
 trellis	trEl-xs	>>1<>0<	0

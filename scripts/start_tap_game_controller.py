@@ -38,21 +38,24 @@ def main(argv):
     #rospy.spin()
 
     time.sleep(1)
-    while(True):
-        try:
-           my_FSM.student_model.plot_curricular_distro()
-           my_FSM.student_model.fig.canvas.flush_events()
-           time.sleep(1)
-        except KeyboardInterrupt: 
-            print('Closing!')
-            sys.exit()
+    if (argv[3] == 'experiment'):
+        my_FSM.student_phoneme_model.init_plot()
+        while(True):
+            try:
+               my_FSM.student_phoneme_model.plot_curricular_distro()
+               my_FSM.student_phoneme_model.fig.canvas.flush_events()
+               time.sleep(1)
+            except KeyboardInterrupt: 
+                print('Closing!')
+                sys.exit()
+    else:
+        while(True):
+            try:               
+               time.sleep(1)
+            except KeyboardInterrupt: 
+                print('Closing!')
+                sys.exit()
     
-
-    ##
-
-
-
-
 if __name__ == "__main__":
     if len(sys.argv) == 4:
         main(sys.argv)

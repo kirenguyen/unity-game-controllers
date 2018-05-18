@@ -53,6 +53,8 @@ We recommend using Anaconda with Python 2.7 as your default system-wide Python e
 	$ https://github.com/mitmedialab/unity_game_msgs.git
 	$ https://github.com/mitmedialab/r1d1_msgs.git (to communicate w Tega)
 	$ https://github.com/mitmedialab/jibo_msgs.git (to communicate w Jibo)
+	$ https://github.com/mitmedialab/affdex_ros_msgs.git (to get realtime Affdex facial info)
+	$ https://github.com/mitmedialab/asr_google_cloud.git (to connect to google ASR for iSpy)
 
 
 ### Install the project's python development and runtime requirements::

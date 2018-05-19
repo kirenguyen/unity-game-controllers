@@ -3,16 +3,18 @@
 1. Install VMWare Fusion and Ubuntu 14.04
 2. Install ROS Indigo following the instruction on [the website](http://wiki.ros.org/indigo) 
 	* ROS is an important platform for us to do social robotics research here at Media Lab
+	* Use Indigo version
 3. Basic tutorials on how to use ROS
 	* How to run roscore
 	* How to suscribe and publish ros messages in Python and in terminal
 	* How to build customized ROS messages
 	* How rosbridge works
-4. Create a short Python script that is able to publish a ROS message
-	* Take a screenshot and show it to me
+
+4. Create a short Python script that is able to publish a ROS message if you haven't done so before
 
 5. add the following to your `./bashrc` for ROS IP
 	* `export ROS_IP=$(/sbin/ip -o -4 addr list eth0 | awk '{print $4}' | cut -d/ -f1)`
+	* or just use the sample bashrc script attached in this folder. copy and paste it to your own bashrc file and modify it accordingly
 
 6. Download `git` to both Mac and Ubuntu using `sudo apt-get install git`
 
@@ -44,9 +46,10 @@
 	* download iSpy-game-unity to your mac
 	* download unit-game-controllers to your Ubuntu.
 		* location: ```/home/[YOUR NAME]/catkin_ws/src```
-3. Become familiar with the iSpy infrastructure. Understand the structure of the code. If you have any questions, please consult with Huili, Mike or Sam
+3. Become familiar with the iSpy infrastructure. Understand the structure of the code. If you have any questions, please consult with Huili or Sam
 	* iSpy game in Unity
 	* iSpy game controller in Python
+	* Check the [iSpy architecture overview doc](https://github.com/mitmedialab/unity-game-controllers/blob/ispy-test/iSpyGameController/iSpyGameController%20Overview.md) to learn about its architecture
 
 4. Learn how to use rosbridge and send ROS messages via ROS Bridge back and forth between Unity code and Python code
 	* Download and install [rosbridge](http://wiki.ros.org/rosbridge_server) 
@@ -54,6 +57,7 @@
 5. Install all dependencies for iSpy 
 	* First install pip3 if necessary. `sudo apt install python3-pip`
 	* Install all python dependencies in `unity-game-controllers/requirements.txt`
+		* You may use `make init` to install python dependencies. Check this [makefile](https://github.com/mitmedialab/unity-game-controllers/blob/ispy-test/Makefile)
 	* Use `sudo apt-get install python-pyaudio python3-pyaudio` to install pyaudio
 	* May need to upgrade `pip` before installing the dependencies. use `pip3 install --upgrade pip`
 	* Use `pip3` to isntall
@@ -61,15 +65,15 @@
 6. Try to run iSpy game on your machine
 	* run ```roscore```
 	* run command ```roslaunch rosbridge_server rosbridge_websocket.launch```
-	* run ```unity-game-controllers``` using ```python3 -m xxx```
-	* Install [Unity 5.6.1](https://unity3d.com/get-unity/download/archive)
+	* run ```unity-game-controllers``` using ```./scripts/run_ispy.sh [participant id] [experimenter name] [session number]```
+		* Example: `./scripts/run_ispy.sh p00 huili s01`
+	* Install [Unity 2017.2.0f](https://unity3d.com/get-unity/download/archive)
 	* Open Unity and run the game
 		* the ROS ip address should match the ros ip address roscore is running on
 
-7. Download the iSpy game to an Anroid tablet in PRG
+7. Download the iSpy game to an Anroid tablet in PRG (optional)
 	* Run the app on the tablet to see if everything works well
 
-8. Demo what you have done to Huili
 
 ### 3. Git commands
 1. Learn to use the following commands
@@ -98,6 +102,7 @@
 	* print the branch you are in 
 
 6. git status shown in the command prompt
+	* if you didn't use the sample `bashrc` file in the folder, then do the following
 	* add the following to your `./bashrc`
 	* ```parse_git_branch() { git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/' } ```
 
@@ -135,7 +140,8 @@
 	* Make sure in the Unity setting (`Edit/Project Settings/Player`): change th permission from `internal` to `external (sd card)`
 	
 ### 6. Video Recording For Role-Switching Study
-1. install `ffmpeg` 
+1. optional 
+2. install `ffmpeg` 
 	* for Ubuntu 14.04:  `sudo apt-add-repository ppa:mc3man/trusty-media`
 	* for Ubuntu 16.04: `sudo apt-add-repository ppa:jonathonf/ffmpeg-3`
 	* `sudo apt-get update`
@@ -151,6 +157,8 @@
 	* lipsync the audio files: `https://sites.google.com/site/personalrobotsgroupmit/r1d1/toolbox/dragonbot-lipsync`
 
 	* download `HandShaker` in Mac's app store for file transfer on Android devices. This app is a better alternative for `AndroidFileTransfer`
+
+### 8. JIBO 
 
 
 

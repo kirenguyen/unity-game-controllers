@@ -14,7 +14,7 @@
 
 5. add the following to your `./bashrc` for ROS IP
 	* `export ROS_IP=$(/sbin/ip -o -4 addr list eth0 | awk '{print $4}' | cut -d/ -f1)`
-	* or just use the sample bashrc script attached in this folder. copy and paste it to your own bashrc file and modify it accordingly
+	* or just use the sample bashrc script attached in [this folder](https://drive.google.com/drive/u/0/folders/1sN_nkvlANsVh9SKG-JqsiDVBEWFbZw0q). copy and paste it to your own bashrc file and modify it accordingly
 
 6. Download `git` to both Mac and Ubuntu using `sudo apt-get install git`
 
@@ -61,6 +61,7 @@
 	* Use `sudo apt-get install python-pyaudio python3-pyaudio` to install pyaudio
 	* May need to upgrade `pip` before installing the dependencies. use `pip3 install --upgrade pip`
 	* Use `pip3` to isntall
+	* if you need any other ros project packages, you can find them [here](https://drive.google.com/drive/u/0/folders/1sN_nkvlANsVh9SKG-JqsiDVBEWFbZw0q). Download them and put them into ```/home/[YOUR NAME]/catkin_ws/src``` and do `catkin_make` command in your `catkin_ws` folder
 	
 6. Try to run iSpy game on your machine
 	* run ```roscore```
@@ -151,15 +152,22 @@
 	* `sudo apt-get install ttf-dejavu`
 
 ### 7. Deploy audios to Tega
-	* put all audios to tega phone's sd card.
+1. put all audios to tega phone's sd card.
 	* create a different folder and put the audios under the following directory: `contentroot/robots/tega/01/speech`
 	* the way to play those audio files is shown in `TegaBehaviors.py`
 	* lipsync the audio files: `https://sites.google.com/site/personalrobotsgroupmit/r1d1/toolbox/dragonbot-lipsync`
 
-	* download `HandShaker` in Mac's app store for file transfer on Android devices. This app is a better alternative for `AndroidFileTransfer`
+2. download `HandShaker` in Mac's app store for file transfer on Android devices. This app is a better alternative for `AndroidFileTransfer`
 
 ### 8. JIBO 
+1. Install JIBO SDK on your mac
+	* check the doc [here](https://sites.google.com/site/personalrobotsgroupmit/robots/jibo)
+2. Install Atom
+3. If you have any questions, Sam is the person you can ask for help
 
+### 9. Tega Recordings for iSPy
+1. check the folder [here](https://drive.google.com/drive/u/0/folders/1XKWfUTtqO9Iu9TbziHFAUxueKslK1hsQ)
+	
 
 
 

@@ -92,9 +92,9 @@ ENV/
 # PyCharm metadata
 .idea
 
-#stored audio files
+#stored data files
 *.wav
-
+*.bag
 .DS_Store
 
 # captured videos
@@ -108,3 +108,8 @@ scripts/tega_cam_affect_analysis
 
 scripts/ispy_scripts/affdex-outputs/*
 scripts/ispy_scripts/rosbag_inputs/*
+
+**.orig
+
+
+iSpyGameController/saved_rl/p*pkl

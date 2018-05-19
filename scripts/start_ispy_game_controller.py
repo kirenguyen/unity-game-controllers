@@ -21,7 +21,7 @@ def fxn():
 
 
 def usage():
-    print('python3 -m scripts.start_ispy_game_controller [game round: practice or experiment] [participant id: pXX] [experimenter] [session number: sXX]')
+    print('python3 -m scripts.start_ispy_game_controller [participant id: pXX] [experimenter] [session number: sXX]')
 
 def main():
 

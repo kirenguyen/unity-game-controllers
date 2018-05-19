@@ -15,6 +15,10 @@ bool player_passed_round
 int16 player_score
 int16 robot_score
 
-string[] curriculum
-float32[] means
-float32[] variances
+string[] word_curriculum
+float32[] word_means
+float32[] word_variances
+
+string[] phoneme_curriculum
+float32[] phoneme_means
+float32[] phoneme_variances

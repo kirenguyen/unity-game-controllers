@@ -40,6 +40,7 @@ We recommend using Anaconda with Python 2.7 as your default system-wide Python e
 	$ sudo apt-get install xdotool
 	$ sudo apt-get install wmctrl
 	$ sudo apt-get install ros-indigo-rosbridge-server
+	$ sudo apt-get install python3-tk
 	
 	# frequently needed for ROS-related code to work)
 	$ pip install rospkg
@@ -53,6 +54,8 @@ We recommend using Anaconda with Python 2.7 as your default system-wide Python e
 	$ https://github.com/mitmedialab/unity_game_msgs.git
 	$ https://github.com/mitmedialab/r1d1_msgs.git (to communicate w Tega)
 	$ https://github.com/mitmedialab/jibo_msgs.git (to communicate w Jibo)
+	$ https://github.com/mitmedialab/affdex_ros_msgs.git (to get realtime Affdex facial info)
+	$ https://github.com/mitmedialab/asr_google_cloud.git (to connect to google ASR for iSpy)
 
 
 ### Install the project's python development and runtime requirements::
@@ -98,7 +101,14 @@ Then, you can run the iSpyGame Controller by running the following script in a  
 `$ python -m scripts.start_ispy_game_controller`
 
 
+### ROSbag analysis
+-------------------
 
+You'll need to install `ffmpeg` for some of the functionality contained here.
+
+Follow these instructions: https://www.faqforge.com/linux/how-to-install-ffmpeg-on-ubuntu-14-04/
+
+Also clone and make from source the officially supported ROS bag tools: https://github.com/srv/srv_tools
 
 
 Troubleshooting:

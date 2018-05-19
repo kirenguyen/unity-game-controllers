@@ -12,3 +12,6 @@ spacy
 pyyaml
 rospkg
 catkin_pkg
+sklearn
+timestring
+scipy

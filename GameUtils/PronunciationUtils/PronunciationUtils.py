@@ -22,7 +22,8 @@ class PronunciationUtils:
 	PHONEME_SUB_COST_PATH = '/GameUtils/PronunciationUtils/data/phoneme_subsitution_costs'
 	WEIGHTED_LEV_DISTANCE_PATH = '/GameUtils/PronunciationUtils/data/weighted_lev_distances'
 	GLOVE_DISTANCE_PATH = '/GameUtils/PronunciationUtils/data/glove_distances'
-	COVARIANCE_PATH = '/GameUtils/PronunciationUtils/data/covariance_matrix'
+	ARPABET_COVARIANCE_PATH = '/GameUtils/PronunciationUtils/data/arpabet_covariance_matrix'
+	WORD_COVARIANCE_PATH = '/GameUtils/PronunciationUtils/data/covariance_matrix'
 
 	def __init__(self):
 
@@ -62,6 +63,7 @@ class PronunciationUtils:
 		
 		graphemes, phonemes = self.phonemes2graphemes(self.current_word)
 		pass_list = []
+		score_list = []
 
 		for i in range(len(phonemes)):
 			score = phoneme_results[i]["quality_score"]
@@ -69,8 +71,9 @@ class PronunciationUtils:
 				pass_list.append("1")
 			else:
 				pass_list.append("0")
+			score_list.append(score)
 
-		return (graphemes, phonemes, pass_list)
+		return (graphemes, phonemes, pass_list, score_list)
 
 	# def syllable_based_accuracy(self, syllable_results):
 	#     """
@@ -94,10 +97,11 @@ class PronunciationUtils:
 
 	def get_letters_and_pass(self, phoneme_acc):
 		"""
-		Converts phoneme or syllable accuracy back to letters and whether they passed
+		Associates phoneme scores with graphemes and whether they passed
+		Also sends the speechace scores (indexed by phoneme) back for analysis
 		"""
 
-		graphemes, phonemes, scores = phoneme_acc
+		graphemes, phonemes, passes, phoneme_scores = phoneme_acc
 		letters = []
 		passed = []
 
@@ -105,13 +109,13 @@ class PronunciationUtils:
 			if len(graphemes[i]) > 1:  # some graphemes have multiple letters, like 'CH'
 				for j in graphemes[i]:
 					letters.append(j)
-					passed.append(scores[i])
-
+					passed.append(passes[i])
+					
 			else:
 				letters.append(graphemes[i])
-				passed.append(scores[i])
+				passed.append(passes[i])				
 
-		return letters, passed
+		return letters, passed, phoneme_scores
 
 
 	def load_arpabet_mapping(self):

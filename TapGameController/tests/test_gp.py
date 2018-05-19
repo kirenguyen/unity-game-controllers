@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from ..StudentModel import StudentModel
+from ..StudentWordModel import StudentWordModel
 from ..AgentModel import ActionSpace
 
 from GameUtils import Curriculum
@@ -13,7 +13,7 @@ class GPTestSuite(unittest.TestCase):
     """Advanced test cases."""
 
     def test_GP(self):
-        my_GP = StudentModel()
+        my_GP = StudentWordModel()
         valid_words = [p for p in dir(Curriculum)
                        if isinstance(getattr(Curriculum, p), str)
                        and not p.startswith('__')]
@@ -21,12 +21,12 @@ class GPTestSuite(unittest.TestCase):
 
 
     def test_kernel(self):
-        my_GP = StudentModel()
+        my_GP = StudentWordModel()
 
         self.assertGreater(my_GP.get_word_cov('BOAT', 'GOAT'), my_GP.get_word_cov('BOAT', 'BROOM'))
 
     def graph_test(self):
-        my_GP = StudentModel()
+        my_GP = StudentWordModel()
         Xtrain = ['BEE', 'SNAKE', 'TIGER']  # these numbers are just labels
         Ytrain = [.66, .66, .66]  # these numbers correspond to 'Correct' demonstrations
 

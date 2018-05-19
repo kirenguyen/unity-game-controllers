@@ -6,6 +6,7 @@ Robot Behaviors
 # pylint: disable=import-error, invalid-name
 
 from .RobotBehaviorList import RobotBehaviors
+from random import randint
 from GameUtils import GlobalSettings
 
 if GlobalSettings.USE_ROS:
@@ -46,6 +47,10 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_lookat = False
             msg.do_sound_playback = False
             msg.motion = JiboAction.DEFAULT
+        
+        elif command == RobotBehaviors.SAY_HI:
+            msg.do_sound_playback = True
+            msg.audio_filename = "SSA_hello.wav"
 
         elif command == RobotBehaviors.RING_ANSWER_CORRECT:
             msg.do_motion = True
@@ -73,28 +78,88 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_tts = False
             msg.do_lookat = False
             msg.do_sound_playback = True
-            msg.audio_filename = "SSA_disappointed.m4a"
+
+            num = randint(0, 2)
+            if num == 0:
+                msg.audio_filename = "SSA_disappointed.m4a"
+            elif num == 1:
+                msg.audio_filename = "SSA_wrong.m4a"
+            elif num == 2:
+                msg.audio_filename = "SSA_wompwomp.m4a"
+            
 
         elif command == RobotBehaviors.PRONOUNCE_WRONG_SPEECH:
             msg.do_motion = False
             msg.do_tts = True
             msg.do_lookat = False
             msg.do_sound_playback = False
-            msg.tts_text = "I dont know this one"
 
-        elif command == RobotBehaviors.REACT_ANSWER_CORRECT:
+            num = randint(0, 3)
+            if num == 0:
+                msg.tts_text = "gee I don't know"
+            elif num == 1:
+                msg.tts_text = "wow I'm not sure about this one"
+            elif num == 2:
+                msg.tts_text = "I don't know this one"
+            elif num == 3:
+                msg.tts_text = "I don't know this one"
+            
+        elif command == RobotBehaviors.REACT_ROBOT_CORRECT:
             msg.do_motion = True
             msg.do_tts = False
             msg.do_lookat = False
-            msg.motion = "Misc/Eye_to_Happy_01.keys"
 
-        elif command == RobotBehaviors.REACT_ANSWER_WRONG:
-            msg.do_motion = False
+            num = randint(0, 1)
+            if num == 0:
+                msg.motion = "Misc/Eye_to_Happy_01.keys"
+            elif num == 1:
+                msg.motion = "Misc/Eye_to_Happy_02.keys"
+            
+
+        elif command == RobotBehaviors.REACT_ROBOT_WRONG:
+            msg.do_sound_playback = False
             msg.do_tts = False
             msg.do_lookat = False
-            msg.do_sound_playback = True
-            msg.audio_filename = "SSA_disappointed.m4a"
+            msg.do_motion = True
 
+            num = randint(0, 2)
+            if num == 0:
+                msg.motion = "Misc/Eye_Sad_03_01.keys"
+            elif num == 1:                
+                msg.motion = "Misc/Eye_Sad_03_02.keys"
+            elif num == 2:
+                msg.do_motion = True
+                msg.motion = "Misc/Frustrated_01_04.keys"
+                
+
+        elif command == RobotBehaviors.REACT_PLAYER_CORRECT:
+            msg.do_motion = True
+            msg.do_tts = False
+            msg.do_lookat = False
+
+            num = randint(0, 1)
+            if num == 0:
+                msg.motion = "Misc/Eye_to_Happy_01.keys"
+            elif num == 1:
+                msg.motion = "Misc/Eye_to_Happy_02.keys"
+            
+
+        elif command == RobotBehaviors.REACT_PLAYER_WRONG:
+            msg.do_sound_playback = False
+            msg.do_tts = False
+            msg.do_lookat = False
+            msg.do_motion = True
+
+            num = randint(0, 2)
+            if num == 0:
+                msg.motion = "Misc/Eye_Sad_03_01.keys"
+            elif num == 1:                
+                msg.motion = "Misc/Eye_Sad_03_02.keys"
+            elif num == 2:
+                msg.do_motion = True
+                msg.motion = "Misc/Frustrated_01_04.keys"
+                
+            
         elif command == RobotBehaviors.REACT_TO_BEAT_CORRECT:
             msg.do_motion = True
             msg.do_tts = False
@@ -126,13 +191,13 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_motion = True
             msg.do_tts = False
             msg.do_lookat = False
-            msg.motion = JiboAction.EMOJI_RAINCLOUD
+            msg.motion = "Misc/Sad_03.keys"
 
         elif command == RobotBehaviors.LOSE_SPEECH:
             msg.do_motion = False
             msg.do_tts = True
             msg.do_lookat = False
-            msg.tts_text = "I lost. Oh well. I'll beat you next time"
+            msg.tts_text = "You beat me. I'll try to do better next time"
 
         elif command == RobotBehaviors.EYE_FIDGET:
             msg.do_motion = True

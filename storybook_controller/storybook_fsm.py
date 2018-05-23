@@ -8,6 +8,7 @@ ROS topics, updating the student model, and sending commands to the robot agent
 """
 
 import transitions
+from transitions.extensions import GraphMachine as Machine
 import json
 import queue
 import time
@@ -114,9 +115,12 @@ class StorybookFSM(object):
 
     # Use queued=True to ensure ensure that a transition finishes before the
     # next begins.
-    self.state_machine = transitions.Machine(
+    self.state_machine = Machine(
       model=self, states=self.states, transitions=self.transitions,
-      initial=self.initial_state, queued=True)
+      initial=self.initial_state, queued=True, show_conditions=True)
+
+    # Uncomment to show the FSM graph.
+    # self.state_machine.get_graph().draw("state_diagram_twopi.png", prog="twopi")
 
   # Runs in its own threads.
   # StorybookEvent messages are put onto this queue when received.

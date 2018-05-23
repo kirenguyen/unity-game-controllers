@@ -24,14 +24,16 @@ s1_rosbags = [i[0] for i in s1]
 s2_rosbags = [i[0] for i in s2]
 all_bags = [i+".bag" for i in s1_rosbags + s2_rosbags]
 
+print(all_bags)
 def remove_downloaded_bags():
-    bags_tmp = all_bags
+    bags_tmp = list(all_bags)
+
     for ibag in bags_tmp:
-        print("ibag: {}".format(ibag))
         if os.path.isfile(rosbag_input_dir+'/'+ibag):
+            print("bag ({}) already exists in the rosbag folder".format(ibag))
             all_bags.remove(ibag)
 
-
+remove_downloaded_bags()
 rosbags_dict = {i[0]+".bag":i[1]+".csv" for i in s1+s2}
 
 
@@ -100,17 +102,18 @@ def list_files(service):
         if not page_token:
             break
 
-print("all bags")
+print("bags....")
 print(all_bags)
-print("for item in list files ....")
+
 success = True
 for item in list_files(drive_service):
 
     if item.get('title') in all_bags:
+        print("\n.........................................")
         outfile = os.path.join(OUT_PATH, '%s' % item['title'])
         print("outfile: {}".format(outfile))
         download_url = None
-        print("after download url...")
+        
         if 'exportLinks' in item and 'application/pdf' in item['exportLinks']:
             download_url = item['exportLinks']['application/pdf']
         elif 'downloadUrl' in item:

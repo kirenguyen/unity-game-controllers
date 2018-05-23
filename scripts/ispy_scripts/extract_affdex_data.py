@@ -14,13 +14,13 @@ import datetime
 
 class AffdexAnalysis:
 
-	def __init__(self,rosbag_name,session_number,interaction_log):
+	def __init__(self,rosbag_name,session_number):
 
 		self.inter_data_frame = 0
 		rospy.init_node('node_name')
 		rospy.Subscriber("affdex_data", AffdexFrameInfo, self.on_affdex_data_received)
 		#self.csv_file_prefix = "affdex_log_"+p_id+"_"+experimenter+"_"+game_round+"_"
-		self.csv_file_name = "affdex-outputs/"+rosbag_name.replace('bag','csv')
+		self.csv_file_name = "affdex-outputs/affdex_"+rosbag_name.replace('bag','csv')
 		rospy.Subscriber("/ispy_cmd_topic",iSpyCommand,self.on_game_start)
 		rospy.Subscriber("/data_child_robot_interaction", iSpyChildRobotInteraction, self.on_inter_data)
 		
@@ -36,14 +36,21 @@ class AffdexAnalysis:
 		
 		self.frame_number = 0
 		self.game_start_time = None
+		self.game_start_datetime = None
 		self.time_diff = 0
-		self.interaction_log = True if "true" in interaction_log else False
+		self.interaction_log = True 
 
 		self.transition_state_start_time = None
+		self.header_cols = ['NA','NA','NA']
+
 
 		participant_id = rosbag_name.split('_')[0]
 		experimenter= rosbag_name.split('_')[1]
-		date_info = rosbag_name.split('__')[1].split('.')[0].replace("-",":")
+		date_info = '-'.join(rosbag_name.split('.')[0].split('_')[2:])
+
+		print(rosbag_name)
+		print("participand id: {} | experimenter: {} | date info: {}".format(participant_id,experimenter,date_info))
+
 		if self.interaction_log:
 			print("interaction log is true")
 			self._initialize_csvs(participant_id, experimenter, session_number,date_info)
@@ -60,12 +67,12 @@ class AffdexAnalysis:
 		if data.data == "TOPLEFT_BUTTON_PRESSED" and not self.transition_state_start_time:
 			print("transition state start  time is set....")
 			self.transition_state_start_time = time.time()
+			self.game_start_datetime = datetime.datetime.now()
 			self.game_start_time = time.time()
 			print(self.transition_state_start_time)
 		
 
 	def _initialize_csvs(self,participant_id, experimenter, session_number,date_info):
-		import datetime
 
 		now = datetime.datetime.now()
 		date = now.isoformat()
@@ -74,10 +81,11 @@ class AffdexAnalysis:
 		# self.ispy_action_log_csv.write(','.join(['elapsedTime','localTime', 'isScalingUpDown',
 		# 	'pointerClick','isDragging','onPinch','clickedObjectName']))
 		INTERACTION_OUTPUTS ="interaction_outputs/"
-		self.child_robot_interaction_csv = open(INTERACTION_OUTPUTS+"interaction_log_"+participant_id+"_"+experimenter+ ":"+date_info+"_"+session_number+"_"+date+".csv","a") 
+		self.child_robot_interaction_csv = open(INTERACTION_OUTPUTS+"interaction_rosbag_"+rosbag_name.replace('bag','csv'),"a") 
 		
 
 		self.child_robot_interaction_csv.write(','.join([
+			'header seq inter ros topic','header secs inter ros topic','header nsecs inter ros topic',
 			'elapsedTimeFromGameStart','currentLocalTime',
 
 			'gameTask','vocab', 'taskStartTime','taskEndTime', 'taskDuration',
@@ -114,12 +122,21 @@ class AffdexAnalysis:
 		callback function. called by ros node manager when child-robot interaction data are received
 		write the data to csv file
 		'''
-		print("msg!!!")
-		print(msg)
 
-		elapsedTime = str(datetime.now() - self.game_start_time) if self.game_start_time else ""
-		content = ','.join(map(str,[
-			elapsedTime,str(datetime.now()),
+		elapsedTime = str(datetime.datetime.now() - self.game_start_datetime) if self.game_start_datetime else ""
+		
+		
+		print(msg.header.seq)
+		print(msg.header.stamp.secs)
+		try:
+			self.header_cols = [msg.header.seq,msg.header.stamp.secs,msg.header.stamp.nsecs]
+		except:
+			self.header_cols = ['NA','NA','NA']
+		print(header_cols)
+
+		content = ','.join(map(str,header_cols+[
+			elapsedTime,str(datetime.datetime.now()),
+
 
 			msg.gameTask, msg.taskVocab,  msg.taskStartTime, msg.taskEndTime, msg.taskDuration,  # task related 
 
@@ -151,12 +168,14 @@ class AffdexAnalysis:
 			
 			]))
 
+
 		self.child_robot_interaction_csv.write(content+'\n')
 
 
 	def on_inter_data(self,data):
 		self.inter_data_frame += 1
-		print("on inter data")
+		if self.inter_data_frame == 1:
+			print("on inter data")
 		if self.interaction_log:
 			self.on_child_robot_interaction_data_received(data)
 
@@ -170,7 +189,7 @@ class AffdexAnalysis:
 
 	def add_file_heading(self,data):
 		print("affdex recording starts")
-		heading = "frame_number, orig_local_time, orig_local_time2, local_time, game_elapsed_time, time_diff, inter_data_frame_number"
+		heading = "header seq inter file, header sec inter file,header nsec inter file, frame_number, orig_local_time, orig_local_time2, local_time, game_elapsed_time, time_diff, inter_data_frame_number"
 		emotion_heading = ','.join([ "emotion-"+str(i) for i in range(1,len(data.emotions)+1,1)])
 		expression_heading = ','.join([ "expression-"+str(i) for i in range(1,len(data.expressions)+1,1)])
 		measurement_heading = ','.join([ "measurement-"+str(i) for i in range(1,len(data.measurements)+1,1)])
@@ -199,7 +218,7 @@ class AffdexAnalysis:
 		expressions_str = ','.join([str(i) for i in data.expressions])
 		measurements_str = ','.join([str(i) for i in data.measurements])
 		
-		return [str(self.frame_number), orig_local_time, orig_time2, time.strftime("%Y-%m-%d-%H:%M:%S",time.localtime()), str(elapsed_time), str(self.time_diff), str(self.inter_data_frame), emotions_str,expressions_str,measurements_str] 
+		return self.header_cols+[str(self.frame_number), orig_local_time, orig_time2, time.strftime("%Y-%m-%d-%H:%M:%S",time.localtime()), str(elapsed_time), str(self.time_diff), str(self.inter_data_frame), emotions_str,expressions_str,measurements_str] 
 
 
 	def on_affdex_data_received(self,data):
@@ -224,10 +243,10 @@ class AffdexAnalysis:
 		self.file.write(line+'\n')
 
 if __name__ == "__main__":
+	print("\n.........................new affect extraction....")
 	print(sys.argv)
 	rosbag_name = sys.argv[1]
 	session_number = sys.argv[2]
-	interaction_log = sys.argv[3]
-	print(interaction_log)
-	print("rosbag name: {}".format(rosbag_name))
-	aff = AffdexAnalysis(rosbag_name,session_number,interaction_log)
+	
+	print("rosbag name: {} | session_number: {}".format(rosbag_name,session_number))
+	aff = AffdexAnalysis(rosbag_name,session_number)

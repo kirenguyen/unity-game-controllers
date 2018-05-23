@@ -71,13 +71,19 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     OBJECTS = "OBJECTS"
 
 
+    ROBOT_HINT_BUTTON_REMINDER = "ROBOT_HINT_BUTTON_REMINDER"
     ROBOT_CUSTOM_SPEECH = "ROBOT_CUSTOM_SPEECH"
+    Q_ROBOT_INDUCE_SPEECH = "Q_ROBOT_INDUCE_SPEECH"
+    ROBOT_INDUCE_SPEECH_RESPONSE = "ROBOT_INDUCE_SPEECH_RESPONSE"
 
     ### ============== Tega Speech for Role Switching Project ================== ###
     BEFORE_GAME_SPEECH = "ROBOT_BEFORE_GAME_SPEECH"
     VOCAB_EXPLANATION_SPEECH = "VOCAB_EXPLANATION_SPEECH"
     HINT_SPEECH = "HINT_SPEECH"
     KEYWORD_DEFINITION_SPEECH = "KEYWORD_DEFINITION_SPEECH"
+    REMINDER_SPEECH = "REMINDER_SPEECH"
+
+    NOVICE_ROLE_KEYWORD = "NOVICE_ROLE_KEYWORD" 
 
 
    ### ====== Tega Question Asking =================== ####
@@ -88,12 +94,17 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     Q_ROBOT_ASK_WHY_WRONG="Q_ROBOT_ASK_WHY_WRONG"
     Q_END_OF_TURN="Q_END_OF_TURN"
 
-    ## ===== no ispy action alert ===
+    ### ===== no ispy action alert === ###
     NO_ISPY_ACTION_ALERT = "NO_ISPY_ACTION_ALERT"
+    ROBOT_TASK_END_BEHAVIOR = "ROBOT_TASK_END_BEHAVIOR"
 
+    ### ===== task end behaviors
+    ROBOT_PLAY_MUSIC = "ROBOT_PLAY_MUSIC"
+    ROBOT_DANCE = "ROBOT_DANCE"
+    ROBOT_TASK_END_RESPONSE = "ROBOT_TASK_END_RESPONSE"
 
-
-
+    Q_ROBOT_TASK_END_REMINDER = "Q_ROBOT_TASK_END_REMINDER"
+    Q_ROBOT_TASK_END_ASSESSMENT = "Q_ROBOT_TASK_END_ASSESSMENT"
 
 
 class RobotRoles(Enum):
@@ -101,7 +112,6 @@ class RobotRoles(Enum):
     contains a list of social roles that are avaiable to robot to perform
     '''
     EXPERT = 0
-    #COMPETENT = 1
     NOVICE = 1
 
 
@@ -127,14 +137,14 @@ class RobotRolesBehaviorsMap:
     '''
     mapping between robot's social role and robot's specific behaviors
     '''  
-    def __init__(self):
+    def __init__(self,game_round):
         # robot's actions during its turn
         self.robot_turn_mapping = {}
         # robot's actions during child's turn
         self.child_turn_mapping = {}
 
-
-        robot_actions_file = open("iSpyGameController/res/robot_actions.json")
+        action_file = "iSpyGameController/res/robot_actions_practice_round.json"if game_round == "practice" else "iSpyGameController/res/robot_actions.json" 
+        robot_actions_file = open(action_file)
         self.robot_actions_dict = json.loads(robot_actions_file.read())
 
         question_answer_file = open("iSpyGameController/res/question_answer.json")
@@ -162,7 +172,6 @@ class RobotRolesBehaviorsMap:
         '''
         get question query result 
         '''
-        print("question query path: "+question_query_path)
         self.current_question_query_path = question_query_path
         if question_query_path in self.question_answer_dict.keys():
             self.question_query = self.question_answer_dict[question_query_path]
@@ -187,6 +196,24 @@ class RobotRolesBehaviorsMap:
                 if any(m in child_help_response for m in yes_response["en_US"]): # found child's answer
                     return True
                 return False
+
+    def get_child_answer_type(self,asr_input):
+        '''
+        return bool for child answer to helping the robot
+        '''
+        
+        if self.current_question_query_path in self.question_answer_dict.keys():
+            if "no_response_" in asr_input: # no response from child
+                return "absence"
+            else:
+                yes_response = self.question_query["user_input"][0]
+                if any(m in asr_input for m in yes_response["en_US"]): # found child's answer
+                    return "positive"
+                no_response = self.question_query["user_input"][1]
+                if any(m in asr_input for m in no_response["en_US"]): # found child's answer
+                    return "negative"
+                return "others"
+
 
     def get_question_type(self):
         if self.current_question_query_path in self.question_answer_dict.keys():

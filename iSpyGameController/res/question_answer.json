@@ -1,9 +1,9 @@
 {
   "Q_ROBOT_OFFER_HELP":{
-    "question": ["yes_no_question_4", "yes_no_question_5"],
+    "question": ["yes_no_question_4"],
     "user_input":[
       {
-        "en_US":["yes","okay","ok","yeah","sure", "mhm"],
+        "en_US":["yes","okay","ok","yeah","sure", "mhm","help me", "of course"],
         "response":["ROBOT_EXCITED", "response_a"]
       },
       {
@@ -22,7 +22,7 @@
       "yes_no_question_6","no_response_h","response_l"
     ],
     "no_response_2":[
-      "no_response_e","response_c"]
+      "no_response_e"]
     
   },
 
@@ -31,7 +31,7 @@
     "question": ["yes_no_question_2"],
     "user_input":[
       {
-        "en_US":["yes","okay","ok","yeah","sure", "mhm"],
+        "en_US":["yes","okay","ok","yeah","sure", "mhm", "I'll try", "try", "could be"],
         "response":["ROBOT_EXCITED","response_h","response_g","response_m","response_k"]
       },
       {
@@ -59,7 +59,8 @@
     "question": ["yes_no_question_3","yes_no_question_1","response_e"],
     "user_input":[
       {
-        "en_US":["yes","okay","ok","yeah","sure"],
+        "en_US":["yes","okay","ok","yeah","sure", "mhm", "I'll try", "try", "maybe", "could be","can be", "help", "of course"],
+
         "response":["ROBOT_WINK", "response_h","response_g","response_k"]
       },
       {
@@ -87,7 +88,8 @@
     "question": ["open_ended_question_4","open_ended_question_2"],
     "user_input":[
       {
-        "en_US":["because","is", "it's", "yes","yeah","ok","cause","pause"],
+        "en_US":["because","is", "it's", "yes","yeah","ok","cause","pause", "cuz", "has to be", "maybe", "could be"],
+
         "response":["response_g","response_c","response_n"]
       },
       {
@@ -115,7 +117,8 @@
     "question": ["open_ended_question_3","open_ended_question_1"],
     "user_input":[
       {
-        "en_US":["because","yes","not", "yeah","ok","cause","pause"],
+        "en_US":["because","yes","not", "yeah","ok","cause","pause", "cuz", "has to be", "maybe", "could be","can be"],
+
         "response":["response_g", "response_c","response_n"]
       },
       {
@@ -132,6 +135,89 @@
     },
     "no_response_1":[
       "no_response_g","no_response_h","response_l"
+    ],
+    "no_response_2":[
+      "no_response_e","no_response_a"
+    ]
+  },
+
+  "Q_ROBOT_INDUCE_SPEECH":{
+    "question": ["induce_keyword_1", "induce_keyword_2", "induce_keyword_3", "induce_keyword_4", "induce_keyword_5"],
+    "user_input":[
+      {
+        "en_US":["vehicle", "delighted", "soar", "minuscule", "crimson", "azure", "aquatic", "gigantic", "giant", "land", "garment", "recreational"],
+        "response":["response_g", "response_c","response_m", "response_a"]
+      },
+      {
+        "en_US":["no","dont know","don't know","don", "don't"],
+        "response":["response_i"]
+      }
+    ],
+    "other_input":[
+      "response_a"
+    ],
+    "other":{
+      "type": "open_ended",
+      "help": false
+    },
+    "no_response_1":[
+      "no_response_h","response_l"
+    ],
+    "no_response_2":[
+      "no_response_e","no_response_a"
+    ]
+  },
+
+
+  "Q_ROBOT_TASK_END_REMINDER":{
+    "question": ["word_reminder_1", "word_reminder_2", "word_reminder_3"],
+    "user_input":[
+      {
+        "en_US":["vehicle", "delighted", "soar", "minuscule", "crimson", "azure", "aquatic", "gigantic", "giant", "land", "garment", "recreational"],
+        "response":["response_g", "response_c","response_m", "response_a"]
+      },
+      {
+        "en_US":["no","dont know","don't know","don", "don't"],
+        "response":["response_i"]
+      }
+    ],
+    "other_input":[
+      "response_a"
+    ],
+    "other":{
+      "type": "open_ended",
+      "help": false
+    },
+    "no_response_1":[
+      "no_response_h","response_l"
+    ],
+    "no_response_2":[
+      "no_response_e","no_response_a"
+    ]
+  },
+
+
+  "Q_ROBOT_TASK_END_ASSESSMENT":{
+    "question": [],
+    "user_input":[
+      {
+        "en_US":["means", "mean"],
+        "response":["response_a", "response_g","response_n"]
+      },
+      {
+        "en_US":["no","dont know","don't know","don"],
+        "response":["response_i"]
+      }
+    ],
+    "other_input":[
+      "response_a"
+    ],
+    "other":{
+      "type": "open_ended",
+      "help": false
+    },
+    "no_response_1":[
+      "no_response_c", "response_l"
     ],
     "no_response_2":[
       "no_response_e","no_response_a"

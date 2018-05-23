@@ -231,6 +231,7 @@
       },
 
       "virtual":{ 
+	"VIRTUALLY_CLICK_CORRECT_OBJ":0.5,
           "VIRTUALLY_CLICK_WRONG_OBJ":1
       }
     },

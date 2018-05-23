@@ -29,6 +29,7 @@ class CompleteModeFSM(BaseGameFSM):
 				{'trigger': gs.Triggers.START_BUTTON_PRESSED, 'source': gs.GAME_START, 'dest': gs.EXPLORATION_MODE},
 				{'trigger': gs.Triggers.TOPLEFT_BUTTON_PRESSED, 'source': gs.EXPLORATION_MODE, 'dest': gs.MISSION_MODE},
 				{'trigger': gs.Triggers.TOPLEFT_BUTTON_PRESSED, 'source': gs.MISSION_MODE, 'dest': gs.EXPLORATION_MODE},
+				{'trigger': gs.Triggers.HINT_BUTTON_PRESSED, 'source':gs.MISSION_MODE , 'dest': gs.MISSION_MODE},
 				{'trigger': gs.Triggers.OBJECT_CLICKED, 'source': gs.MISSION_MODE, 'dest': gs.PRONUNCIATION_PANEL},
 				{'trigger': gs.Triggers.TARGET_OBJECT_COLLECTED , 'source': gs.PRONUNCIATION_RESULT, 'dest': gs.MISSION_MODE},
 				{'trigger': gs.Triggers.SAY_BUTTON_PRESSED, 'source': gs.PRONUNCIATION_PANEL, 'dest': gs.PRONUNCIATION_RESULT},
@@ -56,10 +57,12 @@ class AlwaysMissionModeFSM(BaseGameFSM):
 
 		self.states = [gs.GAME_START, gs.EXPLORATION_MODE,gs.MISSION_MODE,gs.PRONUNCIATION_PANEL,gs.PRONUNCIATION_RESULT,gs.WORD_DISPLAY]
 		self.transitions = [
+				{'trigger': gs.Triggers.CONNECT_BUTTON_PRESSED, 'source': gs.GAME_START, 'dest': gs.GAME_START},
 				{'trigger': gs.Triggers.START_BUTTON_PRESSED, 'source': gs.GAME_START, 'dest': gs.EXPLORATION_MODE},
 				{'trigger': gs.Triggers.TOPLEFT_BUTTON_PRESSED, 'source': gs.EXPLORATION_MODE, 'dest': gs.MISSION_MODE},
 				{'trigger': gs.Triggers.TOPLEFT_BUTTON_PRESSED, 'source': gs.MISSION_MODE, 'dest': gs.MISSION_MODE},
 				#{'trigger': gs.Triggers.TOPLEFT_BUTTON_PRESSED, 'source': gs.MISSION_MODE, 'dest': gs.EXPLORATION_MODE},
+				{'trigger': gs.Triggers.HINT_BUTTON_PRESSED, 'source':gs.MISSION_MODE , 'dest': gs.MISSION_MODE},
 				{'trigger': gs.Triggers.OBJECT_CLICKED, 'source': gs.MISSION_MODE, 'dest': gs.PRONUNCIATION_PANEL},
 				{'trigger': gs.Triggers.TARGET_OBJECT_COLLECTED , 'source': gs.PRONUNCIATION_RESULT, 'dest': gs.MISSION_MODE},
 				{'trigger': gs.Triggers.NONTARGET_OBJECT_COLLECTED , 'source': gs.PRONUNCIATION_RESULT, 'dest': gs.MISSION_MODE},
@@ -101,7 +104,7 @@ class AlwaysMissionModeFSM(BaseGameFSM):
 			return 
 
 		print("on enter exploration mode")
-		self.ros_node_mgr.send_robot_cmd(RobotBehaviors.BEFORE_GAME_SPEECH)
+		#self.ros_node_mgr.send_robot_cmd(RobotBehaviors.BEFORE_GAME_SPEECH)
 	
 class AlwaysExploreModeFSM(BaseGameFSM):
 	'''

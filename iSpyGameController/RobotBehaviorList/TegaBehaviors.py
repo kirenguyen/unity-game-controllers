@@ -138,18 +138,28 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
         if command == RobotBehaviors.ROBOT_SILENT_EXCITED:
             msg.motion = TegaAction.MOTION_SILENT_HAPPY_WIGGLE
 
-
         # Tega speech commands
+        if command == RobotBehaviors.ROBOT_HINT_BUTTON_REMINDER:
+            msg.wav_filename = ROOT_TEGA_SPEECH_FOLDER + "general/others/mission_reminder.wav"
+            msg.motion = TegaAction.MOTION_SILENT_PUZZLED
+            msg.enqueue = True
+
         if command == RobotBehaviors.ROBOT_CUSTOM_SPEECH:
             msg.wav_filename = args[0][0].lower()
             msg.enqueue = True
-            print("custom speech: "+msg.wav_filename)
+
+        if command == RobotBehaviors.NOVICE_ROLE_KEYWORD:
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/novice_keyword/"
+            vocab_word = args[0][0].lower()
+            msg.wav_filename = PATH + "novice_"+ vocab_word + ".wav"
+            msg.motion = TegaAction.MOTION_SILENT_PUZZLED
+            msg.enqueue = True
 
 
         ### ============== Tega Speech for Role Switching Project ================== ###
         if command == RobotBehaviors.BEFORE_GAME_SPEECH:
             PATH = ROOT_TEGA_SPEECH_FOLDER + "general/before_game/"
-            file = "before_game_"+random.choice(["1","3"])+".wav"
+            file = "before_game_"+random.choice(["1", "3"])+".wav"
             msg.wav_filename = PATH + file
             msg.motion = TegaAction.MOTION_SILENT_HAPPY_WIGGLE
             print("before game speech wav: "+msg.wav_filename)
@@ -162,13 +172,12 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             file = vocab_word+"_"+itype+"_explanation.wav"
             msg.wav_filename = PATH + file
             msg.motion = TegaAction.MOTION_SILENT_HAPPY_DANCE
-            print("vocab expla speech wav: "+msg.wav_filename)
 
         if command == RobotBehaviors.HINT_SPEECH:
             PATH = ROOT_TEGA_SPEECH_FOLDER + "general/hint/"
             vocab_word = args[0][0].lower()
             msg.wav_filename = PATH + vocab_word + "_hint.wav"
-            msg.motion = TegaAction.MOTION_POSE_SMILE
+            msg.motion = TegaAction.MOTION_SILENT_HAPPY_WIGGLE
             print("hint speech wav: "+msg.wav_filename)
 
         if command == RobotBehaviors.KEYWORD_DEFINITION_SPEECH:
@@ -177,6 +186,71 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.wav_filename = PATH + file
             msg.motion = TegaAction.MOTION_SILENT_NOD
             print("key word definition speech wav: "+msg.wav_filename)
+
+        if command == RobotBehaviors.REMINDER_SPEECH: 
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/reminder/"
+            file = args[0][0].lower() + "_reminder_" + random.choice(["1", "2", "3"]) + ".wav"
+            msg.wav_filename = PATH + file
+            msg.motion = "" 
+            print ("reminder speech wav: "+msg.wav_filename)
+
+        ### ====== Tega End of Task Celebration =========== ####
+
+        if command == RobotBehaviors.ROBOT_TASK_END_BEHAVIOR:
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/between_missions/"
+            file = "between_missions_"
+            speech_file = PATH + file + str(int(args[0][0])) + ".wav"
+            msg.wav_filename = speech_file
+            print("between missions celebration: "+msg.wav_filename)
+
+        if command == RobotBehaviors.ROBOT_PLAY_MUSIC:
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/music/"
+            file = "music_"
+            speech_file = PATH + file + random.choice(["1", "2", "3", "4", "5"]) + ".wav"
+            msg.wav_filename = speech_file
+            print ("music: "+msg.wav_filename)
+
+        if command == RobotBehaviors.ROBOT_DANCE:
+            msg.motion = TegaAction.MOTION_DANCE
+
+        ### ====== Tega End of Task Vocab Reminder ======== ####
+
+        if command == RobotBehaviors.Q_ROBOT_TASK_END_REMINDER:
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/word_learning/"
+            file = "word_reminder_"
+            speech_file = PATH + file + random.choice(["1", "2", "3"]) + ".wav"
+            msg.wav_filename = speech_file
+            print ("vocab reminder question: "+msg.wav_filename)
+
+        if command == RobotBehaviors.ROBOT_TASK_END_RESPONSE:
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/word_learning/"
+            vocab_word = args[0][0].lower()
+            speech_file = PATH + vocab_word + "_answer_" + random.choice(["1", "2"]) + ".wav"
+            msg.wav_filename = speech_file
+            print ("vocab reminder answer: "+msg.wav_filename)
+
+        if command == RobotBehaviors.Q_ROBOT_TASK_END_ASSESSMENT:
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/word_learning/"
+            vocab_word = args[0][0].lower()
+            speech_file = PATH + vocab_word + "_question_" + random.choice(["1", "2"]) + ".wav"
+            msg.wav_filename = speech_file
+            print ("vocab assessment: "+msg.wav_filename)
+
+        ### =========== Tega Speech Induction ============= ####
+
+        if command == RobotBehaviors.Q_ROBOT_INDUCE_SPEECH:
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/induce_keyword/"
+            file = "induce_keyword_"
+            speech_file = PATH + file + random.choice(["1", "3", "6"]) + ".wav"
+            msg.wav_filename = speech_file
+            print ("induced speech: "+msg.wav_filename)
+
+        if command == RobotBehaviors.ROBOT_INDUCE_SPEECH_RESPONSE:
+            PATH = ROOT_TEGA_SPEECH_FOLDER + "general/word_learning/"
+            vocab_word = args[0][0].lower()
+            speech_file = PATH + vocab_word + "_answer_" + random.choice(["2"]) + ".wav"
+            msg.wav_filename = speech_file
+            print ("induced speech answer: "+msg.wav_filename)
 
         ### ====== Tega Question Asking =================== ####
         if command == RobotBehaviors.Q_ROBOT_OFFER_HELP:
@@ -253,7 +327,6 @@ class TegaBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             speech_file_name = PATH + vocab_word + ".mp3"
             msg.wav_filename = speech_file_name
             msg.enqueue = True
-            print(speech_file_name)
 
 	   # Before pronunciation
         if command == RobotBehaviors.TRY_PRONOUNCE:

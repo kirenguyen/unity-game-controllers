@@ -1,6 +1,7 @@
 import csv 
 import os
 import random
+import datetime
 
 from GameUtils import GlobalSettings
 
@@ -10,7 +11,7 @@ NUM_WORDS_THRESHOLD =4
 class iSpyTaskController():
 	"""docstring for iSpyTaskController"""
 
-	def __init__(self,game_round):
+	def __init__(self,session_number):
 		# List that will hold the names of the target objects
 		self.target_list = []
 
@@ -28,14 +29,26 @@ class iSpyTaskController():
 		# vocab word in the prompts
 		self.vocab_word = ""
 
+		self.task_start_time = None
 
-		self.load_task_list(game_round)
-		self.load_object_list()
+		self.task_end_time = None
+
+		self.task_duration = ""
+
+
+		self.load_task_list(session_number)
+		self.load_object_list(session_number)
 
 	def get_vocab_word(self):
 		return self.vocab_word
 
-	def load_task_list(self,game_round):
+	def get_task_time(self):
+		'''
+		get task start time, end time and duration
+		'''
+		return {'start':self.task_start_time , 'end': self.task_end_time, 'duration':self.task_duration}
+
+	def load_task_list(self,session_number):
 		""" Loads the task_list csv file into a 2d array """
 		dir_path = os.path.dirname(os.path.realpath(__file__))
 		print (dir_path)
@@ -46,8 +59,12 @@ class iSpyTaskController():
 		# {task_number: (task, category, attribute)}
 		# Ex:
 		# {1: ("What objects are related to weather?", object_type, weather)}
-		file_name =  '/../GameUtils/task_list_practice.csv' if game_round == "practice" else '/../GameUtils/task_list_experiment.csv'
-		
+		filename_dict = {
+			"practice": '/../GameUtils/task_list_practice.csv',
+			"s02": '/../GameUtils/task_list_experiment.csv',
+			"s01": '/../GameUtils/task_list_indoor.csv'
+			}
+		file_name = filename_dict.get(session_number)
 
 		
 		with open(dir_path + file_name,'r') as csvfile:
@@ -65,32 +82,18 @@ class iSpyTaskController():
 
 
 
-	def load_object_list(self):
+	def load_object_list(self, session_number):
 		""" Loads the object_list csv file into a 2d array """
 		dir_path = os.path.dirname(os.path.realpath(__file__))
 		print (dir_path)
 
 		self.object_dict= dict()
 
-		# What one row will look like
-		# {object: (word, color, size, object_type, location, attribute)}
-		# Ex:
-		# {'airplane': ('airplane', 'red', 'huge', 'sky', 'wings')}
-		"""
-		# WORKS WITH OBJECT_LIST.CSV
-		with open(dir_path + '/../GameUtils/object_list.csv','r') as csvfile:
-			spamreader = csv.reader(csvfile)
-			for row in spamreader:
-				if row[0] != "" and row[0] != "key_object":
-					self.object_dict[row[0]] = (row[1], row[2], row[3], row[4], row[5], row[6])
-		"""
+		# INDOOR : object_list_indoor.csv
+		# OUTDOOR : object_list3.csv
+		filename = 'object_list_indoor.csv' if session_number == "s01" else "object_list3.csv"
 
-		# What one row will look like
-		# {object: (word, object_type, object_vocab, attribute, color)}
-		# Ex:
-		# {'bicycle': ('bicycle', 'vehicle', 'vehicle', '2wheels:road', 'emerald')}
-		# WORKS WITH OBJECT_LIST2.CSV
-		with open(dir_path + '/../GameUtils/object_list3.csv','r') as csvfile:
+		with open(dir_path + '/../GameUtils/'+ filename,'r') as csvfile:
 			spamreader = csv.reader(csvfile)
 			for row in spamreader:
 				if row[0] != "" and row[0] != "key_object":
@@ -108,13 +111,15 @@ class iSpyTaskController():
 		#index = random.randint(0, len(self.available_quests)-1)
 		index = 0
 
+		self.current_task_index += 1 # update current task index
+
+
 		
 		task, task_category, task_attribute, prompt_audio_name = self.task_dict[self.available_quests[index]]
 
 		self.vocab_word = task_attribute
 
 		
-
 		# Delete the quest after it is chosen
 		del self.available_quests[index]
 
@@ -136,6 +141,10 @@ class iSpyTaskController():
 
 
 		task_message = self.get_task_message(str(len(self.target_list)),task_category,task_attribute)
+
+		self.task_start_time = datetime.datetime.now()
+		self.task_end_time = None
+		self.task_duration = ""
 		
 		return {"task": task_message, "task_vocab": task_attribute, "list" : self.target_list,"prompt_audio_name":prompt_audio_name}
 
@@ -194,23 +203,23 @@ class iSpyTaskController():
 		self.num_finished_words = self.num_finished_words + 1
 
 		if self.num_finished_words == NUM_WORDS_THRESHOLD:
-			print("**update target list: task in progress false")
-			self.task_in_progress = False
-			self._reset_for_new_task()
+			self.reset_for_new_task()
+
+			#self.current_task_index += 1
 
 	def get_current_answer_size(self):
 		pass
 
-	def _reset_for_new_task(self):
+	def reset_for_new_task(self):
 		'''
 		reset target list, nontarget list 
 		clear data of the last finished task for the new task
 		'''
+		self.task_in_progress = False
+		self.task_end_time = datetime.datetime.now()
+		self.task_duration = str(self.task_end_time - self.task_start_time)
 		self.target_list = []
 		self.nontarget_list = []
-		self.num_finished_words = 0
-
-
 
 	'''
 	the following functions are for child robot interaction

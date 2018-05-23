@@ -6,18 +6,18 @@ echo
 sleep 0.5s
 echo "I AM HERE!"
 
-xterm -geometry 45x20+200+200 -T "USB Cam" -e bash -c "roslaunch usb_cam usb_cam-test.launch" &
+xterm -bg grey -geometry 45x20+200+200 -T "USB Cam" -e bash -c "roslaunch usb_cam usb_cam-test.launch" &
 
 sleep 0.5s
 
-xterm -geometry 45x20+300+550 -T "Affect Recognition" -e bash -c ./scripts/tega_cam_affect_analysis & 
+xterm -bg grey -geometry 45x20+300+550 -T "Affect Recognition" -e bash -c ./../../devel/lib/tega_cam_affect_analysis//tega_cam_affect_analysis & 
 
 sleep 0.5s
 
-xterm -geometry 45x20+300+550 -T "Speech Recognition" -e "python3 ../asr_google_cloud/src/ros_asr.py" &
+xterm -bg brown -geometry 45x20+300+550 -T "Speech Recognition" -e "python3 ../asr_google_cloud/src/ros_asr.py" &
 
 sleep 0.5s
 
 #./scripts/start_recording_linux.sh $1 $2
-python3 -m scripts.start_ispy_game_controller $3 $1 $2
+python3 -m scripts.start_ispy_game_controller $1 $2 $3
 #xterm -geometry 120x40+200+0 -T "Main FSM" -e bash -c "python3 -m scripts.start_ispy_game_controller" $3 &

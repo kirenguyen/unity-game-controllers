@@ -8,6 +8,8 @@ from std_msgs.msg import Bool # for child_attention topic
 from std_msgs.msg import Header # standard ROS msg header
 from std_msgs.msg import String
 from std_msgs.msg import Int32
+import os
+import datetime
 
 
 
@@ -26,10 +28,20 @@ DELAY = 25
 
 class AffdexAnalysis:
 
-	def __init__(self,ros_node_mgr,game_round,p_id, experimenter):
+	def __init__(self,gameController,ros_node_mgr,p_id, experimenter, session_number):
+		self.gameController = gameController
 		self.ros_node_mgr = ros_node_mgr
 		self.ros_node_mgr.start_affdex_listener(self.on_affdex_data_received)
-		self.csv_file_prefix = "ispy_data_files/affdex_data/affdex_log_"+p_id+"_"+experimenter+"_"+game_round+"_"
+		if not os.path.isdir("ispy_data_files/"): # check exitence of folders
+			os.makedirs("ispy_data_files/")
+
+		if not os.path.isdir("ispy_data_files/affdex_data/"): # check exitence of folders
+			os.makedirs("ispy_data_files/affdex_data/") 
+
+		now = datetime.datetime.now()
+		date = now.isoformat()
+
+		self.csv_file_prefix = "ispy_data_files/affdex_data/affdex_log_"+p_id+"_"+experimenter+"_"+session_number+"_"+date+"_"
 		self.start_time = '-'.join([str(i) for i in time.localtime()])
 		self.csv_file_name = self.csv_file_prefix+self.start_time+".csv"
 		self.file = open(self.csv_file_name, 'w')
@@ -39,9 +51,11 @@ class AffdexAnalysis:
 		self.frame_number = 0
 
 
+
+
 	def add_file_heading(self,data):
 		print("affdex recording starts")
-		heading = "frame_number, elapsed_time (sec), localtime"
+		heading = "frame_number, elapsed_time (sec), localtime, gameTask, taskTurnIndex, currentRobotAction"
 		emotion_heading = ','.join([ "emotion-"+str(i) for i in range(1,len(data.emotions)+1,1)])
 		expression_heading = ','.join([ "expression-"+str(i) for i in range(1,len(data.expressions)+1,1)])
 		measurement_heading = ','.join([ "measurement-"+str(i) for i in range(1,len(data.measurements)+1,1)])
@@ -70,13 +84,17 @@ class AffdexAnalysis:
 
 		timestamp = '-'.join([str(i) for i in time.localtime()])
 		elapsed_time = time.time() - self.start_time
+		gameTask = self.gameController.task_controller.current_task_index
+		taskTurnIndex = self.gameController.interaction.current_task_turn_index
 
+		curr_robot_action = self.gameController.interaction.curr_robot_action
+		
 			
 		emotions_str = ','.join([str(i) for i in data.emotions])	
 		expressions_str = ','.join([str(i) for i in data.expressions])
 		measurements_str = ','.join([str(i) for i in data.measurements])
 		
-		line = ','.join([str(self.frame_number), str(elapsed_time), timestamp,emotions_str,expressions_str,measurements_str]) 
+		line = ','.join([str(self.frame_number), str(elapsed_time), timestamp, str(gameTask),str(taskTurnIndex), curr_robot_action, emotions_str,expressions_str,measurements_str]) 
 
 		
 		self.file.write(line+'\n')

@@ -64,7 +64,8 @@ ROBOT_VIRTUAL_ACTIONS = 30
 BUTTON_DISABLED=31
 TASK_COMPLETED=32
 WHOSE_TURN = 33
-VALID_ISPY_COMMANDS = [  WHOSE_TURN,TASK_COMPLETED,ROBOT_VIRTUAL_ACTIONS, RESET, SHOW_PRONOUNCIATION_PANEL, SHOW_PRONOUNCIATION_PANEL, SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, SEND_TASKS_TO_UNITY, GAME_FINISHED,BUTTON_DISABLED]
+SET_GAME_SCENE = 34
+VALID_ISPY_COMMANDS = [SET_GAME_SCENE, WHOSE_TURN,TASK_COMPLETED,ROBOT_VIRTUAL_ACTIONS, RESET, SHOW_PRONOUNCIATION_PANEL, SHOW_PRONOUNCIATION_PANEL, SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, SEND_TASKS_TO_UNITY, GAME_FINISHED,BUTTON_DISABLED]
 
 
 
@@ -119,10 +120,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         This function maps actions from the ActionSpace into actual ROS Msgs
         """
         
-        print("send robot cmd...")
-        print(command)
-        print("args...")
-        print(args)
+    
         if self.robot_commander is None:
             self.start_robot_publisher()
             time.sleep(.5)
@@ -171,18 +169,23 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                     
                     robot_action = json.dumps(args[0])
                     msg.properties = robot_action
+
                 elif command == BUTTON_DISABLED:
                     msg.properties = json.dumps(args[0])
 
                 elif command == WHOSE_TURN:
                     msg.properties = json.dumps(args[0])
 
+                elif command == SET_GAME_SCENE:
+                    gameScene = json.dumps(args[0])
+                    msg.properties = gameScene
+
             # send message to tablet game
             if self.game_commander is None:
                 self.start_ispy_cmd_publisher()
 
 
-            if command == SEND_TASKS_TO_UNITY:
+            if command == SEND_TASKS_TO_UNITY or command == SET_GAME_SCENE:
                 counter = 0
                 self.message_received = False
                 # Keep sending the message until hearing that it was received

@@ -153,14 +153,14 @@ for item in list_files(drive_service):
 
 
 ##### delete the current participant from the remaining rosbags
-# if success == True:
-# 	# delete the current participant
-# 	try:
-# 		del remaining_rosbags[next_participant]
-# 		pickle.dump( remaining_rosbags , open( "remaining_rosbags.p", "wb" ))
-# 	except:
-# 		print("failed to delte participant: {}".format(next_participant))
-# 		os.system("echo \"ERROR: failed to delete "+next_participant+">> rosbag_downloading_error_report.txt")
+if success == True:
+	# delete the current participant
+	try:
+		del remaining_rosbags[next_participant]
+		pickle.dump( remaining_rosbags , open( "remaining_rosbags.p", "wb" ))
+	except:
+		print("failed to delte participant: {}".format(next_participant))
+		os.system("echo \"ERROR: failed to delete "+next_participant+">> rosbag_downloading_error_report.txt")
     
 
 

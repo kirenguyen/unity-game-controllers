@@ -42,6 +42,8 @@ class AffdexAnalysis:
 
 		self.transition_state_start_time = None
 		self.header_cols = ['NA','NA','NA']
+		self.taskVocab = None
+		self.gameTask = None
 
 
 		participant_id = rosbag_name.split('_')[0]
@@ -81,12 +83,14 @@ class AffdexAnalysis:
 		# self.ispy_action_log_csv.write(','.join(['elapsedTime','localTime', 'isScalingUpDown',
 		# 	'pointerClick','isDragging','onPinch','clickedObjectName']))
 		INTERACTION_OUTPUTS ="interaction_outputs/"
-		self.child_robot_interaction_csv = open(INTERACTION_OUTPUTS+"interaction_rosbag_"+rosbag_name.replace('bag','csv'),"a") 
+		self.child_robot_interaction_csv = open(INTERACTION_OUTPUTS+"interaction_rosbag_"+rosbag_name.replace('bag','csv'),"w") 
 		
 
 		self.child_robot_interaction_csv.write(','.join([
 			'header seq inter ros topic','header secs inter ros topic','header nsecs inter ros topic',
 			'elapsedTimeFromGameStart','currentLocalTime',
+
+			'orig_local_time2',
 
 			'gameTask','vocab', 'taskStartTime','taskEndTime', 'taskDuration',
 
@@ -132,11 +136,18 @@ class AffdexAnalysis:
 			self.header_cols = [msg.header.seq,msg.header.stamp.secs,msg.header.stamp.nsecs]
 		except:
 			self.header_cols = ['NA','NA','NA']
-		print(header_cols)
 
-		content = ','.join(map(str,header_cols+[
+		self.taskVocab = msg.taskVocab
+		self.gameTask = msg.gameTask
+
+		orig_time2 = str(datetime.datetime.now() - datetime.timedelta(seconds=self.time_diff)) if self.time_diff !=0 else ""
+
+
+
+		content = ','.join(map(str,self.header_cols+[
 			elapsedTime,str(datetime.datetime.now()),
 
+			orig_time2,
 
 			msg.gameTask, msg.taskVocab,  msg.taskStartTime, msg.taskEndTime, msg.taskDuration,  # task related 
 
@@ -182,18 +193,15 @@ class AffdexAnalysis:
 	def on_game_start(self,data):
 		if self.time_diff == 0:
 			nanosec_offset = float(data.header.stamp.nsecs) /(10**9)
-
 			self.time_diff = time.time() - (data.header.stamp.secs + nanosec_offset )
-		
 		
 
 	def add_file_heading(self,data):
 		print("affdex recording starts")
-		heading = "header seq inter file, header sec inter file,header nsec inter file, frame_number, orig_local_time, orig_local_time2, local_time, game_elapsed_time, time_diff, inter_data_frame_number"
+		heading = "header seq inter file, header sec inter file,header nsec inter file, taskVocab, gameTask, frame_number, orig_local_time, orig_local_time2, local_time, game_elapsed_time, time_diff, inter_data_frame_number"
 		emotion_heading = ','.join([ "emotion-"+str(i) for i in range(1,len(data.emotions)+1,1)])
 		expression_heading = ','.join([ "expression-"+str(i) for i in range(1,len(data.expressions)+1,1)])
 		measurement_heading = ','.join([ "measurement-"+str(i) for i in range(1,len(data.measurements)+1,1)])
-
 		self.file.write(','.join([heading,emotion_heading,expression_heading,measurement_heading])+'\n')
 	
 
@@ -202,12 +210,9 @@ class AffdexAnalysis:
 
 		if self.first_line == True:
 			self.add_file_heading(data)
-			
 			self.first_line = False
 
 		nanosec_offset = float(data.header.stamp.nsecs) /(10**9)
-		
-		
 		elapsed_time =  data.header.stamp.secs + nanosec_offset - self.game_start_time if self.game_start_time else ""
 		#print("elapse..{}".format(elapsed_time))
 		#print(time.localtime(time.time() - self.time_diff))
@@ -217,8 +222,8 @@ class AffdexAnalysis:
 		emotions_str = ','.join([str(i) for i in data.emotions])	
 		expressions_str = ','.join([str(i) for i in data.expressions])
 		measurements_str = ','.join([str(i) for i in data.measurements])
-		
-		return self.header_cols+[str(self.frame_number), orig_local_time, orig_time2, time.strftime("%Y-%m-%d-%H:%M:%S",time.localtime()), str(elapsed_time), str(self.time_diff), str(self.inter_data_frame), emotions_str,expressions_str,measurements_str] 
+
+		return map(str,self.header_cols+[self.taskVocab, self.gameTask, str(self.frame_number), orig_local_time, orig_time2, time.strftime("%Y-%m-%d-%H:%M:%S",time.localtime()), str(elapsed_time), str(self.time_diff), str(self.inter_data_frame), emotions_str,expressions_str,measurements_str]) 
 
 
 	def on_affdex_data_received(self,data):

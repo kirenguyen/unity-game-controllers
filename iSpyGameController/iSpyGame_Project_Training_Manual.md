@@ -23,13 +23,13 @@
 
 8. Wifi and Bridged Network
 	* In PRG lab space, please use PRG wifi (either PRG2.4 or PRG5.0). Make sure your ubuntu network is a bridgeted network and the option is "autodetect"
-		* ![autodetect](res/images/Screen Shot 2018-05-28 at 1.16.19 PM.jpg)
+		* ![autodetect](res/images/8.jpg)
 	* In Ubuntu, make sure there is a double arrow sign on the top right side of your interface
 	* do `ifconfig` in Ubuntu to check your IP address. The address should start with `19x.xxx.xxx` rather than `17x.xxx.xxx`
 		* `17x.xxx.xxx` is a fake address created by your computer to communicate between mac and ubuntu, so it is not able to communicate between your unbuntu and robot/tablet. Thus, `19x.xxx.xxx` is necessary. 
-		* ![ip address](res/images/Screen Shot 2018-05-28 at 1.39.43 PM.png)
+		* ![ip address](res/images/1.png)
 	* run `roscore` and then you should see the correct ip address in your terminal
-		*![cor ip add](res/images/Screen Shot 2018-05-28 at 1.40.12 PM.png)
+		*![cor ip add](res/images/2.png)
  
 ### 1. CITI Training
 
@@ -86,7 +86,7 @@
 	* may need to install Google ASR. Check how to do so in the Google ASR section below
 	
 6. Your `catkin` folder should be something like this
-	![catkin](res/images/Screen Shot 2018-05-28 at 1.51.20 PM.png)
+	![catkin](res/images/3.png)
 
 7. Try to run iSpy game on your machine
 	* run ```roscore```
@@ -140,7 +140,7 @@
 
 	* ```export PS1="\n\[$(tput bold)\]\[$(tput setaf 5)\]➜ \[$(tput setaf 6)\]\w\[$(tput setaf 3)\]\$(parse_git_branch) \[$(tput sgr0)\]"```
 	* After the modification, the command line in your terminal should be like this
-		![git command line](res/images/Screen Shot 2018-05-28 at 1.54.36 PM.png) where you can see which git branch you are in. IN this screen, the branch is `ispy-test`. 
+		![git command line](res/images/4.png) where you can see which git branch you are in. IN this screen, the branch is `ispy-test`. 
 
 7. `git push` fails to push a new commit due to a large file that has already been deleted
 	* `git filter-branch --index-filter 'git rm -r --cached --ignore-unmatch <file/dir>' HEAD`
@@ -230,14 +230,14 @@ you send a `JiboAction` typed message with certain fields filled in. for instanc
 	* do `jibo index` in your terminal. make sure the computer has `jibo cli`. You can use PRG's mac, which has `jibo cli`. This `index` command is to reorient jibo and start its motor system
 		* make sure your default jibo is the one you are using
 		* if not, reset default jibo `jibo set-default-robot [robotName]` or `jibo add-robot [robotname] [robot ip]` make sure you put `.local` after `[robot ip]`
-		* ![jibo commands](res/images/Screen Shot 2018-05-29 at 10.52.04 AM.png)
+		* ![jibo commands](res/images/7.png)
 		* When indexing Jibo, you should see it rotating and reorienting itself
 	* go to the Skill Service page (https://YOUR-ROBOT-NAME-HERE.local:8779) and manually launch the skill. Example: `http://lava-volume-cake-angora.local:8779/index.html`
-		* ![screenshot](res/images/Screen Shot 2018-05-29 at 10.30.49 AM.png)
+		* ![screenshot](res/images/6.png)
 	* then, launch the `jibo-rosbridge-receiver` skill. More information on how to run the skill is in [jibo-template](https://github.com/mitmedialab/jibo-template). Make sure you have `roscore` and `rosbridge` running before starting this jibo skill.
 	* first goal is to get `jibo-rosbridge-receiver` running on the robot, get `jibo-teleop` running on your Ubuntu environment, and see if you can get them to actually communicate and play animations between them
 		* if `jibo-rosbridge-receiver` and `jibo-teleop` are running successfully, when you type `rostopic info /jibo` you should see both the publisher and subscriber in the screenshot
-			* ![screenshot](res/images/Screen Shot 2018-05-29 at 11.25.15 AM.png)
+			* ![screenshot](res/images/9.png)
 	* Once that’s working, adding new anims and invoking them from the game should be relatively straightforward	
 5. Then, check how `unity-game-controllers` is connected to Jibo/Tega
 	* what commands does it pass to the robot
@@ -272,7 +272,7 @@ you send a `JiboAction` typed message with certain fields filled in. for instanc
 	* `export GOOGLE_APPLICATION_CREDENTIALS=$HOME/projects/asr-projects-daf2f64ad0c6.json`
 4. Test it by typing `python ros_asr.py` in `~/catkin_ws/src/asr_google_cloud/src` directory
 	* The desired output should be like
-	![desired output](res/images/Screen Shot 2018-05-28 at 2.19.05 PM.png)	 
+	![desired output](res/images/5.png)	 
 
 	
 

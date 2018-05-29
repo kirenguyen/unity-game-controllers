@@ -23,13 +23,13 @@
 
 8. Wifi and Bridged Network
 	* In PRG lab space, please use PRG wifi (either PRG2.4 or PRG5.0). Make sure your ubuntu network is a bridgeted network and the option is "autodetect"
-		* ![autodetect](/Users/huilichen/Projects/unity-game-controllers/iSpyGameController/res/images/Screen Shot 2018-05-28 at 1.16.19 PM.png)
+		* ![autodetect](res/images/Screen Shot 2018-05-28 at 1.16.19 PM.png)
 	* In Ubuntu, make sure there is a double arrow sign on the top right side of your interface
 	* do `ifconfig` in Ubuntu to check your IP address. The address should start with `19x.xxx.xxx` rather than `17x.xxx.xxx`
 		* `17x.xxx.xxx` is a fake address created by your computer to communicate between mac and ubuntu, so it is not able to communicate between your unbuntu and robot/tablet. Thus, `19x.xxx.xxx` is necessary. 
-		* ![ip address](/Users/huilichen/Projects/unity-game-controllers/iSpyGameController/res/images/Screen Shot 2018-05-28 at 1.39.43 PM.png)
+		* ![ip address](res/images/Screen Shot 2018-05-28 at 1.39.43 PM.png)
 	* run `roscore` and then you should see the correct ip address in your terminal
-		*![cor ip add](/Users/huilichen/Projects/unity-game-controllers/iSpyGameController/res/images/Screen Shot 2018-05-28 at 1.40.12 PM.png)
+		*![cor ip add](res/images/Screen Shot 2018-05-28 at 1.40.12 PM.png)
  
 ### 1. CITI Training
 
@@ -86,7 +86,7 @@
 	* may need to install Google ASR. Check how to do so in the Google ASR section below
 	
 6. Your `catkin` folder should be something like this
-	![catkin](/Users/huilichen/Projects/unity-game-controllers/iSpyGameController/res/images/Screen Shot 2018-05-28 at 1.51.20 PM.png)
+	![catkin](res/images/Screen Shot 2018-05-28 at 1.51.20 PM.png)
 
 7. Try to run iSpy game on your machine
 	* run ```roscore```
@@ -140,7 +140,7 @@
 
 	* ```export PS1="\n\[$(tput bold)\]\[$(tput setaf 5)\]➜ \[$(tput setaf 6)\]\w\[$(tput setaf 3)\]\$(parse_git_branch) \[$(tput sgr0)\]"```
 	* After the modification, the command line in your terminal should be like this
-		![git command line](/Users/huilichen/Projects/unity-game-controllers/iSpyGameController/res/images/Screen Shot 2018-05-28 at 1.54.36 PM.png) where you can see which git branch you are in. IN this screen, the branch is `ispy-test`. 
+		![git command line](res/images/Screen Shot 2018-05-28 at 1.54.36 PM.png) where you can see which git branch you are in. IN this screen, the branch is `ispy-test`. 
 
 7. `git push` fails to push a new commit due to a large file that has already been deleted
 	* `git filter-branch --index-filter 'git rm -r --cached --ignore-unmatch <file/dir>' HEAD`
@@ -202,16 +202,27 @@
 ### 8. JIBO Robot (Developer Version)
 
 1. Check out [jibo-rosbridge-receiver](https://github.com/mitmedialab/jibo-rosbridge-receiver) repository and [jibo-template](https://github.com/mitmedialab/jibo-template) repository
+
 2. Check out [jibo-teleop](https://github.com/mitmedialab/jibo-teleop) repository
 	* If you don't have access, then download it from [link](https://drive.google.com/drive/u/0/folders/1sN_nkvlANsVh9SKG-JqsiDVBEWFbZw0q)
 	* `jibo-teleop` is a program that runs on the Linux side, that 	gives you a teleop interface for controlling a Jibo that is running 	`jibo-rosbridge-receiver` skill it also has the jibo_msg definitions you’ll need to build in your catkin_ws so first check that out, make sure you can install and run that, etc.
+	* If you have both `jibo-teleop` and `jibo_msg` in your catkin folder, then delete `jibo_msg` and do `catkin_make` in your terminal
 	* if you look at the message defintions for jibo, you’ll see they’re very similar to Tega’s
 you send a `JiboAction` typed message with certain fields filled in. for instance, `do_motion`: true. and then motion:`my/path/to/anim.keys`
+
 3. How to create a new animation for Jibo? 
 	* in order to add a new animation, you need to first create the `.keys` file, which you can do in the SDK editor that is on PRG's iMac
 	* move that newly created animation file `testAnim.keys` to some subdirectory of the `animations` directory of `jibo-rosbridge-receiver`
 	* then, you can send a ROS message to play that animation
 	* Use one of the iMac computers in PRG to work on Jibo animations
+	* Use the Mac desktop on the other side of Huili's table. It has `atom editor` in it. Log into `prg`. Ask others for the password.
+	* On the Mac desktop, go to `projects/kika/test-skills/node_modules/jibo-anim-db-animations/` directory and type `atom .`
+	* You can reference old animations and merge animations. Creating an animation from scratch may be very time-consuming. merging and changing existing animations is easier and recommended. There are a big set of existing animations. Check the screenshots and if you have questions, feel free to ask Kika.
+		* terminal command to start `Atom Editor` ![](res/images/IMG_20180529_132634.jpg)
+		* referencing and importing an existing animation. ![](res/images/IMG_20180529_132739.jpg)
+		* the location of existing animations![](res/images/IMG_20180529_132559.jpg)
+	* a map between Tega and Jibo's animations can be found [here](https://drive.google.com/drive/u/0/folders/1sN_nkvlANsVh9SKG-JqsiDVBEWFbZw0q). 
+
 4. Start from scratch
 	* pick a dev Jibo. The robot's name can be found on the bottom of the robot (four words)
 	* turn it on. when it is on, should be able to a blue check mark on Jibo's face
@@ -219,14 +230,14 @@ you send a `JiboAction` typed message with certain fields filled in. for instanc
 	* do `jibo index` in your terminal. make sure the computer has `jibo cli`. You can use PRG's mac, which has `jibo cli`. This `index` command is to reorient jibo and start its motor system
 		* make sure your default jibo is the one you are using
 		* if not, reset default jibo `jibo set-default-robot [robotName]` or `jibo add-robot [robotname] [robot ip]` make sure you put `.local` after `[robot ip]`
-		* ![jibo commands](/Users/huilichen/Projects/unity-game-controllers/iSpyGameController/res/images/Screen Shot 2018-05-29 at 10.52.04 AM.png)
+		* ![jibo commands](res/images/Screen Shot 2018-05-29 at 10.52.04 AM.png)
 		* When indexing Jibo, you should see it rotating and reorienting itself
 	* go to the Skill Service page (https://YOUR-ROBOT-NAME-HERE.local:8779) and manually launch the skill. Example: `http://lava-volume-cake-angora.local:8779/index.html`
-		* ![screenshot](/Users/huilichen/Projects/unity-game-controllers/iSpyGameController/res/images/Screen Shot 2018-05-29 at 10.30.49 AM.png)
+		* ![screenshot](res/images/Screen Shot 2018-05-29 at 10.30.49 AM.png)
 	* then, launch the `jibo-rosbridge-receiver` skill. More information on how to run the skill is in [jibo-template](https://github.com/mitmedialab/jibo-template). Make sure you have `roscore` and `rosbridge` running before starting this jibo skill.
 	* first goal is to get `jibo-rosbridge-receiver` running on the robot, get `jibo-teleop` running on your Ubuntu environment, and see if you can get them to actually communicate and play animations between them
 		* if `jibo-rosbridge-receiver` and `jibo-teleop` are running successfully, when you type `rostopic info /jibo` you should see both the publisher and subscriber in the screenshot
-			* ![screenshot](/Users/huilichen/Projects/unity-game-controllers/iSpyGameController/res/images/Screen Shot 2018-05-29 at 11.25.15 AM.png)
+			* ![screenshot](res/images/Screen Shot 2018-05-29 at 11.25.15 AM.png)
 	* Once that’s working, adding new anims and invoking them from the game should be relatively straightforward	
 5. Then, check how `unity-game-controllers` is connected to Jibo/Tega
 	* what commands does it pass to the robot
@@ -261,7 +272,7 @@ you send a `JiboAction` typed message with certain fields filled in. for instanc
 	* `export GOOGLE_APPLICATION_CREDENTIALS=$HOME/projects/asr-projects-daf2f64ad0c6.json`
 4. Test it by typing `python ros_asr.py` in `~/catkin_ws/src/asr_google_cloud/src` directory
 	* The desired output should be like
-	![desired output](/Users/huilichen/Projects/unity-game-controllers/iSpyGameController/res/images/Screen Shot 2018-05-28 at 2.19.05 PM.png)	 
+	![desired output](res/images/Screen Shot 2018-05-28 at 2.19.05 PM.png)	 
 
 	
 

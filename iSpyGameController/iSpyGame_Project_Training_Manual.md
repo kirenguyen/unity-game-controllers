@@ -199,7 +199,7 @@
 
 2. download `HandShaker` in Mac's app store for file transfer on Android devices. This app is a better alternative for `AndroidFileTransfer`
 
-### 8. JIBO Robot (Developer Version)
+### 8. JIBO Robot
 
 1. Check out [jibo-rosbridge-receiver](https://github.com/mitmedialab/jibo-rosbridge-receiver) repository and [jibo-template](https://github.com/mitmedialab/jibo-template) repository
 2. Check out [jibo-teleop](https://github.com/mitmedialab/jibo-teleop) repository
@@ -214,37 +214,17 @@ you send a `JiboAction` typed message with certain fields filled in. for instanc
 	* Use one of the iMac computers in PRG to work on Jibo animations
 4. Start from scratch
 	* pick a dev Jibo. The robot's name can be found on the bottom of the robot (four words)
-	* turn it on. when it is on, should be able to a blue check mark on Jibo's face
 	* Make sure the wifi on your local machine is PRG wifi rather than MIT or Media Lab wifi.
-	* do `jibo index` in your terminal. make sure the computer has `jibo cli`. You can use PRG's mac, which has `jibo cli`. This `index` command is to reorient jibo and start its motor system
-		* make sure your default jibo is the one you are using
-		* if not, reset default jibo `jibo set-default-robot [robotName]` or `jibo add-robot [robotname] [robot ip]` make sure you put `.local` after `[robot ip]`
-		* ![jibo commands](/Users/huilichen/Projects/unity-game-controllers/iSpyGameController/res/images/Screen Shot 2018-05-29 at 10.52.04 AM.png)
-		* When indexing Jibo, you should see it rotating and reorienting itself
-	* go to the Skill Service page (https://YOUR-ROBOT-NAME-HERE.local:8779) and manually launch the skill. Example: `http://lava-volume-cake-angora.local:8779/index.html`
-		* ![screenshot](/Users/huilichen/Projects/unity-game-controllers/iSpyGameController/res/images/Screen Shot 2018-05-29 at 10.30.49 AM.png)
-	* then, launch the `jibo-rosbridge-receiver` skill. More information on how to run the skill is in [jibo-template](https://github.com/mitmedialab/jibo-template). Make sure you have `roscore` and `rosbridge` running before starting this jibo skill.
+	* go to the Skill Service page (https://YOUR-ROBOT-NAME-HERE.local:8779) and manually launch the skill. then, launch the `jibo-rosbridge-receiver` skill. More information on how to run the skill is in [jibo-template](https://github.com/mitmedialab/jibo-template)
 	* first goal is to get `jibo-rosbridge-receiver` running on the robot, get `jibo-teleop` running on your Ubuntu environment, and see if you can get them to actually communicate and play animations between them
-		* if `jibo-rosbridge-receiver` and `jibo-teleop` are running successfully, when you type `rostopic info /jibo` you should see both the publisher and subscriber in the screenshot
-			* ![screenshot](/Users/huilichen/Projects/unity-game-controllers/iSpyGameController/res/images/Screen Shot 2018-05-29 at 11.25.15 AM.png)
 	* Once that’s working, adding new anims and invoking them from the game should be relatively straightforward	
 5. Then, check how `unity-game-controllers` is connected to Jibo/Tega
 	* what commands does it pass to the robot
 	* Learn how to add more robot behaviors/actions to the game
 6. How to create `.key` file for Jibo custom animations?
 	* Use Jibo SDK Editor on PRG's mac
-	* check out `jibo-beta-docs-12.1.6` tutorial in the [link](https://drive.google.com/drive/u/0/folders/1sN_nkvlANsVh9SKG-JqsiDVBEWFbZw0q) 
-
-7. Debug page: `Skills Debug Page http://MY-ROBOT-HOST-NAME.local:9191/index.html`	
-8. If you have any questions, Sam is the person you can ask for help
-
-9. Useful terminal commands for `jibo cli`
-	* `jibo --help` to see all jibo commands
-	* `jibo index`
-	* `jibo add-robot <robotName> <robotIpAddress> ` 
-		* example: `jibo add-robot angora lava-volume-cake-angora.local` make sure you add `.local`
-	* `jibo set-default-robot [robotName]`
-	* `jibo remove-robot <robotName>`
+	* check out `jibo-beta-docs-12.1.6` tutorial in the [link](https://drive.google.com/drive/u/0/folders/1sN_nkvlANsVh9SKG-JqsiDVBEWFbZw0q) 	
+7. If you have any questions, Sam is the person you can ask for help
 
 ### 9. Tega Recordings for iSPy (Optional)
 1. check the folder [here](https://drive.google.com/drive/u/0/folders/1XKWfUTtqO9Iu9TbziHFAUxueKslK1hsQ)

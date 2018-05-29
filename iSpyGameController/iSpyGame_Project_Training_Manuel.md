@@ -23,7 +23,7 @@
 
 8. Wifi and Bridged Network
 	* In PRG lab space, please use PRG wifi (either PRG2.4 or PRG5.0). Make sure your ubuntu network is a bridgeted network and the option is "autodetect"
-		* ![autodetect](res/images/Screen Shot 2018-05-28 at 1.16.19 PM.png)
+		* ![autodetect](res/images/Screen Shot 2018-05-28 at 1.16.19 PM.jpg)
 	* In Ubuntu, make sure there is a double arrow sign on the top right side of your interface
 	* do `ifconfig` in Ubuntu to check your IP address. The address should start with `19x.xxx.xxx` rather than `17x.xxx.xxx`
 		* `17x.xxx.xxx` is a fake address created by your computer to communicate between mac and ubuntu, so it is not able to communicate between your unbuntu and robot/tablet. Thus, `19x.xxx.xxx` is necessary. 

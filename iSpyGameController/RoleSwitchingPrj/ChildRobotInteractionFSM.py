@@ -133,8 +133,6 @@ class ChildRobotInteractionFSM:
 
 			self.child_click_cancel_num = 0
 
-			self.numHintButtonPressedForTask = 0
-
 			self.continue_robot_help = True
 
 		
@@ -415,7 +413,6 @@ class ChildRobotInteractionFSM:
 			self.state = ris.CHILD_TURN
 			self.child_states.on_new_task_received() # reset some task-based variables in child's states
 			self.task_controller.num_finished_words = 0
-			self.numHintButtonPressedForTask = 0
 
 		def turn_taking(self,max_time=False):
 			def _get_turn_duration():
@@ -634,11 +631,7 @@ class ChildRobotInteractionFSM:
 			if physical_actions:
 				self.physical_actions = physical_actions
 				self._perform_robot_physical_actions(ras.TURN_STARTING)
-
-				# if self.state == ris.ROBOT_TURN: 
-				# 	time.sleep(3)
-				# 	self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_EXPLORE)
-
+				
 		def start_task_end_celebration(self, action_number):
 
 			time.sleep(5)
@@ -887,8 +880,6 @@ class ChildRobotInteractionFSM:
  
 
 			msg.numChildClickCancelForTurn = self.child_click_cancel_num 
-
-			#msg.numHintButtonPressedForTask = self.numHintButtonPressedForTask
 
 			msg.numQAForTurn = [self.child_states.num_robot_questions_asked, self.child_states.pos_answers, 
 									self.child_states.neg_answers, self.child_states.other_answers,

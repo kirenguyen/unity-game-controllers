@@ -33,7 +33,6 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     ROBOT_ENCOURAGING = 'ROBOT_ENCOURAGING'
     ROBOT_WINK = 'ROBOT_WINK'
     ROBOT_THINKING = 'ROBOT_THINKING'
-
    
 
     ROBOT_SAY_WORD = 'ROBOT_SAY_WORD'
@@ -98,7 +97,7 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     NO_ISPY_ACTION_ALERT = "NO_ISPY_ACTION_ALERT"
     ROBOT_TASK_END_BEHAVIOR = "ROBOT_TASK_END_BEHAVIOR"
 
-    ### ===== task end behaviors
+    ### ===== task end behaviors ==== ###
     ROBOT_PLAY_MUSIC = "ROBOT_PLAY_MUSIC"
     ROBOT_DANCE = "ROBOT_DANCE"
     ROBOT_TASK_END_RESPONSE = "ROBOT_TASK_END_RESPONSE"

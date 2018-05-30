@@ -55,7 +55,7 @@ class iSpyDataTracking:
 			
 			'numTotalAttemptsForTask','numChildTotalAttemptsForTask', # task related 
 
-			'numChildClickCancelForTurn', 'numHintButtonPressedForTask', # turn related
+			'numChildClickCancelForTurn', # turn related
 
 			'numQsAskeddForTask','numPositiveAnswerForTask','numNegativeAnswerForTask','numOtherAnswerForTask','numNoAnswerAttempt1ForTask',# turn related
 
@@ -67,10 +67,7 @@ class iSpyDataTracking:
 
 			'numTouchAbsenceAlertPerTask','objectWordPronounced' ,
 
-			'isDraggin', 'pointerClick','onPinch','isScalingUp','isScalingDown',
-
-			'maxElapsedTimeReached'
-			
+			'isDraggin', 'pointerClick','onPinch','isScalingUp','isScalingDown'
 			
 			])+'\n')
 
@@ -117,7 +114,7 @@ class iSpyDataTracking:
 
 			msg.numTotalAttemptsForTask[0],msg.numTotalAttemptsForTask[1],
 
-			msg.numChildClickCancelForTurn, #msg.numHintButtonPressedForTask, 
+			msg.numChildClickCancelForTurn,
 
 			msg.numQAForTurn[0], msg.numQAForTurn[1], msg.numQAForTurn[2], 
 
@@ -131,10 +128,7 @@ class iSpyDataTracking:
 
 			msg.numTouchAbsenceAlertPerTask, msg.objectWordPronounced,
 
-			msg.ispyAction[0], msg.ispyAction[1], msg.ispyAction[2], msg.ispyAction[3], msg.ispyAction[4],
-
-			msg.maxElapsedTime 
-			
+			msg.ispyAction[0], msg.ispyAction[1], msg.ispyAction[2], msg.ispyAction[3], msg.ispyAction[4]
 			]))
 
 		self.child_robot_interaction_csv.write(content+'\n')

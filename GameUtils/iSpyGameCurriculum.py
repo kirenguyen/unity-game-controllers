@@ -12,13 +12,9 @@ class iSpyGameCurriculum: # pylint: disable=too-few-public-methods
     #    HOUSE    #
     ###############
 
-    # DAD = 'DAD'
     FATHER = "FATHER"
-    # MOM = 'MOM'
     MOTHER = "MOTHER"
-    # GRANDMOTHER = 'GRANDMOTHER'
     GRANDMA = "GRANDMA"
-    # GRANDFATHER = 'GRANDFATHER'
     GRANDPA = "GRANDPA"
     BABY = 'BABY'
 
@@ -40,7 +36,6 @@ class iSpyGameCurriculum: # pylint: disable=too-few-public-methods
     SHELF = 'SHELF'
     TV = 'TV'
 
-    #UNCOMENT FROM HERE LATER
     BOWL = 'BOWL'
     BROOM = 'BROOM'
     BUCKET = 'BUCKET'
@@ -71,13 +66,12 @@ class iSpyGameCurriculum: # pylint: disable=too-few-public-methods
     TOWEL = 'TOWEL'
 
 
-
-
     ###############
     #JUNGLE/FOREST#
     ###############
 
     DEER = 'DEER'
+
 
     ###############
     #    FARM     #
@@ -90,6 +84,7 @@ class iSpyGameCurriculum: # pylint: disable=too-few-public-methods
     ROOSTER = 'ROOSTER'
 
     TRACTOR = 'TRACTOR'
+
 
     ###############
     #    NATURE   #
@@ -104,11 +99,9 @@ class iSpyGameCurriculum: # pylint: disable=too-few-public-methods
 
     FLOWER = 'FLOWER'
     FOREST = 'FOREST'
-    # LAKE = 'LAKE'
-    # POND = 'POND'
     CLOUD = 'CLOUD'
-    # SKY = 'SKY'
     MOUNTAIN = 'MOUNTAIN'
+
 
     ###############
     #    CITY     #
@@ -127,7 +120,6 @@ class iSpyGameCurriculum: # pylint: disable=too-few-public-methods
     #    BEACH    #
     ###############
 
-   # SAND = 'SAND'
     DOLPHIN = 'DOLPHIN'
     BUCKET = 'BUCKET'
     COCONUT = 'COCONUT'

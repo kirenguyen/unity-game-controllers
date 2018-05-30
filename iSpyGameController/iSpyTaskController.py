@@ -207,9 +207,6 @@ class iSpyTaskController():
 
 			#self.current_task_index += 1
 
-	def get_current_answer_size(self):
-		pass
-
 	def reset_for_new_task(self):
 		'''
 		reset target list, nontarget list 
@@ -225,34 +222,18 @@ class iSpyTaskController():
 	the following functions are for child robot interaction
 	they are called by ChildRobotInteractionFSM.py
 	'''
-
-	def get_random_target_obj(self):
-		'''
-		randomly select an object on the target list to return
-		'''
-		ran_index = random.randint(0, len(self.target_list)-1)
-		return self.target_list[ran_index]
-
-	def get_a_nontarget_object(self):
-		'''
-		return a nontarget object
-		'''
-		ran_index = random.randint(0, len(self.nontarget_list)-1)
-		return self.nontarget_list[ran_index]
 			
-
+	def get_obj(self, obj_list):
+		ran_index = random.randint(0, len(obj_list)-1)
+		return obj_list[ran_index]
 	
 	def get_obj_for_robot(self,correct):
 		'''
 		return an object for robot to spy and pronounce
 		'''
-		
-		if correct == True:
-			# return a correct target object for now
-			ran_index = random.randint(0, len(self.target_list)-1)
-			return self.target_list[ran_index]
-		else:
-			return self.get_a_nontarget_object()
+
+		obj = self.get_obj(self.target_list) if correct == True else self.get_obj(self.nontarget_list)
+		return obj 
 
 	def get_num_available_target_objs(self):
 		'''

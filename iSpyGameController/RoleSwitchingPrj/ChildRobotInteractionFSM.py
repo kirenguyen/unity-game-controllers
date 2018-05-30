@@ -63,7 +63,7 @@ class ChildRobotInteractionFSM:
 				
 
 				# when the child does not interact with the tablet
-				{'trigger': ris.Triggers.NO_INTERACTION_ALERT, 'source': ris.CHILD_TURN, 'dest':ris.CHILD_TURN+"_"+ris.NO_INTERACTION_1 },
+				# {'trigger': ris.Triggers.NO_INTERACTION_ALERT, 'source': ris.CHILD_TURN, 'dest':ris.CHILD_TURN+"_"+ris.NO_INTERACTION_1 },
 				
 				# robot question asking activity related trisitions
 				{'trigger': ris.Triggers.LISTEN_RESPONSE, 'source': ris.ROBOT_TURN+'_'+ris.QUESTION_ASKING, 'dest': ris.ROBOT_TURN+'_'+ris.LISTEN_CHILD_SPEECH_RESPONSE},
@@ -137,10 +137,6 @@ class ChildRobotInteractionFSM:
 
 			self.continue_robot_help = True
 
-			self.reset_elapsed_time = False;
-
-			self.elapsed = ""
-
 		
 
 			tega_speech_file = open("iSpyGameController/res/tega_speech.json")
@@ -163,20 +159,6 @@ class ChildRobotInteractionFSM:
 			else:
 				print("======WARNING: asr result publisher does not exist. Remember to start ros_asr.py======")
 
-		def on_child_max_elapsed_time(self):
-			''' max elapsed time for a child's turn'''
-			# print("!!!!on child max elapsed time....")
-			# print(ris.CHILD_TURN in self.state)
-			# print(self.reset_elapsed_time)
-			# if ris.CHILD_TURN in self.state and self.reset_elapsed_time == False:
-			# 	self.elapsed = "True"
-			# 	self._ros_publish_data()
-			# 	self.elapsed = ""
-			# 	self.reset_elapsed_time = True
-			# 	print("!!!!")
-			# 	self.turn_taking(max_time=True)
-			pass
-
 		def on_enter_childTURN(self):
 			self.turn_start_time = datetime.now()
 			self.turn_end_time = None
@@ -187,9 +169,6 @@ class ChildRobotInteractionFSM:
 			self.explore_action = ""
 			self.virtual_action = ""
 			self._ros_publish_data()
-			threading.Timer(3.0, self.start_tracking_child_interaction).start()
-			threading.Timer(10.0, self.on_child_max_elapsed_time).start()
-			self.reset_elapsed_time = False
 
 
 		def on_enter_robotTURN(self):
@@ -267,83 +246,9 @@ class ChildRobotInteractionFSM:
 				print("INFO: manually call tega new asr result")
 				self.on_tega_new_asr_result("")
 
-
-		def start_tracking_child_interaction(self):
-			'''
-			callback function on tracking child's engagment with the tablet. 
-			called by ChildRobotInteraction
-			'''
-			#print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!start tracking child interaction")
-			#print("on start tracking child interaction")
-			# start a new thread to keep track of elapsed time
-			def elapsed_time_alert(stop):
-			
-				start_time = datetime.now()
-				alerted_once = False
-				while True:
-					delta_time = datetime.now() - start_time
-					if stop():
-						break
-					if delta_time.total_seconds() > 40:
-						self.on_no_ispy_action_alert(2)
-						break
-					elif delta_time.total_seconds() > 5 and alerted_once == False :
-						# 10 secs have passed without receiving any tablet interaction input from the cihld
-						self.on_no_ispy_action_alert(1)
-						alerted_once = True		
-				
-			self.stop_thread_flag = True
-			time.sleep(0.5)
-			self.stop_thread_flag = False
-			t = threading.Thread(target=elapsed_time_alert, args=(lambda: self.stop_thread_flag,)).start()
-		
 				
 		def stop_tracking_child_interaction(self):
 			self.stop_thread_flag = True
-
-
-
-		def on_no_ispy_action_alert(self,attempt):
-			'''
-			callback function when no ispy action within a time period is detected
-			when the child is not interacting with the tablet, the robot will try to encourage the child
-			called by iSpyDataTracking 
-			attempt: first alert, second alert
-			'''
-			pass 
-			# check whether the current state is child_turn_no_interaction_1
-			# if self.state != ris.CHILD_TURN:
-			# 	return
-
-			# else:
-
-			# 	#getattr(self, ris.Triggers.NO_INTERACTION_ALERT)() # trigger the FSM transition 
-
-			# 	print("INFO: No iSpy Tablet Touches")
-				
-			# 	self.ros_node_mgr.send_robot_cmd(RobotBehaviors.NO_ISPY_ACTION_ALERT)
-
-			# 	self.child_states.numTouchAbsenceAlertPerTask += 1 # update the number of touch absence alert
-
-			# 	self.stop_tracking_child_interaction()
-				# if attempt == 2: # first alert
-				# 	# robot intervenes (robot spies an object for the child)
-				# 	# select an object and then find it for the child
-				# 	self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ)
-			
-				# 	action = RobotBehaviors.ROBOT_OFFER_HELP
-
-				# 	question_query_path = '/'.join([self.role.name.lower(), self.state.replace('TURN',''), action])
-				# 	print("question query!!")
-				# 	print(question_query_path)
-
-				# 	question_query = self.question_answer_dict[question_query_path]
-				# 	question_speech_file = ROOT_TEGA_SPEECH_FOLDER + "questions/" +question_query['question'][0]+".wav"
-					
-				# 	print(question_speech_file)
-				# 	self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, question_speech_file)
-				
-				# 	getattr(self, ris.Triggers.ROBOT_HELP_TRIGGER)()
 
 
 		def on_tega_state_received(self,data):
@@ -1021,8 +926,6 @@ class ChildRobotInteractionFSM:
 			if ispy_action == True:
 				msg.ispyAction  = [str(self.game_controller.isDragging), str(self.game_controller.pointerClick), str(self.game_controller.onPinch), str(self.game_controller.isScalingUp), str(self.game_controller.isScalingDown)]
 
-
-			msg.maxElapsedTime = self.elapsed
 			##############
 
 			self.ros_node_mgr.pub_child_robot_interaction.publish(msg)

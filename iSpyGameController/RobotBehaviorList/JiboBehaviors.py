@@ -67,13 +67,6 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_sound_playback = False
             msg.motion = JiboAction.RING_IN_ANIM
 
-        # elif command == RobotBehaviors.LATE_RING:
-        #     msg.do_motion = True
-        #     msg.do_tts = False
-        #     msg.do_lookat = False
-        #     msg.do_sound_playback = False
-        #     msg.motion = JiboAction.RING_IN_ANIM
-
         elif command == RobotBehaviors.PRONOUNCE_CORRECT:
             msg.do_motion = False
             msg.do_tts = True
@@ -88,32 +81,11 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_sound_playback = True
             msg.audio_filename = "SSA_disappointed.m4a"
 
-        # elif command == RobotBehaviors.PRONOUNCE_WRONG_SPEECH:
-        #     msg.do_motion = False
-        #     msg.do_tts = True
-        #     msg.do_lookat = False
-        #     msg.do_sound_playback = False
-        #     msg.tts_text = "I dont know this one"
-
         elif command == RobotBehaviors.REACT_CHILD_ANSWER_CORRECT:
             msg.do_motion = True
             msg.do_tts = False
             msg.do_lookat = False
             msg.motion = "Misc/Eye_to_Happy_01.keys"
-
-        # elif command == RobotBehaviors.REACT_ANSWER_WRONG:
-        #     msg.do_motion = False
-        #     msg.do_tts = False
-        #     msg.do_lookat = False
-        #     msg.do_sound_playback = True
-        #     msg.audio_filename = "SSA_disappointed.m4a"
-
-        # elif command == RobotBehaviors.REACT_TO_BEAT_CORRECT:
-        #     msg.do_motion = True
-        #     msg.do_tts = False
-        #     msg.do_lookat = False
-        #     msg.do_sound_playback = False
-        #     msg.motion = "Misc/Frustrated_01_04.keys"
 
 
         elif command == RobotBehaviors.REACT_GAME_START:
@@ -136,35 +108,10 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_lookat = False
             msg.motion = JiboAction.HAPPY_GO_LUCKY_DANCE
 
-
-        # elif command == RobotBehaviors.LOSE_MOTION:
-        #     msg.do_motion = True
-        #     msg.do_tts = False
-        #     msg.do_lookat = False
-        #     msg.motion = JiboAction.EMOJI_RAINCLOUD
-
-        # elif command == RobotBehaviors.LOSE_SPEECH:
-        #     msg.do_motion = False
-        #     msg.do_tts = True
-        #     msg.do_lookat = False
-        #     msg.tts_text = "I lost. Oh well. I'll beat you next time"
-
         elif command == RobotBehaviors.EYE_FIDGET:
             msg.do_motion = True
             msg.do_tts = False
             msg.do_lookat = False
             msg.motion = JiboAction.EYE_FIDGET
-
-        # elif command == RobotBehaviors.REACT_TO_BEAT:
-        #     msg.do_motion = True
-        #     msg.do_lookat = False
-        #     msg.motion = "Misc/Frustrated_01_04.keys"
-
-        # elif command == RobotBehaviors.PLAYER_RING_PROMPT:
-        #     msg.do_motion = False
-        #     msg.do_tts = False
-        #     msg.do_lookat = False
-        #     msg.do_sound_playback = True
-        #     msg.audio_filename = "SSA_prompt.m4a"
 
         return msg

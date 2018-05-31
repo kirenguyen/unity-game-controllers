@@ -65,13 +65,21 @@ class PronunciationUtils:
 		pass_list = []
 		score_list = []
 
+		phoneme_res_index = 0
 		for i in range(len(phonemes)):
-			score = phoneme_results[i]["quality_score"]
-			if score >= PronunciationUtils.SCORE_THRESHOLD:
-				pass_list.append("1")
+			#print(phoneme_results[phoneme_res_index]["phone"].upper() + " COMPARED TO " + phonemes[i])
+			if phoneme_results[phoneme_res_index]["phone"].upper() == phonemes[i]:
+				score = phoneme_results[phoneme_res_index]["quality_score"]
+				phoneme_res_index += 1
+				if score >= PronunciationUtils.SCORE_THRESHOLD:
+					pass_list.append("1")
+				else:
+					pass_list.append("0")
+				score_list.append(score)
 			else:
+				print(phoneme_results[phoneme_res_index]["phone"].upper() + " DID NOT MATCH " + phonemes[i])
 				pass_list.append("0")
-			score_list.append(score)
+				score_list.append(0.0)
 
 		return (graphemes, phonemes, pass_list, score_list)
 

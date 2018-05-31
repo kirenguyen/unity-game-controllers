@@ -5,10 +5,10 @@ from TapGameController.TapGamePosttestFSM import TapGamePosttestFSM
 from TapGameController.TapGamePracticeFSM import TapGamePracticeFSM
 from unity_game_msgs.msg import TapGameCommand
 import rospy
+import _thread as thread
 import time
 import signal
 import sys
-import _thread as thread
 
 
 def signal_handler(signal, frame):

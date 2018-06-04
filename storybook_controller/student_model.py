@@ -8,7 +8,6 @@ beliefs are correlated but updated under different criteria.
 
 import random
 import sys
-import nltk
 
 from unity_game_msgs.msg import StorybookCommand
 import storybook_controller.robot_feedback as robot_feedback
@@ -35,7 +34,7 @@ Set up phoneme information.
 """
 Load stop words.
 """
-STOP_WORDS = nltk.corpus.stopwords.words("english")
+#STOP_WORDS = nltk.corpus.stopwords.words("english")
 
 """
 Updates model with inputs from SpeechACE and the child's answers to questions.

@@ -265,6 +265,7 @@ class StorybookFSM(object):
         # Trigger!
         print("New mode is EXPLORE")
         self.begin_explore_mode()
+        print("state is", self.state)
 
     elif data.event_type == StorybookEvent.REPEAT_END_PAGE_QUESTION:
       print("REPEAT_END_PAGE_QUESTION message received")

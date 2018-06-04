@@ -13,3 +13,4 @@ pyyaml
 rospkg
 catkin_pkg
 scipy
+pygraphviz

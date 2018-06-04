@@ -67,6 +67,12 @@ class StorybookFSMStructure(object):
     },
     {
       "trigger": "storybook_loaded",
+      "source": "WAITING_FOR_STORY_LOAD",
+      "dest": "EXPLORING_PAGE",
+      "conditions": ["in_explore_mode"]
+    },
+    {
+      "trigger": "storybook_loaded",
       "source": "EXPLORING_PAGE",
       "dest": "=",
       "conditions": ["in_explore_mode"]
@@ -174,7 +180,7 @@ class StorybookFSMStructure(object):
       "trigger": "jibo_finish_child_asr",
       "source": "WAITING_FOR_END_STORY_CHILD_RESPONSE",
       "dest": "END_EXPLORE",
-      "after": "jibo_respond_to_end_story",
+      "after": ["jibo_respond_to_end_story", "stop_waiting_for_child_response"],
       "conditions": ["in_explore_mode"]
     },
     {

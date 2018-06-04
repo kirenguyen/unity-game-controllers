@@ -281,6 +281,7 @@ class StorybookFSM(object):
       print("RETURN_TO_LIBRARY_EARLY message received")
       # Trigger
       self.begin_explore_mode()
+      # print("state:", self.state)
 
     elif data.event_type == StorybookEvent.EXPLORE_CHILD_READ_START:
       print("EXPLORE_CHILD_READ_START")

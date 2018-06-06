@@ -34,7 +34,6 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     ROBOT_WINK = 'ROBOT_WINK'
     ROBOT_THINKING = 'ROBOT_THINKING'
 
-   
 
     ROBOT_SAY_WORD = 'ROBOT_SAY_WORD'
     

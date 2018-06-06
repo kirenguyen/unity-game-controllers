@@ -30,7 +30,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
 
     @staticmethod
     def get_msg_from_behavior(command, *args):  # pylint: disable=too-many-branches, too-many-statements
-
+        print("get_msg_from_behavior is called")
         msg = JiboAction()
         msg.header = Header()
         msg.header.stamp = rospy.Time.now()

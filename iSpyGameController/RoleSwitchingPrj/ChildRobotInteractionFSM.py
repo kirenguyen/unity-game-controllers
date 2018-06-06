@@ -149,19 +149,20 @@ class ChildRobotInteractionFSM:
 			self.check_existence_of_asr_rostopic()
 
 		def check_existence_of_asr_rostopic(self):
-			'''
-			check whether google asr rostopic exists
-			'''
-			import rospy
-			topics = rospy.get_published_topics()
-			self.asr_result_topic = False
-
-			
-			if '/asr_result' in [ i[0] for i in topics]:
-				print("=========asr result publisher exists=========")
-				self.asr_result_topic = True
-			else:
-				print("======WARNING: asr result publisher does not exist. Remember to start ros_asr.py======")
+			pass
+			# '''
+			# check whether google asr rostopic exists
+			# '''
+			# import rospy
+			# topics = rospy.get_published_topics()
+			# self.asr_result_topic = False
+            #
+			#
+			# if '/asr_result' in [ i[0] for i in topics]:
+			# 	print("=========asr result publisher exists=========")
+			# 	self.asr_result_topic = True
+			# else:
+			# 	print("======WARNING: asr result publisher does not exist. Remember to start ros_asr.py======")
 
 		def on_child_max_elapsed_time(self):
 			''' max elapsed time for a child's turn'''

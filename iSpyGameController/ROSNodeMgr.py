@@ -127,9 +127,9 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
 
         # choose which platform
         #if GlobalSettings.USE_TEGA:
-        msg = TegaBehaviors.get_msg_from_behavior(command, args)
+        # msg = TegaBehaviors.get_msg_from_behavior(command, args)
         #else:
-        #    msg = JiboBehaviors.get_msg_from_behavior(command, args)
+        msg = JiboBehaviors.get_msg_from_behavior(command, args)
 
         # add header
         self.robot_commander.publish(msg)  # would be nice to guarantee message performance here

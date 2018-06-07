@@ -102,11 +102,11 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         print('Robot Pub Node started')
 
         #if GlobalSettings.USE_TEGA:
-        msg_type = TegaAction
-        msg_topic = ROSCORE_TO_TEGA_TOPIC
+        # msg_type = TegaAction
+        # msg_topic = ROSCORE_TO_TEGA_TOPIC
         #else:
-        #    msg_type = JiboAction
-        #    msg_topic = ROSCORE_TO_JIBO_TOPIC
+        msg_type = JiboAction
+        msg_topic = ROSCORE_TO_JIBO_TOPIC
 
         self.robot_commander = rospy.Publisher(msg_topic, msg_type, queue_size=10)
         rate = rospy.Rate(10)  # spin at 10 Hz
@@ -132,6 +132,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         msg = JiboBehaviors.get_msg_from_behavior(command, args)
 
         # add header
+        print("in def send_robot_cmd, type: ", type(msg), msg)
         self.robot_commander.publish(msg)  # would be nice to guarantee message performance here
         #rospy.loginfo(msg)
 
@@ -141,6 +142,8 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         send a iSpyCommand to unity game
         Args are optional parameters.
         """
+
+        print("in def send_ispy_cmd")
         msg = iSpyCommand()
         # add header
         msg.header = Header()

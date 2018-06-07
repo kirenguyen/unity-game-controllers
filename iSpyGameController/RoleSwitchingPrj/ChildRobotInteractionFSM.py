@@ -713,6 +713,7 @@ class ChildRobotInteractionFSM:
 					self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_EXPLORE)
 			virtual_action_dict = self.role_behavior_mapping.get_actions(self.role,self.state,'virtual')
 			if virtual_action_dict:
+				print(type(virtual_action_dict),virtual_action_dict)
 				ran = random.uniform(0,1)
 				for key,val in virtual_action_dict.items():
 					if ran <= val:

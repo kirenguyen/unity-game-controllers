@@ -1,6 +1,8 @@
 import time
 import json
 
+from ..BaseClassFSM import BaseClassFSM
+
 #from transitions import Machine
 from transitions.extensions import HierarchicalMachine as Machine
 
@@ -37,7 +39,7 @@ import rospy
 ROOT_TEGA_SPEECH_FOLDER = 'roleswitching18/'
 
 
-class ChildRobotInteractionFSM:
+class ChildRobotInteractionFSM(BaseClassFSM):
 		'''
 		child robot interaction FSM for robot's role switching project
 		It communicates with iSpyGameFSM, reinforcemnet learning agent model of the robot, robot's behaviors
@@ -673,9 +675,6 @@ class ChildRobotInteractionFSM:
 						continue
 				else:
 					continue
-
-
-
 
 		def get_turn_taking_actions(self):
 			'''

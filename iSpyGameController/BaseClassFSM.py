@@ -164,9 +164,13 @@ class BaseClassFSM:
 		def on_tega_new_asr_result(self,data):
 			print("Some implementation!")
 
-		@abstractmethod
+
 		def reset_turn_taking(self):
-			print("Some implementation!")
+			self.current_task_turn_index = 0
+			self.state = ris.CHILD_TURN
+			self.child_states.on_new_task_received() # reset some task-based variables in child's states
+			self.task_controller.num_finished_words = 0
+			self.numHintButtonPressedForTask = 0
 
 		@abstractmethod
 		def turn_taking(self,max_time=False):

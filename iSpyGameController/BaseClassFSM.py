@@ -1,10 +1,101 @@
+import time
+import json
+
 from abc import ABC, abstractmethod
+
+from .RobotBehaviorList.RobotBehaviorList import RobotBehaviors
+from .RobotBehaviorList.RobotBehaviorList import RobotRoles
+from .RobotBehaviorList.RobotBehaviorList import RobotRolesBehaviorsMap
+from .RobotBehaviorList.RobotBehaviorList import RobotActionSequence as ras
+from .RoleSwitchingPrj.ChildStates import ChildStates
+
+# from GameUtils import Curriculum
+from GameUtils import GlobalSettings
+from GameUtils.GlobalSettings import iSpyGameStates as gs
+from GameUtils.GlobalSettings import iSpyRobotInteractionStates as ris
+from GameUtils.PronunciationUtils.PronunciationUtils import PronunciationUtils
+
+if GlobalSettings.USE_ROS:
+	from std_msgs.msg import Header  # standard ROS msg header
+	from std_msgs.msg import String
+	from unity_game_msgs.msg import iSpyCommand
+	from unity_game_msgs.msg import iSpyAction
+
+import random
+
+from unity_game_msgs.msg import iSpyChildRobotInteraction
+import threading
+from datetime import datetime, timedelta
+
+import os
+import timestring
+import rospy
+
+#from transitions import Machine
+from transitions.extensions import HierarchicalMachine as Machine
 
 class BaseClassFSM:
 
 		@abstractmethod
 		def __init__(self,ros_node_mgr,task_controller,game_controller,participant_id,game_round):
-			pass
+			
+			self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
+									 initial=ris.CHILD_TURN)
+
+			self.ros_node_mgr = ros_node_mgr
+
+			self.task_controller = task_controller
+
+			self.game_controller = game_controller
+
+			# load assigned condition the participant is in
+			subj_assign_dict = json.loads(open("iSpyGameController/res/participant_assignment.json").read())
+			self.subj_cond = subj_assign_dict[participant_id]
+
+			self.child_states = ChildStates(participant_id,self.subj_cond,task_controller)
+
+			self.role_behavior_mapping = RobotRolesBehaviorsMap(game_round)
+
+			# robot's physical actions
+			self.physical_actions ={}
+			# robot's virtual actions on the tablet
+			self.virtual_action = ""
+
+			self.explore_action = ""
+
+			#self.robot_response = self.role_behavior_mapping.get_robot_general_responses()
+
+			self.role = "novice" #default to novice at the beginning (backup)
+
+			self.robot_clickedObj=""
+
+			self.ros_node_mgr.start_tega_state_listener(self.on_tega_state_received)
+
+			self.ros_node_mgr.start_tega_asr(self.on_tega_new_asr_result)
+			
+			self.tega_is_playing_sound = False
+
+			self.asr_input = ""
+
+			self.current_task_turn_index = 0 # for the current task, current turn index
+
+			self.curr_robot_action = "NA"
+
+			self.turn_start_time = None
+
+			self.turn_end_time = None
+
+			self.turn_duration = ""
+
+			self.child_click_cancel_num = 0
+
+			self.numHintButtonPressedForTask = 0
+
+			self.continue_robot_help = True
+
+			self.reset_elapsed_time = False;
+
+			self.elapsed = ""
 
 		@abstractmethod
 		def check_existence_of_asr_rostopic(self):

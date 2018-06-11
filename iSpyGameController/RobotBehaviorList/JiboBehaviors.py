@@ -245,7 +245,8 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_motion = False
             msg.do_tts = True
             msg.do_sound_playback = False
-            msg.tts_text = args[0][0].lower()
+            msg.tts_text = "Hi I'm Jibo"
+            print("CUSTOM SPEECH", args[0][0].lower())
 
         elif command == RobotBehaviors.NOVICE_ROLE_KEYWORD:
             msg.do_motion = True
@@ -253,6 +254,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_sound_playback = False
             msg.motion = JiboAction.SILENT_PUZZLED
             msg.tts_text = jibo_tts_dict["novice_keyword"][args[0][0].lower()]
+            print("NOVICE_ROLE_KEYWORD", args[0][0.lower()])
 
         ### ========== Jibo Speech for Role Switching Project ========== ###
 
@@ -275,11 +277,13 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             try:
                 key = vocab_word + "_" + itype
                 msg.tts_text = jibo_tts_dict["explanation"][key]
+                print("VOCAB_EXPLANATION_SPEECH_TRY")
             except KeyError:
                 key = vocab_word
                 msg1 = jibo_tts_dict["explanation"][vocab_word]
                 msg2 = msg1.replace("*", itype)
                 msg.tts_text = msg2
+                print("VOCAB_EXPLANATION_SPEECH", vocab_word, itype, msg2)
 
             msg.motion = JiboAction.SILENT_HAPPY_DANCE
 
@@ -289,6 +293,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_sound_playback = False
             vocab_word = args[0][0].lower()
             msg.tts_text = jibo_tts_dict["hint"][vocab_word]
+            print("HINT_SPEECH", args[0][0].lower())
 
         elif command == RobotBehaviors.KEYWORD_DEFINITION_SPEECH:
             msg.do_tts = True
@@ -297,6 +302,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.motion = JiboAction.SILENT_NOD
             vocab_word = args[0][0].lower()
             msg.tts_text = jibo_tts_dict["definition"][vocab_word]
+            print("KEYWORD_DEFINITION_SPEECH", args[0][0].lower())
 
         elif command == RobotBehaviors.REMINDER_SPEECH:
             msg.do_tts = True
@@ -309,11 +315,14 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             try:
                 key = vocab_word + "_" + hint_num
                 msg.tts_text = jibo_tts_dict["reminder"][key]
+                print("REMINDER_SPEECH's TRY", key)
             except KeyError:
                 key = hint_num
                 msg1 = jibo_tts_dict["reminder"][hint_num]
                 msg2 = msg1.replace("*", vocab_word)
                 msg.tts_text = msg2
+                print("REMINDER_SPEECH", msg2)
+
 
         ### ========== Jibo End of Task Vocab Reminder ========== ###
 
@@ -323,6 +332,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_sound_playback = False
             review_num = random.choice(["1", "2", "3"])
             msg.tts_text = jibo_tts_dict["review"][review_num]
+            print("Q_ROBOT_TASK_END_REMINDER", args[0][0].lower())
 
         elif command == RobotBehaviors.ROBOT_TASK_END_RESPONSE:
             msg.do_motion = False
@@ -333,6 +343,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg1 = jibo_tts_dict["review"][key]
             msg2 = msg1.replace("*", vocab_word)
             msg.tts_text = msg2
+            print("ROBOT_TASK_END_REMINDER", args[0][0].lower())
 
         elif command == RobotBehaviors.Q_ROBOT_TASK_END_ASSESSMENT:
             msg.do_motion = False
@@ -343,6 +354,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg1 = jibo_tts_dict["review"][key]
             msg2 = msg1.replace("*", vocab_word)
             msg.tts_text = msg2
+            print("Q_ROBOT_TASK_END_ASSESSMENT", msg2)
 
         ### ========== Jibo Speech Induction ========== ###
 
@@ -351,6 +363,8 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_tts = True
             msg.do_sound_playback = False
             msg.motion = JiboAction.SILENT_PUZZLED
+            msg.tts_text = jibo_tts_dict["induce"][random.choice(["1", "2", "3", "4", "5", "6"])]
+            print("Q_ROBOT_INDUCE_SPEECH", args[0][0].lower())
 
         elif command == RobotBehaviors.ROBOT_INDUCE_SPEECH_RESPONSE:
             msg.do_motion = False
@@ -360,6 +374,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg1 = jibo_tts_dict["review"]["answer_2"]
             msg2 = msg1.replace("*", vocab_word)
             msg.tts_text = msg2
+            print("ROBOT)INDUCE_SPEECH_RESPONSE", msg2)
 
         ### ========== Jibo Question Asking ========== ###
 
@@ -369,6 +384,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_sound_playback = False
             help_msg_code = args[0][0].lower()
             msg.tts_text = jibo_tts_dict["questions"][help_msg_code]
+            print("Q_ROBOT_OFFER_HELP", help_msg_code)
 
         elif command == RobotBehaviors.Q_ROBOT_ASK_WHY_CHOOSE_IT:
             msg.do_motion = True
@@ -377,6 +393,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             help_msg_code = args[0][0].lower()
             msg.tts_text = jibo_tts_dict["questions"][help_msg_code]
             msg.motion = JiboAction.SILENT_PUZZLED
+            print("Q_ROBOT_ASK_WHY_CHOOSE_IT", help_msg_code)
 
         elif command == RobotBehaviors.Q_ROBOT_WANT_LEARN:
             msg.do_motion = True
@@ -385,6 +402,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             help_msg_code = args[0][0].lower()
             msg.tts_text = jibo_tts_dict["questions"][help_msg_code]
             msg.motion = JiboAction.SILENT_INTERESTED
+            print("Q_ROBOT_ASK_HELP", args[0][0].lower())
 
         elif command == RobotBehaviors.Q_ROBOT_ASK_HELP:
             msg.do_motion = False
@@ -392,6 +410,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_sound_playback = False
             help_msg_code = args[0][0].lower()
             msg.tts_text = jibo_tts_dict["questions"][help_msg_code]
+            print("Q_ROBOT_ASK_HELP", args[0][0].lower())
 
         elif command == RobotBehaviors.Q_ROBOT_ASK_WHY_WRONG:
             msg.do_motion = True
@@ -400,6 +419,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             help_msg_code = args[0][0].lower()
             msg.tts_text = jibo_tts_dict["questions"][help_msg_code]
             msg.motion = JiboAction.SILENT_PUZZLED
+            print("Q_ROBOT_ASK_WHY_WRONG", args[0][0].lower())
 
         elif command == RobotBehaviors.Q_END_OF_TURN:
             msg.do_motion = False
@@ -409,6 +429,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg1 = jibo_tts_dict["questions"]["end_of_turn_question"]
             msg2 = msg1.replace("*", vocab_word)
             msg.tts_text = msg2
+            print("Q_END_OF_TURN", msg2)
 
 
         elif command == RobotBehaviors.ROBOT_SAY_WORD:
@@ -416,6 +437,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_tts = True
             msg.do_sound_playback = False
             msg.tts_text = args[0][0].lower()
+            print("ROBOT_SAY_WORD", args[0][0].lower())
 
         ### ========== No iSpy Action Alert ========== ###
 
@@ -425,6 +447,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_sound_playback = False
             msg_code = random.choice(["no_ispy_action_alert1_response_1", "no_ispy_action_alert1_response_2"])
             msg.tts_text = args[0][0].lower()
+            print("No iSpy Action Alert", args[0][0].lower())
 
 
 

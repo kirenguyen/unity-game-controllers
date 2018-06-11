@@ -92,6 +92,14 @@
     "soar": "Soar means fly in the air.",
     "vehicle": "Vehicle is something you can drive, steer, or ride in."
   },
+  "induce": {
+    "1": "Can you tell me what we are trying to find?",
+    "2": "What is the task again?",
+    "3": "What is the word we are trying to learn?",
+    "4": "I don't remember the task. Can you remind me again?",
+    "5": "Can you say the word again? I don't remember.",
+    "6": "What are we trying to find?"
+  },
   "reminder": {
     "1": "I'm curious about which objects are *.",
     "aquatic_1": "I'm curious which animals are aquatic.",

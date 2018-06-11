@@ -254,7 +254,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_sound_playback = False
             msg.motion = JiboAction.SILENT_PUZZLED
             msg.tts_text = jibo_tts_dict["novice_keyword"][args[0][0].lower()]
-            print("NOVICE_ROLE_KEYWORD", args[0][0.lower()])
+            print("NOVICE_ROLE_KEYWORD", args[0][0].lower())
 
         ### ========== Jibo Speech for Role Switching Project ========== ###
 

@@ -1,0 +1,16 @@
+nose
+sphinx
+transitions
+matplotlib
+pyaudio
+six
+pronouncing
+weighted-levenshtein
+pandas
+spacy
+pyyaml
+rospkg
+catkin_pkg
+sklearn
+timestring
+scipy

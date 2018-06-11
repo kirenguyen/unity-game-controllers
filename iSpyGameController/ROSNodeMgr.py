@@ -28,14 +28,15 @@ if GlobalSettings.USE_ROS:
     from std_msgs.msg import String
     from asr_google_cloud.msg import AsrResult
     from asr_google_cloud.msg import AsrCommand
+    from jibo_msgs.msg import JiboAsrCommand # ASR commands to Jibo
+    from jibo_msgs.msg import JiboAsrResult # ASR results from Jibo
+
 
 else:
     TapGameLog = GlobalSettings.iSpyAction  # Mock object, used for testing in non-ROS environments
     TapGameCommand = GlobalSettings.iSpyCommand
     TegaAction = GlobalSettings.TegaAction
     JiboAction = GlobalSettings.JiboAction
-
-#from asr_google_cloud.msg import AsrResult
 
 #ROSCORE_TO_ISPY_GAME_TOPIC = '/ispy_game_from_ros'
 #ISPY_GAME_TO_ROSCORE_TOPIC = '/ispy_game_to_ros'
@@ -101,12 +102,12 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         """
         print('Robot Pub Node started')
 
-        #if GlobalSettings.USE_TEGA:
-        msg_type = TegaAction
-        msg_topic = ROSCORE_TO_TEGA_TOPIC
-        #else:
-        #    msg_type = JiboAction
-        #    msg_topic = ROSCORE_TO_JIBO_TOPIC
+        if GlobalSettings.USE_TEGA:
+            msg_type = TegaAction
+            msg_topic = ROSCORE_TO_TEGA_TOPIC
+        else:
+            msg_type = JiboAction
+            msg_topic = ROSCORE_TO_JIBO_TOPIC
 
         self.robot_commander = rospy.Publisher(msg_topic, msg_type, queue_size=10)
         rate = rospy.Rate(10)  # spin at 10 Hz
@@ -126,10 +127,10 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             time.sleep(.5)
 
         # choose which platform
-        #if GlobalSettings.USE_TEGA:
-        msg = TegaBehaviors.get_msg_from_behavior(command, args)
-        #else:
-        #    msg = JiboBehaviors.get_msg_from_behavior(command, args)
+        if GlobalSettings.USE_TEGA:
+            msg = TegaBehaviors.get_msg_from_behavior(command, args)
+        else:
+            msg = JiboBehaviors.get_msg_from_behavior(command, args)
 
         # add header
         self.robot_commander.publish(msg)  # would be nice to guarantee message performance here
@@ -141,6 +142,8 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         send a iSpyCommand to unity game
         Args are optional parameters.
         """
+
+        print("in def send_ispy_cmd")
         msg = iSpyCommand()
         # add header
         msg.header = Header()
@@ -253,6 +256,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
 
 
     def start_tega_asr(self, on_tega_new_asr_result):
+
         self.sub_asr_result = rospy.Subscriber('asr_result', AsrResult, on_tega_new_asr_result)
         self.pub_asr_command = rospy.Publisher('asr_command', AsrCommand, queue_size=1)
 
@@ -260,16 +264,25 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         '''
         start asr's listening
         '''
-        msg = AsrCommand()
-        msg.command = AsrCommand.START_FINAL # start final
+
+        if GlobalSettings.USE_TEGA:
+            msg = AsrCommand()
+            msg.command = AsrCommand.START_FINAL  # start final
+        else:
+            msg = JiboAsrCommand()
         self.pub_asr_command.publish(msg)
 
     def stop_asr_listening(self):
         '''
         stop asr's listening and get the results
         '''
-        msg = AsrCommand()
-        msg.command = AsrCommand.STOP_FINAL # stop final for the asr result
+
+        if GlobalSettings.USE_TEGA:
+            msg = AsrCommand()
+            msg.command = AsrCommand.STOP_FINAL # stop final for the asr result
+        else:
+            msg = JiboAsrCommand()
+
         self.pub_asr_command.publish(msg)
         print("stop asr listening....")
 

@@ -1,0 +1,26 @@
+{
+  "before_game": {
+    "1": "Sometimes I know, sometimes I don't. Sometimes you know, and sometimes you don't. But it is okay, because that is when we learn.",
+    "3": "This game is really fun. Let's play it together. If you don't know, I can help you. If I don't know, can you teach me? We can help each other out."
+  },
+  "novice_keyword":{
+    "aquatic_animal": "Is this an aquatic animal?",
+    "azure": "Is this azure?",
+    "crimson": "Is this crimson?",
+    "delighted": "Does this person look delighted?",
+    "garment": "Is this a garment?",
+    "gigantic": "Is this gigantic?",
+    "lavender": "Is this the color of lavender?",
+    "minuscule": "Is this miniscule?",
+    "recreational_activity": "Is this person doing a recreational activity?",
+    "soar": "Does this soar?",
+    "vehicle": "Is this a vehicle?"
+  },
+  "others":{
+    "mission_reminder": "Can you please help me tap on the hint button? I forgot what the game mission is.",
+    "child_help": "Now, you can pan the screen around and help me find an object.",
+    "no_ispy_action_alert1_response_1": "This game is really fun. Give it a try! Pan the screen around and click an object.",
+    "no_ispy_action_alert1_response_2": "I also don't know which ones are right. Just give it a try and we will know which ones are correct."
+    "robot_guess": "Yay! I guessed that correctly."
+  }
+}

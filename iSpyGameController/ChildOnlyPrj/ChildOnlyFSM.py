@@ -1,5 +1,6 @@
 from ..BaseClassFSM import BaseClassFSM
 from GameUtils.GlobalSettings import iSpyRobotInteractionStates as ris
+import random
 
 class ChildOnlyFSM(BaseClassFSM):
 		'''
@@ -23,6 +24,10 @@ class ChildOnlyFSM(BaseClassFSM):
 			super().__init__(ros_node_mgr,task_controller,game_controller,participant_id,game_round)
 
 		def on_enter_childTURN(self):
+
+			r = random.choice([-1, 1])
+			if r > 0: self.ros_node_mgr.send_ispy_cmd(iSpyCommand.BUTTON_DISABLED, {"buttonName": "helpingHintActivate"})
+			else: self.ros_node_mgr.send_ispy_cmd(iSpyCommand.BUTTON_DISABLED, {"buttonName": "helpingHintDeactivate"})
 			super().on_enter_childTURN()
 
 		def turn_taking(self,max_time=False):

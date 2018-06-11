@@ -10,7 +10,10 @@ from GameUtils import GlobalSettings
 
 if GlobalSettings.USE_ROS:
     import rospy
+    import json
+    import random
     from std_msgs.msg import Header  # standard ROS msg header
+    from random import randint
     from unity_game_msgs.msg import TapGameCommand
     from unity_game_msgs.msg import TapGameLog
     from r1d1_msgs.msg import TegaAction
@@ -22,6 +25,10 @@ else:
     TapGameCommand = GlobalSettings.TapGameCommand
     JiboAction = GlobalSettings.JiboAction
 
+jibo_tts_data = "iSpyGameController/res/jibo_speech.json"
+jibo_tts_file = open(jibo_tts_data)
+jibo_tts_dict = json.loads(jibo_tts_file.read())
+
 
 class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     """
@@ -30,7 +37,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
 
     @staticmethod
     def get_msg_from_behavior(command, *args):  # pylint: disable=too-many-branches, too-many-statements
-        print("get_msg_from_behavior is called")
+
         msg = JiboAction()
         msg.header = Header()
         msg.header.stamp = rospy.Time.now()
@@ -65,8 +72,6 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
         #     msg.motion = JiboAction.
         #
         # # Positive Emotions
-        # #TODO: decide between TTS and Audio
-        # #TODO: Audio filenames + path and TTS need a JSON file
         # elif command == RobotBehaviors.ROBOT_EXCITED:
         #     msg.do_motion = True
         #     msg.do_tts = False
@@ -143,7 +148,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_motion = False
             msg.do_tts = True
             msg.do_sound_playback = False
-            msg.tts_text = args[0][0]
+            msg.tts_text = args[0][0].lower()
 
         # # Negative Emotions
         # elif command == RobotBehaviors.ROBOT_SAD:
@@ -231,6 +236,42 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_tts = False
             msg.do_sound_playback = False
             msg.motion = JiboAction.SILENT_EXCITED
+
+
+        # Jibo Speech commands
+        elif command == RobotBehaviors.ROBOT_HINT_BUTTON_REMINDER:
+            msg.do_motion = True
+            msg.do_tts = True
+            msg.do_sound_playback = False
+            msg.motion = JiboAction.SILENT_PUZZLED
+            msg.tts_text = jibo_tts_dict["others"]["misson_reminder"]
+
+        elif command == RobotBehaviors.ROBOT_CUSTOM_SPEECH:
+            msg.do_motion = False
+            msg.do_tts = True
+            msg.do_sound_playback = False
+            msg.tts_text = args[0][0].lower()
+
+        elif command == RobotBehaviors.NOVICE_ROLE_KEYWORD:
+            msg.do_motion = True
+            msg.do_tts = True
+            msg.do_sound_playback = False
+            msg.motion = JiboAction.SILENT_PUZZLED
+            msg.tts_text = jibo_tts_dict["novice_keyword"][args[0][0].lower()]
+
+        ### ========== Jibo Speech for Role Switching Project ========== ###
+        elif command == RobotBehaviors.BEFORE_GAME_SPEECH:
+            msg.do_motion = False
+            msg.do_tts = True
+            msg.do_sound_playback = False
+            hint_num = random.choice(["1", "3"])
+            msg.tts_text = jibo_tts_dict["before_game"][hint_num]
+
+        elif command == RobotBehaviors.VOCAB_EXPLANATION_SPEECH:
+
+
+
+
 
         return msg
 

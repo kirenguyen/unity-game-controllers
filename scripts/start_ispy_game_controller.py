@@ -26,7 +26,7 @@ def usage():
 def main():
 
     def signal_handler(signal, frame):
-        print("closing in one second!")
+        print("closing in one second!")			
         control.kill_received = True
         sys.exit()
 
@@ -35,13 +35,15 @@ def main():
         participant_id = sys.argv[1] # which participant
         experimenter = sys.argv[2] # experimenter
         session_number = sys.argv[3] # session number 
+        is_child_robot = sys.argv[4] # interaction mode
+
 
     except IndexError:
         usage()
         sys.exit()
 
     global control
-    control = iSpyGameFSM.iSpyGameFSM(participant_id, experimenter, session_number)
+    control = iSpyGameFSM.iSpyGameFSM(participant_id, experimenter, session_number, is_child_robot)
     print("FSM Started!")
     thread.start_new_thread(control.ros_node_mgr.start_ispy_transition_listener, (control.on_ispy_state_info_received,))
 

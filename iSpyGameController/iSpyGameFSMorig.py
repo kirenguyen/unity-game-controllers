@@ -1,3 +1,4 @@
+
 """
 This is a basic class for the Game Controller
 """
@@ -33,7 +34,6 @@ from .RobotBehaviorList.RobotBehaviorList import RobotRolesBehaviorsMap
 from .AffdexAnalysis.node_AffdexResponse import AffdexAnalysis
 
 from .RoleSwitchingPrj.ChildRobotInteractionFSM import ChildRobotInteractionFSM
-from .ChildOnlyPrj.ChildOnlyFSM import ChildOnlyFSM
 
 from .GameModeFSMs import AlwaysMissionModeFSM,CompleteModeFSM,AlwaysExploreModeFSM
 
@@ -72,17 +72,13 @@ SET_GAME_SCENE = 34
 
 
 
-
-
 class iSpyGameFSM: # pylint: disable=no-member
 	"""
 	Receives and sends out ROS messages.
 	"""
 
 
-	def __init__(self,participant_id, experimenter, session_number, is_child_robot): #*
-           #* is_child_robot is a boolean determining whether or not we are in child vs robot mode
-		self.is_child_robot = is_child_robot #*
+	def __init__(self,participant_id, experimenter, session_number, is_child_robot):
 
 		self.ros_node_mgr = ROSNodeMgr()
 		self.ros_node_mgr.init_ros_node()
@@ -93,7 +89,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		self.origText = ""
 
 		# check whether the clicked object is a target object
-		self.correct_obj = is_child_robot
+		self.correct_obj = False
 
 		# The object of the iSpyAudioRecorder Class
 		self.recorder = None
@@ -107,11 +103,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 		self.task_controller = iSpyTaskController(session_number)
 
 		self.results_handler = PronunciationUtils()
-                
-		if self.is_child_robot == 'True':
-                  self.interaction = ChildRobotInteractionFSM(self.ros_node_mgr,self.task_controller,self, participant_id,session_number)
-		elif self.is_child_robot == 'False': 
-                  self.interaction = ChildOnlyFSM(self.ros_node_mgr,self.task_controller,self,participant_id,session_number)
+
+		self.interaction = ChildRobotInteractionFSM(self.ros_node_mgr,self.task_controller,self, participant_id,session_number)
 
 		self.iSpyDataTracking = iSpyDataTracking(self.interaction,self.ros_node_mgr, participant_id, experimenter, session_number)
 
@@ -385,3 +378,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 	
 	
+
+
+	
+

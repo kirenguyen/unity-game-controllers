@@ -21,7 +21,7 @@
             "LOOK_AT_TABLET"
           ],
           "exclusive":{
-            "KEYWORD_DEFINITION_SPEECH":1,
+            "KEYWORD_DEFINITION_SPEECH":1.0,
             "ROBOT_CUSTOM_SPEECH":0.8
           }
         },
@@ -51,7 +51,7 @@
 
           ],
           "exclusive":{
-            "VOCAB_EXPLANATION_SPEECH":0.5,
+            "VOCAB_EXPLANATION_SPEECH":1.0,
             "ROBOT_CELEBRATION": 0.9
           }
         },
@@ -86,7 +86,7 @@
           ],
           "exclusive":{
             "ROBOT_CUSTOM_SPEECH":0.2,
-            "HINT_SPEECH": 0.4
+            "HINT_SPEECH": 1.0
           }
         },
         "SCREEN_MOVING": {
@@ -103,7 +103,7 @@
             "ROBOT_SILENT_PUZZLED"
           ],
           "optional":{
-            "HINT_SPEECH":0.2
+            "HINT_SPEECH":1.0
           }
         },
         "RIGHT_OBJECT_FOUND": {
@@ -147,7 +147,7 @@
 
           ],
           "optional":{
-            "ROBOT_SAD": 0.8
+            "ROBOT_SAD": 1.0
           }
         }
       },
@@ -178,8 +178,8 @@
             "LOOK_AT_TABLET"
           ],
           "exclusive": {
-            "Q_ROBOT_ASK_HELP":1,
-            "REMINDER_SPEECH": 1,
+            "Q_ROBOT_ASK_HELP":1.0,
+            "REMINDER_SPEECH": 1.0,
             "ROBOT_SILENT_INTERESTED": 1.0
           }
         },
@@ -188,7 +188,7 @@
 
           ],
           "exclusive":{
-            "ROBOT_SILENT_PUZZLED": 0.3,
+            "ROBOT_SILENT_PUZZLED": 1.0,
             "NOVICE_ROLE_KEYWORD": 1.0
           }
         },
@@ -197,7 +197,7 @@
 
           ],
           "exclusive":{
-            "ROBOT_INTERESTED": 0.3,
+            "ROBOT_INTERESTED": 1.0,
             "NOVICE_ROLE_KEYWORD": 1.0
 
           }
@@ -385,7 +385,7 @@
             "ROBOT_ENCOURAGING"
           ],
           "exclusive":{
-            "Q_ROBOT_INDUCE_SPEECH": 0.8
+            "Q_ROBOT_INDUCE_SPEECH": 1
           }
         },
         "WRONG_OBJECT_CLICKED": {
@@ -401,7 +401,7 @@
             "ROBOT_CUSTOM_SPEECH": 0.6
           },
           "exclusive":{
-            "ROBOT_SILENT_YES": 0.6,
+            "ROBOT_SILENT_YES": 1.0,
             "ROBOT_SILENT_NOD": 1.0
           }
         },

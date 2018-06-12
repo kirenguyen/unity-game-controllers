@@ -1,8 +1,6 @@
 import time
 import json
 
-from ..BaseClassFSM import BaseClassFSM
-
 #from transitions import Machine
 from transitions.extensions import HierarchicalMachine as Machine
 
@@ -39,7 +37,7 @@ import rospy
 ROOT_TEGA_SPEECH_FOLDER = 'roleswitching18/'
 
 
-class ChildRobotInteractionFSM(BaseClassFSM):
+class ChildRobotInteractionFSM:
 		'''
 		child robot interaction FSM for robot's role switching project
 		It communicates with iSpyGameFSM, reinforcemnet learning agent model of the robot, robot's behaviors
@@ -81,9 +79,67 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 				
 				# when receiving no response for the first time
 				{'trigger': ris.Triggers.RETRY_QA, 'source':ris.CHILD_TURN+'_'+ris.PARSE_CHILD_SPEECH_RESPONSE, 'dest': ris.CHILD_TURN+'_'+ris.LISTEN_CHILD_SPEECH_RESPONSE },
-				{'trigger': ris.Triggers.RETRY_QA, 'source':ris.ROBOT_TURN+'_'+ris.PARSE_CHILD_SPEECH_RESPONSE, 'dest': ris.ROBOT_TURN+'_'+ris.LISTEN_CHILD_SPEECH_RESPONSE }]
+				{'trigger': ris.Triggers.RETRY_QA, 'source':ris.ROBOT_TURN+'_'+ris.PARSE_CHILD_SPEECH_RESPONSE, 'dest': ris.ROBOT_TURN+'_'+ris.LISTEN_CHILD_SPEECH_RESPONSE }
+				
+			]
 
-			super().__init__(ros_node_mgr,task_controller,game_controller,participant_id,game_round)
+			self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
+									 initial=ris.CHILD_TURN)
+
+			self.ros_node_mgr = ros_node_mgr
+
+			self.task_controller = task_controller
+
+			self.game_controller = game_controller
+
+			# load assigned condition the participant is in
+			subj_assign_dict = json.loads(open("iSpyGameController/res/participant_assignment.json").read())
+			self.subj_cond = subj_assign_dict[participant_id]
+
+			self.child_states = ChildStates(participant_id,self.subj_cond,task_controller)
+
+			self.role_behavior_mapping = RobotRolesBehaviorsMap(game_round)
+
+			# robot's physical actions
+			self.physical_actions ={}
+			# robot's virtual actions on the tablet
+			self.virtual_action = ""
+
+			self.explore_action = ""
+
+			#self.robot_response = self.role_behavior_mapping.get_robot_general_responses()
+
+			self.role = "novice" #default to novice at the beginning (backup)
+
+			self.robot_clickedObj=""
+
+			self.ros_node_mgr.start_tega_state_listener(self.on_tega_state_received)
+
+			self.ros_node_mgr.start_tega_asr(self.on_tega_new_asr_result)
+			
+			self.tega_is_playing_sound = False
+
+			self.asr_input = ""
+
+			self.current_task_turn_index = 0 # for the current task, current turn index
+
+			self.curr_robot_action = "NA"
+
+			self.turn_start_time = None
+
+			self.turn_end_time = None
+
+			self.turn_duration = ""
+
+			self.child_click_cancel_num = 0
+
+			self.numHintButtonPressedForTask = 0
+
+			self.continue_robot_help = True
+
+			self.reset_elapsed_time = False;
+
+			self.elapsed = ""
 
 		
 
@@ -123,7 +179,19 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			pass
 
 		def on_enter_childTURN(self):
-			super().on_enter_childTURN()
+			self.turn_start_time = datetime.now()
+			self.turn_end_time = None
+			self.turn_duration = ""
+			self.current_task_turn_index += 1
+			
+			self.robot_clickedObj = "" # reset robot's clicked obj
+			self.explore_action = ""
+			self.virtual_action = ""
+			self._ros_publish_data()
+			threading.Timer(3.0, self.start_tracking_child_interaction).start()
+			threading.Timer(10.0, self.on_child_max_elapsed_time).start()
+			self.reset_elapsed_time = False
+
 
 		def on_enter_robotTURN(self):
 			self.turn_start_time = datetime.now()
@@ -437,6 +505,14 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 	
 			self._ros_publish_data()
 
+
+		def reset_turn_taking(self):
+			self.current_task_turn_index = 0
+			self.state = ris.CHILD_TURN
+			self.child_states.on_new_task_received() # reset some task-based variables in child's states
+			self.task_controller.num_finished_words = 0
+			self.numHintButtonPressedForTask = 0
+
 		def turn_taking(self,max_time=False):
 			def _get_turn_duration():
 				self.turn_end_time = datetime.now()
@@ -475,8 +551,11 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 				print("\n============================================")
 				print("\n=================TURN TAKING===============: "+self.state+'\n')
 				# send the turn info (child/robot) to tablet via ROS
-				
-				super().turn_taking()
+
+				self.ros_node_mgr.send_ispy_cmd(iSpyCommand.WHOSE_TURN, {"whose_turn":self.state})
+
+				# update the number of available objects for child's learning states
+				self.child_states.set_num_available_objs(self.task_controller.get_num_available_target_objs())
 				
 				self._wait_until_all_audios_done()
 
@@ -596,6 +675,9 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 				else:
 					continue
 
+
+
+
 		def get_turn_taking_actions(self):
 			'''
 			check the current interaction FSM to decide whether the robot should respond
@@ -631,7 +713,6 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 					self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_EXPLORE)
 			virtual_action_dict = self.role_behavior_mapping.get_actions(self.role,self.state,'virtual')
 			if virtual_action_dict:
-				print(type(virtual_action_dict),virtual_action_dict)
 				ran = random.uniform(0,1)
 				for key,val in virtual_action_dict.items():
 					if ran <= val:
@@ -719,14 +800,16 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 				'''
 				role_name = self.role if isinstance(self.role,str) else self.role.name.lower()
 				cur_state = self.state.replace('TURN','') if str(self.state.replace('TURN','')) != "child_noInteraction1" else "child"
-				
-				speech_audio_path = '/'.join([speech_type,role_name, cur_state])
-				
-				
+
+				speech_audio_path = '/'.join([speech_type, role_name, cur_state])
+
 				try:
 					all_audio_arrs= self.tega_speech_dict[speech_audio_path]
-						
-					speech_audios = [ ROOT_TEGA_SPEECH_FOLDER+speech_audio_path+"/"+i+'.wav' for i in all_audio_arrs if action_type in i]
+
+					if GlobalSettings.USE_TEGA:
+						speech_audios = [ ROOT_TEGA_SPEECH_FOLDER+speech_audio_path+"/"+i+'.wav' for i in all_audio_arrs if action_type in i]
+					else:	
+						speech_audios = [(i, role_name, cur_state) for i in all_audio_arrs if action_type in i]
 
 					return random.choice(speech_audios)
 				except KeyError as k:
@@ -802,7 +885,7 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 
 				# send physical moition commands
 				for action, prob in actions.items():
-				
+				_get_tega_speech
 					print("action: "+action+" | prob:" + str(prob))
 					if random.random() > prob:
 						continue

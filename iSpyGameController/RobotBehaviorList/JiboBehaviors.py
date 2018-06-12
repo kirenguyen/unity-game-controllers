@@ -245,11 +245,18 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_motion = False
             msg.do_tts = True
             msg.do_sound_playback = False
-            print("CUSTOM SPEECH", args)
-            difficulty = args[0][0][1].lower()
-            current_state = args[0][0][2].lower()
-            msg1 = args[0][0][0].lower()
-            msg.tts_text = jibo_tts_dict["custom_speech"][difficulty][current_state][msg1]
+            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            print("CUSTOM SPEECH:", args)
+            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            try:
+                difficulty = args[0][0][1].lower()
+                current_state = args[0][0][2].lower()
+                msg1 = args[0][0][0].lower()
+                msg.tts_text = jibo_tts_dict["custom_speech"][difficulty][current_state][msg1]
+            except KeyError:
+                print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+                print("CUSTOM SPEECH:", args)
+                print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
         elif command == RobotBehaviors.NOVICE_ROLE_KEYWORD:
             msg.do_motion = True
@@ -377,7 +384,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg1 = jibo_tts_dict["review"]["answer_2"]
             msg2 = msg1.replace("*", vocab_word)
             msg.tts_text = msg2
-            print("ROBOT)INDUCE_SPEECH_RESPONSE", msg2)
+            print("ROBOT_INDUCE_SPEECH_RESPONSE", msg2)
 
         ### ========== Jibo Question Asking ========== ###
 

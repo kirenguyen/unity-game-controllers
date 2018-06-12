@@ -149,20 +149,20 @@ class ChildRobotInteractionFSM:
 			self.check_existence_of_asr_rostopic()
 
 		def check_existence_of_asr_rostopic(self):
-			pass
-			# '''
-			# check whether google asr rostopic exists
-			# '''
-			# import rospy
-			# topics = rospy.get_published_topics()
-			# self.asr_result_topic = False
-            #
-			#
-			# if '/asr_result' in [ i[0] for i in topics]:
-			# 	print("=========asr result publisher exists=========")
-			# 	self.asr_result_topic = True
-			# else:
-			# 	print("======WARNING: asr result publisher does not exist. Remember to start ros_asr.py======")
+			
+			'''
+			check whether google asr rostopic exists
+			'''
+			import rospy
+			topics = rospy.get_published_topics()
+			self.asr_result_topic = False
+            
+			
+			if '/asr_result' in [ i[0] for i in topics]:
+				print("=========asr result publisher exists=========")
+				self.asr_result_topic = True
+			else:
+				print("======WARNING: asr result publisher does not exist. Remember to start ros_asr.py======")
 
 		def on_child_max_elapsed_time(self):
 			''' max elapsed time for a child's turn'''
@@ -807,9 +807,12 @@ class ChildRobotInteractionFSM:
 					all_audio_arrs= self.tega_speech_dict[speech_audio_path]
 
 					if GlobalSettings.USE_TEGA:
+						print("We are in _get_tega_speech: Tega")
 						speech_audios = [ ROOT_TEGA_SPEECH_FOLDER+speech_audio_path+"/"+i+'.wav' for i in all_audio_arrs if action_type in i]
-					else:	
+					else:
 						speech_audios = [(i, role_name, cur_state) for i in all_audio_arrs if action_type in i]
+						print("==================WE ARE IN _GET_TEGA_SPEECH: JIBO======================")
+						print(speech_audios)
 
 					return random.choice(speech_audios)
 				except KeyError as k:

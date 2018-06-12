@@ -885,7 +885,7 @@ class ChildRobotInteractionFSM:
 
 				# send physical moition commands
 				for action, prob in actions.items():
-				_get_tega_speech
+
 					print("action: "+action+" | prob:" + str(prob))
 					if random.random() > prob:
 						continue

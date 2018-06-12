@@ -224,7 +224,7 @@ class ChildRobotInteractionFSM:
 			print ("on_enter_childTURN_robotHelp")
 			if self.continue_robot_help:
 				self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":"ROBOT_OFFER_HELP","clicked_object":""})
-				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, ROOT_TEGA_SPEECH_FOLDER + "general/others/robot_help.wav") # "i'll help you then!"
+				# self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, ROOT_TEGA_SPEECH_FOLDER + "general/others/robot_help.wav") # "i'll help you then!"
 				self.robot_clickedObj = self.task_controller.get_obj_for_robot(True)
 				self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":RobotBehaviors.VIRTUALLY_CLICK_CORRECT_OBJ,"clicked_object":self.robot_clickedObj})
 				self.continue_robot_help = True
@@ -234,7 +234,10 @@ class ChildRobotInteractionFSM:
 			print ("on_enter_robotTURN_childHelp")
 			self.child_states.child_help = True
 			self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":"ROBOT_ASK_HELP","clicked_object":""}) # enable the child to interact with the tablet
-			self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, ROOT_TEGA_SPEECH_FOLDER + "general/others/child_help.wav") # "now you can span the screen around"
+			if GlobalSettings.USE_TEGA:
+				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, ROOT_TEGA_SPEECH_FOLDER + "general/others/child_help.wav") # "now you can span the screen around"
+			else:
+				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, ("others","child_help")) # "now you can span the screen around"
 			self.virtual_action = ""
 			self._ros_publish_data()
 
@@ -411,9 +414,11 @@ class ChildRobotInteractionFSM:
 				self.ros_node_mgr.send_robot_cmd(action)
 			else:
 				if not ("INDUCE" in self.role_behavior_mapping.current_question_query_path or help_no_repeat) and (self.attempt == 1):
-					path = ROOT_TEGA_SPEECH_FOLDER + "questions/"
-					self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, path+ action +".wav")
-
+					if GlobalSettings.USE_TEGA:
+						path = ROOT_TEGA_SPEECH_FOLDER + "questions/"
+						self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, path+ action +".wav")
+					else:
+						self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, ("questions", action))
 			time.sleep(0.5)
 			self._wait_until_all_audios_done()
 
@@ -807,12 +812,9 @@ class ChildRobotInteractionFSM:
 					all_audio_arrs= self.tega_speech_dict[speech_audio_path]
 
 					if GlobalSettings.USE_TEGA:
-						print("We are in _get_tega_speech: Tega")
 						speech_audios = [ ROOT_TEGA_SPEECH_FOLDER+speech_audio_path+"/"+i+'.wav' for i in all_audio_arrs if action_type in i]
 					else:
 						speech_audios = [(i, role_name, cur_state) for i in all_audio_arrs if action_type in i]
-						print("==================WE ARE IN _GET_TEGA_SPEECH: JIBO======================")
-						print(speech_audios)
 
 					return random.choice(speech_audios)
 				except KeyError as k:

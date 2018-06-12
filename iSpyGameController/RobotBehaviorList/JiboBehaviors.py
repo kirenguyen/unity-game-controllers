@@ -248,15 +248,15 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
             print("CUSTOM SPEECH:", args)
             print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-            try:
+            try:    #attempts to send TTS command from def _get_tega_speech
                 difficulty = args[0][0][1].lower()
                 current_state = args[0][0][2].lower()
                 msg1 = args[0][0][0].lower()
                 msg.tts_text = jibo_tts_dict["custom_speech"][difficulty][current_state][msg1]
-            except KeyError:
-                print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-                print("CUSTOM SPEECH:", args)
-                print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            except: #accounts for other calls to ROBOT_CUSTOM_SPEECH
+                path = args[0][0][0].lower()
+                msg1 = args[0][0][1].lower()
+                msg.tts_text = jibo_tts_dict[path][msg1]
 
         elif command == RobotBehaviors.NOVICE_ROLE_KEYWORD:
             msg.do_motion = True

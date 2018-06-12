@@ -206,11 +206,6 @@ class iSpyGameFSM: # pylint: disable=no-member
 				check_task_completion()
 				self.interaction.turn_taking()
 
-			# elif transition_msg.data == gs.Triggers.TARGET_OBJECT_COLLECTED:
-			# 	self._reach_max_task_time()
-			# 	check_task_completion()
-			# 	self.interaction.turn_taking()
-
 			elif transition_msg.data == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
 				if self.interaction.state == ris.CHILD_TURN: # when a new turn is child's, then start tracking the child's interaction
 					t = threading.Timer(3.0, self.interaction.start_tracking_child_interaction).start() # checking for timeout

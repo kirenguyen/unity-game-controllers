@@ -101,7 +101,7 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			self.asr_result_topic = False
 
 			
-			if '/asr_result' in [ i[0] for i in topics]:
+			if '/asr_result' in [i[0] for i in topics]:
 				print("=========asr result publisher exists=========")
 				self.asr_result_topic = True
 			else:
@@ -1013,6 +1013,3 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			
 			print("-----get virtual action----: "+action+"---clicked obj: "+self.robot_clickedObj)
 			self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":action,"clicked_object":self.robot_clickedObj})
-			
-
-		

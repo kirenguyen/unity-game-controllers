@@ -246,11 +246,10 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_tts = True
             msg.do_sound_playback = False
             print("CUSTOM SPEECH", args)
-            # difficulty = args[1].lower()
-            # current_state = args[2].lower()
-            # msg1 = args[0].lower()
-            # msg.tts_text = jibo_tts_dict["custom_speech"][difficulty][current_state][msg1]
-            msg.tts_text = "Custom_speech"
+            difficulty = args[0][0][1].lower()
+            current_state = args[0][0][2].lower()
+            msg1 = args[0][0][0].lower()
+            msg.tts_text = jibo_tts_dict["custom_speech"][difficulty][current_state][msg1]
 
         elif command == RobotBehaviors.NOVICE_ROLE_KEYWORD:
             msg.do_motion = True

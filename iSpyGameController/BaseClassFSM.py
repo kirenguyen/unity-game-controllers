@@ -212,7 +212,17 @@ class BaseClassFSM:
 		
 		@abstractmethod
 		def start_task_end_behavior(self, action_number):
-			print("Some implementation!")
+			'''
+			send between mission celebration behaviors 
+			'''
+			time.sleep(2)
+
+			if self.task_controller.task_in_progress:
+				return
+
+			# task reminder at the end of mission 
+			self.task_number = action_number
+
 
 		@abstractmethod
 		def _perform_robot_physical_actions(self,action_type):

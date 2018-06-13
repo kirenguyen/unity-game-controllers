@@ -149,20 +149,21 @@ class ChildRobotInteractionFSM:
 			self.check_existence_of_asr_rostopic()
 
 		def check_existence_of_asr_rostopic(self):
-			
+
 			'''
 			check whether google asr rostopic exists
 			'''
 			import rospy
 			topics = rospy.get_published_topics()
 			self.asr_result_topic = False
-            
-			
-			if '/asr_result' in [ i[0] for i in topics]:
+
+			if '/asr_result' in [i[0] for i in topics]:
+
 				print("=========asr result publisher exists=========")
 				self.asr_result_topic = True
 			else:
 				print("======WARNING: asr result publisher does not exist. Remember to start ros_asr.py======")
+
 
 		def on_child_max_elapsed_time(self):
 			''' max elapsed time for a child's turn'''
@@ -781,15 +782,7 @@ class ChildRobotInteractionFSM:
 			'''
 			send between mission celebration behaviors 
 			'''
-
-			time.sleep(2)
-
-			if self.task_controller.task_in_progress:
-				return
-
-
-			# task reminder at the end of mission 
-			self.task_number = action_number
+			super().start_task_end_behavior(action_number)
 
 			reminder = RobotBehaviors.Q_ROBOT_TASK_END_REMINDER
 			self._robot_question_asking(reminder)
@@ -1103,6 +1096,3 @@ class ChildRobotInteractionFSM:
 			
 			print("-----get virtual action----: "+action+"---clicked obj: "+self.robot_clickedObj)
 			self.ros_node_mgr.send_ispy_cmd(iSpyCommand.ROBOT_VIRTUAL_ACTIONS,{"robot_action":action,"clicked_object":self.robot_clickedObj})
-			
-
-		

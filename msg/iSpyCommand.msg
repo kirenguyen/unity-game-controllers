@@ -30,3 +30,5 @@ int8 TASK_COMPLETED = 32 # send commands to notify the game the task is complete
 int8 WHOSE_TURN = 33 # either robot or child's turn
 
 int8 SET_GAME_SCENE = 34 # either indoor or outdoor
+
+int8 SPEAK = 35 # get tablet to speak on child-only mode

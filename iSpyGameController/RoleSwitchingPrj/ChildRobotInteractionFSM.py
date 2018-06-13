@@ -93,6 +93,7 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			self.check_existence_of_asr_rostopic()
 
 		def check_existence_of_asr_rostopic(self):
+
 			'''
 			check whether google asr rostopic exists
 			'''
@@ -106,6 +107,7 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 				self.asr_result_topic = True
 			else:
 				print("======WARNING: asr result publisher does not exist. Remember to start ros_asr.py======")
+
 
 		def on_child_max_elapsed_time(self):
 			''' max elapsed time for a child's turn'''
@@ -630,6 +632,7 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 					self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_EXPLORE)
 			virtual_action_dict = self.role_behavior_mapping.get_actions(self.role,self.state,'virtual')
 			if virtual_action_dict:
+				print(type(virtual_action_dict),virtual_action_dict)
 				ran = random.uniform(0,1)
 				for key,val in virtual_action_dict.items():
 					if ran <= val:

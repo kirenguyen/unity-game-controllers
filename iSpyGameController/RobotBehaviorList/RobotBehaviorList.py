@@ -34,7 +34,6 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     ROBOT_WINK = 'ROBOT_WINK'
     ROBOT_THINKING = 'ROBOT_THINKING'
 
-   
 
     ROBOT_SAY_WORD = 'ROBOT_SAY_WORD'
     
@@ -96,9 +95,9 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
 
     ### ===== no ispy action alert === ###
     NO_ISPY_ACTION_ALERT = "NO_ISPY_ACTION_ALERT"
-    ROBOT_TASK_END_BEHAVIOR = "ROBOT_TASK_END_BEHAVIOR"
+    ROBOT_TASK_END_BEHAVIOR = "ROBOT_TASK_END_BEHAVIOR" # Deprecated; not for Jibo
 
-    ### ===== task end behaviors
+    ### ===== task end behaviors === ###
     ROBOT_PLAY_MUSIC = "ROBOT_PLAY_MUSIC"
     ROBOT_DANCE = "ROBOT_DANCE"
     ROBOT_TASK_END_RESPONSE = "ROBOT_TASK_END_RESPONSE"
@@ -143,7 +142,9 @@ class RobotRolesBehaviorsMap:
         # robot's actions during child's turn
         self.child_turn_mapping = {}
 
-        action_file = "iSpyGameController/res/robot_actions_practice_round.json"if game_round == "practice" else "iSpyGameController/res/robot_actions.json" 
+        # action_file = "iSpyGameController/res/robot_actions_practice_round.json" if game_round == "practice" else "iSpyGameController/res/robot_actions.json"
+        action_file = "iSpyGameController/res/robot_actions-test-tran.json"
+
         robot_actions_file = open(action_file)
         self.robot_actions_dict = json.loads(robot_actions_file.read())
 

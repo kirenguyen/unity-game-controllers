@@ -57,130 +57,120 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_sound_playback = False
             msg.motion = JiboAction.DEFAULT
 
-        # elif command == RobotBehaviors.LOOK_LEFT_RIGHT:
-        #     msg.do_motion = True
-        #     msg.do_tts = False
-        #     msg.do_lookat = False
-        #     msg.do_sound_playback = False
-        #     msg.motion = JiboAction.
-        #
-        # elif command == RobotBehaviors.LOOK_DOWN_CENTER:
-        #     msg.do_motion = True
-        #     msg.do_tts = False
-        #     msg.do_lookat = False
-        #     msg.do_sound_playback = False
-        #     msg.motion = JiboAction.
-        #
-        # # Positive Emotions
-        # elif command == RobotBehaviors.ROBOT_EXCITED:
-        #     msg.do_motion = True
-        #     msg.do_tts = False
-        #     msg.do_lookat = False
-        #     msg.do_sound_playback = True
-        #     msg.audio_filename =
-        #     msg.motion = JiboAction
-        #
-        # elif command == RobotBehaviors.ROBOT_INTERESTED:
-        #     msg.do_motion = True
-        #     msg.do_tts = True
-        #     msg.do_lookat = False
-        #     msg.do_sound_playback = False
-        #     msg.tts_text =
-        #
-        # elif command == RobotBehaviors.ROBOT_YES:
-        #     msg.do_motion = True
-        #     msg.do_tts = True
-        #     msg.do_lookat = False
-        #     msg.do_sound_playback = False
-        #     msg.tts_text =
-        #     msg.motion = JiboAction.
-        #
-        # elif command == RobotBehaviors.ROBOT_HAPPY_DANCE:   #TODO: check if happy dance has audio
-        #     msg.do_motion = True
-        #     msg.do_tts = False
-        #     msg.do_lookat = False
-        #     msg.do_sound_playback = True
-        #     msg.audio_filename =
-        #     msg.motion = JiboAction.
-        #
-        # elif command == RobotBehaviors.ROBOT_CURIOUS:
-        #     msg.do_motion = True
-        #     msg.do_tts = True
-        #     msg.do_lookat = False
-        #     msg.do_sound_playback = False
-        #     msg.tts_text =
-        #     msg.motion = JiboAction.
-        #
-        # elif command == RobotBehaviors.ROBOT_ATTENTION:
-        #     msg.do_motion = True
-        #     msg.do_tts = True
-        #     msg.do_lookat = False
-        #     msg.do_sound_playback = False
-        #     msg.tts_text =
-        #     msg.motion = JiboAction.
-        #
-        # elif command == RobotBehaviors.ROBOT_CELEBRATION:
-        #     msg.do_motion = True
-        #     msg.do_tts = False
-        #     msg.do_sound_playback = False
-        #     msg.motion = JiboAction.
-        #
-        # elif command == RobotBehaviors.ROBOT_ENCOURAGING:
-        #     msg.do_motion = True
-        #     msg.do_tts = True
-        #     msg.do_sound_playback = False
-        #     msg.tts_text =
-        #     msg.motion = JiboAction.
-        #
-        # elif command == RobotBehaviors.ROBOT_WINK:
-        #     msg.do_motion = True
-        #     msg.do_tts = False
-        #     msg.do_sound_playback = False
-        #     msg.motion = JiboAction.
-        #
-        # elif command == RobotBehaviors.ROBOT_THINKING:
-        #     msg.do_motion = True
-        #     msg.do_tts = True
-        #     msg.do_sound_playback = False
-        #     msg.motion = JiboAction.
+        elif command == RobotBehaviors.LOOK_LEFT_RIGHT:
+            msg.do_motion = True
+            msg.do_tts = False
+            msg.do_lookat = False
+            msg.do_sound_playback = False
+            msg.motion = JiboAction.LOOK_LEFT_RIGHT
+
+        elif command == RobotBehaviors.LOOK_DOWN_CENTER:
+            msg.do_motion = True
+            msg.do_tts = False
+            msg.do_lookat = False
+            msg.do_sound_playback = False
+            msg.motion = JiboAction.LOOK_DOWN_CENTER
+
+        # Positive Emotions
+        elif command == RobotBehaviors.ROBOT_EXCITED:
+            msg.do_motion = True
+            msg.do_tts = False
+            msg.do_lookat = False
+            msg.do_sound_playback = False
+            msg.motion = JiboAction.ROBOT_EXCITED
+
+        elif command == RobotBehaviors.ROBOT_INTERESTED:
+            msg.do_motion = True
+            msg.do_tts = True
+            msg.do_lookat = False
+            msg.do_sound_playback = False
+            msg.do_motion = JiboAction.ROBOT_INTERESTED
+
+        elif command == RobotBehaviors.ROBOT_YES:
+            msg.do_motion = True
+            msg.do_tts = True
+            msg.do_lookat = False
+            msg.do_sound_playback = False
+            msg.tts_text = "Yes"
+            msg.motion = JiboAction.ROBOT_YES
+
+        elif command == RobotBehaviors.ROBOT_HAPPY_DANCE:   #TODO: check if happy dance has audio
+            msg.do_motion = True
+            msg.do_tts = False
+            msg.do_lookat = False
+            msg.do_sound_playback = False
+            msg.motion = JiboAction.ROBOT_HAPPY_DANCE
+
+        elif command == RobotBehaviors.ROBOT_CURIOUS:
+            msg.do_motion = True
+            msg.do_tts = False
+            msg.do_lookat = False
+            msg.do_sound_playback = False
+            msg.motion = JiboAction.ROBOT_CURIOUS
+
+        elif command == RobotBehaviors.ROBOT_ATTENTION:
+            msg.do_motion = True
+            msg.do_tts = False
+            msg.do_lookat = False
+            msg.do_sound_playback = False
+            msg.motion = JiboAction.ROBOT_ATTENTION
+
+        elif command == RobotBehaviors.ROBOT_CELEBRATION:
+            msg.do_motion = True
+            msg.do_tts = False
+            msg.do_sound_playback = False
+            msg.motion = JiboAction.ROBOT_CELEBRATION
+
+        elif command == RobotBehaviors.ROBOT_ENCOURAGING:
+            msg.do_motion = True
+            msg.do_tts = False
+            msg.do_sound_playback = False
+            msg.motion = JiboAction.ROBOT_ENCOURAGING
+
+        elif command == RobotBehaviors.ROBOT_WINK:
+            msg.do_motion = True
+            msg.do_tts = False
+            msg.do_sound_playback = False
+            msg.motion = JiboAction.ROBOT_WINK
+
+        elif command == RobotBehaviors.ROBOT_THINKING:
+            msg.do_motion = True
+            msg.do_tts = True
+            msg.do_sound_playback = False
+            msg.motion = JiboAction.ROBOT_THINKING
 
 
-        # # Negative Emotions
-        # elif command == RobotBehaviors.ROBOT_SAD:
-        #     msg.do_motion = True
-        #     msg.do_tts = False
-        #     msg.do_sound_playback = True
-        #     msg.audio_filename =
-        #     msg.motion = JiboAction
-        #
-        # elif command == RobotBehaviors.ROBOT_UNSURE:
-        #     msg.do_motion = True
-        #     msg.do_tts = True
-        #     msg.do_sound_playback = False
-        #     msg.tts_text =
-        #     msg.motion = JiboAction
-        #
-        # elif command == RobotBehaviors.ROBOT_COMFORT:
-        #     msg.do_motion = True
-        #     msg.do_tts = True
-        #     msg.do_sound_playback = False
-        #     msg.tts_text =
-        #     msg.motion = JiboAction
-        #
-        # elif command == RobotBehaviors.ROBOT_ASK_HELP:
-        #     msg,do_motion = True
-        #     msg.do_tts = True
-        #     msg.do_sound_playback = False
-        #     msg.tts_text =
-        #     msg.motion = JiboAction
-        #
-        # elif command == RobotBehaviors.ROBOT_DISAPPOINTED:
-        #     msg.do_motion = True
-        #     msg.do_tts = False
-        #     msg.do_sound_playback = True
-        #     msg.audio_filename =
-        #     msg.motion = JiboAction
+        # Negative Emotions
+        elif command == RobotBehaviors.ROBOT_SAD:
+            msg.do_motion = True
+            msg.do_tts = False
+            msg.do_sound_playback = False
+            msg.motion = JiboAction.ROBOT_SAD
 
+        elif command == RobotBehaviors.ROBOT_UNSURE:
+            msg.do_motion = True
+            msg.do_tts = True
+            msg.do_sound_playback = False
+            msg.tts_text = "I'm not really sure."
+            msg.motion = JiboAction.ROBOT_UNSURE
+
+        elif command == RobotBehaviors.ROBOT_COMFORT:
+            msg.do_motion = True
+            msg.do_tts = False
+            msg.do_sound_playback = False
+            msg.motion = JiboAction.ROBOT_COMFORT
+
+        elif command == RobotBehaviors.ROBOT_ASK_HELP:
+            msg,do_motion = True
+            msg.do_tts = False
+            msg.do_sound_playback = False
+            msg.motion = JiboAction.ROBOT_ASK_HELP
+
+        elif command == RobotBehaviors.ROBOT_DISAPPOINTED:
+            msg.do_motion = True
+            msg.do_tts = False
+            msg.do_sound_playback = False
+            msg.motion = JiboAction.ROBOT_DISAPPOINTED
 
         # Silent Emotions
         elif command == RobotBehaviors.ROBOT_SILENT_NOD:
@@ -248,7 +238,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
             print("CUSTOM SPEECH:", args)
             print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-            try:    #attempts to send TTS command from def _get_tega_speech
+            try: #attempts to send TTS command from def _get_tega_speech
                 difficulty = args[0][0][1].lower()
                 current_state = args[0][0][2].lower()
                 msg1 = args[0][0][0].lower()

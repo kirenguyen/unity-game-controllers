@@ -244,6 +244,7 @@ you send a `JiboAction` typed message with certain fields filled in. for instanc
 	* Clone your branch of the repo into a directory and be sure to git checkout to your branch (you may need to run `git branch -a` to find your branch first).
 	* Run `npm install`, then `npm run build` then `jibo run .` You should now see your skill on the skill manager website! Every time you add new .keys files, you will need to run npm run build to compile.
 	* With the `.keys` file uploaded, you will then need to update `JiboAction.msg` in the `jibo-teleop/msg` to be able to call said skill. You can easily follow the format of previously added skills.
+	* Finally, depending on your project, you will be able to refer to the skills by importing `jibo_msgs.msg` and `JiboAction.msg` then calling on the appropriate skill `JiboAction.SKILL`
 
 5. Then, check how `unity-game-controllers` is connected to Jibo/Tega
 	* what commands does it pass to the robot

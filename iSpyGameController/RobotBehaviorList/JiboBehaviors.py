@@ -139,7 +139,6 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_sound_playback = False
             msg.motion = JiboAction.ROBOT_THINKING
 
-
         # Negative Emotions
         elif command == RobotBehaviors.ROBOT_SAD:
             msg.do_motion = True
@@ -177,58 +176,62 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_motion = True
             msg.do_tts = False
             msg.do_sound_playback = False
-            msg.motion = JiboAction.SILENT_NOD
+            msg.motion = JiboAction.ROBOT_SILENT_NOD
 
         elif command == RobotBehaviors.ROBOT_SILENT_HAPPY_DANCE:
             msg.do_motion = True
             msg.do_tts = False
             msg.do_sound_playback = False
-            msg.motion = JiboAction.SILENT_HAPPY_DANCE
+            msg.motion = JiboAction.ROBOT_SILENT_HAPPY_DANCE
 
         elif command == RobotBehaviors.ROBOT_SILENT_YES:
             msg.do_motion = True
             msg.do_tts = False
             msg.do_sound_playback = False
-            msg.motion = JiboAction.SILENT_YES
+            msg.motion = JiboAction.ROBOT_SILENT_YES
 
         elif command == RobotBehaviors.ROBOT_SILENT_PUZZLED:
             msg.do_motion = True
             msg.do_tts = False
             msg.do_sound_playback = False
-            msg.motion = JiboAction.SILENT_PUZZLED
+            msg.motion = JiboAction.ROBOT_SILENT_PUZZLED
+            print("ROBOT_SILENT_PUZZLED")
 
         elif command == RobotBehaviors.ROBOT_SILENT_FRUSTRATED:
             msg.do_motion = True
             msg.do_tts = False
             msg.do_sound_playback = False
-            msg.motion = JiboAction.SILENT_FRUSTRATED
+            msg.motion = JiboAction.ROBOT_SILENT_FRUSTRATED
+            print("ROBOT_SILENT_FRUSTRATED")
 
         elif command == RobotBehaviors.ROBOT_SILENT_SAD:
             msg.do_motion = True
             msg.do_tts = False
             msg.do_sound_playback = False
-            msg.motion = JiboAction.SILENT_SAD
+            msg.motion = JiboAction.ROBOT_SILENT_SAD
+            print("ROBOT_SILENT_SAD")
 
 
         elif command == RobotBehaviors.ROBOT_SILENT_INTERESTED:
             msg.do_motion = True
             msg.do_tts = False
             msg.do_sound_playback = False
-            msg.motion = JiboAction.SILENT_INTERESTED
+            msg.motion = JiboAction.ROBOT_SILENT_INTERESTED
+            print("ROBOT_SILENT_INTERESTED")
 
         elif command == RobotBehaviors.ROBOT_SILENT_EXCITED:
             msg.do_motion = True
             msg.do_tts = False
             msg.do_sound_playback = False
-            msg.motion = JiboAction.SILENT_EXCITED
-
+            msg.motion = JiboAction.ROBOT_SILENT_EXCITED
+            print("ROBOT_SILENT_EXCITED")
 
         # Jibo Speech commands
         elif command == RobotBehaviors.ROBOT_HINT_BUTTON_REMINDER:
             msg.do_motion = True
             msg.do_tts = True
             msg.do_sound_playback = False
-            msg.motion = JiboAction.SILENT_PUZZLED
+            msg.motion = JiboAction.ROBOT_SILENT_PUZZLED
             msg.tts_text = jibo_tts_dict["others"]["misson_reminder"]
 
         elif command == RobotBehaviors.ROBOT_CUSTOM_SPEECH:
@@ -252,7 +255,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_motion = True
             msg.do_tts = True
             msg.do_sound_playback = False
-            msg.motion = JiboAction.SILENT_PUZZLED
+            msg.motion = JiboAction.ROBOT_SILENT_PUZZLED
             msg.tts_text = jibo_tts_dict["novice_keyword"][args[0][0].lower()]
             print("NOVICE_ROLE_KEYWORD", args[0][0].lower())
 
@@ -285,7 +288,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
                 msg.tts_text = msg2
                 print("VOCAB_EXPLANATION_SPEECH", vocab_word, itype, msg2)
 
-            msg.motion = JiboAction.SILENT_HAPPY_DANCE
+            msg.motion = JiboAction.ROBOT_SILENT_HAPPY_DANCE
 
         elif command == RobotBehaviors.HINT_SPEECH:     #TODO: ADD WIGGLE EMOTION
             msg.do_tts = True
@@ -362,7 +365,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_motion = True
             msg.do_tts = True
             msg.do_sound_playback = False
-            msg.motion = JiboAction.SILENT_PUZZLED
+            msg.motion = JiboAction.ROBOT_SILENT_PUZZLED
             msg.tts_text = jibo_tts_dict["induce"][random.choice(["1", "2", "3", "4", "5", "6"])]
             print("Q_ROBOT_INDUCE_SPEECH", args[0][0].lower())
 
@@ -392,7 +395,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_sound_playback = False
             help_msg_code = args[0][0].lower()
             msg.tts_text = jibo_tts_dict["questions"][help_msg_code]
-            msg.motion = JiboAction.SILENT_PUZZLED
+            msg.motion = JiboAction.ROBOT_SILENT_PUZZLED
             print("Q_ROBOT_ASK_WHY_CHOOSE_IT", help_msg_code)
 
         elif command == RobotBehaviors.Q_ROBOT_WANT_LEARN:
@@ -401,7 +404,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_sound_playback = False
             help_msg_code = args[0][0].lower()
             msg.tts_text = jibo_tts_dict["questions"][help_msg_code]
-            msg.motion = JiboAction.SILENT_INTERESTED
+            msg.motion = JiboAction.ROBOT_SILENT_INTERESTED
             print("Q_ROBOT_ASK_HELP", args[0][0].lower())
 
         elif command == RobotBehaviors.Q_ROBOT_ASK_HELP:
@@ -418,7 +421,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_sound_playback = False
             help_msg_code = args[0][0].lower()
             msg.tts_text = jibo_tts_dict["questions"][help_msg_code]
-            msg.motion = JiboAction.SILENT_PUZZLED
+            msg.motion = JiboAction.ROBOT_SILENT_PUZZLED
             print("Q_ROBOT_ASK_WHY_WRONG", args[0][0].lower())
 
         elif command == RobotBehaviors.Q_END_OF_TURN:

@@ -27,7 +27,7 @@ Project Setup
 
 ### System Dependencies
 
-This project was built and tested on Ubuntu 14.04, with a full desktop installation of ROS Indigo
+This project was built and tested on Ubuntu 16.04, with a full desktop installation of ROS Kinetic
 
 We recommend using Anaconda with Python 2.7 as your default system-wide Python environment (for ROS) and creating an Anaconda with Python 3.6 virtual env to execute the controller code [see here for details](https://uoa-eresearch.github.io/eresearch-cookbook/recipe/2014/11/20/conda/).
 
@@ -35,7 +35,7 @@ We recommend using Anaconda with Python 2.7 as your default system-wide Python e
 
 ### Install the project's non-python development and runtime requirements::	
 	
-	UBUNTU 14.04 System dependencies
+	UBUNTU 16.04 System dependencies
 	$ sudo apt-get install portaudio19-dev
 	$ sudo apt-get install xdotool
 	$ sudo apt-get install wmctrl
@@ -44,10 +44,11 @@ We recommend using Anaconda with Python 2.7 as your default system-wide Python e
 	$ sudo apt-get install python-dev graphviz libgraphviz-dev pkg-config
 	
 	# frequently needed for ROS-related code to work)
-	$ pip install rospkg
-	$ pip install catkin_pkg
-	$ pip install pymongo
-	$ pip install twisted
+	$ pip3 install rospkg
+	$ pip3 install catkin_pkg
+	$ pip3 install pymongo
+	$ pip3 install twisted
+	$ pip3 install pygraphviz --install-option="--include-path=/usr/include/graphviz" --install-option="--library-path=/usr/lib/graphviz/" --upgrade --force-reinstall
 	
 	# External catkin repos necessary for message passing and other functions
 	# Clone these to ~/catkin_ws/src, then run "catkin_make" from ~/catkin_ws
@@ -75,44 +76,17 @@ To run a Unity Game Controller, there are three major components of the back-end
 	- Create one in a new terminal by running `$ roslaunch rosbridge_server rosbridge_websocket.launch`; Requires install of Rosbridge (not included with regular ROS Desktop install), above.
 - *GameController (any
 
-### Tap Game
+### Storybook Game
 -------------
 
 After installing the dependencies, you can launch the Rosbridge Webserver and ROSCore together by running `$ ./scripts/startROS.sh`
 
 Then, you can run the TapGame Controller by running the following script in a  Python 3 environment:
 
-`$ python -m scripts.start_tap_game_controller [participant_id] [experimenter] [experiment_phase]`
+`$ python -m scripts.start_storybook_controller [participant_id]`
 
 e.g.
 
-`$ python -m scripts.start_tap_game_controller p01 sam experiment`
-
-You can test the tap game in `practice` or `posttest` mode, by passing those arguments in as the `experiment_phase`
-
-### ISpy Game
--------------
-
-After installing the dependencies, you can launch the Rosbridge Webserver and ROSCore together by running `$ ./scripts/startROS.sh`
-
-Then, you can run the iSpyGame Controller by running the following script in a  Python 3 environment:
-
-`$ python -m scripts.start_ispy_game_controller`
+`$ python -m scripts.start_storybook_controller p00`
 
 
-### ROSbag analysis
--------------------
-
-You'll need to install `ffmpeg` for some of the functionality contained here.
-
-Follow these instructions: https://www.faqforge.com/linux/how-to-install-ffmpeg-on-ubuntu-14-04/
-
-Also clone and make from source the officially supported ROS bag tools: https://github.com/srv/srv_tools
-
-
-Troubleshooting:
-------------------
-- **Problem**: `"cannot find module 'clev"`
-	- **Solution**: Navigate to the install site of the `weighted-levenshtein` package, edit __init__.py, and remove
-- **Problem**: `"cannot find module 'em'"`
-	- **Solution**: `pip install empy`

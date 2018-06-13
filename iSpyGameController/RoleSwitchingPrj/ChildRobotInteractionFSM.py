@@ -693,15 +693,7 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			'''
 			send between mission celebration behaviors 
 			'''
-
-			time.sleep(2)
-
-			if self.task_controller.task_in_progress:
-				return
-
-
-			# task reminder at the end of mission 
-			self.task_number = action_number
+			super().start_task_end_behavior(action_number)
 
 			reminder = RobotBehaviors.Q_ROBOT_TASK_END_REMINDER
 			self._robot_question_asking(reminder)

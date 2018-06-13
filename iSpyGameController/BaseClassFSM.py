@@ -230,4 +230,14 @@ class BaseClassFSM:
 		def _perform_robot_virtual_action(self,action):
 			print("Some implementation!")
 
-		
+		#def activate_button(self, buttonName, what_to_say = ''):
+		def activate_button(self):
+			#self.ros_node_mgr.send_ispy_cmd(iSpyCommand.BUTTON_DISABLED, {"buttonName": [buttonName, "Activate", what_to_say]})
+			self.ros_node_mgr.send_ispy_cmd(iSpyCommand.BUTTON_DISABLED, {"buttonName": 'helpingHintActivate'})
+			print('&&&&&&&&&&&& activating button &&&&&&&&&&&&&&&&&&')
+
+		#def deactivate_button(self, buttonName):
+		def deactivate_button(self):
+			#self.ros_node_mgr.send_ispy_cmd(iSpyCommand.BUTTON_DISABLED, {"buttonName": [buttonName, "Deactivate"]})
+			self.ros_node_mgr.send_ispy_cmd(iSpyCommand.BUTTON_DISABLED, {"buttonName": 'helpingHintDeactivate'})
+			print('&&&&&&&&&&&& deactivating button &&&&&&&&&&&&&&&&&&')

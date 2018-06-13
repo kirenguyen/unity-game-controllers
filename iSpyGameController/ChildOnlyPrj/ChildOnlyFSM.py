@@ -26,9 +26,20 @@ class ChildOnlyFSM(BaseClassFSM):
 		def on_enter_childTURN(self):
 
 			r = random.choice([-1, 1])
-			if r > 0: self.ros_node_mgr.send_ispy_cmd(iSpyCommand.BUTTON_DISABLED, {"buttonName": "helpingHintActivate"})
-			else: self.ros_node_mgr.send_ispy_cmd(iSpyCommand.BUTTON_DISABLED, {"buttonName": "helpingHintDeactivate"})
+			if r > 0: 
+				'''
+				self.activate_button("helpingHint", "What to Say")
+				'''
+				self.activate_button()
+			
+			else: 
+				'''
+				self.deactivate_button("helpingHint")
+				'''
+				self.deactivate_button()
+
 			super().on_enter_childTURN()
 
 		def turn_taking(self,max_time=False):
 			super().turn_taking()
+			self.on_enter_childTURN()

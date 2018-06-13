@@ -110,7 +110,7 @@ class iSpyGameFSM: # pylint: disable=no-member
                 
 		if self.is_child_robot == 'True': # Child-robot Mode
                   self.interaction = ChildRobotInteractionFSM(self.ros_node_mgr,self.task_controller,self, participant_id,session_number)
-                  self.ros_node_mgr.send_ispy_cmd(iSpyCommand.BUTTON_DISABLED, {"buttonName": "helpingHintDeactivate"})
+                  #self.ros_node_mgr.send_ispy_cmd(iSpyCommand.BUTTON_DISABLED, {"buttonName": "helpingHintDeactivate"})
 
 		elif self.is_child_robot == 'False': # Child-only Mode
                   self.interaction = ChildOnlyFSM(self.ros_node_mgr,self.task_controller,self,participant_id,session_number)

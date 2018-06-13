@@ -2,6 +2,13 @@ from ..BaseClassFSM import BaseClassFSM
 from GameUtils.GlobalSettings import iSpyRobotInteractionStates as ris
 import random
 from unity_game_msgs.msg import iSpyCommand
+from ..iSpyTaskController import iSpyTaskController
+
+import json
+jibo_tts_data = "../res/jibo_speech.json"
+jibo_tts_file = open(jibo_tts_data)
+jibo_tts_dict = json.loads(jibo_tts_file.read())
+hints_dict = jibo_tts_dict['hint']
 
 
 class ChildOnlyFSM(BaseClassFSM):
@@ -31,6 +38,9 @@ class ChildOnlyFSM(BaseClassFSM):
 			if r > 0: 
 
 				self.ros_node_mgr.send_ispy_cmd(iSpyCommand.BUTTON_DISABLED, {"buttonName": "helpingHintActivate"})
+				current_word = self.task_controller.vocab_word
+				desired_speech = hints_dict[current_word]
+				self.ros_node_mgr.send_ispy_cmd(iSpyCommand.SPEAK, {'desiredSpeech': desired_speech})
 			else: 
 				self.ros_node_mgr.send_ispy_cmd(iSpyCommand.BUTTON_DISABLED, {"buttonName": "helpingHintDeactivate"})
 			

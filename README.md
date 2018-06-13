@@ -47,7 +47,7 @@ We recommend using Anaconda with Python 2.7 as your default system-wide Python e
 	$ pip3 install rospkg
 	$ pip3 install catkin_pkg
 	$ pip3 install pymongo
-	$ pip3 install twisted
+	$ pip3 install twisted transitions 
 	$ pip3 install pygraphviz --install-option="--include-path=/usr/include/graphviz" --install-option="--library-path=/usr/lib/graphviz/" --upgrade --force-reinstall
 	
 	# External catkin repos necessary for message passing and other functions

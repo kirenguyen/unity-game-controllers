@@ -3,7 +3,7 @@
     "1": "Sometimes I know, sometimes I don't. Sometimes you know, and sometimes you don't. But it is okay, because that is when we learn.",
     "3": "This game is really fun. Let's play it together. If you don't know, I can help you. If I don't know, can you teach me? We can help each other out."
   },
-  "novice_keyword":{
+  "novice_keyword": {
     "aquatic_animal": "Is this an aquatic animal?",
     "azure": "Is this azure?",
     "crimson": "Is this crimson?",
@@ -16,7 +16,7 @@
     "soar": "Does this soar?",
     "vehicle": "Is this a vehicle?"
   },
-  "others":{
+  "others": {
     "mission_reminder": "Can you please help me tap on the hint button? I forgot what the game mission is.",
     "child_help": "Now, you can pan the screen around and help me find an object.",
     "no_ispy_action_alert1_response_1": "This game is really fun. Give it a try! Pan the screen around and click an object.",
@@ -68,7 +68,7 @@
     "crimson": "Do you think crimson is a color?",
     "delighted": "Do you think delighted is an emotion?",
     "garment": "Do you think garment means clothing?",
-    "giant" :"Do you think giant describes size?",
+    "giant": "Do you think giant describes size?",
     "gigantic": "Do you think gigantic describes size?",
     "land": "There's ocean and there's land, so there are aquatic animals and there are land animals.",
     "lavender": "Do you think lavender is a color?",
@@ -244,4 +244,5 @@
       }
     }
   }
+}
 

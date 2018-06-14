@@ -37,7 +37,7 @@ import rospy
 ROOT_TEGA_SPEECH_FOLDER = 'roleswitching18/'
 
 
-class ChildRobotInteractionFSM:
+class ChildRobotInteractionFSM(BaseClassFSM):
 		'''
 		child robot interaction FSM for robot's role switching project
 		It communicates with iSpyGameFSM, reinforcemnet learning agent model of the robot, robot's behaviors
@@ -79,9 +79,7 @@ class ChildRobotInteractionFSM:
 				
 				# when receiving no response for the first time
 				{'trigger': ris.Triggers.RETRY_QA, 'source':ris.CHILD_TURN+'_'+ris.PARSE_CHILD_SPEECH_RESPONSE, 'dest': ris.CHILD_TURN+'_'+ris.LISTEN_CHILD_SPEECH_RESPONSE },
-				{'trigger': ris.Triggers.RETRY_QA, 'source':ris.ROBOT_TURN+'_'+ris.PARSE_CHILD_SPEECH_RESPONSE, 'dest': ris.ROBOT_TURN+'_'+ris.LISTEN_CHILD_SPEECH_RESPONSE }
-				
-			]
+				{'trigger': ris.Triggers.RETRY_QA, 'source':ris.ROBOT_TURN+'_'+ris.PARSE_CHILD_SPEECH_RESPONSE, 'dest': ris.ROBOT_TURN+'_'+ris.LISTEN_CHILD_SPEECH_RESPONSE }]
 
 			super().__init__(ros_node_mgr, task_controller, game_controller, participant_id, game_round)
 

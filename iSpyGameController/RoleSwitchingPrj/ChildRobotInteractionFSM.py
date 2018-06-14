@@ -4,7 +4,7 @@ import json
 #from transitions import Machine
 from transitions.extensions import HierarchicalMachine as Machine
 
-
+from ..BaseClassFSM import BaseClassFSM
 from ..RobotBehaviorList.RobotBehaviorList import RobotBehaviors
 from ..RobotBehaviorList.RobotBehaviorList import RobotRoles
 from ..RobotBehaviorList.RobotBehaviorList import RobotRolesBehaviorsMap
@@ -83,65 +83,7 @@ class ChildRobotInteractionFSM:
 				
 			]
 
-			self.state_machine = Machine(self, states=self.states, transitions=self.transitions,
-									 initial=ris.CHILD_TURN)
-
-			self.ros_node_mgr = ros_node_mgr
-
-			self.task_controller = task_controller
-
-			self.game_controller = game_controller
-
-			# load assigned condition the participant is in
-			subj_assign_dict = json.loads(open("iSpyGameController/res/participant_assignment.json").read())
-			self.subj_cond = subj_assign_dict[participant_id]
-
-			self.child_states = ChildStates(participant_id,self.subj_cond,task_controller)
-
-			self.role_behavior_mapping = RobotRolesBehaviorsMap(game_round)
-
-			# robot's physical actions
-			self.physical_actions ={}
-			# robot's virtual actions on the tablet
-			self.virtual_action = ""
-
-			self.explore_action = ""
-
-			#self.robot_response = self.role_behavior_mapping.get_robot_general_responses()
-
-			self.role = "novice" #default to novice at the beginning (backup)
-
-			self.robot_clickedObj=""
-
-			self.ros_node_mgr.start_tega_state_listener(self.on_tega_state_received)
-
-			self.ros_node_mgr.start_tega_asr(self.on_tega_new_asr_result)
-			
-			self.tega_is_playing_sound = False
-
-			self.asr_input = ""
-
-			self.current_task_turn_index = 0 # for the current task, current turn index
-
-			self.curr_robot_action = "NA"
-
-			self.turn_start_time = None
-
-			self.turn_end_time = None
-
-			self.turn_duration = ""
-
-			self.child_click_cancel_num = 0
-
-			self.numHintButtonPressedForTask = 0
-
-			self.continue_robot_help = True
-
-			self.reset_elapsed_time = False;
-
-			self.elapsed = ""
-
-		
+			super().__init__(ros_node_mgr, task_controller, game_controller, participant_id, game_round)
 
 			tega_speech_file = open("iSpyGameController/res/tega_speech.json")
 			self.tega_speech_dict = json.loads(tega_speech_file.read())
@@ -180,19 +122,7 @@ class ChildRobotInteractionFSM:
 			pass
 
 		def on_enter_childTURN(self):
-			self.turn_start_time = datetime.now()
-			self.turn_end_time = None
-			self.turn_duration = ""
-			self.current_task_turn_index += 1
-			
-			self.robot_clickedObj = "" # reset robot's clicked obj
-			self.explore_action = ""
-			self.virtual_action = ""
-			self._ros_publish_data()
-			threading.Timer(3.0, self.start_tracking_child_interaction).start()
-			threading.Timer(10.0, self.on_child_max_elapsed_time).start()
-			self.reset_elapsed_time = False
-
+			super().on_enter_childTURN()
 
 		def on_enter_robotTURN(self):
 			self.turn_start_time = datetime.now()
@@ -558,11 +488,8 @@ class ChildRobotInteractionFSM:
 				print("\n=================TURN TAKING===============: "+self.state+'\n')
 				# send the turn info (child/robot) to tablet via ROS
 
-				self.ros_node_mgr.send_ispy_cmd(iSpyCommand.WHOSE_TURN, {"whose_turn":self.state})
+				super().turn_taking()
 
-				# update the number of available objects for child's learning states
-				self.child_states.set_num_available_objs(self.task_controller.get_num_available_target_objs())
-				
 				self._wait_until_all_audios_done()
 
 				# robot's response 
@@ -782,11 +709,12 @@ class ChildRobotInteractionFSM:
 			'''
 			send between mission celebration behaviors 
 			'''
+
 			super().start_task_end_behavior(action_number)
 
 			reminder = RobotBehaviors.Q_ROBOT_TASK_END_REMINDER
 			self._robot_question_asking(reminder)
-
+			
 
 		def _perform_robot_physical_actions(self,action_type):
 			'''

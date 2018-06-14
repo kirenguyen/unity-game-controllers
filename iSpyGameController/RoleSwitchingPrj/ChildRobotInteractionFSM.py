@@ -234,8 +234,6 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 		def stop_tracking_child_interaction(self):
 			self.stop_thread_flag = True
 
-
-
 		def on_no_ispy_action_alert(self,attempt):
 			'''
 			callback function when no ispy action within a time period is detected

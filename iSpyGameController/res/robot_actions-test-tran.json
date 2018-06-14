@@ -4,13 +4,14 @@
       "physical":{
         "TURN_SWITCHING": {
           "general": [
-            "LOOK_CENTER",
+            "LOOK_DOWN_CENTER",
             "ROBOT_SILENT_NOD"
           ]
         },
         "TURN_STARTING": {
           "general": [
-            "ROBOT_SILENT_INTERESTED"
+            "ROBOT_SILENT_INTERESTED",
+            "ROBOT_ATTENTION"
           ],
           "optional":{
             "ROBOT_CUSTOM_SPEECH": 0.7
@@ -18,21 +19,25 @@
         },
         "SCREEN_MOVING": {
           "general": [
-            "LOOK_AT_TABLET"
+            "LOOK_AT_TABLET",
+            "ROBOT_CURIOUS",
+            "ROBOT_THINKING"
           ],
           "exclusive":{
-            "KEYWORD_DEFINITION_SPEECH":1,
+            "KEYWORD_DEFINITION_SPEECH":0.3,
             "ROBOT_CUSTOM_SPEECH":0.8
           }
         },
         "WRONG_OBJECT_CLICKED": {
           "general": [
-            "ROBOT_SILENT_FRUSTRATED"
+            "ROBOT_ENCOURAGING",
+            "ROBOT_DISAPPOINTED"
           ]
         },
         "RIGHT_OBJECT_FOUND": {
           "general": [
-            "ROBOT_SILENT_INTERESTED"
+            "ROBOT_SILENT_HAPPY_DANCE",
+            "ROBOT_SILENT_NOD"
           ],
           "exclusive":{
             "ROBOT_INTERESTED": 0.8,
@@ -41,14 +46,13 @@
         },
         "OBJECT_PRONOUNCED":{
           "general": [
-            "LOOK_CENTER", 
-            "ROBOT_SAY_WORD"
+            "ROBOT_SAY_WORD",
+            "ROBOT_EXCITED"
           ]
         },
         "PRONOUNCE_CORRECT":{
           "general": [
-            "ROBOT_SILENT_NOD"
-
+          "ROBOT_SILENT_HAPPY_DANCE"
           ],
           "exclusive":{
             "VOCAB_EXPLANATION_SPEECH":0.5,
@@ -62,7 +66,9 @@
         },
         "WRONG_OBJECT_FAIL":{
           "general": [
-
+            "ROBOT_SILENT_PUZZLED",
+            "ROBOT_SILENT_FRUSTRATED",
+            "ROBOT_UNSURE"
           ]
         }
       },
@@ -82,7 +88,8 @@
         },
         "TURN_STARTING": {
           "general": [
-            "ROBOT_ATTENTION"
+            "ROBOT_ATTENTION",
+            "ROBOT_INTERESTED"
           ],
           "exclusive":{
             "ROBOT_CUSTOM_SPEECH":0.2,
@@ -90,17 +97,19 @@
           }
         },
         "SCREEN_MOVING": {
-          "general": [ 
-            "LOOK_AT_TABLET"
+          "general": [
+            "LOOK_AT_TABLET",
+            "ROBOT_ATTENTION"
           ],
           "exclusive":{
-            "KEYWORD_DEFINITION_SPEECH":1,
-            "Q_ROBOT_OFFER_HELP": 1
+            "KEYWORD_DEFINITION_SPEECH":0.3,
+            "Q_ROBOT_OFFER_HELP": 0.6
           }
         },
         "WRONG_OBJECT_CLICKED": {
           "general": [
-            "ROBOT_SILENT_PUZZLED"
+            "ROBOT_DISAPPOINTED",
+            "ROBOT_ENCOURAGING"
           ],
           "optional":{
             "HINT_SPEECH":0.2
@@ -108,7 +117,7 @@
         },
         "RIGHT_OBJECT_FOUND": {
           "general": [
-
+            "ROBOT_WINK"
           ],
           "optional":{
             "ROBOT_CUSTOM_SPEECH":0.6
@@ -120,7 +129,7 @@
         },
         "OBJECT_PRONOUNCED":{
           "general": [
-            "LOOK_CENTER", 
+            "LOOK_CENTER",
             "ROBOT_ATTENTION"
           ],
           "conditional":{
@@ -129,7 +138,7 @@
         },
         "PRONOUNCE_CORRECT":{
           "general": [
-
+            "ROBOT_SILENT_HAPPY_DANCE"
           ],
           "exclusive":{
             "ROBOT_SILENT_HAPPY_DANCE": 0.5,
@@ -138,13 +147,13 @@
         },
         "RESULTS_RETURNED":{
           "general": [
-          "ROBOT_SILENT_INTERESTED"
+            "ROBOT_INTERESTED"
           ]
         },
         "WRONG_OBJECT_FAIL":{
           "general": [
-            "ROBOT_SILENT_SAD"
-
+            "ROBOT_ENCOURAGING",
+            "ROBOT_THINKING"
           ],
           "optional":{
             "ROBOT_SAD": 0.8
@@ -152,7 +161,7 @@
         }
       },
 
-      "virtual":{}
+      "virtual":[]
     }
   },
 
@@ -164,8 +173,8 @@
       "physical":{
         "TURN_SWITCHING": {
           "general": [
-            "LOOK_CENTER", 
-            "ROBOT_SILENT_PUZZLED"
+            "LOOK_CENTER",
+            "ROBOT_CURIOUS"
           ]
         },
         "TURN_STARTING": {
@@ -175,16 +184,19 @@
         },
         "SCREEN_MOVING": {
           "general": [
-            "LOOK_AT_TABLET"
+            "LOOK_AT_TABLET",
+            "ROBOT_SILENT_INTERESTED"
           ],
           "exclusive": {
-            "Q_ROBOT_ASK_HELP":1,
-            "REMINDER_SPEECH": 1,
+            "Q_ROBOT_ASK_HELP":0.35,
+            "REMINDER_SPEECH": 0.75,
             "ROBOT_SILENT_INTERESTED": 1.0
           }
         },
         "WRONG_OBJECT_CLICKED": {
           "general": [
+            "ROBOT_SAD",
+            "ROBOT_DISAPPOINTED"
 
           ],
           "exclusive":{
@@ -194,7 +206,8 @@
         },
         "RIGHT_OBJECT_FOUND": {
           "general": [
-
+            "ROBOT_SILENT_NOD",
+            "ROBOT_SILENT_YES"
           ],
           "exclusive":{
             "ROBOT_INTERESTED": 0.3,
@@ -210,12 +223,16 @@
         },
         "PRONOUNCE_CORRECT":{
           "general": [
-            "ROBOT_SILENT_HAPPY_DANCE"
+            "ROBOT_SILENT_HAPPY_DANCE",
+            "ROBOT_SILENT_YES",
+            "ROBOT_SILENT_EXCITED"
           ]
         },
         "RESULTS_RETURNED":{
           "general": [
-
+            "ROBOT_SILENT_INTERESTED",
+            "ROBOT_WINK",
+            "ROBOT_THINKING"
           ],
           "exclusive": {
 
@@ -223,16 +240,16 @@
         },
         "WRONG_OBJECT_FAIL":{
           "general": [
-
+            "ROBOT_SILENT_SAD"
           ],
           "exclusive":{
-            "Q_ROBOT_ASK_WHY_WRONG":1,
+            "Q_ROBOT_ASK_WHY_WRONG":0.3,
             "ROBOT_SAD": 0.8
           }
         }
       },
 
-      "virtual":{ 
+      "virtual":{
           "VIRTUALLY_CLICK_WRONG_OBJ":1
       }
     },
@@ -256,9 +273,9 @@
             "LOOK_AT_TABLET"
           ],
           "exclusive":{
-            "REMINDER_SPEECH": 1,
+            "REMINDER_SPEECH": 0.3,
             "ROBOT_CUSTOM_SPEECH": 0.6,
-            "Q_ROBOT_INDUCE_SPEECH":1
+            "Q_ROBOT_INDUCE_SPEECH":0.9
           }
         },
         "WRONG_OBJECT_CLICKED": {
@@ -271,7 +288,7 @@
         },
         "RIGHT_OBJECT_FOUND": {
           "general": [
-            "LOOK_AT_TABLET" 
+            "LOOK_AT_TABLET"
           ],
           "optional":{
             "ROBOT_CUSTOM_SPEECH": 0.6
@@ -279,7 +296,8 @@
         },
         "OBJECT_PRONOUNCED":{
           "general": [
-            "LOOK_CENTER"
+            "LOOK_CENTER",
+            "ROBOT_ATTENTION"
           ]
         },
         "PRONOUNCE_CORRECT":{
@@ -287,18 +305,19 @@
             "ROBOT_SILENT_EXCITED"
           ],
           "exclusive":{
-            "ROBOT_CUSTOM_SPEECH": 0.4, 
-            "Q_ROBOT_ASK_WHY_CHOOSE_IT": 1
+            "ROBOT_CUSTOM_SPEECH": 0.4,
+            "Q_ROBOT_ASK_WHY_CHOOSE_IT": 0.8
           }
         },
         "RESULTS_RETURNED":{
           "general": [
-
+            "ROBOT_SILENT_INTERESTED"
           ]
         },
         "WRONG_OBJECT_FAIL":{
           "general": [
-            "ROBOT_SILENT_SAD"
+            "ROBOT_COMFORTING",
+            "ROBOT_DISAPPOINTED"
           ],
           "exclusive":{
             "ROBOT_SAD": 0.8,
@@ -307,7 +326,7 @@
         }
       },
 
-      "virtual":{}
+      "virtual":[]
     }
   },
 
@@ -326,7 +345,7 @@
           ]
         },
         "SCREEN_MOVING": {
-          "general": [  
+          "general": [
 
           ]
         },
@@ -358,11 +377,11 @@
 
         "WRONG_OBJECT_FAIL":{
           "general": [
-            
+
           ]
         }
       },
-      "virtual":{}
+      "virtual":[]
 
     },
     "childTURN": {
@@ -395,7 +414,7 @@
         },
         "RIGHT_OBJECT_FOUND": {
           "general": [
-            
+
           ],
           "optional":{
             "ROBOT_CUSTOM_SPEECH": 0.6
@@ -423,7 +442,7 @@
         },
         "RESULTS_RETURNED":{
           "general": [
-           
+
           ]
         },
         "WRONG_OBJECT_FAIL":{
@@ -437,7 +456,7 @@
         }
       },
 
-      "virtual":{}
+      "virtual":[]
     }
   }
 

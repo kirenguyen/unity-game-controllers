@@ -76,7 +76,8 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_motion = True
             msg.do_tts = False
             msg.do_lookat = False
-            msg.do_sound_playback = False
+            msg.do_sound_playback = True
+            msg.audio_filename = "laugh4-jibo.wav"
             msg.motion = JiboAction.ROBOT_EXCITED
 
         elif command == RobotBehaviors.ROBOT_INTERESTED:
@@ -84,17 +85,18 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_tts = True
             msg.do_lookat = False
             msg.do_sound_playback = False
+            msg.audio_filename = random.choice(["interested-jibo.wav", "interested1-jibo.wav", "hmm1-jibo.wav"])
             msg.do_motion = JiboAction.ROBOT_INTERESTED
 
         elif command == RobotBehaviors.ROBOT_YES:
             msg.do_motion = True
             msg.do_tts = True
             msg.do_lookat = False
-            msg.do_sound_playback = False
-            msg.tts_text = "Yes"
+            msg.do_sound_playback = True
+            msg.audio_filename = random.choice(["yes1-jibo.wav", "uh-huh-jibo.wav", "agreement1-jibo.wav"])
             msg.motion = JiboAction.ROBOT_YES
 
-        elif command == RobotBehaviors.ROBOT_HAPPY_DANCE:   #TODO: check if happy dance has audio
+        elif command == RobotBehaviors.ROBOT_HAPPY_DANCE:
             msg.do_motion = True
             msg.do_tts = False
             msg.do_lookat = False
@@ -105,7 +107,8 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_motion = True
             msg.do_tts = False
             msg.do_lookat = False
-            msg.do_sound_playback = False
+            msg.do_sound_playback = True
+            msg.audio_filename = random.choice(["interested-jibo.wav", "interested1-jibo.wav", "hmm1-jibo.wav"])
             msg.motion = JiboAction.ROBOT_CURIOUS
 
         elif command == RobotBehaviors.ROBOT_ATTENTION:
@@ -121,7 +124,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_sound_playback = False
             msg.motion = JiboAction.ROBOT_CELEBRATION
 
-        elif command == RobotBehaviors.ROBOT_ENCOURAGING:
+        elif command == RobotBehaviors.ROBOT_ENCOURAGING: #TODO: add TTS or add sound
             msg.do_motion = True
             msg.do_tts = False
             msg.do_sound_playback = False
@@ -136,21 +139,23 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
         elif command == RobotBehaviors.ROBOT_THINKING:
             msg.do_motion = True
             msg.do_tts = True
-            msg.do_sound_playback = False
+            msg.do_sound_playback = True
+            msg.audio_filename = random.choice(["thinking1-jibo.wav", "hmm2-jibo.wav"])
             msg.motion = JiboAction.ROBOT_THINKING
 
         # Negative Emotions
         elif command == RobotBehaviors.ROBOT_SAD:
             msg.do_motion = True
             msg.do_tts = False
-            msg.do_sound_playback = False
+            msg.do_sound_playback = True
+            msg.audio_filename = random.choice(["sigh1-jibo.wav", "sad1-jibo.wav", "aww1-jibo.wav"])
             msg.motion = JiboAction.ROBOT_SAD
 
         elif command == RobotBehaviors.ROBOT_UNSURE:
             msg.do_motion = True
-            msg.do_tts = True
-            msg.do_sound_playback = False
-            msg.tts_text = "I'm not really sure."
+            msg.do_tts = False
+            msg.do_sound_playback = True
+            msg.audio_filename = (["thinking1-jibo.wav", "hmm2-jibo.wav", "hmm3-jibo.wav"])
             msg.motion = JiboAction.ROBOT_UNSURE
 
         elif command == RobotBehaviors.ROBOT_COMFORT:
@@ -159,7 +164,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_sound_playback = False
             msg.motion = JiboAction.ROBOT_COMFORT
 
-        elif command == RobotBehaviors.ROBOT_ASK_HELP:
+        elif command == RobotBehaviors.ROBOT_ASK_HELP: #TODO: check if this is TTS implemented or if we need sounds
             msg,do_motion = True
             msg.do_tts = False
             msg.do_sound_playback = False
@@ -169,6 +174,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_motion = True
             msg.do_tts = False
             msg.do_sound_playback = False
+            msg.audio_filename = random.choice(["lazy1-jibo.wav", "frustrated2-jibo.wav", "ooh-jibo.wav"])
             msg.motion = JiboAction.ROBOT_DISAPPOINTED
 
         # Silent Emotions
@@ -233,9 +239,6 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_motion = False
             msg.do_tts = True
             msg.do_sound_playback = False
-            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-            print("CUSTOM SPEECH:", args)
-            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
             try: #attempts to send TTS command from def _get_tega_speech
                 difficulty = args[0][0][1].lower()
                 current_state = args[0][0][2].lower()
@@ -285,9 +288,9 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
 
             msg.motion = JiboAction.ROBOT_SILENT_HAPPY_DANCE
 
-        elif command == RobotBehaviors.HINT_SPEECH:     #TODO: ADD WIGGLE EMOTION
+        elif command == RobotBehaviors.HINT_SPEECH:
             msg.do_tts = True
-            msg.do_motion = False   #should be True, set to wiggle
+            msg.do_motion = False
             msg.do_sound_playback = False
             vocab_word = args[0][0].lower()
             msg.tts_text = jibo_tts_dict["hint"][vocab_word]

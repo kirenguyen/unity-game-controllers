@@ -195,21 +195,18 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_tts = False
             msg.do_sound_playback = False
             msg.motion = JiboAction.ROBOT_SILENT_PUZZLED
-            print("ROBOT_SILENT_PUZZLED")
 
         elif command == RobotBehaviors.ROBOT_SILENT_FRUSTRATED:
             msg.do_motion = True
             msg.do_tts = False
             msg.do_sound_playback = False
             msg.motion = JiboAction.ROBOT_SILENT_FRUSTRATED
-            print("ROBOT_SILENT_FRUSTRATED")
 
         elif command == RobotBehaviors.ROBOT_SILENT_SAD:
             msg.do_motion = True
             msg.do_tts = False
             msg.do_sound_playback = False
             msg.motion = JiboAction.ROBOT_SILENT_SAD
-            print("ROBOT_SILENT_SAD")
 
 
         elif command == RobotBehaviors.ROBOT_SILENT_INTERESTED:
@@ -217,14 +214,12 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_tts = False
             msg.do_sound_playback = False
             msg.motion = JiboAction.ROBOT_SILENT_INTERESTED
-            print("ROBOT_SILENT_INTERESTED")
 
         elif command == RobotBehaviors.ROBOT_SILENT_EXCITED:
             msg.do_motion = True
             msg.do_tts = False
             msg.do_sound_playback = False
             msg.motion = JiboAction.ROBOT_SILENT_EXCITED
-            print("ROBOT_SILENT_EXCITED")
 
         # Jibo Speech commands
         elif command == RobotBehaviors.ROBOT_HINT_BUTTON_REMINDER:

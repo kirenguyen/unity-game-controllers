@@ -115,7 +115,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		elif self.is_child_robot == 'False': # Child-only Mode
                   self.interaction = ChildOnlyFSM(self.ros_node_mgr,self.task_controller,self,participant_id,session_number)
 
-		self.iSpyDataTracking = iSpyDataTracking(self.interaction,self.ros_node_mgr, participant_id, experimenter, session_number)
+		self.iSpyDataTracking = iSpyDataTracking(self.interaction,self.ros_node_mgr, participant_id, experimenter, session_number, is_child_robot)
 
 		# Bool stating whether or not the current mission is completed
 		self.mission_completed = True
@@ -138,7 +138,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		#self.t = threading.Thread(target=self.update)
 		#self.t.start()
 
-
+	'''
 	def update(self):
 		while self.kill_received == False:
 			if self.FSM.state != gs.MISSION_MODE:
@@ -148,6 +148,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			if self.kill_received == True:
 				break
+	'''
 
 	def _reach_max_task_time(self): # if the condition is in "fixed novice": set a max elapsed time
 			if self.interaction.subj_cond != "novice": return

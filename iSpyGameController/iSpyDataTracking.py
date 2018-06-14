@@ -13,22 +13,28 @@ CSV_PATH = "ispy_data_files/"
 
 
 class iSpyDataTracking:
-	def __init__(self,childRobotFSM,ros_node_mgr,participant_id, experimenter, session_number):
+	def __init__(self,childRobotFSM,ros_node_mgr,participant_id, experimenter, session_number, is_child_robot):
 
 		self.ros_node_mgr = ros_node_mgr
 		# create a pandas dataframe to store all interaction data based on timestamps
 		self.game_start_time = None
 		self.child_robot_FSM = childRobotFSM
 		self.session_number = session_number
+		self.is_child_robot = is_child_robot
 
 		if not os.path.isdir("ispy_data_files/"): # check exitence of folders
 			os.makedirs("ispy_data_files/")
 
-		if self.session_number != "practice":
-			self._initialize_csvs(participant_id, experimenter, session_number)
-		self.ros_node_mgr.start_child_robot_interaction_pub_sub(self.on_child_robot_interaction_data_received)
+		if self.session_number != "practice" and is_child_robot:
+			self._initialize_csvs_CR(participant_id, experimenter, session_number)
+		if self.session_number != "practice" and not is_child_robot:
+			self._initialize_csvs_CO(participant_id, experimenter, session_number)
+		if is_child_robot:
+			self.ros_node_mgr.start_child_robot_interaction_pub_sub(self.on_child_robot_interaction_data_received)
+		else: 
+			self.ros_node_mgr.start_child_only_interaction_pub_sub(self.on_child_only_interaction_data_recieved)
 		
-	def _initialize_csvs(self,participant_id, experimenter, session_number):
+	def _initialize_csvs_CR(self,participant_id, experimenter, session_number):
 
 		import datetime
 
@@ -74,24 +80,93 @@ class iSpyDataTracking:
 			
 			])+'\n')
 
-		# self.interaction_turn_csv = open(CSV_PATH+"interaction_turn_summary_"+participant_id+"_"+experimenter+"_"+session_number_"+date+".csv","a") 
-		# elf.interaction_turn_csv.write(','.join(['turn_index','elapsedTimeFromGameStart','localTime',
-		# 	'turnStartTime','turnEndTime', 
-		# 	'gameTask','vocab', 'whoseTurn', 
-		# 	'turn_length', 'robotRole', 'clickedRightObject','clickedObjName',
-		# 	'numFinishedObjects', 
-		# 	'totalNumQsAsked','totalNumQsAnswered',
-		# 	'numQsAskedArr','numQsAnsweredArr',
+	def _initialize_csvs_CO(self,participant_id, experimenter, session_number):
 
-		# 	'numRobotOfferHelp' ,'numChildAcceptHelp', 
-		# 	'numRobotAskHelp', 'numChildOfferHelp',
-		# 	'timeOnScreenDragging'
-		# 	])+'\n')
+		import datetime
+
+		now = datetime.datetime.now()
+		date = now.isoformat()
+
+
+		self.child_robot_interaction_csv = open(CSV_PATH+"interaction_log_"+participant_id+"_"+experimenter+"_"+session_number+"_"+date+".csv","a") 
+		
+
+		self.child_robot_interaction_csv.write(','.join([
+			'elapsedTimeFromGameStart','currentLocalTime',
+
+			'gameTask','vocab', 'taskStartTime','taskEndTime', 'taskDuration',
+
+			'taskTurnIndex', 'whoseTurn', 'robotRole', 
+
+			'turnStartTime','turnEndTime','turnDuration',
+
+			'numCollectedObjectsForTask', 'numChildCollectedObjectsForTask', # task related
+			
+			'numTotalAttemptsForTask','numChildTotalAttemptsForTask', # task related 
+
+			'numChildClickCancelForTurn', 'numHintButtonPressedForTask', # turn related
+
+			'numQsAskeddForTask','numPositiveAnswerForTask','numNegativeAnswerForTask','numOtherAnswerForTask','numNoAnswerAttempt1ForTask',# turn related
+
+			'gameStateTrigger','currentInteractionState','currentGameState',
+
+			'robotPhysicalBehavior', 'robotVirtualBehavior',
+
+			'robotClickedObj','clickedRightObject','clickedObjName',
+
+			'numTouchAbsenceAlertPerTask','objectWordPronounced' ,
+
+			'isDraggin', 'pointerClick','onPinch','isScalingUp','isScalingDown',
+
+			'maxElapsedTimeReached'
+			
+			
+			])+'\n')
 
 	def start_stopwatch(self): #
 		self.game_start_time = datetime.now()
 
 	
+	def on_child_only_interaction_data_recieved(self,msg):
+		if self.session_number == 'practice': return
+
+		elapsedTime = str(datetime.now() - self.game_start_time) if self.game_start_time else ""
+		content = ','.join(map(str,[
+			elapsedTime,str(datetime.now()),
+
+			msg.gameTask, msg.taskVocab,  msg.taskStartTime, msg.taskEndTime, msg.taskDuration,  # task related 
+
+			msg.taskTurnIndex, msg.whoseTurn, msg.robotRole, 
+
+			msg.turnStartTime, msg.turnEndTime, msg.turnDuration,
+
+			msg.numFinishedObjectsForTask[0], msg.numFinishedObjectsForTask[1], # turn related 
+
+			msg.numTotalAttemptsForTask[0],msg.numTotalAttemptsForTask[1],
+
+			msg.numChildClickCancelForTurn, #msg.numHintButtonPressedForTask, 
+
+			msg.numQAForTurn[0], msg.numQAForTurn[1], msg.numQAForTurn[2], 
+
+			msg.numQAForTurn[3], msg.numQAForTurn[4],  msg.numQAForTurn[5],
+
+			msg.gameStateTrigger, msg.currentInteractionState, msg.currentGameState,
+
+			msg.robotBehavior, msg.robotVirtualBehavior,
+
+			msg.robotClickedObj, msg.clickedRightObject, msg.clickedObjName, 
+
+			msg.numTouchAbsenceAlertPerTask, msg.objectWordPronounced,
+
+			msg.ispyAction[0], msg.ispyAction[1], msg.ispyAction[2], msg.ispyAction[3], msg.ispyAction[4],
+
+			msg.maxElapsedTime
+			
+			]))
+
+		self.child_robot_interaction_csv.write(content+'\n')
+
+
 
 	def on_child_robot_interaction_data_received(self,msg):
 		'''
@@ -99,6 +174,8 @@ class iSpyDataTracking:
 		write the data to csv file
 		'''
 		
+		print("+++++++++ WRITE TO CSV +++++++++++++++++++")
+
 		# update the ispy action data frame
 		if self.session_number == "practice": return
 
@@ -159,14 +236,7 @@ class iSpyDataTracking:
 
 		# update the ispy action data frame
 		elapsedTime = str(datetime.now() - self.game_start_time) if self.game_start_time else ""
-		isScalingUpDown = any(n == True for n in [data.isScalingUp,data.isScalingDown])
-
-		#self.ispy_action_log_csv.write(','.join(map(str,[elapsedTime,str(datetime.now()), isScalingUpDown, data.pointerClick,data.isDragging,data.onPinch,object_name,data.speakingStage ])))
-	
-	
-		
-
-	
+		isScalingUpDown = any(n == True for n in [data.isScalingUp,data.isScalingDown])	
 
 	def on_ispy_child_learning_received(self,data):
 		pass

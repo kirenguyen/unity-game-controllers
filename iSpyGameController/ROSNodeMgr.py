@@ -166,6 +166,8 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             # fill in command and any params:
             msg.command = command
             if len(args) > 0:
+
+
                 if command == SEND_PRONOUNCIATION_ACCURACY_TO_UNITY:
                     msg.properties = json.dumps(args[0])
 
@@ -187,6 +189,9 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 elif command == SET_GAME_SCENE:
                     gameScene = json.dumps(args[0])
                     msg.properties = gameScene
+
+                elif command == SPEAK:
+                    msg.properties = json.dumps(args[0])
 
             # send message to tablet game
             if self.game_commander is None:

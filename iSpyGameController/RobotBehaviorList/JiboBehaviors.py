@@ -77,7 +77,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_tts = False
             msg.do_lookat = False
             msg.do_sound_playback = True
-            msg.audio_filename = "laugh4-jibo.wav"
+            msg.audio_filename = "interested-jibo.wav"
             msg.motion = JiboAction.ROBOT_EXCITED
 
         elif command == RobotBehaviors.ROBOT_INTERESTED:

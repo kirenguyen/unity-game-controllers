@@ -239,6 +239,13 @@ you send a `JiboAction` typed message with certain fields filled in. for instanc
 		* if `jibo-rosbridge-receiver` and `jibo-teleop` are running successfully, when you type `rostopic info /jibo` you should see both the publisher and subscriber in the screenshot
 			* ![screenshot](res/images/9.png)
 	* Once that’s working, adding new anims and invoking them from the game should be relatively straightforward	
+5. Adding animations and implementing them on Jibo
+	* To add new animations for Jibo to perform, you will need to create your own branch of `jibo-rosbridge-receiver`. Then, you can go to the `animations` file and add the `Testanim.keys` file to the appropriate folder from there. While there, open up `package.json` and edit the name of your version of jibo-rosbridge-receiver to differentiate yours among others.
+	* Clone your branch of the repo into a directory and be sure to git checkout to your branch (you may need to run `git branch -a` to find your branch first).
+	* Run `npm install`, then `npm run build` then `jibo run .` You should now see your skill on the skill manager website! Every time you add new .keys files, you will need to run npm run build to compile.
+	* With the `.keys` file uploaded, you will then need to update `JiboAction.msg` in the `jibo-teleop/msg` to be able to call said skill. You can easily follow the format of previously added skills.
+	* Finally, depending on your project, you will be able to refer to the skills by importing `jibo_msgs.msg` and `JiboAction.msg` then calling on the appropriate skill `JiboAction.SKILL`
+
 5. Then, check how `unity-game-controllers` is connected to Jibo/Tega
 	* what commands does it pass to the robot
 	* Learn how to add more robot behaviors/actions to the game

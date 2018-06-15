@@ -13,7 +13,7 @@ import _thread as thread
 from transitions import Machine
 import threading
 
-
+#test
 
 # from GameUtils import Curriculum
 from GameUtils import GlobalSettings
@@ -110,12 +110,12 @@ class iSpyGameFSM: # pylint: disable=no-member
                 
 		if self.is_child_robot == 'True': # Child-robot Mode
                   self.interaction = ChildRobotInteractionFSM(self.ros_node_mgr,self.task_controller,self, participant_id,session_number)
-                  self.ros_node_mgr.send_ispy_cmd(iSpyCommand.BUTTON_DISABLED, {"buttonName": "helpingHintDeactivate"})
+                  #self.ros_node_mgr.send_ispy_cmd(iSpyCommand.BUTTON_DISABLED, {"buttonName": "helpingHintDeactivate"})
 
 		elif self.is_child_robot == 'False': # Child-only Mode
                   self.interaction = ChildOnlyFSM(self.ros_node_mgr,self.task_controller,self,participant_id,session_number)
 
-		self.iSpyDataTracking = iSpyDataTracking(self.interaction,self.ros_node_mgr, participant_id, experimenter, session_number)
+		self.iSpyDataTracking = iSpyDataTracking(self.interaction,self.ros_node_mgr, participant_id, experimenter, session_number, is_child_robot)
 
 		# Bool stating whether or not the current mission is completed
 		self.mission_completed = True
@@ -138,7 +138,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		#self.t = threading.Thread(target=self.update)
 		#self.t.start()
 
-
+	'''
 	def update(self):
 		while self.kill_received == False:
 			if self.FSM.state != gs.MISSION_MODE:
@@ -148,6 +148,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			if self.kill_received == True:
 				break
+	'''
 
 	def _reach_max_task_time(self): # if the condition is in "fixed novice": set a max elapsed time
 			if self.interaction.subj_cond != "novice": return

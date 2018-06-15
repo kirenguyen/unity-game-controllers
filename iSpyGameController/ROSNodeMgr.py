@@ -166,6 +166,8 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             # fill in command and any params:
             msg.command = command
             if len(args) > 0:
+
+
                 if command == SEND_PRONOUNCIATION_ACCURACY_TO_UNITY:
                     msg.properties = json.dumps(args[0])
 
@@ -187,6 +189,9 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
                 elif command == SET_GAME_SCENE:
                     gameScene = json.dumps(args[0])
                     msg.properties = gameScene
+
+                elif command == SPEAK:
+                    msg.properties = json.dumps(args[0])
 
             # send message to tablet game
             if self.game_commander is None:
@@ -298,6 +303,12 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
 
         self.pub_asr_command.publish(msg)
         print("stop asr listening....")
+
+
+    def start_child_only_interaction_pub_sub(self, on_interaction_data):
+        print("start child only interaction publisher/subscriber")
+        self.pub_child_only_interaction = rospy.Publisher()
+        self.sub_child_only_interaction = rospy.Subscriber()
 
 
     def start_child_robot_interaction_pub_sub(self, on_interaction_data):

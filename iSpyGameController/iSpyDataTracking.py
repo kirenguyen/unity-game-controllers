@@ -15,6 +15,9 @@ CSV_PATH = "ispy_data_files/"
 class iSpyDataTracking:
 	def __init__(self,childRobotFSM,ros_node_mgr,participant_id, experimenter, session_number, is_child_robot):
 
+		if is_child_robot == "True": is_child_robot = True
+		if is_child_robot == "False": is_child_robot = False
+
 		self.ros_node_mgr = ros_node_mgr
 		# create a pandas dataframe to store all interaction data based on timestamps
 		self.game_start_time = None
@@ -29,6 +32,7 @@ class iSpyDataTracking:
 			self._initialize_csvs_CR(participant_id, experimenter, session_number)
 		if self.session_number != "practice" and not is_child_robot:
 			self._initialize_csvs_CO(participant_id, experimenter, session_number)
+
 		if is_child_robot:
 			self.ros_node_mgr.start_child_robot_interaction_pub_sub(self.on_child_robot_interaction_data_received)
 		else: 
@@ -45,7 +49,7 @@ class iSpyDataTracking:
 		# self.ispy_action_log_csv.write(','.join(['elapsedTime','localTime', 'isScalingUpDown',
 		# 	'pointerClick','isDragging','onPinch','clickedObjectName']))
 
-		self.child_robot_interaction_csv = open(CSV_PATH+"interaction_log_"+participant_id+"_"+experimenter+"_"+session_number+"_"+date+".csv","a") 
+		self.child_robot_interaction_csv = open(CSV_PATH+"interaction_log_"+participant_id+"_"+experimenter+"_"+session_number+"_"+date+"_childrobot_"+".csv","a") 
 		
 
 		self.child_robot_interaction_csv.write(','.join([
@@ -88,7 +92,7 @@ class iSpyDataTracking:
 		date = now.isoformat()
 
 
-		self.child_robot_interaction_csv = open(CSV_PATH+"interaction_log_"+participant_id+"_"+experimenter+"_"+session_number+"_"+date+".csv","a") 
+		self.child_robot_interaction_csv = open(CSV_PATH+"interaction_log_"+participant_id+"_"+experimenter+"_"+session_number+"_"+date+"_childonly_"+".csv","a") 
 		
 
 		self.child_robot_interaction_csv.write(','.join([

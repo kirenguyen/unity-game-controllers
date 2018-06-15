@@ -266,30 +266,36 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
 
 
     def start_tega_asr(self, on_tega_new_asr_result):
-        if GlobalSettings.USE_TEGA:
-            self.sub_asr_result = rospy.Subscriber('asr_result', AsrResult, on_tega_new_asr_result)
-            self.pub_asr_command = rospy.Publisher('asr_command', AsrCommand, queue_size=1)
-        else:
-            self.sub_asr_result = rospy.Subscriber('asr_result', JiboAsrResult, on_tega_new_asr_result)
-            self.pub_asr_command = rospy.Publisher('asr_command', JiboAsrCommand, queue_size=1)
+        # if GlobalSettings.USE_TEGA:
+        #     self.sub_asr_result = rospy.Subscriber('asr_result', AsrResult, on_tega_new_asr_result)
+        #     self.pub_asr_command = rospy.Publisher('asr_command', AsrCommand, queue_size=1)
+        # else:
+        #     self.sub_asr_result = rospy.Subscriber('asr_result', JiboAsrResult, on_tega_new_asr_result)
+        #     self.pub_asr_command = rospy.Publisher('asr_command', JiboAsrCommand, queue_size=1)
+
+        self.sub_asr_result = rospy.Subscriber('asr_result', AsrResult, on_tega_new_asr_result)
+        self.pub_asr_command = rospy.Publisher('asr_command', AsrCommand, queue_size=1)
 
     def start_asr_listening(self):
         '''
         start asr's listening
         '''
         #TODO: implement this properly for Jibo/Tega switch
-        if GlobalSettings.USE_TEGA:
-            msg = AsrCommand()
-            msg.command = AsrCommand.START_FINAL  # start final
-        else:
-            msg = JiboAsrCommand()
-            msg.header - Header()
-            msg.header.stamp = rospy.Time.now()
-            msg.command = JiboAsrCommand.START
-            msg.heyjibo = False
-            msg.incremental = True
-            msg.continuous = True
-            msg.rule = rule
+        # if GlobalSettings.USE_TEGA:
+        #     msg = AsrCommand()
+        #     msg.command = AsrCommand.START_FINAL  # start final
+        # else:
+        #     msg = JiboAsrCommand()
+        #     msg.header - Header()
+        #     msg.header.stamp = rospy.Time.now()
+        #     msg.command = JiboAsrCommand.START
+        #     msg.heyjibo = False
+        #     msg.incremental = True
+        #     msg.continuous = True
+        #     msg.rule = rule
+
+        msg = AsrCommand()
+        msg.command = AsrCommand.START_FINAL
 
 
         self.pub_asr_command.publish(msg)
@@ -300,18 +306,21 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         '''
 
         #TODO: implement this properly for Jibo/Tega switch
-        if GlobalSettings.USE_TEGA:
+        # if GlobalSettings.USE_TEGA:
+        #     msg = AsrCommand()
+        #     msg.command = AsrCommand.STOP_FINAL # stop final for the asr result
+        # else:
+        #     msg = JiboAsrCommand()
+        #     msg.header - Header()
+        #     msg.header.stamp = rospy.Time.now()
+        #     msg.command = JiboAsrCommand.STOP
+        #     msg.heyjibo = False
+        #     msg.incremental = True
+        #     msg.continuous = True
+        #     msg.rule = rule
+
             msg = AsrCommand()
-            msg.command = AsrCommand.STOP_FINAL # stop final for the asr result
-        else:
-            msg = JiboAsrCommand()
-            msg.header - Header()
-            msg.header.stamp = rospy.Time.now()
-            msg.command = JiboAsrCommand.STOP
-            msg.heyjibo = False
-            msg.incremental = True
-            msg.continuous = True
-            msg.rule = rule
+            msg.command = AsrCommand.STOP_FINAL
 
 
         self.pub_asr_command.publish(msg)

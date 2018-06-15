@@ -283,10 +283,13 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             msg.command = AsrCommand.START_FINAL  # start final
         else:
             msg = JiboAsrCommand()
+            msg.header - Header()
+            msg.header.stamp = rospy.Time.now()
             msg.command = JiboAsrCommand.START
-            msg.heyjibo = True
+            msg.heyjibo = False
             msg.incremental = True
             msg.continuous = True
+            msg.rule = rule
 
 
         self.pub_asr_command.publish(msg)
@@ -302,7 +305,13 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             msg.command = AsrCommand.STOP_FINAL # stop final for the asr result
         else:
             msg = JiboAsrCommand()
+            msg.header - Header()
+            msg.header.stamp = rospy.Time.now()
             msg.command = JiboAsrCommand.STOP
+            msg.heyjibo = False
+            msg.incremental = True
+            msg.continuous = True
+            msg.rule = rule
 
 
         self.pub_asr_command.publish(msg)

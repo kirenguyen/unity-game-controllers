@@ -557,7 +557,7 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 				if self.state == ris.CHILD_TURN or ris.CHILD_HELP in self.state:
 					self.child_click_cancel_num += 1 
 					
-			self._ros_publish_data()
+			#self._ros_publish_data()
 
 		def _robot_virutal_action_wait(self):
 			'''

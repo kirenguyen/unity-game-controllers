@@ -21,7 +21,7 @@ if GlobalSettings.USE_ROS:
     from unity_game_msgs.msg import iSpyCommand
     from unity_game_msgs.msg import iSpyAction
     from unity_game_msgs.msg import iSpyChildRobotInteraction
-    from unity_game_msgs.msg import iSpyChildOnlyInteraction
+    #from unity_game_msgs.msg import iSpyChildOnlyInteraction
     from r1d1_msgs.msg import TegaAction
     from r1d1_msgs.msg import TegaState
     from r1d1_msgs.msg import Vec3
@@ -313,9 +313,11 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
 
     def start_child_only_interaction_pub_sub(self, on_interaction_data):
         print("start child only interaction publisher/subscriber")
-        self.pub_child_only_interaction = rospy.Publisher(DATA_CHILD_ONLY_INTERACTION,iSpyChildOnlyInteraction,queue_size=1)
-        self.sub_child_only_interaction = rospy.Subscriber(DATA_CHILD_ONLY_INTERACTION,iSpyChildOnlyInteraction, on_interaction_data)
-
+        print(on_interaction_data)
+        #self.pub_child_only_interaction = rospy.Publisher(DATA_CHILD_ONLY_INTERACTION,iSpyChildOnlyInteraction,queue_size=1)
+        #self.sub_child_only_interaction = rospy.Subscriber(DATA_CHILD_ONLY_INTERACTION,iSpyChildOnlyInteraction, on_interaction_data)
+        self.pub_child_only_interaction = rospy.Publisher(DATA_CHILD_ONLY_INTERACTION,iSpyChildRobotInteraction,queue_size=1)
+        self.sub_child_only_interaction = rospy.Subscriber(DATA_CHILD_ONLY_INTERACTION,iSpyChildRobotInteraction, on_interaction_data)
 
     def start_child_robot_interaction_pub_sub(self, on_interaction_data):
         print("start child robot interaction publisher/subscriber")
@@ -324,4 +326,4 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         print()
 
         self.pub_child_robot_interaction = rospy.Publisher(DATA_CHILD_ROBOT_INTERACTION,iSpyChildRobotInteraction,queue_size=1)
-        self.sub_child_robot_interacftion = rospy.Subscriber(DATA_CHILD_ROBOT_INTERACTION,iSpyChildRobotInteraction, on_interaction_data)
+        self.sub_child_robot_interaction = rospy.Subscriber(DATA_CHILD_ROBOT_INTERACTION,iSpyChildRobotInteraction, on_interaction_data)

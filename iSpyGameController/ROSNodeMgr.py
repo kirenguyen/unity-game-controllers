@@ -320,7 +320,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         #     msg.incremental = True
         #     msg.continuous = True
         #     msg.rule = rule
-
+        if not GlobalSettings.USE_TEGA:
             msg = AsrCommand()
             msg.command = AsrCommand.STOP_FINAL
 

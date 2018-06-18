@@ -3,6 +3,7 @@ from GameUtils.GlobalSettings import iSpyRobotInteractionStates as ris
 import random
 from unity_game_msgs.msg import iSpyCommand
 from unity_game_msgs.msg import iSpyChildRobotInteraction
+from unity_game_msgs.msg import iSpyChildOnlyInteraction
 from ..iSpyTaskController import iSpyTaskController
 
 # from GameUtils import Curriculum
@@ -103,7 +104,7 @@ class ChildOnlyFSM(BaseClassFSM):
 
 			self.curr_robot_action = action
 	
-			msg = iSpyChildRobotInteraction()
+			msg = iSpyChildOnlyInteraction()
 			
 			# add header
 			msg.header = Header()
@@ -127,12 +128,6 @@ class ChildOnlyFSM(BaseClassFSM):
 
 			msg.taskTurnIndex = self.current_task_turn_index
 
-			# current turn: child or robot?
-			msg.whoseTurn = self.state
-
-			# robot's current role: expert or novice?
-			msg.robotRole = self.role.name if not isinstance(self.role,str) else self.role
-
 			msg.turnStartTime = str(self.turn_start_time) 
 
 			msg.turnEndTime = str(self.turn_end_time) 
@@ -143,57 +138,34 @@ class ChildOnlyFSM(BaseClassFSM):
 			
 			msg.numFinishedObjectsForTask = [self.task_controller.num_finished_words,self.child_states.numChildCorrectAttemptsCurrTask ]
 
-			#msg.numFinishedObjectsForTask[1] = 
 
 			msg.numTotalAttemptsForTask = [self.child_states.total_num_trials,self.child_states.numChildAttemptsCurrTask]
 
- 
 
 			msg.numChildClickCancelForTurn = self.child_click_cancel_num 
 
-			#msg.numHintButtonPressedForTask = self.numHintButtonPressedForTask
-
-			msg.numQAForTurn = [self.child_states.num_robot_questions_asked, self.child_states.pos_answers, 
-									self.child_states.neg_answers, self.child_states.other_answers,
-									self.child_states.no_answers_attempt1,self.child_states.no_answers_attempt2]
-  
-
-			msg.gameStateTrigger = None #self.gameStateTrigger
+			msg.gameStateTrigger = "None" #self.gameStateTrigger
 
 			msg.currentInteractionState = self.state
 
 			msg.currentGameState = self.game_controller.FSM.state
 
-			msg.robotBehavior = action
+			msg.clickedRightObject = "None" #self.clicked_right_obj
 
-			'''
-			if self.virtual_action:
-				msg.robotVirtualBehavior =  str(self.virtual_action)
-			elif self.explore_action:
-				msg.robotVirtualBehavior = str(self.explore_action)
-			else:
-				msg.robotVirtualBehavior = ""
-			'''
-			msg.robotVirtualBehavior = None
-
-			msg.robotClickedObj = None#self.robot_clickedObj
-
-			msg.clickedRightObject = None#self.clicked_right_obj
-
-			msg.clickedObjName = None#self.clicked_obj_name 
+			msg.clickedObjName = "None" #self.clicked_obj_name 
 
 			msg.numTouchAbsenceAlertPerTask = self.child_states.numTouchAbsenceAlertPerTask #######
 
 			msg.objectWordPronounced = self.child_states.objectWordPronounced
 
-
-
 			msg.ispyAction = ["", "", "", "", ""]
 			if ispy_action == True:
 				msg.ispyAction  = [str(self.game_controller.isDragging), str(self.game_controller.pointerClick), str(self.game_controller.onPinch), str(self.game_controller.isScalingUp), str(self.game_controller.isScalingDown)]
 
-
 			msg.maxElapsedTime = self.elapsed
+
+			msg.numHintButtonPressedForTask = self.numHintButtonPressedForTask
+
 			##############
 
 			self.ros_node_mgr.pub_child_only_interaction.publish(msg)

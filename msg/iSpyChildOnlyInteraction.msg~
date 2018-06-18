@@ -18,6 +18,12 @@ string taskDuration
 # current turn index in the task. initialize again when a new task is out
 int8 taskTurnIndex
 
+# current turn: child or robot?
+string whoseTurn
+
+# robot's current role: expert or novice?
+string robotRole
+
 string turnStartTime
 
 string turnEndTime
@@ -34,6 +40,8 @@ int8 numChildClickCancelForTurn
 
 int8 numHintButtonPressedForTask
 
+int8[] numQAForTurn 
+
 # game state trigger (e.g., object clicked, object found, object pronounced) 
 string gameStateTrigger
 
@@ -41,6 +49,11 @@ string gameStateTrigger
 string currentInteractionState
 
 string currentGameState
+
+# robot's current behavior (action): question asking, feedback, hints? 
+string robotBehavior
+
+string robotVirtualBehavior
 
 # clicked object (either robot's or child's) right or wrong (bool)
 string clickedRightObject  
@@ -57,7 +70,5 @@ bool objectWordPronounced
 string[] ispyAction
 
 string maxElapsedTime 
-
-int8 numHintButtonPressedForTask
 ###########
 

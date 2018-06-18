@@ -2,7 +2,6 @@
 echo -e "\033[1m\033[42mhere to stop all\033[0m"
 echo
 
-
 sleep 0.5s
 echo "I AM HERE!"
 
@@ -14,10 +13,19 @@ xterm -bg grey -geometry 45x20+300+550 -T "Affect Recognition" -e bash -c ./../.
 
 sleep 0.5s
 
+if [ "$5" = "tega" ]
+then
+echo "~~~~~~~~~~~~~~~~~~~~~~WE ARE USING TEGA~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 xterm -bg brown -geometry 45x20+300+550 -T "Speech Recognition" -e "python3 ../asr_google_cloud/src/ros_asr.py" &
+else
+echo "~~~~~~~~~~~~~~~~~~~~~~~WE ARE USING JIBO~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+fi
 
 sleep 0.5s
 
 #./scripts/start_recording_linux.sh $1 $2
-python3 -m scripts.start_ispy_game_controller $1 $2 $3 $4
-#xterm -geometry 120x40+200+0 -T "Main FSM" -e bash -c "python3 -m scripts.start_ispy_game_controller" $3 &
+python3 -m scripts.start_ispy_game_controller $1 $2 $3 $4 $5
+
+
+
+#xterm -geometry 120x40+200+0 -T "Main FSM" -e bash -c "python3 -m scripts.start_ispy_game_controller" $3

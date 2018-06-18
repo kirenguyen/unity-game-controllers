@@ -21,7 +21,7 @@ def fxn():
 
 
 def usage():
-    print('python3 -m scripts.start_ispy_game_controller [participant id: pXX] [experimenter] [session number: sXX] [is_child_robot]')
+    print('python3 -m scripts.start_ispy_game_controller [participant id: pXX] [experimenter] [session number: sXX] [bool: is_child_robot], ["jibo" or "tega"]')
 
 def main():
 
@@ -36,6 +36,7 @@ def main():
         experimenter = sys.argv[2] # experimenter
         session_number = sys.argv[3] # session number 
         is_child_robot = sys.argv[4] # interaction mode
+        use_jibo_or_tega = sys.argv[5] # which robot
 
 
     except IndexError:
@@ -43,18 +44,18 @@ def main():
         sys.exit()
 
     global control
-    control = iSpyGameFSM.iSpyGameFSM(participant_id, experimenter, session_number, is_child_robot)
+    control = iSpyGameFSM.iSpyGameFSM(participant_id, experimenter, session_number, is_child_robot, use_jibo_or_tega)
     print("FSM Started!")
     thread.start_new_thread(control.ros_node_mgr.start_ispy_transition_listener, (control.on_ispy_state_info_received,))
 
     thread.start_new_thread(control.ros_node_mgr.start_ispy_log_listener, (control.on_ispy_log_received,))
+
 
     signal.signal(signal.SIGINT, signal_handler) # for keyboard interrupt
 
     # control.ros_node_mgr.send_ispy_cmd(34,game_round) #SET_GAME_SCENE = 34
 
     control.ros_node_mgr.start_ispy_action_listener(control.on_ispy_action_received)
-
 
 
     

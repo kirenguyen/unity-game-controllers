@@ -93,6 +93,7 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			'''
 			check whether google asr rostopic exists
 			'''
+			print("===== issue comes from here? check existence of asr topic===")
 			import rospy
 			topics = rospy.get_published_topics()
 			self.asr_result_topic = False

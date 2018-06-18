@@ -15,6 +15,9 @@ CSV_PATH = "ispy_data_files/"
 class iSpyDataTracking:
 	def __init__(self,childRobotFSM,ros_node_mgr,participant_id, experimenter, session_number, is_child_robot):
 
+		if is_child_robot == "True": is_child_robot = True
+		if is_child_robot == "False": is_child_robot = False
+
 		self.ros_node_mgr = ros_node_mgr
 		# create a pandas dataframe to store all interaction data based on timestamps
 		self.game_start_time = None
@@ -29,6 +32,7 @@ class iSpyDataTracking:
 			self._initialize_csvs_CR(participant_id, experimenter, session_number)
 		if self.session_number != "practice" and not is_child_robot:
 			self._initialize_csvs_CO(participant_id, experimenter, session_number)
+
 		if is_child_robot:
 			self.ros_node_mgr.start_child_robot_interaction_pub_sub(self.on_child_robot_interaction_data_received)
 		else: 
@@ -36,6 +40,7 @@ class iSpyDataTracking:
 		
 	def _initialize_csvs_CR(self,participant_id, experimenter, session_number):
 
+		print('55555555555555555555555555555555555555555555')
 		import datetime
 
 		now = datetime.datetime.now()
@@ -45,8 +50,9 @@ class iSpyDataTracking:
 		# self.ispy_action_log_csv.write(','.join(['elapsedTime','localTime', 'isScalingUpDown',
 		# 	'pointerClick','isDragging','onPinch','clickedObjectName']))
 
-		self.child_robot_interaction_csv = open(CSV_PATH+"interaction_log_"+participant_id+"_"+experimenter+"_"+session_number+"_"+date+".csv","a") 
+		self.child_robot_interaction_csv = open(CSV_PATH+"interaction_log_"+participant_id+"_"+experimenter+"_"+session_number+"_"+date+"_childrobot_"+".csv","a") 
 		
+		self.child_robot_interaction_csv.write("TESTING TESTING")
 
 		self.child_robot_interaction_csv.write(','.join([
 			'elapsedTimeFromGameStart','currentLocalTime',
@@ -88,10 +94,11 @@ class iSpyDataTracking:
 		date = now.isoformat()
 
 
-		self.child_robot_interaction_csv = open(CSV_PATH+"interaction_log_"+participant_id+"_"+experimenter+"_"+session_number+"_"+date+".csv","a") 
-		
 
-		self.child_robot_interaction_csv.write(','.join([
+		self.child_only_interaction_csv = open(CSV_PATH+"interaction_log_"+participant_id+"_"+experimenter+"_"+session_number+"_"+date+"_childonly_"+".csv","a") 
+		self.child_only_interaction_csv.write("please write something")
+
+		self.child_only_interaction_csv.write(','.join([
 			'elapsedTimeFromGameStart','currentLocalTime',
 
 			'gameTask','vocab', 'taskStartTime','taskEndTime', 'taskDuration',
@@ -128,6 +135,11 @@ class iSpyDataTracking:
 
 	
 	def on_child_only_interaction_data_recieved(self,msg):
+
+		print("+++++++++ WRITE TO CSV CO +++++++++++++++++++")
+		print("444444444444444444444444444444444444444444444")
+
+
 		if self.session_number == 'practice': return
 
 		elapsedTime = str(datetime.now() - self.game_start_time) if self.game_start_time else ""
@@ -174,9 +186,10 @@ class iSpyDataTracking:
 		write the data to csv file
 		'''
 		
-		print("+++++++++ WRITE TO CSV +++++++++++++++++++")
+		print("+++++++++ WRITE TO CSV CR +++++++++++++++++++")
 
 		# update the ispy action data frame
+		
 		if self.session_number == "practice": return
 
 

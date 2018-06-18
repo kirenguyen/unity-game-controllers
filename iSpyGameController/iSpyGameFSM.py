@@ -84,7 +84,7 @@ class iSpyGameFSM: # pylint: disable=no-member
         #* is_child_robot is a boolean determining whether or not we are in child vs robot mode
 		self.is_child_robot = is_child_robot #*
 
-        self. use_jibo_or_tega = use_jibo_or_tega
+		self.use_jibo_or_tega = use_jibo_or_tega
 
 		self.ros_node_mgr = ROSNodeMgr()
 		self.ros_node_mgr.init_ros_node()
@@ -108,14 +108,14 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		self.task_controller = iSpyTaskController(session_number)
 
-        self.results_handler = PronunciationUtils()
+		self.results_handler = PronunciationUtils()
                 
-        if self.is_child_robot == 'True': # Child-robot Mode
-            self.interaction = ChildRobotInteractionFSM(self.ros_node_mgr,self.task_controller,self, participant_id,session_number)
-                  #self.ros_node_mgr.send_ispy_cmd(iSpyCommand.BUTTON_DISABLED, {"buttonName": "helpingHintDeactivate"})
+		if self.is_child_robot == 'True': # Child-robot Mode
+			self.interaction = ChildRobotInteractionFSM(self.ros_node_mgr,self.task_controller,self, participant_id,session_number)
+            #self.ros_node_mgr.send_ispy_cmd(iSpyCommand.BUTTON_DISABLED, {"buttonName": "helpingHintDeactivate"})
 
 		elif self.is_child_robot == 'False': # Child-only Mode
-                  self.interaction = ChildOnlyFSM(self.ros_node_mgr,self.task_controller,self,participant_id,session_number)
+			self.interaction = ChildOnlyFSM(self.ros_node_mgr,self.task_controller,self,participant_id,session_number)
 
 		self.iSpyDataTracking = iSpyDataTracking(self.interaction,self.ros_node_mgr, participant_id, experimenter, session_number, is_child_robot)
 

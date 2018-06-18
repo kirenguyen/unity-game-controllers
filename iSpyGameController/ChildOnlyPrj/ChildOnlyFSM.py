@@ -166,7 +166,7 @@ class ChildOnlyFSM(BaseClassFSM):
 
 			msg.numHintButtonPressedForTask = self.numHintButtonPressedForTask
 
-			#msg.numHintAppear = self.numHintAppear
+			msg.numHintAppear = self.numHintAppear
 
 			##############
 

@@ -58,6 +58,6 @@ string maxElapsedTime
 
 int8 numHintButtonPressedForTask
 
-# int8 numHintAppear
+int8 numHintAppear
 ###########
 

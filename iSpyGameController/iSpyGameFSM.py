@@ -126,8 +126,10 @@ class iSpyGameFSM: # pylint: disable=no-member
 		self.FSM = AlwaysMissionModeFSM(self.ros_node_mgr,session_number)
 
 
+		
 		if session_number != "practice":
 			self.affdexAnalysis = AffdexAnalysis(self,self.ros_node_mgr,participant_id,experimenter, session_number)
+		
 
 		self.kill_received = False # for stopping the update() thread
 

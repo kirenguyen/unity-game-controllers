@@ -166,7 +166,10 @@ class ChildOnlyFSM(BaseClassFSM):
 
 			msg.numHintButtonPressedForTask = self.numHintButtonPressedForTask
 
+			#msg.numHintAppear = self.numHintAppear
+
 			##############
 
+			print("msg is: ", msg )
 			self.ros_node_mgr.pub_child_only_interaction.publish(msg)
 		

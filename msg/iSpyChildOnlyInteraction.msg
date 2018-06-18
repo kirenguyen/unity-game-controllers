@@ -32,8 +32,6 @@ int8[] numTotalAttemptsForTask
 
 int8 numChildClickCancelForTurn
 
-int8 numHintButtonPressedForTask
-
 # game state trigger (e.g., object clicked, object found, object pronounced) 
 string gameStateTrigger
 
@@ -59,5 +57,7 @@ string[] ispyAction
 string maxElapsedTime 
 
 int8 numHintButtonPressedForTask
+
+# int8 numHintAppear
 ###########
 

@@ -288,12 +288,10 @@
       "physical":{
         "TURN_SWITCHING": {
           "general": [
-          "ROBOT_ASK_HELP"
           ]
         },
         "TURN_STARTING": {
           "general": [
-          "ROBOT_UNSURE"
           ]
         },
         "SCREEN_MOVING": {
@@ -303,33 +301,27 @@
         },
         "WRONG_OBJECT_CLICKED": {
           "general": [
-            "ROBOT_CURIOUS"
           ]
         },
         "RIGHT_OBJECT_FOUND": {
           "general": [
-            "ROBOT_THINKING"
           ]
         },
         "OBJECT_PRONOUNCED":{
           "general": [
-            "ROBOT_SILENT_YES"
           ]
         },
         "PRONOUNCE_CORRECT":{
           "general": [
-            "ROBOT_SILENT_NOD"
           ]
         },
         "RESULTS_RETURNED":{
           "general": [
-            "ROBOT_ATTENTION"
           ]
         },
 
         "WRONG_OBJECT_FAIL":{
           "general": [
-            "ROBOT_DISAPPOINTED"
           ]
         }
       },

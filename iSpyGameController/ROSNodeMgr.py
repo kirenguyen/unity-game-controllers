@@ -294,8 +294,8 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             msg.header.stamp = rospy.Time.now()
             msg.command = JiboAsrCommand.START
             msg.heyjibo = False
-            msg.incremental = True
             msg.continuous = True
+            msg.incremental = False
 
         print("!!!--------start asr listening---------!!!")
         self.pub_asr_command.publish(msg)

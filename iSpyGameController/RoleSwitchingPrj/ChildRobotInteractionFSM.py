@@ -199,10 +199,10 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			
 
 			#TODO: Does this have anything to do with it?
-			# if not self.asr_result_topic: # if the asr result topic publsiher doesn't exist
-			# 	# manually call the asr result callback function
-			# 	print("Something is wrong!!! ASR result topic is not working, check the fnc: check_existence_of_asr_rostopic and debug from there")
-			# 	self.on_tega_new_asr_result("")
+			if not self.asr_result_topic: # if the asr result topic publsiher doesn't exist
+				# manually call the asr result callback function
+				print("Something is wrong!!! ASR result topic is not working, check the fnc: check_existence_of_asr_rostopic and debug from there")
+				self.on_tega_new_asr_result("")
 
 
 		def start_tracking_child_interaction(self):
@@ -309,8 +309,8 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 
 			print("ASR STOP LISTENING RESULTING FROM: on_tega_new_asr_result")
 
-
-			self.ros_node_mgr.stop_asr_listening()
+			#TODO: CHECK WHY THE HECK THIS IS HERE???? IT JUST STOPS SH*T IMMEDIATELY
+			# self.ros_node_mgr.stop_asr_listening()
 
 			self._ros_publish_data()
 

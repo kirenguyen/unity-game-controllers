@@ -13,11 +13,8 @@ CSV_PATH = "ispy_data_files/"
 
 
 class iSpyDataTracking:
-	def __init__(self,childRobotFSM,ros_node_mgr,participant_id, experimenter, session_number, use_jibo_or_tega):
+	def __init__(self,childRobotFSM,ros_node_mgr,participant_id, experimenter, session_number, is_child_robot):
 
-		if use_jibo_or_tega == "jibo": is_child_robot = True
-		elif use_jibo_or_tega == "tega": is_child_robot = True
-		else: is_child_robot = False
 
 		self.is_child_robot = is_child_robot
 
@@ -26,17 +23,16 @@ class iSpyDataTracking:
 		self.game_start_time = None
 		self.child_robot_FSM = childRobotFSM
 		self.session_number = session_number
-		self.use_jibo_or_tega = use_jibo_or_tega
 
 		if not os.path.isdir("ispy_data_files/"): # check exitence of folders
 			os.makedirs("ispy_data_files/")
 
-		if self.session_number != "practice" and is_child_robot:
+		if self.session_number != "practice" and self.is_child_robot:
 			self._initialize_csvs_CR(participant_id, experimenter, session_number)
-		if self.session_number != "practice" and not is_child_robot:
+		if self.session_number != "practice" and not self.is_child_robot:
 			self._initialize_csvs_CO(participant_id, experimenter, session_number)
 
-		if is_child_robot:
+		if self.is_child_robot:
 			self.ros_node_mgr.start_child_robot_interaction_pub_sub(self.on_child_robot_interaction_data_received)
 		else: 
 			self.ros_node_mgr.start_child_only_interaction_pub_sub(self.on_child_only_interaction_data_recieved)

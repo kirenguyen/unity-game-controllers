@@ -18,6 +18,7 @@ if GlobalSettings.USE_ROS:
 	from unity_game_msgs.msg import iSpyCommand
 	from unity_game_msgs.msg import iSpyAction
 
+from datetime import datetime, timedelta
 import os
 import timestring
 import rospy
@@ -69,16 +70,27 @@ class ChildOnlyFSM(BaseClassFSM):
 				self.ros_node_mgr.send_ispy_cmd(iSpyCommand.SPEAK, {'desiredSpeech': desired_speech})
 			else: 
 				self.ros_node_mgr.send_ispy_cmd(iSpyCommand.BUTTON_DISABLED, {"buttonName": "helpingHintDeactivate"})
+				print("777777777777777777777777777777777777777777777777777777777")
 			
 			super().on_enter_childTURN()
+			self._ros_publish_data()
 
 		def turn_taking(self,max_time=False):
+			def _get_turn_duration():
+				self.turn_end_time = datetime.now()
+				self.turn_duration = str(self.turn_end_time - self.turn_start_time)
+				self._ros_publish_data()
+
+			_get_turn_duration()
+
+			self.child_click_cancel_num =0  # reset child's number of clicks and cancels each turn
+
 			if self.task_controller.task_in_progress:
 				self.on_enter_childTURN()
 				super().turn_taking()
 
 
-		"""
+		
 		def react(self,gameStateTrigger,  clicked_obj_name = ""):
 			'''
 			react to ispy game state change
@@ -93,10 +105,17 @@ class ChildOnlyFSM(BaseClassFSM):
 				self._ros_publish_data() # publish data of child-robot interaction via ROS
 				self.clicked_obj_name = ""
 
-			self._ros_publish_data()
-		"""
+			if gameStateTrigger == gs.Triggers.TARGET_OBJECT_COLLECTED:
+				self._wait_until_all_audios_done()
+				self.child_states.update_turn_result(self.state,True) # the child finds the correct object
 
-		
+			elif gameStateTrigger  == gs.Triggers.NONTARGET_OBJECT_COLLECTED:
+				self.child_states.update_turn_result(self.state,False) # the child finds the incorrect object
+
+			elif gameStateTrigger == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
+				if self.state == ris.CHILD_TURN or ris.CHILD_HELP in self.state:
+					self.child_click_cancel_num += 1 
+
 		def _ros_publish_data(self,action="", v_action = "", ispy_action=False):
 			'''
 			public ros data on child-robot interaction
@@ -138,21 +157,19 @@ class ChildOnlyFSM(BaseClassFSM):
 			
 			msg.numFinishedObjectsForTask = [self.task_controller.num_finished_words,self.child_states.numChildCorrectAttemptsCurrTask ]
 
-
 			msg.numTotalAttemptsForTask = [self.child_states.total_num_trials,self.child_states.numChildAttemptsCurrTask]
-
 
 			msg.numChildClickCancelForTurn = self.child_click_cancel_num 
 
-			msg.gameStateTrigger = "None" #self.gameStateTrigger
+			msg.gameStateTrigger = self.gameStateTrigger
 
 			msg.currentInteractionState = self.state
 
 			msg.currentGameState = self.game_controller.FSM.state
 
-			msg.clickedRightObject = "None" #self.clicked_right_obj
+			msg.clickedRightObject = self.clicked_right_obj
 
-			msg.clickedObjName = "None" #self.clicked_obj_name 
+			msg.clickedObjName = self.clicked_obj_name 
 
 			msg.numTouchAbsenceAlertPerTask = self.child_states.numTouchAbsenceAlertPerTask #######
 
@@ -170,6 +187,5 @@ class ChildOnlyFSM(BaseClassFSM):
 
 			##############
 
-			print("msg is: ", msg )
 			self.ros_node_mgr.pub_child_only_interaction.publish(msg)
 		

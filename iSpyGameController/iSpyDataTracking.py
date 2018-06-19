@@ -90,6 +90,7 @@ class iSpyDataTracking:
 		date = now.isoformat()
 
 		self.child_only_interaction_csv = open(CSV_PATH+"interaction_log_"+participant_id+"_"+experimenter+"_"+session_number+"_"+date+"_childonly_"+".csv","a") 
+		#print("WOW I REALLY SHOULD BE WRITING SOMETHING ------------------------------------------------------------------")
 		self.child_only_interaction_csv.write("please write something")
 
 		self.child_only_interaction_csv.write(','.join([

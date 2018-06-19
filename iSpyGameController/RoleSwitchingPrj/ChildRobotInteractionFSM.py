@@ -892,8 +892,6 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			
 			msg.numFinishedObjectsForTask = [self.task_controller.num_finished_words,self.child_states.numChildCorrectAttemptsCurrTask ]
 
-			#msg.numFinishedObjectsForTask[1] = 
-
 			msg.numTotalAttemptsForTask = [self.child_states.total_num_trials,self.child_states.numChildAttemptsCurrTask]
 
  

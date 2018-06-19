@@ -70,7 +70,8 @@ SET_GAME_SCENE = 34
 
 
 
-
+# max amount of time duration for the absence of the child’s interaction
+MAX_ABSENCE_TIME = 10
 
 
 
@@ -80,9 +81,10 @@ class iSpyGameFSM: # pylint: disable=no-member
 	"""
 
 
-	def __init__(self,participant_id, experimenter, session_number, is_child_robot): #*
-           #* is_child_robot is a boolean determining whether or not we are in child vs robot mode
-		self.is_child_robot = is_child_robot #*
+	def __init__(self,participant_id, experimenter, session_number, is_child_robot): 
+
+        # is_child_robot is a boolean determining whether or not we are in child vs robot mode
+		self.is_child_robot = is_child_robot 
 
 		self.ros_node_mgr = ROSNodeMgr()
 		self.ros_node_mgr.init_ros_node()
@@ -168,6 +170,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		"""
 		Rospy Callback for when we get log messages from ispy game
 		"""
+
 		def check_task_completion():
 			if not self.task_controller.task_in_progress:
 				# let the game knows the task is completed
@@ -179,8 +182,10 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		#print("State Transition: "+transition_msg.data)
 
+
 		if transition_msg.data in gs.Triggers.triggers:
 			#time.sleep(.1)
+
 
 			if self.FSM.state != gs.EXPLORATION_MODE and self.FSM.state != gs.WORD_DISPLAY: # if the game is still in explore mode
 				self.interaction.react(transition_msg.data,self.origText) # the robot reacts
@@ -197,6 +202,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_HAPPY_DANCE)
 
 			elif transition_msg.data == gs.Triggers.HINT_BUTTON_PRESSED:
+				print('666666666666666666666666666666666666666')
 				self.interaction.numHintButtonPressedForTask += 1
 
 
@@ -383,5 +389,3 @@ class iSpyGameFSM: # pylint: disable=no-member
 				t = threading.Timer(3.0,self.interaction.start_tracking_child_interaction).start()
 				threading.Timer(10.0, self.interaction.on_child_max_elapsed_time).start()
 
-	
-	

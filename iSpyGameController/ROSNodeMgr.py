@@ -256,7 +256,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         # rospy.spin()
 
     def start_tega_state_listener(self,on_tega_state_received):
-        print('start tega state listener')
+        print('start state listener')
         if GlobalSettings.USE_TEGA:
             sub_affdex = rospy.Subscriber('tega_state', TegaState, on_tega_state_received)
         else:
@@ -276,12 +276,9 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             self.sub_asr_result = rospy.Subscriber('asr_result', AsrResult, on_tega_new_asr_result)
             self.pub_asr_command = rospy.Publisher('asr_command', AsrCommand, queue_size=1)
         else:
-            print("======start JIBO asr!! USE JIBO")
-            self.sub_asr_result = rospy.Subscriber('asr_result', JiboAsrResult, on_tega_new_asr_result)
-            self.pub_asr_command = rospy.Publisher('asr_command', JiboAsrCommand, queue_size=1)
+            self.sub_asr_result = rospy.Subscriber('jibo_asr_result', JiboAsrResult, on_tega_new_asr_result)
+            self.pub_asr_command = rospy.Publisher('jibo_asr_command', JiboAsrCommand, queue_size=10)
 
-        # self.sub_asr_result = rospy.Subscriber('asr_result', AsrResult, on_tega_new_asr_result)
-        # self.pub_asr_command = rospy.Publisher('asr_command', AsrCommand, queue_size=1)
 
     def start_asr_listening(self):
         '''
@@ -289,11 +286,9 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         '''
         #TODO: implement this properly for Jibo/Tega switch
         if GlobalSettings.USE_TEGA:
-            print("=====start as litening...TEGA!!!")
             msg = AsrCommand()
             msg.command = AsrCommand.START_FINAL  # start final
         else:
-            print("=======start asr listening JIBO!!!")
             msg = JiboAsrCommand()
             msg.header = Header()
             msg.header.stamp = rospy.Time.now()
@@ -302,11 +297,9 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             msg.incremental = True
             msg.continuous = True
 
-        # msg = AsrCommand()
-        # msg.command = AsrCommand.START_FINAL
-
-        print("start asr listening....", msg)
+        print("!!!--------start asr listening---------!!!")
         self.pub_asr_command.publish(msg)
+        print("ASR START MESSAGE SENT")
 
     def stop_asr_listening(self):
         '''
@@ -322,15 +315,10 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             msg.header = Header()
             msg.header.stamp = rospy.Time.now()
             msg.command = JiboAsrCommand.STOP
-            msg.heyjibo = False
-            msg.incremental = True
-            msg.continuous = True
 
-        # msg = AsrCommand()
-        # msg.command = AsrCommand.STOP_FINAL
-
-        print("stop asr listening....", msg)
+        print("!!!--------stop asr listening-----!!!")
         self.pub_asr_command.publish(msg)
+        print("ASR STOP MESSAGE SENT")
 
 
     def start_child_only_interaction_pub_sub(self, on_interaction_data):
@@ -338,14 +326,10 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         print(on_interaction_data)
         #self.pub_child_only_interaction = rospy.Publisher(DATA_CHILD_ONLY_INTERACTION,iSpyChildOnlyInteraction,queue_size=1)
         #self.sub_child_only_interaction = rospy.Subscriber(DATA_CHILD_ONLY_INTERACTION,iSpyChildOnlyInteraction, on_interaction_data)
-        self.pub_child_only_interaction = rospy.Publisher(DATA_CHILD_ONLY_INTERACTION,iSpyChildRobotInteraction,queue_size=1)
-        self.sub_child_only_interaction = rospy.Subscriber(DATA_CHILD_ONLY_INTERACTION,iSpyChildRobotInteraction, on_interaction_data)
+        self.pub_child_only_interaction = rospy.Publisher(DATA_CHILD_ONLY_INTERACTION, iSpyChildRobotInteraction,queue_size=1)
+        self.sub_child_only_interaction = rospy.Subscriber(DATA_CHILD_ONLY_INTERACTION, iSpyChildRobotInteraction, on_interaction_data)
 
     def start_child_robot_interaction_pub_sub(self, on_interaction_data):
-        print("start child robot interaction publisher/subscriber")
-        print()
-        print("^^^^^^^^^^^^^^^^^^^")
-        print()
 
-        self.pub_child_robot_interaction = rospy.Publisher(DATA_CHILD_ROBOT_INTERACTION,iSpyChildRobotInteraction,queue_size=1)
+        self.pub_child_robot_interaction = rospy.Publisher(DATA_CHILD_ROBOT_INTERACTION,iSpyChildRobotInteraction, queue_size=1)
         self.sub_child_robot_interaction = rospy.Subscriber(DATA_CHILD_ROBOT_INTERACTION,iSpyChildRobotInteraction, on_interaction_data)

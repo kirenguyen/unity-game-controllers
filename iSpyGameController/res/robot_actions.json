@@ -316,12 +316,10 @@
       "physical":{
         "TURN_SWITCHING": {
           "general": [
-
           ]
         },
         "TURN_STARTING": {
           "general": [
-
           ]
         },
         "SCREEN_MOVING": {
@@ -331,7 +329,6 @@
         },
         "WRONG_OBJECT_CLICKED": {
           "general": [
-
           ]
         },
         "RIGHT_OBJECT_FOUND": {
@@ -341,23 +338,20 @@
         },
         "OBJECT_PRONOUNCED":{
           "general": [
-
           ]
         },
         "PRONOUNCE_CORRECT":{
           "general": [
-
           ]
         },
         "RESULTS_RETURNED":{
           "general": [
-
           ]
         },
 
         "WRONG_OBJECT_FAIL":{
           "general": [
-            
+
           ]
         }
       },

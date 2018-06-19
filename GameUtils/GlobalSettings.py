@@ -5,12 +5,14 @@ This is a module that exports certain global runtime settings
 import sys
 
 try:
-    if sys.argv[5] == "tega":
+    if sys.argv[4] == "tega":
         USE_TEGA = True
-        print("+++++We are using Tega!+++++")
-    elif sys.argv[5] == "jibo":
+    elif sys.argv[4] == "jibo":
         USE_TEGA = False
-        print("+++++We are using Jibo!+++++")
+    else:
+        print("+++WE AREN'T USING ROBOTS!+++")
+        USE_TEGA = True
+
 except:
     print("THIS DIDN'T WORK")
     USE_TEGA = False #if False, we are using Jibo

@@ -13,17 +13,20 @@ CSV_PATH = "ispy_data_files/"
 
 
 class iSpyDataTracking:
-	def __init__(self,childRobotFSM,ros_node_mgr,participant_id, experimenter, session_number, is_child_robot):
+	def __init__(self,childRobotFSM,ros_node_mgr,participant_id, experimenter, session_number, use_jibo_or_tega):
 
-		if is_child_robot == "True": is_child_robot = True
-		if is_child_robot == "False": is_child_robot = False
+		if use_jibo_or_tega == "jibo": is_child_robot = True
+		elif use_jibo_or_tega == "tega": is_child_robot = True
+		else: is_child_robot = False
+
+		self.is_child_robot = is_child_robot
 
 		self.ros_node_mgr = ros_node_mgr
 		# create a pandas dataframe to store all interaction data based on timestamps
 		self.game_start_time = None
 		self.child_robot_FSM = childRobotFSM
 		self.session_number = session_number
-		self.is_child_robot = is_child_robot
+		self.use_jibo_or_tega = use_jibo_or_tega
 
 		if not os.path.isdir("ispy_data_files/"): # check exitence of folders
 			os.makedirs("ispy_data_files/")

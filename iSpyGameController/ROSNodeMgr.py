@@ -270,13 +270,13 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         sub_affdex = rospy.Subscriber('affdex_data', AffdexFrameInfo, on_affdex_data_received) # affdex data
 
 
-    def start_tega_asr(self, on_tega_new_asr_result):
+    def start_tega_asr(self, on_tega_new_asr_result,on_jibo_new_asr_result_callback):
         if GlobalSettings.USE_TEGA:
             print("======start tega asr!! use tega")
             self.sub_asr_result = rospy.Subscriber('asr_result', AsrResult, on_tega_new_asr_result)
             self.pub_asr_command = rospy.Publisher('asr_command', AsrCommand, queue_size=1)
         else:
-            self.sub_asr_result = rospy.Subscriber('jibo_asr_result', JiboAsrResult, on_tega_new_asr_result)
+            self.sub_asr_result = rospy.Subscriber('jibo_asr_result', JiboAsrResult, on_jibo_new_asr_result_callback)
             self.pub_asr_command = rospy.Publisher('jibo_asr_command', JiboAsrCommand, queue_size=10)
 
 
@@ -294,7 +294,7 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             msg.header.stamp = rospy.Time.now()
             msg.command = JiboAsrCommand.START
             msg.heyjibo = False
-            msg.continuous = True
+            msg.continuous = False
             msg.incremental = False
 
         print("!!!--------start asr listening---------!!!")

@@ -100,9 +100,9 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			if '/asr_result' in [i[0] for i in topics]:
 				print("=========TEGA/Google asr result publisher exists=========")
 				self.asr_result_topic = True
-			# elif '/jibo_asr_result' in [i[0] for i in topics]:
-			# 	print("=========JIBO asr result publisher exists check_existence_of_asr_rostopic fnc is all good======")
-			# 	self.asr_result_topic = True
+			elif '/jibo_asr_result' in [i[0] for i in topics]:
+				print("=========JIBO asr result publisher exists check_existence_of_asr_rostopic fnc is all good======")
+				self.asr_result_topic = True
 			else:
 				print("WARNING!!! ASR RESULT PUBLISHER DOES NOT EXIST. CHECK ERROR (fnc: check_existence_of_asr_rostopic")
 
@@ -199,7 +199,7 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			
 
 			#TODO: Does this have anything to do with it?
-			if not self.asr_result_topic: # if the asr result topic publsiher doesn't exist
+			if not self.asr_result_topic and GlobalSettings.USE_TEGA: # if the asr result topic publsiher doesn't exist
 				# manually call the asr result callback function
 				print("Something is wrong!!! ASR result topic is not working, check the fnc: check_existence_of_asr_rostopic and debug from there")
 				self.on_tega_new_asr_result("")
@@ -287,7 +287,9 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			# robot is in motion or playing sound or not
 			self.tega_is_playing_sound = data.is_playing_sound
 
-        		
+		def on_jibo_new_asr_result_callback(self,data):
+			print("====testing====== Jibo ASR Result callback function")
+
 		def on_tega_new_asr_result(self,data):
 			# callback function when new asr results are received from Tega
 			# it will be called manually if the asr has not been initialized
@@ -309,7 +311,7 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 
 			print("ASR STOP LISTENING RESULTING FROM: on_tega_new_asr_result")
 
-			#TODO: CHECK WHY THE HECK THIS IS HERE???? IT JUST STOPS SH*T IMMEDIATELY
+			#TODO: Add a check if there is any data; if there isn't any, dismiss the stop_asr
 			# self.ros_node_mgr.stop_asr_listening()
 
 			self._ros_publish_data()

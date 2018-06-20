@@ -102,11 +102,11 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			topics = rospy.get_published_topics()
 			self.asr_result_topic = False
 
-			if '/asr_result' in [i[0] for i in topics]:
+			if '/asr_result' in [i[0] for i in topics] and '/jibo_asr_result' not in [i[0] for i in topics]:
 				print("=========TEGA/Google asr result publisher exists=========")
 				self.asr_result_topic = True
 			elif '/jibo_asr_result' in [i[0] for i in topics]:
-				print("=========JIBO asr result publisher exists check_existence_of_asr_rostopic fnc is all good======")
+				print("=========JIBO asr result publisher exists======")
 				self.asr_result_topic = True
 			else:
 				print("WARNING!!! ASR RESULT PUBLISHER DOES NOT EXIST. CHECK ERROR (fnc: check_existence_of_asr_rostopic")

@@ -300,7 +300,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_tts = True
             msg.do_motion = True
             msg.do_sound_playback = False
-            msg.motion = JiboAction.SILENT_NOD
+            msg.motion = JiboAction.ROBOT_SILENT_NOD
             vocab_word = args[0][0].lower()
             msg.tts_text = jibo_tts_dict["definition"][vocab_word]
             print("KEYWORD_DEFINITION_SPEECH", args[0][0].lower())
@@ -344,7 +344,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg1 = jibo_tts_dict["review"][key]
             msg2 = msg1.replace("*", vocab_word)
             msg.tts_text = msg2
-            print("ROBOT_TASK_END_REMINDER", args[0][0].lower())
+            print("ROBOT_TASK_END_RESPONSE", args[0][0].lower())
 
         elif command == RobotBehaviors.Q_ROBOT_TASK_END_ASSESSMENT:
             msg.do_motion = False
@@ -403,7 +403,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             help_msg_code = args[0][0].lower()
             msg.tts_text = jibo_tts_dict["questions"][help_msg_code]
             msg.motion = JiboAction.ROBOT_SILENT_INTERESTED
-            print("Q_ROBOT_ASK_HELP", args[0][0].lower())
+            print("Q_ROBOT_WANT_LEARN", args[0][0].lower())
 
         elif command == RobotBehaviors.Q_ROBOT_ASK_HELP:
             msg.do_motion = False

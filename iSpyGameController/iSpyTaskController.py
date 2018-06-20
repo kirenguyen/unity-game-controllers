@@ -201,10 +201,6 @@ class iSpyTaskController():
 		self.target_list.remove(object_name)
 
 		self.num_finished_words = self.num_finished_words + 1
-
-		print("")
-		print("@-@-@-@-@-@-@-@-@ HOW FAR ARE WE IN THE GAME???? ", self.num_finished_words)
-		print("")
 		
 		if self.num_finished_words == NUM_WORDS_THRESHOLD:
 			self.reset_for_new_task()

@@ -216,7 +216,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 			elif transition_msg.data == gs.Triggers.CONNECT_BUTTON_PRESSED:
 				self.ros_node_mgr.send_ispy_cmd(34, self.session_number) #SET_GAME_SCNE = 34
 				print("CONNECT_BUTTON_PRESSED : "+self.session_number)
-				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_HAPPY_DANCE)
+				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_SILENT_EXCITED)
 
 			elif transition_msg.data == gs.Triggers.HINT_BUTTON_PRESSED:
 				print('666666666666666666666666666666666666666')

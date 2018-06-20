@@ -301,7 +301,6 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
 
         print("!!!--------start asr listening---------!!!")
         self.pub_asr_command.publish(msg)
-        print("ASR START MESSAGE SENT")
 
     def stop_asr_listening(self):
         '''
@@ -317,9 +316,8 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             msg.header.stamp = rospy.Time.now()
             msg.command = JiboAsrCommand.STOP
 
-        print("!!!--------stop asr listening-----!!!")
+        print("!!!--------stop asr listening---------!!!")
         self.pub_asr_command.publish(msg)
-        print("ASR STOP MESSAGE SENT")
 
 
     def start_child_only_interaction_pub_sub(self, on_interaction_data):

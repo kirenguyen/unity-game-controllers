@@ -185,13 +185,13 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 
 
 			def timeout_alert():
-				print("######========inside timeout_alert========#######")
+				print("######========timeout_alert just called========#######")
 				self.ros_node_mgr.stop_asr_listening()
 				time.sleep(2.0)
 				# 6 seconds
 				if ris.LISTEN_CHILD_SPEECH_RESPONSE in self.state: 
 					self.on_tega_new_asr_result("")
-					print("###~~~~~~inside of of timeout_alert~~~~~###")
+					print("~~~~~~inside of of timeout_alert~~~~~")
 
 			# start ASR listening mode
 			print("\n~~~~~~~~~~----ENTER STATE: listen child speech response----~~~~~~~~~~")

@@ -143,7 +143,9 @@ class RobotRolesBehaviorsMap:
         self.child_turn_mapping = {}
 
         # action_file = "iSpyGameController/res/robot_actions_practice_round.json" if game_round == "practice" else "iSpyGameController/res/robot_actions.json"
-        action_file = "iSpyGameController/res/robot_actions-test-tran.json"
+        # action_file = "iSpyGameController/res/robot_actions-test-tran.json"
+        action_file = "iSpyGameController/res/robot_actions.json"
+        
 
         robot_actions_file = open(action_file)
         self.robot_actions_dict = json.loads(robot_actions_file.read())

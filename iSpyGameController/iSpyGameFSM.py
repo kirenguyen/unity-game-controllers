@@ -49,7 +49,7 @@ if GlobalSettings.USE_ROS:
 	from unity_game_msgs.msg import iSpyAction
 else:
 	pass
-	# TapGameLog = GlobalSettings.TapGameLog #Mock ob-ject, used for testing in non-ROS environments
+	# TapGameLog = GlobalSettings.TapGameLog #Mock object, used for testing in non-ROS environments
 	# TapGameCommand = GlobalSettings.TapGameCommand
 
 #Recording Time Constant
@@ -354,6 +354,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 			# 		passed = ['1'] * len(letters)
 			# 		print ("NO, RECORDING SO YOU AUTOMATICALLY PASS")
 
+
+
 			results_params = {}
 			results_params["letters"] = letters
 			results_params["passed"] = passed
@@ -371,7 +373,6 @@ class iSpyGameFSM: # pylint: disable=no-member
 					self.origText = ""
 
 
-			#print(results_params)
 			self.ros_node_mgr.send_ispy_cmd(SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, results_params)
 			self.recorder.has_recorded = 0
 

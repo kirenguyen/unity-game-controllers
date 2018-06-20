@@ -103,7 +103,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 		self.origText = ""
 
 		# check whether the clicked object is a target object
-		self.correct_obj = is_child_robot
+		self.correct_obj = False
 
 		# The object of the iSpyAudioRecorder Class
 		self.recorder = None
@@ -150,8 +150,9 @@ class iSpyGameFSM: # pylint: disable=no-member
 		#self.t = threading.Thread(target=self.update)
 		#self.t.start()
 
-	'''
+	
 	def update(self):
+		print("++++in def update() in iSpyGameSFM.py++++")
 		while self.kill_received == False:
 			if self.FSM.state != gs.MISSION_MODE:
 				self.iSpyDataTracking.stop_tracking_child_interaction()
@@ -160,19 +161,25 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			if self.kill_received == True:
 				break
-	'''
+	
 
 	def _reach_max_task_time(self): # if the condition is in "fixed novice": set a max elapsed time
 			if self.interaction.subj_cond != "novice": return
-
 			max_elapsed_time = datetime.timedelta(seconds=4.5*60) # 5 mins
 			max_elapsed_time2 = datetime.timedelta(seconds=6.5*60) # 5 mins
 			if datetime.datetime.now() - self.task_controller.get_task_time()['start'] > max_elapsed_time:
-				if self.task_controller.num_finished_words <= 2: self.task_controller.reset_for_new_task()
+				if self.task_controller.num_finished_words <= 2: 
+					print("***********************************")
+					print("WE RAN OUT OF TIME: TASK RESETTING 1")
+					print("************************************")
+					self.task_controller.reset_for_new_task()
 
 			if datetime.datetime.now() - self.task_controller.get_task_time()['start'] > max_elapsed_time2:
-				if self.task_controller.num_finished_words <= 3: self.task_controller.reset_for_new_task()
-
+				if self.task_controller.num_finished_words <= 3: 
+					self.task_controller.reset_for_new_task()
+					print("***********************************")
+					print("WE RAN OUT OF TIME: TASK RESETTING 2")
+					print("************************************")
 
 	def on_ispy_state_info_received(self,transition_msg):
 		"""
@@ -333,7 +340,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			letters = list(self.origText)
 			passed = ['1'] * len(letters)
-			print("NO RECORDING SO YOU AUTOMATICALLY PASS")
+			print("NO RECORDING SO YOU AUTOMATICALLY PASS; disregard this feature for now")
 
 			# TODO: Delete if we are not planning on using SpeechAce as real-time source of game info
 			# if not self.recorder.valid_recording:
@@ -353,8 +360,6 @@ class iSpyGameFSM: # pylint: disable=no-member
 			# 		letters = list(self.origText)
 			# 		passed = ['1'] * len(letters)
 			# 		print ("NO, RECORDING SO YOU AUTOMATICALLY PASS")
-
-
 
 			results_params = {}
 			results_params["letters"] = letters

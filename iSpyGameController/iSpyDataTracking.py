@@ -45,10 +45,6 @@ class iSpyDataTracking:
 		now = datetime.datetime.now()
 		date = now.isoformat()
 
-		# self.ispy_action_log_csv = open(CSV_PATH + "ispy_action_log.csv","a") 
-		# self.ispy_action_log_csv.write(','.join(['elapsedTime','localTime', 'isScalingUpDown',
-		# 	'pointerClick','isDragging','onPinch','clickedObjectName']))
-
 		self.child_robot_interaction_csv = open(CSV_PATH+"interaction_log_"+participant_id+"_"+experimenter+"_"+session_number+"_"+date+"_childrobot_"+".csv","a") 
 		
 		self.child_robot_interaction_csv.write("TESTING TESTING")
@@ -92,41 +88,23 @@ class iSpyDataTracking:
 		now = datetime.datetime.now()
 		date = now.isoformat()
 
-
-
 		self.child_only_interaction_csv = open(CSV_PATH+"interaction_log_"+participant_id+"_"+experimenter+"_"+session_number+"_"+date+"_childonly_"+".csv","a") 
+		#print("WOW I REALLY SHOULD BE WRITING SOMETHING ------------------------------------------------------------------")
 		self.child_only_interaction_csv.write("please write something")
 
 		self.child_only_interaction_csv.write(','.join([
 			'elapsedTimeFromGameStart','currentLocalTime',
-
 			'gameTask','vocab', 'taskStartTime','taskEndTime', 'taskDuration',
-
-			'taskTurnIndex', 'whoseTurn', 'robotRole', 
-
+			'taskTurnIndex', 
 			'turnStartTime','turnEndTime','turnDuration',
-
 			'numCollectedObjectsForTask', 'numChildCollectedObjectsForTask', # task related
-			
 			'numTotalAttemptsForTask','numChildTotalAttemptsForTask', # task related 
-
-			'numChildClickCancelForTurn', 'numHintButtonPressedForTask', # turn related
-
-			'numQsAskeddForTask','numPositiveAnswerForTask','numNegativeAnswerForTask','numOtherAnswerForTask','numNoAnswerAttempt1ForTask',# turn related
-
+			'numChildClickCancelForTurn',  # turn related
 			'gameStateTrigger','currentInteractionState','currentGameState',
-
-			'robotPhysicalBehavior', 'robotVirtualBehavior',
-
-			'robotClickedObj','clickedRightObject','clickedObjName',
-
+			'clickedRightObject','clickedObjName',
 			'numTouchAbsenceAlertPerTask','objectWordPronounced' ,
-
 			'isDraggin', 'pointerClick','onPinch','isScalingUp','isScalingDown',
-
-			'maxElapsedTimeReached'
-			
-			
+			'maxElapsedTimeReached', 'numHintButtonPressedForTask', 'numHintAppear'
 			])+'\n')
 
 	def start_stopwatch(self): #
@@ -144,38 +122,20 @@ class iSpyDataTracking:
 		elapsedTime = str(datetime.now() - self.game_start_time) if self.game_start_time else ""
 		content = ','.join(map(str,[
 			elapsedTime,str(datetime.now()),
-
 			msg.gameTask, msg.taskVocab,  msg.taskStartTime, msg.taskEndTime, msg.taskDuration,  # task related 
-
-			msg.taskTurnIndex, msg.whoseTurn, msg.robotRole, 
-
+			msg.taskTurnIndex,
 			msg.turnStartTime, msg.turnEndTime, msg.turnDuration,
-
 			msg.numFinishedObjectsForTask[0], msg.numFinishedObjectsForTask[1], # turn related 
-
 			msg.numTotalAttemptsForTask[0],msg.numTotalAttemptsForTask[1],
-
-			msg.numChildClickCancelForTurn, #msg.numHintButtonPressedForTask, 
-
-			msg.numQAForTurn[0], msg.numQAForTurn[1], msg.numQAForTurn[2], 
-
-			msg.numQAForTurn[3], msg.numQAForTurn[4],  msg.numQAForTurn[5],
-
+			msg.numChildClickCancelForTurn, 
 			msg.gameStateTrigger, msg.currentInteractionState, msg.currentGameState,
-
-			msg.robotBehavior, msg.robotVirtualBehavior,
-
-			msg.robotClickedObj, msg.clickedRightObject, msg.clickedObjName, 
-
+			msg.clickedRightObject, msg.clickedObjName, 
 			msg.numTouchAbsenceAlertPerTask, msg.objectWordPronounced,
-
 			msg.ispyAction[0], msg.ispyAction[1], msg.ispyAction[2], msg.ispyAction[3], msg.ispyAction[4],
-
-			msg.maxElapsedTime
-			
+			msg.maxElapsedTime, msg.numHintButtonPressedForTask, msg.numHintAppear
 			]))
 
-		self.child_robot_interaction_csv.write(content+'\n')
+		self.child_only_interaction_csv.write(content+'\n')
 
 
 
@@ -227,8 +187,6 @@ class iSpyDataTracking:
 			]))
 
 		self.child_robot_interaction_csv.write(content+'\n')
-
-
 
 
 	def on_ispy_action_received(self,data):

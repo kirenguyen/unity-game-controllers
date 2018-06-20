@@ -167,7 +167,7 @@
     "yes_no_question_3": "Can you spy an object for me?",
     "yes_no_question_4": "Can I help you this time? I know where we can find a correct object.",
     "yes_no_question_5": "Can you help me spy an object?",
-    "yes_no_question_6": "You can just say either 'yes' or 'no'."
+    "yes_no_question_6": "You can just say either yes or no."
   },
   "custom_speech": {
     "novice": {

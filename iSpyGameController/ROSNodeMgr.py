@@ -278,7 +278,8 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             self.sub_asr_result = rospy.Subscriber('asr_result', AsrResult, on_tega_new_asr_result)
             self.pub_asr_command = rospy.Publisher('asr_command', AsrCommand, queue_size=1)
         else:
-            self.sub_asr_result = rospy.Subscriber('jibo_asr_result', JiboAsrResult, on_jibo_new_asr_result_callback)
+            # self.sub_asr_result = rospy.Subscriber('jibo_asr_result', JiboAsrResult, on_jibo_new_asr_result_callback)
+            self.sub_asr_result = rospy.Subscriber('jibo_asr_result', JiboAsrResult, on_tega_new_asr_result)
             self.pub_asr_command = rospy.Publisher('jibo_asr_command', JiboAsrCommand, queue_size=10)
 
 
@@ -286,7 +287,6 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         '''
         start asr's listening
         '''
-        #TODO: implement this properly for Jibo/Tega switch
         if GlobalSettings.USE_TEGA:
             msg = AsrCommand()
             msg.command = AsrCommand.START_FINAL  # start final
@@ -308,7 +308,6 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         stop asr's listening and get the results
         '''
 
-        #TODO: implement this properly for Jibo/Tega switch
         if GlobalSettings.USE_TEGA:
             msg = AsrCommand()
             msg.command = AsrCommand.STOP_FINAL # stop final for the asr result

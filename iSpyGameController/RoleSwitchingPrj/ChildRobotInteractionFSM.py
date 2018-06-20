@@ -316,8 +316,9 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 
 			print("ASR STOP LISTENING RESULTING FROM: on_tega_new_asr_result")
 
-			#TODO: Add a check if there is any data; if there isn't any, dismiss the stop_asr
-			# self.ros_node_mgr.stop_asr_listening()
+			#TODO: Consider how well this actually works
+			if data:
+				self.ros_node_mgr.stop_asr_listening()
 
 			self._ros_publish_data()
 

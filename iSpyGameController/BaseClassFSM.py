@@ -71,7 +71,7 @@ class BaseClassFSM:
 
 			self.ros_node_mgr.start_tega_state_listener(self.on_tega_state_received)
 
-			self.ros_node_mgr.start_tega_asr(self.on_tega_new_asr_result)
+			self.ros_node_mgr.start_tega_asr(self.on_tega_new_asr_result,self.on_jibo_new_asr_result_callback)
 			
 			self.tega_is_playing_sound = False
 

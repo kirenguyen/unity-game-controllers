@@ -98,12 +98,13 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			self.asr_result_topic = False
 
 			if '/asr_result' in [i[0] for i in topics]:
-
-				print("=========asr result publisher exists=========")
+				print("=========TEGA/Google asr result publisher exists=========")
+				self.asr_result_topic = True
+			elif '/jibo_asr_result' in [i[0] for i in topics]:
+				print("=========JIBO asr result publisher exists check_existence_of_asr_rostopic fnc is all good======")
 				self.asr_result_topic = True
 			else:
-				print("======WARNING: asr result publisher does not exist. Remember to start ros_asr.py======")
-
+				print("WARNING!!! ASR RESULT PUBLISHER DOES NOT EXIST. CHECK ERROR (fnc: check_existence_of_asr_rostopic")
 
 		def on_child_max_elapsed_time(self):
 			''' max elapsed time for a child's turn'''
@@ -179,25 +180,28 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 
 
 			def timeout_alert():
+				print("######========inside timeout_alert========#######")
 				self.ros_node_mgr.stop_asr_listening()
 				time.sleep(2.0)
 				# 6 seconds
 				if ris.LISTEN_CHILD_SPEECH_RESPONSE in self.state: 
 					self.on_tega_new_asr_result("")
+					print("###~~~~~~inside of of timeout_alert~~~~~###")
 
 			# start ASR listening mode
-			print("\nENTER STATE: listen child speech response")
+			print("\n~~~~~~~~~~----ENTER STATE: listen child speech response----~~~~~~~~~~")
 			time.sleep(0.4)
 			self._wait_until_all_audios_done()
 			print("INFO: ASR start listening")
 			self.ros_node_mgr.start_asr_listening()
+			print("!!!!!!!!!!!JIBO IS LISTENING!!!!!!!!!!!")
 			threading.Timer(4.5, timeout_alert).start() # checking for timeout 
 			
 
-			
-			if not self.asr_result_topic: # if the asr result topic publsiher doesn't exist
+			#TODO: Does this have anything to do with it?
+			if not self.asr_result_topic and GlobalSettings.USE_TEGA: # if the asr result topic publsiher doesn't exist
 				# manually call the asr result callback function
-				print("INFO: manually call tega new asr result")
+				print("Something is wrong!!! ASR result topic is not working, check the fnc: check_existence_of_asr_rostopic and debug from there")
 				self.on_tega_new_asr_result("")
 
 
@@ -283,7 +287,9 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			# robot is in motion or playing sound or not
 			self.tega_is_playing_sound = data.is_playing_sound
 
-        		
+		def on_jibo_new_asr_result_callback(self,data):
+			print("====testing====== Jibo ASR Result callback function")
+
 		def on_tega_new_asr_result(self,data):
 			# callback function when new asr results are received from Tega
 			# it will be called manually if the asr has not been initialized
@@ -303,7 +309,10 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 
 			getattr(self, ris.Triggers.SPEECH_RECEIVED)()
 
-			self.ros_node_mgr.stop_asr_listening()
+			print("ASR STOP LISTENING RESULTING FROM: on_tega_new_asr_result")
+
+			#TODO: Add a check if there is any data; if there isn't any, dismiss the stop_asr
+			# self.ros_node_mgr.stop_asr_listening()
 
 			self._ros_publish_data()
 
@@ -541,6 +550,7 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			elif gameStateTrigger  == gs.Triggers.SAY_BUTTON_PRESSED:
 				if self.state == ris.CHILD_TURN or ris.CHILD_HELP in self.state:
 					self.ros_node_mgr.start_asr_listening() # start asr listening to check whether the child pronoucnes the child or not
+					print("ASR STOP LISTENING RESULTING FROM: gameStateTrigger...")
 					threading.Timer(3.5, self.ros_node_mgr.stop_asr_listening()).start() # checking for timeout 
 				self.continue_robot_help = False
 				self._perform_robot_physical_actions(ras.OBJECT_PRONOUNCED)
@@ -947,12 +957,11 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			'''
 			robot asks a question and waits for the child to answer
 			'''
-	
 			self._ros_publish_data(question_cmd)
 
 			self.check_existence_of_asr_rostopic()
 			self.continue_robot_help = True
-			if self.asr_result_topic == False: # if google asr shuts down, reopen it
+			if self.asr_result_topic == False and GlobalSettings.USE_TEGA: # if google asr shuts down, reopen it
 				print("\nINFO: Google ASR is restarting!!\n")
 				os.system("xterm -bg brown -geometry 45x20+300+550 -T \"Speech Recognition\" -e \"python3 /home/huilichen/catkin_ws/src/asr_google_cloud/src/ros_asr.py\" &")
 				time.sleep(2)
@@ -961,7 +970,12 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 					if self.asr_result_topic == True:
 						print("===============yeah....asr result exists!!!")
 						break
-
+			else:
+				print("We are using Jibo ASR! We are inside of robot_question_asking")
+				if self.asr_result_topic == True:
+					print("============ASR RESULT EXISTS!!!============")
+				else:
+					print("============ASR RESULT NOT FOUND!!!==========")
 
 
 			print("\nINFO: robot question asking")

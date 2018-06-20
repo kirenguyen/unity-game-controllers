@@ -79,12 +79,20 @@ class iSpyGameFSM: # pylint: disable=no-member
 	"""
 	Receives and sends out ROS messages.
 	"""
+  
+	def __init__(self,participant_id, experimenter, session_number, use_jibo_or_tega): #*
+        #* is_child_robot is a boolean determining whether or not we are in child vs robot mode
 
+		self.use_jibo_or_tega = use_jibo_or_tega
 
-	def __init__(self,participant_id, experimenter, session_number, is_child_robot): 
+		if use_jibo_or_tega == "jibo":
+			is_child_robot = True
+		elif use_jibo_or_tega == "tega":
+			is_child_robot = True
+		else:
+			is_child_robot = False
 
-        # is_child_robot is a boolean determining whether or not we are in child vs robot mode
-		self.is_child_robot = is_child_robot 
+		self.is_child_robot = is_child_robot
 
 		self.ros_node_mgr = ROSNodeMgr()
 		self.ros_node_mgr.init_ros_node()
@@ -110,12 +118,12 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 		self.results_handler = PronunciationUtils()
                 
-		if self.is_child_robot == 'True': # Child-robot Mode
-                  self.interaction = ChildRobotInteractionFSM(self.ros_node_mgr,self.task_controller,self, participant_id,session_number)
-                  #self.ros_node_mgr.send_ispy_cmd(iSpyCommand.BUTTON_DISABLED, {"buttonName": "helpingHintDeactivate"})
+		if self.is_child_robot: # Child-robot Mode
+			self.interaction = ChildRobotInteractionFSM(self.ros_node_mgr,self.task_controller,self, participant_id,session_number)
+            #self.ros_node_mgr.send_ispy_cmd(iSpyCommand.BUTTON_DISABLED, {"buttonName": "helpingHintDeactivate"})
 
-		elif self.is_child_robot == 'False': # Child-only Mode
-                  self.interaction = ChildOnlyFSM(self.ros_node_mgr,self.task_controller,self,participant_id,session_number)
+		elif not self.is_child_robot: # Child-only Mode
+			self.interaction = ChildOnlyFSM(self.ros_node_mgr,self.task_controller,self,participant_id,session_number)
 
 		self.iSpyDataTracking = iSpyDataTracking(self.interaction,self.ros_node_mgr, participant_id, experimenter, session_number, is_child_robot)
 

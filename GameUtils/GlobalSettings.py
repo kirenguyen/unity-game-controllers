@@ -2,9 +2,22 @@
 This is a module that exports certain global runtime settings
 """
 # -*- coding: utf-8 -*-
+import sys
+
+try:
+    if sys.argv[4] == "tega":
+        USE_TEGA = True
+    elif sys.argv[4] == "jibo":
+        USE_TEGA = False
+    else:
+        print("+++WE AREN'T USING ROBOTS!+++")
+        USE_TEGA = True
+
+except:
+    print("THIS DIDN'T WORK")
+    USE_TEGA = False #if False, we are using Jibo
 
 USE_ROS = True
-USE_TEGA = False # if False, we are using Jibo
 USE_SPACY = False # if False, do not load the full SpaCy language model
 USE_USB_MIC = True #if True, use the external USB microphone
 

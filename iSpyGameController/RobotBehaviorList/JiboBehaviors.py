@@ -450,8 +450,6 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.tts_text = args[0][0].lower()
             print("No iSpy Action Alert", args[0][0].lower())
 
-
-
         return msg
 
 

@@ -196,6 +196,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 				self.interaction.turn_start_time = datetime.datetime.now()
 				self._run_game_task()
 
+
+
 			elif transition_msg.data == gs.Triggers.CONNECT_BUTTON_PRESSED:
 				self.ros_node_mgr.send_ispy_cmd(34, self.session_number) #SET_GAME_SCNE = 34
 				print("CONNECT_BUTTON_PRESSED : "+self.session_number)
@@ -388,4 +390,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 				t = threading.Timer(3.0,self.interaction.start_tracking_child_interaction).start()
 				threading.Timer(10.0, self.interaction.on_child_max_elapsed_time).start()
+
+
+	#def start_time_count(self):
 

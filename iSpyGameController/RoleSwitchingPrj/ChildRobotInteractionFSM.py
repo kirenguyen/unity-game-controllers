@@ -88,6 +88,11 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 
 			self.check_existence_of_asr_rostopic()
 
+			
+			self.ros_node_mgr.start_tega_state_listener(self.on_tega_state_received)
+
+			self.ros_node_mgr.start_tega_asr(self.on_tega_new_asr_result,self.on_jibo_new_asr_result_callback)
+
 		def check_existence_of_asr_rostopic(self):
 
 			'''

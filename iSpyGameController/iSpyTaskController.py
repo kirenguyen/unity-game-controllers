@@ -66,7 +66,6 @@ class iSpyTaskController():
 			}
 		file_name = filename_dict.get(session_number)
 
-		
 		with open(dir_path + file_name,'r') as csvfile:
 			spamreader = csv.reader(csvfile, delimiter=',')
 			for row in spamreader:

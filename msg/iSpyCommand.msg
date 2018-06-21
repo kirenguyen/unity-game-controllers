@@ -32,3 +32,5 @@ int8 WHOSE_TURN = 33 # either robot or child's turn
 int8 SET_GAME_SCENE = 34 # either indoor or outdoor
 
 int8 SPEAK = 35 # get tablet to speak on child-only mode
+
+int8 GAME_OVER = 66 # child has not interacted for too long, game is over

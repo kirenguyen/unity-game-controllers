@@ -138,13 +138,15 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 		
 			self.robot_clickedObj = ""
 			self.explore_action = ""
-			if self.help_response and not GlobalSettings.USE_TEGA:
-				print("4444444444444444444444444444444444444")
-				self.virtual_action = ""
-			elif GlobalSettings.USE_TEGA:
-				self.virtual_action = ""
-			else:
-				print("Child responded NO to help")
+			try:
+				if self.help_response and not GlobalSettings.USE_TEGA:
+					self.virtual_action = ""
+				elif GlobalSettings.USE_TEGA:
+					self.virtual_action = ""
+				else:
+					print("Child responded NO to help")
+			except:
+				print("WHAT IS GOING ONNNN")
 			print("")
 			print("3333333333333333333333333")
 			print("right after on_enter_robotTurn : {}".format(self.virtual_action))
@@ -377,21 +379,20 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 
 			if self.attempt == 0: # get child's response
 				print("GETTING CHILD'S RESPONSE. THIS IS THE ANSWER OF HELP_RESPONSE: ", help_response )
-				if "HELP" in self.role_behavior_mapping.current_question_query_path and help_response: # robot asks the child to help find an object
+				if "HELP" in self.role_behavior_mapping.current_question_query_path and help_response: # child agrees to help find an object
 					# send a ros command to enable child's interaction with the tablet
-					print("999999999999999999999999")
 					getattr(self, ris.Triggers.HELP_TRIGGER)() #converts string to fnc
 					if ris.ROBOT_HELP in self.state: 
 						print ("INFO: robot helping action starts\n")
 					elif ris.CHILD_HELP in self.state: 
 						print("INFO: child helping action starts\n")
-				elif "HELP" in self.role_behavior_mapping.current_question_query_path and not help_response:
+				elif "HELP" in self.role_behavior_mapping.current_question_query_path and not help_response: # child does not want to help the robot
 					try:
 						print("Child does not want to help or get help")
-						self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, ("questions", action))
+						self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, ("questions", action))	#Can you help me next time/I will make a guess for now
 						getattr(self, ris.Triggers.QA_FINISHED)()
 					except:
-						print("SOMETHING WENT WRONG 111111111111111111111111111")
+						print("SOMETHING WENT WRONG. The likely issue is that there is no action that suits the child's response.")
 
 				elif "END_REMINDER" in self.role_behavior_mapping.current_question_query_path:
 					# test for task end response 
@@ -405,7 +406,12 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 						self._wait_until_all_audios_done()
 						time.sleep(3)
 					else:
-						print ("====== RESPOND [KEYWORD] TO TASK END QUESTION =======")
+						action = self.role_behavior_mapping.get_robot_response_to_answer(self.asr_input)
+						self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_TASK_SPEECH_RESPONSE, action)
+						self._wait_until_all_audios_done()
+						print("")
+						print("THIS IS WHAT JIBO IS DOING: ", action)
+						print("")
 					
 					# if not self.task_controller.task_in_progress:
 					# 	self.start_task_end_assessment(self.task_number)
@@ -416,7 +422,6 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 
 					print("INFO: QA finished\n")
 					getattr(self, ris.Triggers.QA_FINISHED)()
-					print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
 					print("IN ELIF END_REMINDER2!", "CONDITIONAL: ", self.role_behavior_mapping.get_child_answer_type(self.asr_input))
 
 					if self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "negative" or self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "others":
@@ -424,7 +429,12 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 						self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_INDUCE_SPEECH_RESPONSE, self.task_controller.get_vocab_word())
 						self._wait_until_all_audios_done()
 					else:
-						print ("====== RESPOND [KEYWORD] TO INDUCE SPEECH QUESTION =======")
+						action = self.role_behavior_mapping.get_robot_response_to_answer(self.asr_input)
+						self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_TASK_SPEECH_RESPONSE, action)
+						self._wait_until_all_audios_done()
+						print("")
+						print("THIS IS WHAT JIBO IS DOING: ", action)
+						print("")
 				else:
 					print("INFO: QA finished\n")
 					getattr(self, ris.Triggers.QA_FINISHED)() # q & a activiity is done
@@ -587,8 +597,6 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 				self._perform_robot_physical_actions(ras.SCREEN_MOVING)
 
 				if ris.ROBOT_TURN in self.state and not ris.CHILD_HELP in self.state:
-					print("~~~~~~~~~~~~~~~~~~")
-					print("")
 					print("START FREEZING ROBOT VIRTUAL ACTION. current state: "+self.state)
 					#pass	#TODO: This was here???	
 					print("right before threading robot virutal action wait: virt act {}".format(self.virtual_action))

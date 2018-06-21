@@ -377,6 +377,15 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.tts_text = msg2
             print("ROBOT_INDUCE_SPEECH_RESPONSE", msg2)
 
+        elif command == RobotBehaviors.ROBOT_TASK_SPEECH_RESPONSE:
+            msg.do_motion = True
+            msg.do_tts = True
+            msg.do_sound_playback = False
+            msg.motion = JiboAction.ROBOT_SILENT_YES
+            key = args[0][0].lower()
+            msg.tts_text = jibo_tts_dict["questions"][key]
+            print("ROBOT_INDUCE_SPEECH_CORRECT_RESPONSE")
+
         ### ========== Jibo Question Asking ========== ###
 
         elif command == RobotBehaviors.Q_ROBOT_OFFER_HELP:

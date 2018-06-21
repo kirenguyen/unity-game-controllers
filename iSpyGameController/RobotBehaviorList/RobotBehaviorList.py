@@ -74,6 +74,7 @@ class RobotBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
     ROBOT_CUSTOM_SPEECH = "ROBOT_CUSTOM_SPEECH"
     Q_ROBOT_INDUCE_SPEECH = "Q_ROBOT_INDUCE_SPEECH"
     ROBOT_INDUCE_SPEECH_RESPONSE = "ROBOT_INDUCE_SPEECH_RESPONSE"
+    ROBOT_TASK_SPEECH_RESPONSE = "ROBOT_TASK_SPEECH_RESPONSE"
 
     ### ============== Tega Speech for Role Switching Project ================== ###
     BEFORE_GAME_SPEECH = "ROBOT_BEFORE_GAME_SPEECH"
@@ -143,8 +144,8 @@ class RobotRolesBehaviorsMap:
         self.child_turn_mapping = {}
 
         # action_file = "iSpyGameController/res/robot_actions_practice_round.json" if game_round == "practice" else "iSpyGameController/res/robot_actions.json"
-        # action_file = "iSpyGameController/res/robot_actions-test-tran.json"
-        action_file = "iSpyGameController/res/robot_actions.json"
+        action_file = "iSpyGameController/res/robot_actions-test-tran.json"
+        # action_file = "iSpyGameController/res/robot_actions.json"
         
 
         robot_actions_file = open(action_file)

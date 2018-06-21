@@ -66,7 +66,6 @@ class iSpyTaskController():
 			}
 		file_name = filename_dict.get(session_number)
 
-		
 		with open(dir_path + file_name,'r') as csvfile:
 			spamreader = csv.reader(csvfile, delimiter=',')
 			for row in spamreader:
@@ -201,7 +200,7 @@ class iSpyTaskController():
 		self.target_list.remove(object_name)
 
 		self.num_finished_words = self.num_finished_words + 1
-
+		
 		if self.num_finished_words == NUM_WORDS_THRESHOLD:
 			self.reset_for_new_task()
 

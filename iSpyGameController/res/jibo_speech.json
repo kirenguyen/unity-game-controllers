@@ -140,8 +140,8 @@
     "no_response_f": "I really want to know why you chose this. Could you tell me next time?",
     "no_response_g": "I'm trying very hard to learn. I don't know why I am wrong.",
     "no_response_h": "Could you answer me please.",
-    "none_yes_no_response_a": "Maybe you can explain your reason with 'because'.",
-    "none_yes_no_response_b": "It will be great if you enter 'yes' or 'no' next time.",
+    "none_yes_no_response_a": "Maybe you can explain your reason with because.",
+    "none_yes_no_response_b": "It will be great if you enter yes or no next time.",
     "none_yes_no_response_c": "Could you tell me yes or no first so I can better understand.",
     "none_yes_no_response_d": "I am not sure if I understand that. Can you tell me yes or no first?",
     "open_ended_question_1": "Can you tell me why this is wrong?",
@@ -167,7 +167,7 @@
     "yes_no_question_3": "Can you spy an object for me?",
     "yes_no_question_4": "Can I help you this time? I know where we can find a correct object.",
     "yes_no_question_5": "Can you help me spy an object?",
-    "yes_no_question_6": "You can just say either 'yes' or 'no'."
+    "yes_no_question_6": "You can just say either yes or no."
   },
   "custom_speech": {
     "novice": {
@@ -179,7 +179,7 @@
         "right_object_found_2": "This looks really cool! I'm excited to see the results.",
         "right_object_found_3": "Let's do it then!",
         "screen_moving_1": "I'm excited to see what you spy.",
-        "screen_moving_2": "You can do this! I'm watching you.",
+        "screen_moving_2": "You can do this! I believe in you.",
         "turn_starting_1": "Are you excited?",
         "turn_starting_2": "It's your turn now.",
         "turn_starting_3": "It's your chance to perform.",

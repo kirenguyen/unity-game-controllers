@@ -71,11 +71,12 @@ TASK_COMPLETED=32
 WHOSE_TURN = 33
 SET_GAME_SCENE = 34
 SPEAK = 35
+GAME_OVER = 66
 VALID_ISPY_COMMANDS = [SET_GAME_SCENE, WHOSE_TURN,TASK_COMPLETED,
                        ROBOT_VIRTUAL_ACTIONS, RESET, SHOW_PRONOUNCIATION_PANEL, 
                        SHOW_PRONOUNCIATION_PANEL, SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, 
                        SEND_TASKS_TO_UNITY, GAME_FINISHED,BUTTON_DISABLED,
-                       SPEAK]
+                       SPEAK, GAME_OVER]
 
 
 
@@ -278,7 +279,8 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             self.sub_asr_result = rospy.Subscriber('asr_result', AsrResult, on_tega_new_asr_result)
             self.pub_asr_command = rospy.Publisher('asr_command', AsrCommand, queue_size=1)
         else:
-            self.sub_asr_result = rospy.Subscriber('jibo_asr_result', JiboAsrResult, on_jibo_new_asr_result_callback)
+            # self.sub_asr_result = rospy.Subscriber('jibo_asr_result', JiboAsrResult, on_jibo_new_asr_result_callback)
+            self.sub_asr_result = rospy.Subscriber('jibo_asr_result', JiboAsrResult, on_tega_new_asr_result)
             self.pub_asr_command = rospy.Publisher('jibo_asr_command', JiboAsrCommand, queue_size=10)
 
 
@@ -286,7 +288,6 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         '''
         start asr's listening
         '''
-        #TODO: implement this properly for Jibo/Tega switch
         if GlobalSettings.USE_TEGA:
             msg = AsrCommand()
             msg.command = AsrCommand.START_FINAL  # start final
@@ -301,14 +302,12 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
 
         print("!!!--------start asr listening---------!!!")
         self.pub_asr_command.publish(msg)
-        print("ASR START MESSAGE SENT")
 
     def stop_asr_listening(self):
         '''
         stop asr's listening and get the results
         '''
 
-        #TODO: implement this properly for Jibo/Tega switch
         if GlobalSettings.USE_TEGA:
             msg = AsrCommand()
             msg.command = AsrCommand.STOP_FINAL # stop final for the asr result
@@ -318,9 +317,8 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
             msg.header.stamp = rospy.Time.now()
             msg.command = JiboAsrCommand.STOP
 
-        print("!!!--------stop asr listening-----!!!")
+        print("!!!--------stop asr listening---------!!!")
         self.pub_asr_command.publish(msg)
-        print("ASR STOP MESSAGE SENT")
 
 
     def start_child_only_interaction_pub_sub(self, on_interaction_data):

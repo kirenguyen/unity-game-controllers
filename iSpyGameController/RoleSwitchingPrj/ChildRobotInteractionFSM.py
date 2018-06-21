@@ -102,11 +102,11 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			topics = rospy.get_published_topics()
 			self.asr_result_topic = False
 
-			if '/asr_result' in [i[0] for i in topics]:
+			if '/asr_result' in [i[0] for i in topics] and '/jibo_asr_result' not in [i[0] for i in topics]:
 				print("=========TEGA/Google asr result publisher exists=========")
 				self.asr_result_topic = True
 			elif '/jibo_asr_result' in [i[0] for i in topics]:
-				print("=========JIBO asr result publisher exists check_existence_of_asr_rostopic fnc is all good======")
+				print("=========JIBO asr result publisher exists======")
 				self.asr_result_topic = True
 			else:
 				print("WARNING!!! ASR RESULT PUBLISHER DOES NOT EXIST. CHECK ERROR (fnc: check_existence_of_asr_rostopic")
@@ -129,6 +129,7 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			super().on_enter_childTURN()
 
 		def on_enter_robotTURN(self):
+			
 			self.turn_start_time = datetime.now()
 			self.turn_end_time = None
 			self.turn_duration = ""
@@ -137,6 +138,9 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			self.robot_clickedObj = ""
 			self.explore_action = ""
 			self.virtual_action = ""
+			print("")
+			print("33333333")
+			print("right after emptying virtual dict: virt act {}".format(self.virtual_action))
 			self._ros_publish_data()
 			
 
@@ -181,17 +185,14 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			listen to child's speech
 			called by listenChildSpeechResponse in either child's turn or robot's turn
 			'''
-			print("====================== listen child speech ===================")
-
-
 			def timeout_alert():
-				print("######========inside timeout_alert========#######")
+				print("######========timeout_alert just called========#######")
 				self.ros_node_mgr.stop_asr_listening()
 				time.sleep(2.0)
 				# 6 seconds
 				if ris.LISTEN_CHILD_SPEECH_RESPONSE in self.state: 
 					self.on_tega_new_asr_result("")
-					print("###~~~~~~inside of of timeout_alert~~~~~###")
+					print("~~~~~~inside of of timeout_alert~~~~~")
 
 			# start ASR listening mode
 			print("\n~~~~~~~~~~----ENTER STATE: listen child speech response----~~~~~~~~~~")
@@ -206,7 +207,7 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			#TODO: Does this have anything to do with it?
 			if not self.asr_result_topic and GlobalSettings.USE_TEGA: # if the asr result topic publsiher doesn't exist
 				# manually call the asr result callback function
-				print("Something is wrong!!! ASR result topic is not working, check the fnc: check_existence_of_asr_rostopic and debug from there")
+				print("ASR result topic is not working")
 				self.on_tega_new_asr_result("")
 
 
@@ -316,8 +317,9 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 
 			print("ASR STOP LISTENING RESULTING FROM: on_tega_new_asr_result")
 
-			#TODO: Add a check if there is any data; if there isn't any, dismiss the stop_asr
-			# self.ros_node_mgr.stop_asr_listening()
+			#TODO: Consider how well this actually works
+			if data:
+				self.ros_node_mgr.stop_asr_listening()
 
 			self._ros_publish_data()
 
@@ -365,11 +367,13 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 
 
 			if self.attempt == 0: # get child's response
-				
+				print("GETTING CHILD'S RESPONSE. THIS IS THE ANSWER OF HELP_RESPONSE: ", help_response )
 				if "HELP" in self.role_behavior_mapping.current_question_query_path and help_response: # robot asks the child to help find an object
 					# send a ros command to enable child's interaction with the tablet
-					getattr(self, ris.Triggers.HELP_TRIGGER)()
-
+					print("999999999999999999999999")
+					print("+++++++++ Executing IF trigger: ", self.state)
+					getattr(self, ris.Triggers.HELP_TRIGGER)() #converts string to fnc
+					print("Current state after getattr: ", self.state)
 					if ris.ROBOT_HELP in self.state: 
 						print ("INFO: robot helping action starts\n")
 					elif ris.CHILD_HELP in self.state: 
@@ -380,7 +384,8 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 
 					print("INFO: QA finished\n")
 					getattr(self, ris.Triggers.QA_FINISHED)()
-
+					print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+					print("IN ELIF END_REMINDER1!", "CONDITIONAL: ", self.role_behavior_mapping.get_child_answer_type(self.asr_input))
 					if self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "negative" or self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "others":
 						time.sleep(2)
 						self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_TASK_END_RESPONSE, self.task_controller.get_vocab_word())
@@ -398,6 +403,8 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 
 					print("INFO: QA finished\n")
 					getattr(self, ris.Triggers.QA_FINISHED)()
+					print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+					print("IN ELIF END_REMINDER2!", "CONDITIONAL: ", self.role_behavior_mapping.get_child_answer_type(self.asr_input))
 
 					if self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "negative" or self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "others":
 						time.sleep(1)
@@ -504,6 +511,9 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			react to ispy game state change
 			'''
 
+			print("react func: virt act {}".format(self.virtual_action))
+					
+
 			# variables created for sending interaction data to ROS
 			self.clicked_obj_name = clicked_obj_name
 			self.gameStateTrigger = gameStateTrigger
@@ -564,9 +574,12 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 				self._perform_robot_physical_actions(ras.SCREEN_MOVING)
 
 				if ris.ROBOT_TURN in self.state and not ris.CHILD_HELP in self.state:
-					#print("START FREEZING ROBOT VIRTUAL ACTION. current state: "+self.state)
-					#pass		
-					threading.Thread(target=self._robot_virutal_action_wait).start()
+					print("~~~~~~~~~~~~~~~~~~")
+					print("")
+					print("START FREEZING ROBOT VIRTUAL ACTION. current state: "+self.state)
+					#pass	#TODO: This was here???	
+					print("right before threading robot virutal action wait: virt act {}".format(self.virtual_action))
+					threading.Thread(target=self._robot_virtual_action_wait).start()
 
 			elif gameStateTrigger == gs.Triggers.PRONUNCIATION_PANEL_CLOSED:
 				if self.state == ris.CHILD_TURN or ris.CHILD_HELP in self.state:
@@ -574,7 +587,7 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 					
 			#self._ros_publish_data()
 
-		def _robot_virutal_action_wait(self):
+		def _robot_virtual_action_wait(self):
 			'''
 			create a thread. wait for all child-robot interaction is over letting the robot click an obj
 			'''
@@ -583,7 +596,15 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 					break
 			self._wait_until()
 			if self.state == ris.CHILD_TURN+'_'+ris.ROBOT_HELP or self.state == ris.ROBOT_TURN:
+				print("*************************************")
+				print(self.state)
+				print("THIS IS WHAT WE'RE DOING IN _ROBOT_VIRTUAL_ACTION_WAIT: ", self.virtual_action)
+				# TODO: WE COMMENTED THIS OUT. WILL HE STILL KEEP PAUSING??? Probably consider manually putting in virtual action if the point where the virtual act dict is reset is not found
 				self._perform_robot_virtual_action(self.virtual_action)
+				print("*************************************")
+				print("WE ARE INSIDE _ROBOT_VIRTUAL_ACTION_WAIT")
+				print(self.state)
+				print("*************************************")
 
 
 		def _wait_until(self):
@@ -647,7 +668,13 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 					self.explore_action = "VIRTUALLY_EXPLORE"
 					time.sleep(3)
 					self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_EXPLORE)
+					print("*************************************")
+				print("WE ARE INSIDE _GET_TURN_TAKING_ACTIONS")
+				print("*************************************")
 			virtual_action_dict = self.role_behavior_mapping.get_actions(self.role,self.state,'virtual')
+			print("==========virtual action dict=================")
+			print(virtual_action_dict )
+
 			if virtual_action_dict:
 				ran = random.uniform(0,1)
 				for key,val in virtual_action_dict.items():
@@ -655,7 +682,7 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 						self.virtual_action = key
 						break
 				self.virtual_action = virtual_action_dict.keys()[0] if not self.virtual_action else self.virtual_action
-
+				print("virtual action here in side if virtual action dict: {}".format(self.virtual_action))
 		def get_robot_general_response(self):
 			physical_actions = self.role_behavior_mapping.get_actions("BACKUP",self.state,'physical')
 			self.virtual_action = self.role_behavior_mapping.get_actions("BACKUP",self.state,'virtual')
@@ -909,8 +936,6 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 
 			msg.numTotalAttemptsForTask = [self.child_states.total_num_trials,self.child_states.numChildAttemptsCurrTask]
 
- 
-
 			msg.numChildClickCancelForTurn = self.child_click_cancel_num 
 
 			#msg.numHintButtonPressedForTask = self.numHintButtonPressedForTask
@@ -976,11 +1001,10 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 						print("===============yeah....asr result exists!!!")
 						break
 			else:
-				print("We are using Jibo ASR! We are inside of robot_question_asking")
 				if self.asr_result_topic == True:
-					print("============ASR RESULT EXISTS!!!============")
+					print("ASR RESULT EXISTS")
 				else:
-					print("============ASR RESULT NOT FOUND!!!==========")
+					print("ASR RESULT NOT FOUND")
 
 
 			print("\nINFO: robot question asking")

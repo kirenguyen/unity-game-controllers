@@ -334,3 +334,8 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
 
         self.pub_child_robot_interaction = rospy.Publisher(DATA_CHILD_ROBOT_INTERACTION,iSpyChildRobotInteraction, queue_size=1)
         self.sub_child_robot_interaction = rospy.Subscriber(DATA_CHILD_ROBOT_INTERACTION,iSpyChildRobotInteraction, on_interaction_data)
+
+    def shutdown(self):
+        print("SHUTDOWN INITIATED")
+        rospy.signal_shutdown("iSpy Unity Game Application has been quit")
+        print("SHUTDOWN FINISHED")

@@ -129,6 +129,7 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			super().on_enter_childTURN()
 
 		def on_enter_robotTURN(self):
+			
 			self.turn_start_time = datetime.now()
 			self.turn_end_time = None
 			self.turn_duration = ""
@@ -137,6 +138,9 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			self.robot_clickedObj = ""
 			self.explore_action = ""
 			self.virtual_action = ""
+			print("")
+			print("33333333")
+			print("right after emptying virtual dict: virt act {}".format(self.virtual_action))
 			self._ros_publish_data()
 			
 
@@ -571,7 +575,6 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 
 				if ris.ROBOT_TURN in self.state and not ris.CHILD_HELP in self.state:
 					print("~~~~~~~~~~~~~~~~~~")
-					print("IS THIS WHY WE ARE STRUGGLE BUSSING?")
 					print("")
 					print("START FREEZING ROBOT VIRTUAL ACTION. current state: "+self.state)
 					#pass	#TODO: This was here???	

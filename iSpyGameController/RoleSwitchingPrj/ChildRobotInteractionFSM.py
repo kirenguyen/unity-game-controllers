@@ -389,10 +389,14 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 				elif "HELP" in self.role_behavior_mapping.current_question_query_path and not help_response: # child does not want to help the robot
 					try:
 						print("Child does not want to help or get help")
-						self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, ("questions", action))	#Can you help me next time/I will make a guess for now
-						getattr(self, ris.Triggers.QA_FINISHED)()
+						try:
+							self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, ("questions", action))	#Can you help me next time/I will make a guess for now
+							getattr(self, ris.Triggers.QA_FINISHED)()
+						except:
+							print("JIBO WANTS TO DO: ", action)
 					except:
 						print("SOMETHING WENT WRONG. The likely issue is that there is no action that suits the child's response.")
+
 
 				elif "END_REMINDER" in self.role_behavior_mapping.current_question_query_path:
 					# test for task end response 
@@ -445,10 +449,10 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 
 				# if the question is test end response
 				if "END_REMINDER" in self.role_behavior_mapping.current_question_query_path:
-					time.sleep(1)
+					# time.sleep(1)
 					self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_TASK_END_RESPONSE, self.task_controller.get_vocab_word())
 					self._wait_until_all_audios_done()
-					time.sleep(2)
+					# time.sleep(2)
 
 					if not self.task_controller.task_in_progress:
 						self.start_task_end_assessment(self.task_number)
@@ -464,7 +468,7 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 					
 					if self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "absence": 
 						print ("===== NO RESPONSE TO INDUCE SPEECH QUESTION ======")
-						time.sleep(1)
+						# time.sleep(1)
 						self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_INDUCE_SPEECH_RESPONSE, self.task_controller.get_vocab_word())
 					
 					self.attempt = 0

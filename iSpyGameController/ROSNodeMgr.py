@@ -4,8 +4,15 @@ This is the main class that manages the creation / parsing of ROS Node Communica
 # -*- coding: utf-8 -*-
 # pylint: disable=import-error, invalid-names
 
+import os
 import time
 import json
+import sys
+import subprocess
+import signal
+from subprocess import call
+
+
 from GameUtils import GlobalSettings
 from .RobotBehaviorList.JiboBehaviors import JiboBehaviors
 from .RobotBehaviorList.TegaBehaviors import TegaBehaviors
@@ -72,11 +79,12 @@ WHOSE_TURN = 33
 SET_GAME_SCENE = 34
 SPEAK = 35
 GAME_OVER = 66
+QUIT_GAME = 67
 VALID_ISPY_COMMANDS = [SET_GAME_SCENE, WHOSE_TURN,TASK_COMPLETED,
                        ROBOT_VIRTUAL_ACTIONS, RESET, SHOW_PRONOUNCIATION_PANEL, 
                        SHOW_PRONOUNCIATION_PANEL, SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, 
                        SEND_TASKS_TO_UNITY, GAME_FINISHED,BUTTON_DISABLED,
-                       SPEAK, GAME_OVER]
+                       SPEAK, GAME_OVER, QUIT_GAME]
 
 
 
@@ -335,7 +343,24 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         self.pub_child_robot_interaction = rospy.Publisher(DATA_CHILD_ROBOT_INTERACTION,iSpyChildRobotInteraction, queue_size=1)
         self.sub_child_robot_interaction = rospy.Subscriber(DATA_CHILD_ROBOT_INTERACTION,iSpyChildRobotInteraction, on_interaction_data)
 
+
+
+
+
+
     def shutdown(self):
+
+        #def signal_handler(signal, frame):  
+        #    sys.exit()
+
+
         print("SHUTDOWN INITIATED")
-        rospy.signal_shutdown("iSpy Unity Game Application has been quit")
+        #call("exit 1", shell=True)
+
+        rospy.signal_shutdown("Reason: iSpy Unity Game Application has exited play mode")
+
+        
+        #signal.signal(signal.SIGINT, signal_handler) # for keyboard interrupt
+
+        #sys.exit()
         print("SHUTDOWN FINISHED")

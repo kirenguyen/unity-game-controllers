@@ -237,6 +237,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 
 			elif transition_msg.data == gs.Triggers.APPLICATION_QUIT:
 				print('7777777777777777777777777777777777777777')
+				#self.kill_received = True
 				self.ros_node_mgr.shutdown()
 				print('7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7')
 

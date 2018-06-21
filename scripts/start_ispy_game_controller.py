@@ -12,6 +12,12 @@ from multiprocessing import Process
 import warnings
 import time
 
+
+# COMMAND CONSTANTS
+QUIT_GAME = 67
+
+
+
 def fxn():
     warnings.warn("deprecated", DeprecationWarning)
     with warnings.catch_warnings():
@@ -24,12 +30,6 @@ def usage():
     print('python3 -m scripts.start_ispy_game_controller [participant id: pXX] [experimenter] [session number: sXX], ["jibo" or "tega" or "none"]')
 
 def main():
-
-    def signal_handler(signal, frame):
-        print("closing in one second!")			
-        control.kill_received = True
-        sys.exit()
-
     try:
 
         participant_id = sys.argv[1] # which participant
@@ -44,6 +44,16 @@ def main():
 
     global control
     control = iSpyGameFSM.iSpyGameFSM(participant_id, experimenter, session_number, use_jibo_or_tega)
+    
+    def signal_handler(signal, frame):
+        print("closing iSpy Unity Game")
+        control.ros_node_mgr.send_ispy_cmd(QUIT_GAME)
+        print("closing in one second!")         
+        control.kill_received = True
+        sys.exit()
+
+
+
     print("FSM Started!")
     thread.start_new_thread(control.ros_node_mgr.start_ispy_transition_listener, (control.on_ispy_state_info_received,))
 

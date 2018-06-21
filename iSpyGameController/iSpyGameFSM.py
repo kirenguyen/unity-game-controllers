@@ -55,6 +55,8 @@ else:
 #Recording Time Constant
 RECORD_TIME_MS = 3500
 
+NUM_WORDS_THRESHOLD =4
+
 # COMMAND CONSTANTS
 RESET = 0
 SHOW_PRONOUNCIATION_PANEL = 1
@@ -67,6 +69,7 @@ BUTTON_DISABLED=31
 TASK_COMPLETED = 32
 VALID_ISPY_COMMANDS = [RESET, SHOW_PRONOUNCIATION_PANEL, SHOW_PRONOUNCIATION_PANEL, SEND_PRONOUNCIATION_ACCURACY_TO_UNITY, SEND_TASKS_TO_UNITY, GAME_FINISHED,BUTTON_DISABLED]
 SET_GAME_SCENE = 34
+GAME_OVER = 66
 
 
 
@@ -84,6 +87,9 @@ class iSpyGameFSM: # pylint: disable=no-member
         #* is_child_robot is a boolean determining whether or not we are in child vs robot mode
 
 		self.use_jibo_or_tega = use_jibo_or_tega
+
+		self.time_count_started = False
+
 
 		if use_jibo_or_tega == "jibo":
 			is_child_robot = True
@@ -173,18 +179,25 @@ class iSpyGameFSM: # pylint: disable=no-member
 					print("WE RAN OUT OF TIME: TASK RESETTING 1")
 					print("************************************")
 					self.task_controller.reset_for_new_task()
+					self.stop_time_count()
+
 
 			if datetime.datetime.now() - self.task_controller.get_task_time()['start'] > max_elapsed_time2:
 				if self.task_controller.num_finished_words <= 3: 
-					self.task_controller.reset_for_new_task()
 					print("***********************************")
 					print("WE RAN OUT OF TIME: TASK RESETTING 2")
 					print("************************************")
+          self.task_controller.reset_for_new_task()
+					self.stop_time_count()
+
+
 
 	def on_ispy_state_info_received(self,transition_msg):
 		"""
 		Rospy Callback for when we get log messages from ispy game
 		"""
+
+		self.reset_time_count()
 
 		def check_task_completion():
 			if not self.task_controller.task_in_progress:
@@ -211,7 +224,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 				self.interaction.turn_start_time = datetime.datetime.now()
 				self._run_game_task()
 
-
+				self.start_time_count() # Start timer that keeps track of how long the child has gone without interactino
 
 			elif transition_msg.data == gs.Triggers.CONNECT_BUTTON_PRESSED:
 				self.ros_node_mgr.send_ispy_cmd(34, self.session_number) #SET_GAME_SCNE = 34
@@ -259,6 +272,8 @@ class iSpyGameFSM: # pylint: disable=no-member
 		"""
 		Rospy callback for when we get ispy action from the unity game over ROS
 		"""
+
+		self.reset_time_count() # Since child has interacted, reset time_count
 
 
 		if self.FSM.state == gs.EXPLORATION_MODE or self.FSM.state == gs.WORD_DISPLAY:
@@ -374,6 +389,10 @@ class iSpyGameFSM: # pylint: disable=no-member
 			# If the word was pronounced perfectly then reset origText
 			if perfect_word:
 				if self.task_controller.isTarget(self.origText):
+
+					if self.task_controller.num_finished_words == NUM_WORDS_THRESHOLD:
+						self.stop_time_count()
+
 					self.task_controller.update_target_list(self.origText)
 					self.origText = ""
 
@@ -406,5 +425,33 @@ class iSpyGameFSM: # pylint: disable=no-member
 				threading.Timer(10.0, self.interaction.on_child_max_elapsed_time).start()
 
 
-	#def start_time_count(self):
+	def start_time_count(self):
+		'''
+		after MAX_ABSENCE_TIME seconds has passed with the child not touching the screen, GAME_OVER
+		'''
+		self.time_count_started = True
+
+		def game_over():
+		    self.ros_node_mgr.send_ispy_cmd(GAME_OVER)
+
+		def new():
+			self.time_count = threading.Timer(MAX_ABSENCE_TIME, game_over)
+			self.time_count.start()
+		new()
+
+	def reset_time_count(self):
+		'''
+		Reset the time_count thread
+		'''
+		if not self.time_count_started: return 
+		self.time_count.cancel()
+		self.start_time_count()
+
+	def stop_time_count(self):
+		'''
+		Stop the time count (for when we are on Explore Mode)
+		'''
+		self.time_count.cancel()
+		self.time_count_started = False
+
 

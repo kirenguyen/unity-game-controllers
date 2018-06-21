@@ -187,7 +187,7 @@ class iSpyGameFSM: # pylint: disable=no-member
 					print("***********************************")
 					print("WE RAN OUT OF TIME: TASK RESETTING 2")
 					print("************************************")
-          self.task_controller.reset_for_new_task()
+					self.task_controller.reset_for_new_task()
 					self.stop_time_count()
 
 

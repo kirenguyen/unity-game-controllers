@@ -109,7 +109,8 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 				print("=========JIBO asr result publisher exists======")
 				self.asr_result_topic = True
 			else:
-				print("WARNING!!! ASR RESULT PUBLISHER DOES NOT EXIST. CHECK ERROR (fnc: check_existence_of_asr_rostopic")
+				print(topics)
+				print("WARNING!!! ASR RESULT PUBLISHER DOES NOT EXIST. This may be a false negative. Run the game once, then check again.")
 
 		def on_child_max_elapsed_time(self):
 			''' max elapsed time for a child's turn'''
@@ -137,10 +138,16 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 		
 			self.robot_clickedObj = ""
 			self.explore_action = ""
-			self.virtual_action = ""
+			if self.help_response and not GlobalSettings.USE_TEGA:
+				print("4444444444444444444444444444444444444")
+				self.virtual_action = ""
+			elif GlobalSettings.USE_TEGA:
+				self.virtual_action = ""
+			else:
+				print("Child responded NO to help")
 			print("")
-			print("33333333")
-			print("right after emptying virtual dict: virt act {}".format(self.virtual_action))
+			print("3333333333333333333333333")
+			print("right after on_enter_robotTurn : {}".format(self.virtual_action))
 			self._ros_publish_data()
 			
 
@@ -176,6 +183,7 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			if GlobalSettings.USE_TEGA:
 				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, ROOT_TEGA_SPEECH_FOLDER + "general/others/child_help.wav") # "now you can span the screen around"
 			else:
+				print("NOW YOU CAN PAN THE SCREEN AROUND")
 				self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, ("others","child_help")) # "now you can span the screen around"
 			self.virtual_action = ""
 			self._ros_publish_data()
@@ -351,6 +359,7 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 			self.child_states.update_qa_result(self.role_behavior_mapping.get_child_answer_type(self.asr_input),self.attempt) # update QA results to child states
 			action = self.role_behavior_mapping.get_robot_response_to_answer(self.asr_input) # action is based on child's answer
 			help_response = self.role_behavior_mapping.get_robot_response_to_help(self.asr_input) # check whether the child gives a positive answer
+			self.help_response = help_response
 			help_no_repeat = True if ("OFFER_HELP" in self.role_behavior_mapping.current_question_query_path) else False
 
 			if "ROBOT" in action:
@@ -371,20 +380,24 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 				if "HELP" in self.role_behavior_mapping.current_question_query_path and help_response: # robot asks the child to help find an object
 					# send a ros command to enable child's interaction with the tablet
 					print("999999999999999999999999")
-					print("+++++++++ Executing IF trigger: ", self.state)
 					getattr(self, ris.Triggers.HELP_TRIGGER)() #converts string to fnc
-					print("Current state after getattr: ", self.state)
 					if ris.ROBOT_HELP in self.state: 
 						print ("INFO: robot helping action starts\n")
 					elif ris.CHILD_HELP in self.state: 
 						print("INFO: child helping action starts\n")
-	
+				elif "HELP" in self.role_behavior_mapping.current_question_query_path and not help_response:
+					try:
+						print("Child does not want to help or get help")
+						self.ros_node_mgr.send_robot_cmd(RobotBehaviors.ROBOT_CUSTOM_SPEECH, ("questions", action))
+						getattr(self, ris.Triggers.QA_FINISHED)()
+					except:
+						print("SOMETHING WENT WRONG 111111111111111111111111111")
+
 				elif "END_REMINDER" in self.role_behavior_mapping.current_question_query_path:
 					# test for task end response 
 
 					print("INFO: QA finished\n")
 					getattr(self, ris.Triggers.QA_FINISHED)()
-					print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
 					print("IN ELIF END_REMINDER1!", "CONDITIONAL: ", self.role_behavior_mapping.get_child_answer_type(self.asr_input))
 					if self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "negative" or self.role_behavior_mapping.get_child_answer_type(self.asr_input) == "others":
 						time.sleep(2)
@@ -599,11 +612,14 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 				print("*************************************")
 				print(self.state)
 				print("THIS IS WHAT WE'RE DOING IN _ROBOT_VIRTUAL_ACTION_WAIT: ", self.virtual_action)
-				# TODO: WE COMMENTED THIS OUT. WILL HE STILL KEEP PAUSING??? Probably consider manually putting in virtual action if the point where the virtual act dict is reset is not found
 				self._perform_robot_virtual_action(self.virtual_action)
+
+				#TODO: DELETE THIS AFTER TESTING IT
+				self.virtual_action = ""
 				print("*************************************")
 				print("WE ARE INSIDE _ROBOT_VIRTUAL_ACTION_WAIT")
 				print(self.state)
+				print(self.virtual_action)
 				print("*************************************")
 
 
@@ -668,12 +684,10 @@ class ChildRobotInteractionFSM(BaseClassFSM):
 					self.explore_action = "VIRTUALLY_EXPLORE"
 					time.sleep(3)
 					self._perform_robot_virtual_action(RobotBehaviors.VIRTUALLY_EXPLORE)
-					print("*************************************")
-				print("WE ARE INSIDE _GET_TURN_TAKING_ACTIONS")
-				print("*************************************")
+		
 			virtual_action_dict = self.role_behavior_mapping.get_actions(self.role,self.state,'virtual')
 			print("==========virtual action dict=================")
-			print(virtual_action_dict )
+			print(virtual_action_dict)
 
 			if virtual_action_dict:
 				ran = random.uniform(0,1)

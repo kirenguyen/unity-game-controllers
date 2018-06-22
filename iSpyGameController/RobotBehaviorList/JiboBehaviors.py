@@ -84,7 +84,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
             msg.do_motion = True
             msg.do_tts = True
             msg.do_lookat = False
-            msg.do_sound_playback = False
+            msg.do_sound_playback = True
             msg.audio_filename = random.choice(["interested-jibo.wav", "interested1-jibo.wav", "hmm1-jibo.wav"])
             msg.do_motion = JiboAction.ROBOT_INTERESTED
 
@@ -173,7 +173,7 @@ class JiboBehaviors:  # pylint: disable=no-member, too-many-instance-attributes
         elif command == RobotBehaviors.ROBOT_DISAPPOINTED:
             msg.do_motion = True
             msg.do_tts = False
-            msg.do_sound_playback = False
+            msg.do_sound_playback = True
             msg.audio_filename = random.choice(["lazy1-jibo.wav", "frustrated2-jibo.wav", "ooh-jibo.wav"])
             msg.motion = JiboAction.ROBOT_DISAPPOINTED
 

@@ -208,7 +208,10 @@
         "PRONOUNCE_CORRECT":{
           "general": [
             "ROBOT_SILENT_HAPPY_DANCE"
-          ]
+          ],
+          "optional": {
+            "VOCAB_EXPLANATION_SPEECH": 0.5
+          }
         },
         "RESULTS_RETURNED":{
           "general": [

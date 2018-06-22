@@ -176,7 +176,7 @@
             "LOOK_AT_TABLET"
           ],
           "exclusive": {
-            "Q_ROBOT_ASK_HELP":1.0
+            "Q_ROBOT_ASK_HELP":0.3
     
           }
         },

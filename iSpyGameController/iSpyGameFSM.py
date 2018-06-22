@@ -235,10 +235,14 @@ class iSpyGameFSM: # pylint: disable=no-member
 				print('666666666666666666666666666666666666666')
 				self.interaction.numHintButtonPressedForTask += 1
 
+			elif transition_msg.data == gs.Triggers.APPLICATION_QUIT:
+				print('7777777777777777777777777777777777777777')
+				#self.kill_received = True
+				self.ros_node_mgr.shutdown()
+				print('7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7')
 
 			elif transition_msg.data == gs.Triggers.OBJECT_CLICKED:
 				pass
-
 
 			elif transition_msg.data == gs.Triggers.NONTARGET_OBJECT_COLLECTED or transition_msg.data == gs.Triggers.TARGET_OBJECT_COLLECTED:
 				self._reach_max_task_time()

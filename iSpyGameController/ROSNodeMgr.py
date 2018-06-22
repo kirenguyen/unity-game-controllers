@@ -357,6 +357,9 @@ class ROSNodeMgr:  # pylint: disable=no-member, too-many-instance-attributes
         print("SHUTDOWN INITIATED")
         #call("exit 1", shell=True)
 
+
+
+        sys.exit()
         rospy.signal_shutdown("Reason: iSpy Unity Game Application has exited play mode")
 
         
